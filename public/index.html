@@ -20,16 +20,16 @@
   <meta property="og:url" content="https://arcado-springs.vercel.app/" />
   <meta property="og:title" content="Arcado Springs — Walk the Future of the Neighborhood" />
   <meta property="og:description" content="A real-time, interactive 3D walkthrough of a proposed walkable town center. Explore it before construction begins, and help shape the neighborhood." />
-  <meta property="og:image" content="https://arcado-springs.vercel.app/site-plan.jpg" />
-  <meta property="og:image:alt" content="Master site plan of the proposed Arcado Springs walkable town center." />
+  <meta property="og:image" content="https://arcado-springs.vercel.app/lifestyle/hero.jpg" />
+  <meta property="og:image:alt" content="Golden-hour view down the main street of the proposed Arcado Springs town center, with families walking past storefronts and outdoor seating." />
   <meta property="og:locale" content="en_US" />
 
   <!-- Twitter card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Arcado Springs — Walk the Future of the Neighborhood" />
   <meta name="twitter:description" content="A real-time, interactive 3D walkthrough of a proposed walkable town center. Explore it before construction begins, and help shape the neighborhood." />
-  <meta name="twitter:image" content="https://arcado-springs.vercel.app/site-plan.jpg" />
-  <meta name="twitter:image:alt" content="Master site plan of the proposed Arcado Springs walkable town center." />
+  <meta name="twitter:image" content="https://arcado-springs.vercel.app/lifestyle/hero.jpg" />
+  <meta name="twitter:image:alt" content="Golden-hour view down the main street of the proposed Arcado Springs town center, with families walking past storefronts and outdoor seating." />
 
   <!-- Google Fonts: Fraunces (headings), Inter (body), IBM Plex Mono (honesty signals) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -174,6 +174,7 @@
       <div class="hero-media" aria-hidden="true">
         <img class="hero-img" src="lifestyle/hero.jpg"
              alt="" fetchpriority="high" decoding="async"
+             width="2400" height="1371"
              onerror="this.onerror=null;this.src='site-plan.jpg'" />
         <div class="hero-scrim"></div>
       </div>
@@ -181,8 +182,9 @@
       <span class="pill-mono hero-pill" aria-hidden="true">ARCADO ROAD · CONCEPT PREVIEW</span>
 
       <div class="wrap hero-content" data-reveal>
-        <p class="hero-eyebrow">A new walkable town center on Arcado Road</p>
+        <p class="hero-eyebrow">Arcado Springs — A new town center on Arcado Road · Lilburn, GA</p>
         <h1 class="hero-title" id="hero-title">Walk the future of the neighborhood, before a single brick is laid.</h1>
+        <span class="hero-rule" aria-hidden="true"></span>
         <p class="hero-lede">Arcado Springs is a real-time, interactive 3D walkthrough of a proposed walkable town center: stroll the main street, step into the shops and dining, and even drive the route home. See exactly what&rsquo;s being planned — and tell us what you think while it can still change.</p>
 
         <div class="hero-cta">
@@ -212,6 +214,14 @@
 
     <!-- ===================== VISION ===================== -->
     <section class="section" id="vision" aria-labelledby="vision-title">
+      <figure class="wrap vision-plate" data-reveal>
+        <img class="vision-plate-img" src="lifestyle/hero.jpg" loading="lazy" decoding="async"
+             width="2400" height="1371"
+             alt="Golden-hour view down the main street of the proposed Arcado Springs town center, with families walking past storefronts and outdoor seating."
+             onerror="this.onerror=null;this.src='site-plan.jpg'" />
+        <figcaption class="vision-plate-cap muted">The proposed main street at golden hour — an AI-generated impression of the design.</figcaption>
+      </figure>
+
       <div class="wrap vision-grid">
         <div class="vision-lead" data-reveal>
           <p class="eyebrow">The vision</p>
@@ -289,29 +299,53 @@
         <h2 class="section-title" id="gallery-title">A day in the neighborhood.</h2>
         <p class="muted gallery-intro">How the town center is designed to feel — neighbors walking the main street, gathering over dinner, and shopping local.</p>
 
-        <div class="gallery-grid lifestyle-grid">
-          <figure class="gallery-item gallery-item--wide lifestyle-item" data-reveal>
-            <img class="lifestyle-img" src="lifestyle/walking.jpg" loading="lazy" decoding="async"
-                 alt="Neighbors walking along the tree-lined main street of Arcado Springs at golden hour, with storefronts and outdoor seating."
-                 onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
-            <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-walk"/></svg> Walking the main street</b><span>AI preview image coming soon</span></span>
-            <figcaption>Strolling the walkable, tree-lined main street.</figcaption>
+        <div class="lifestyle-spreads">
+          <figure class="spread spread--wide lifestyle-item" data-reveal>
+            <div class="spread-figure">
+              <img class="lifestyle-img" src="lifestyle/walking.jpg" loading="lazy" decoding="async"
+                   width="1600" height="914"
+                   alt="Neighbors walking along the tree-lined main street of Arcado Springs at golden hour, with storefronts and outdoor seating."
+                   onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
+              <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-walk"/></svg> Walking the main street</b><span>AI preview image coming soon</span></span>
+            </div>
+            <figcaption class="spread-cap">
+              <span class="spread-index" aria-hidden="true">01</span>
+              <span class="spread-kicker"><svg class="icon icon-inline" aria-hidden="true"><use href="#i-walk"/></svg> On foot</span>
+              <span class="spread-title">Strolling the walkable, tree-lined main street.</span>
+              <span class="spread-text">A street built for people first — wide sidewalks, shade trees, and storefronts close enough to wander between.</span>
+            </figcaption>
           </figure>
 
-          <figure class="gallery-item lifestyle-item" data-reveal>
-            <img class="lifestyle-img" src="lifestyle/dining.jpg" loading="lazy" decoding="async"
-                 alt="People dining at outdoor patio tables outside a restaurant at Arcado Springs in warm evening light."
-                 onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
-            <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-utensils"/></svg> Dining on the patio</b><span>AI preview image coming soon</span></span>
-            <figcaption>Patio dining at the heart of the town center.</figcaption>
+          <figure class="spread spread--right lifestyle-item" data-reveal>
+            <div class="spread-figure">
+              <img class="lifestyle-img" src="lifestyle/dining.jpg" loading="lazy" decoding="async"
+                   width="1600" height="1179"
+                   alt="People dining at outdoor patio tables outside a restaurant at Arcado Springs in warm evening light."
+                   onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
+              <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-utensils"/></svg> Dining on the patio</b><span>AI preview image coming soon</span></span>
+            </div>
+            <figcaption class="spread-cap">
+              <span class="spread-index" aria-hidden="true">02</span>
+              <span class="spread-kicker"><svg class="icon icon-inline" aria-hidden="true"><use href="#i-utensils"/></svg> Gather</span>
+              <span class="spread-title">Patio dining at the heart of the town center.</span>
+              <span class="spread-text">Restaurants spill onto the sidewalk, turning an ordinary evening into somewhere to linger.</span>
+            </figcaption>
           </figure>
 
-          <figure class="gallery-item lifestyle-item" data-reveal>
-            <img class="lifestyle-img" src="lifestyle/shopping.jpg" loading="lazy" decoding="async"
-                 alt="Shoppers browsing storefronts with shopping bags along the retail frontage of Arcado Springs."
-                 onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
-            <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-bag"/></svg> Shopping local</b><span>AI preview image coming soon</span></span>
-            <figcaption>Browsing the shops along the retail frontage.</figcaption>
+          <figure class="spread spread--left lifestyle-item" data-reveal>
+            <div class="spread-figure">
+              <img class="lifestyle-img" src="lifestyle/shopping.jpg" loading="lazy" decoding="async"
+                   width="1600" height="1179"
+                   alt="Shoppers browsing storefronts with shopping bags along the retail frontage of Arcado Springs."
+                   onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
+              <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-bag"/></svg> Shopping local</b><span>AI preview image coming soon</span></span>
+            </div>
+            <figcaption class="spread-cap">
+              <span class="spread-index" aria-hidden="true">03</span>
+              <span class="spread-kicker"><svg class="icon icon-inline" aria-hidden="true"><use href="#i-bag"/></svg> Shop local</span>
+              <span class="spread-title">Browsing the shops along the retail frontage.</span>
+              <span class="spread-text">A row of independent storefronts at street level — the kind of place errands turn into an afternoon out.</span>
+            </figcaption>
           </figure>
         </div>
         <p class="muted gallery-foot">Lifestyle images are AI-generated impressions of the proposed design, not photographs.</p>
