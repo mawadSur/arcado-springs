@@ -118,6 +118,70 @@
   }
 
   /* ------------------------------------------------------------------ *
+   * 3b. ANIMATED STAT COUNT-UP
+   *     Each .stat-num[data-count] counts from 0 to its target on first
+   *     reveal. Handles decimals (e.g. 3.6). Gated on prefers-reduced-
+   *     motion: shows the final value instantly when motion is reduced.
+   * ------------------------------------------------------------------ */
+  function initStatCounters() {
+    var nums = $$(".stat-num[data-count]");
+    if (!nums.length) return;
+
+    // Format to the same precision as the target (so 3.6 stays "3.6", 9 stays "9").
+    function fmt(value, decimals) {
+      return decimals > 0 ? value.toFixed(decimals) : String(Math.round(value));
+    }
+
+    function finalize(el) {
+      var raw = el.getAttribute("data-count");
+      var target = parseFloat(raw);
+      if (isNaN(target)) return;
+      var decimals = (raw.split(".")[1] || "").length;
+      el.textContent = fmt(target, decimals);
+    }
+
+    // No motion or no observer: show final values immediately.
+    if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+      nums.forEach(finalize);
+      return;
+    }
+
+    function animate(el) {
+      var raw = el.getAttribute("data-count");
+      var target = parseFloat(raw);
+      if (isNaN(target)) return;
+      var decimals = (raw.split(".")[1] || "").length;
+      var duration = 1100; // ms
+      var start = null;
+
+      function tick(now) {
+        if (start === null) start = now;
+        var t = Math.min((now - start) / duration, 1);
+        // easeOutCubic for a premium settle
+        var eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = fmt(target * eased, decimals);
+        if (t < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          el.textContent = fmt(target, decimals); // exact final value
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    var io = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          animate(entry.target);
+          obs.unobserve(entry.target); // count once
+        }
+      });
+    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.4 });
+
+    nums.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ------------------------------------------------------------------ *
    * 4. LIGHTBOX
    * ------------------------------------------------------------------ */
   function initLightbox() {
@@ -479,6 +543,7 @@
     initNav();
     initMobileMenu();
     initReveals();
+    initStatCounters();
     initLightbox();
     initSitePlan();
     initCompare();

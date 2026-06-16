@@ -42,6 +42,104 @@
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
+  <!-- ===================== ICON SPRITE =====================
+       One hidden inline SVG sprite. Lucide-inspired clean line icons:
+       fill=none, stroke=currentColor, 1.8 stroke, round caps/joins, 24 grid.
+       Referenced via <svg class="icon"><use href="#i-NAME"/></svg>. -->
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="i-walk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="13" cy="4" r="1.6"/>
+      <path d="M13 7.5l-3 2.2L11 14l-2 6"/>
+      <path d="M13 13l3 1.5 2 4"/>
+      <path d="M11 10l-3.5 2"/>
+    </symbol>
+    <symbol id="i-utensils" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 3v7a2 2 0 0 0 4 0V3"/>
+      <path d="M9 10v11"/>
+      <path d="M17 3c-1.5 0-2.5 1.6-2.5 4s1 4 2.5 4"/>
+      <path d="M17 3v18"/>
+    </symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 8h14l-1 12H6L5 8z"/>
+      <path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+    </symbol>
+    <symbol id="i-bike" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="6" cy="17" r="3.2"/>
+      <circle cx="18" cy="17" r="3.2"/>
+      <path d="M6 17l4-7h5l3 7"/>
+      <path d="M10 10l-1.5-3H6.5"/>
+      <circle cx="14.5" cy="6.5" r="0.8"/>
+    </symbol>
+    <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l8 7-8 4-8-4 8-7z"/>
+      <path d="M4 10l8 4 8-4"/>
+      <path d="M12 14v7"/>
+      <path d="M9 18l3 3 3-3"/>
+    </symbol>
+    <symbol id="i-paddle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="10" cy="8.5" r="5.5"/>
+      <path d="M6.4 12.6l-3.2 4.6a1.6 1.6 0 0 0 2.6 1.9l3-4.4"/>
+      <circle cx="18" cy="16" r="1.3"/>
+    </symbol>
+    <symbol id="i-tree" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l5 7h-3l3 5H7l3-5H7l5-7z"/>
+      <path d="M12 15v6"/>
+    </symbol>
+    <symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 21V6l8-3 8 3v15"/>
+      <path d="M4 21h16"/>
+      <path d="M9 9h0M9 13h0M9 17h0M15 9h0M15 13h0M15 17h0"/>
+    </symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="7" y="3" width="10" height="18" rx="2.4"/>
+      <path d="M11 18h2"/>
+    </symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l7 3v5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6l7-3z"/>
+      <path d="M9 12l2 2 4-4"/>
+    </symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/>
+    </symbol>
+    <symbol id="i-accessibility" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="4" r="1.4"/>
+      <path d="M4 8h16"/>
+      <path d="M9 8v4l-2 8"/>
+      <path d="M15 8v4l2 8"/>
+    </symbol>
+    <symbol id="i-store" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 9l1.2-4h13.6L20 9"/>
+      <path d="M4 9c0 1.7 1.3 2.5 2.5 2.5S9 10.7 9 9c0 1.7 1.3 2.5 3 2.5S15 10.7 15 9c0 1.7 1.3 2.5 2.5 2.5S20 10.7 20 9"/>
+      <path d="M5 11.5V20h14v-8.5"/>
+      <path d="M10 20v-4h4v4"/>
+    </symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 11l8-7 8 7"/>
+      <path d="M6 9.5V20h12V9.5"/>
+      <path d="M10 20v-5h4v5"/>
+    </symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.5" y="8" width="19" height="8" rx="1.6" transform="rotate(-45 12 12)"/>
+      <path d="M9 7l1.5 1.5M11.5 9.5L13 11M14 6l1.5 1.5M16.5 8.5L18 10"/>
+    </symbol>
+    <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 13a4 4 0 0 0 5.7.4l2.6-2.6a4 4 0 0 0-5.7-5.7l-1.5 1.5"/>
+      <path d="M14 11a4 4 0 0 0-5.7-.4L5.7 13.2a4 4 0 0 0 5.7 5.7l1.5-1.5"/>
+    </symbol>
+    <symbol id="i-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21c4.5-4.5 7-7.6 7-11a7 7 0 1 0-14 0c0 3.4 2.5 6.5 7 11z"/>
+      <circle cx="12" cy="10" r="2.5"/>
+    </symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 7v5l3.5 2"/>
+    </symbol>
+    <symbol id="i-play-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 5.5l11 6.5-11 6.5z" fill="currentColor" stroke="none"/>
+    </symbol>
+  </svg>
+
   <!-- ===================== NAV ===================== -->
   <header class="nav" id="nav" data-nav>
     <div class="wrap nav-inner">
@@ -160,7 +258,7 @@
           <!-- Launch overlay — shown when a build IS present, before the user starts it -->
           <div class="player-launch" id="player-launch" hidden>
             <button class="btn btn-primary player-launch-btn" id="player-launch-btn" type="button">
-              &#9654; Launch walkthrough
+              <svg class="icon icon-play" aria-hidden="true"><use href="#i-play-triangle"/></svg> Launch walkthrough
             </button>
             <p class="player-launch-note">Loads a real-time 3D build · best on desktop</p>
           </div>
@@ -175,7 +273,7 @@
           <div class="player-fallback" id="player-fallback" hidden>
             <img class="player-fallback-img" src="site-plan.jpg"
                  alt="Arcado Springs master site plan — interactive walkthrough preview" loading="lazy" />
-            <span class="player-badge">&#9654; Interactive walkthrough — live build deploying soon</span>
+            <span class="player-badge"><svg class="icon icon-play" aria-hidden="true"><use href="#i-play-triangle"/></svg> Interactive walkthrough — live build deploying soon</span>
           </div>
         </div>
 
@@ -196,7 +294,7 @@
             <img class="lifestyle-img" src="lifestyle/walking.jpg" loading="lazy" decoding="async"
                  alt="Neighbors walking along the tree-lined main street of Arcado Springs at golden hour, with storefronts and outdoor seating."
                  onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
-            <span class="lifestyle-ph" aria-hidden="true"><b>🚶 Walking the main street</b><span>AI preview image coming soon</span></span>
+            <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-walk"/></svg> Walking the main street</b><span>AI preview image coming soon</span></span>
             <figcaption>Strolling the walkable, tree-lined main street.</figcaption>
           </figure>
 
@@ -204,7 +302,7 @@
             <img class="lifestyle-img" src="lifestyle/dining.jpg" loading="lazy" decoding="async"
                  alt="People dining at outdoor patio tables outside a restaurant at Arcado Springs in warm evening light."
                  onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
-            <span class="lifestyle-ph" aria-hidden="true"><b>🍽️ Dining on the patio</b><span>AI preview image coming soon</span></span>
+            <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-utensils"/></svg> Dining on the patio</b><span>AI preview image coming soon</span></span>
             <figcaption>Patio dining at the heart of the town center.</figcaption>
           </figure>
 
@@ -212,7 +310,7 @@
             <img class="lifestyle-img" src="lifestyle/shopping.jpg" loading="lazy" decoding="async"
                  alt="Shoppers browsing storefronts with shopping bags along the retail frontage of Arcado Springs."
                  onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
-            <span class="lifestyle-ph" aria-hidden="true"><b>🛍️ Shopping local</b><span>AI preview image coming soon</span></span>
+            <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-bag"/></svg> Shopping local</b><span>AI preview image coming soon</span></span>
             <figcaption>Browsing the shops along the retail frontage.</figcaption>
           </figure>
         </div>
@@ -254,20 +352,20 @@
         <p class="muted">Nine acres reimagined as a walkable town center — retail, dining, recreation, and open green space for the whole neighborhood.</p>
 
         <ul class="stats-grid" data-reveal>
-          <li class="stat-card"><span class="stat-num">9</span><span class="stat-label">Acres of land</span></li>
-          <li class="stat-card"><span class="stat-num">12</span><span class="stat-label">Retail stores <span class="stat-plus">+&nbsp;1 anchor</span></span></li>
-          <li class="stat-card"><span class="stat-num">6</span><span class="stat-label">Dining spaces</span></li>
-          <li class="stat-card"><span class="stat-num">3.6</span><span class="stat-label">Acres open green space</span></li>
+          <li class="stat-card"><span class="stat-num" data-count="9">9</span><span class="stat-label">Acres of land</span></li>
+          <li class="stat-card"><span class="stat-num" data-count="12">12</span><span class="stat-label">Retail stores <span class="stat-plus">+&nbsp;1 anchor</span></span></li>
+          <li class="stat-card"><span class="stat-num" data-count="6">6</span><span class="stat-label">Dining spaces</span></li>
+          <li class="stat-card"><span class="stat-num" data-count="3.6">3.6</span><span class="stat-label">Acres open green space</span></li>
         </ul>
 
         <h3 class="subhead">Amenities for the neighborhood</h3>
         <ul class="amenities" data-reveal>
-          <li class="amenity"><span class="am-ico" aria-hidden="true">🚲</span> Dedicated bicycle lane</li>
-          <li class="amenity"><span class="am-ico" aria-hidden="true">🛝</span> Kids play area</li>
-          <li class="amenity"><span class="am-ico" aria-hidden="true">🎾</span> Pickleball court</li>
-          <li class="amenity"><span class="am-ico" aria-hidden="true">🚶</span> Walkable main street</li>
-          <li class="amenity"><span class="am-ico" aria-hidden="true">🌳</span> Open green space</li>
-          <li class="amenity"><span class="am-ico" aria-hidden="true">🍽️</span> Outdoor patio dining</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-bike"/></svg></span> Dedicated bicycle lane</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg></span> Kids play area</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-paddle"/></svg></span> Pickleball court</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-walk"/></svg></span> Walkable main street</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-tree"/></svg></span> Open green space</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-utensils"/></svg></span> Outdoor patio dining</li>
         </ul>
       </div>
     </section>
@@ -280,32 +378,32 @@
 
         <ul class="benefits-grid">
           <li class="benefit-card" data-reveal>
-            <span class="benefit-icon" aria-hidden="true">🏙️</span>
+            <span class="benefit-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg></span>
             <h3>See it before it&rsquo;s built</h3>
             <p>Flat site plans and zoning maps are hard to picture. Arcado Springs lets you walk the actual streets, look up at the buildings, and feel the scale at eye level — so the proposal is something you experience, not something you have to imagine.</p>
           </li>
           <li class="benefit-card" data-reveal>
-            <span class="benefit-icon" aria-hidden="true">📱</span>
+            <span class="benefit-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></span>
             <h3>Engagement anyone can join</h3>
             <p>No app to download and no meeting to attend — just open a link on your phone or computer. That reaches neighbors who can&rsquo;t make a Tuesday-night town hall: parents at home, shift workers, and people who simply learn better by exploring than by reading a packet.</p>
           </li>
           <li class="benefit-card" data-reveal>
-            <span class="benefit-icon" aria-hidden="true">🤝</span>
+            <span class="benefit-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg></span>
             <h3>Transparency that builds trust</h3>
             <p>Most opposition to new development comes from uncertainty about what&rsquo;s really coming. Showing the design openly and at full scale replaces rumor with fact, lowers the friction of &ldquo;not in my backyard,&rdquo; and gives the community an honest basis for its concerns and its support.</p>
           </li>
           <li class="benefit-card" data-reveal>
-            <span class="benefit-icon" aria-hidden="true">🧭</span>
+            <span class="benefit-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-compass"/></svg></span>
             <h3>Better decisions, earlier and cheaper</h3>
             <p>Walking the plan surfaces real questions about traffic flow, building height, parking, and walkability while they&rsquo;re still lines in a model. Catching a scale or circulation problem now costs a design revision — catching it after construction costs a fortune.</p>
           </li>
           <li class="benefit-card" data-reveal>
-            <span class="benefit-icon" aria-hidden="true">♿</span>
+            <span class="benefit-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-accessibility"/></svg></span>
             <h3>A seat at the table for everyone</h3>
             <p>Residents who are elderly, have mobility limitations, work during public-comment hours, or live too far to drive in can all take the same tour from home. Participation stops depending on who can physically show up.</p>
           </li>
           <li class="benefit-card" data-reveal>
-            <span class="benefit-icon" aria-hidden="true">🏬</span>
+            <span class="benefit-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span>
             <h3>Real value for the local economy</h3>
             <p>The walkthrough showcases each retail and dining space the way a future tenant or investor would experience it, helping fill storefronts sooner. A clearly understood, well-supported project is also one that moves forward — turning a proposal into local jobs and a place to gather.</p>
           </li>
@@ -331,32 +429,32 @@
 
         <ul class="mechanism-grid">
           <li class="mechanism-card" data-reveal>
-            <span class="mechanism-icon" aria-hidden="true">🏘️</span>
+            <span class="mechanism-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></span>
             <h3>Trips that never reach the road</h3>
             <p>When homes, shops, and dining share one site, many trips start and end inside it &mdash; a resident walks to coffee, a worker walks to lunch &mdash; so that car trip is never made on Arcado Rd at all. Planners call this internal capture, and for mixed-use sites it commonly runs about 15&ndash;30% of trips overall, and even higher in the evening peak (measured at roughly 33&ndash;44% in studies behind NCHRP Report 684).</p>
           </li>
           <li class="mechanism-card" data-reveal>
-            <span class="mechanism-icon" aria-hidden="true">📏</span>
+            <span class="mechanism-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-ruler"/></svg></span>
             <h3>The car trips that remain are shorter</h3>
             <p>Even drives that do use the road cover fewer miles when groceries, dining, and services are nearby instead of across town. Each car clears the roadway faster and takes up less capacity per trip. Across the research, how close your destinations are is the single strongest predictor of how much people drive (Ewing &amp; Cervero, 2010).</p>
           </li>
           <li class="mechanism-card" data-reveal>
-            <span class="mechanism-icon" aria-hidden="true">🔗</span>
+            <span class="mechanism-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></span>
             <h3>One outing instead of several drives</h3>
             <p>A walkable mix lets you bundle errands &mdash; coffee, a package, a few groceries &mdash; into one stop or one short loop on foot, rather than three separate round-trips from home. Fewer separate drives means fewer cars turning in and out at intersections and driveways. The benefit is largest exactly when destinations are close enough to chain on foot, which is what a compact site provides.</p>
           </li>
           <li class="mechanism-card" data-reveal>
-            <span class="mechanism-icon" aria-hidden="true">🚶</span>
+            <span class="mechanism-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-walk"/></svg></span>
             <h3>Walking and biking absorb short trips</h3>
             <p>Most car trips are short: nationally about 52% of all daily trips are under 3 miles and roughly 28% are under 1 mile (2022 National Household Travel Survey). Safe sidewalks, walkable streets, and a bike lane let a real share of those short trips happen on foot or by bike &mdash; removed from the road entirely rather than added to it.</p>
           </li>
           <li class="mechanism-card" data-reveal>
-            <span class="mechanism-icon" aria-hidden="true">📍</span>
+            <span class="mechanism-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-map-pin"/></svg></span>
             <h3>Fewer drives to distant centers</h3>
             <p>When daily needs sit on-site, residents stop driving out to a far commercial node for routine errands &mdash; the longest, most road-heavy trips of suburban life. Compact, mixed-use development is estimated to cut total vehicle miles traveled by roughly 20&ndash;40% compared with dispersed, single-use development (EPA Smart Growth; ULI Growing Cooler; National Academies).</p>
           </li>
           <li class="mechanism-card" data-reveal>
-            <span class="mechanism-icon" aria-hidden="true">⏱️</span>
+            <span class="mechanism-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span>
             <h3>Relief at the peaks that matter</h3>
             <p>On-site destinations let people run errands off-peak and on foot, smoothing demand instead of piling it into the school and commute rushes. Internalized trips also skip the Arcado-at-Killian-Hill corner entirely, easing the left-turn and merge conflicts that cause the most delay. The evening pull-off is strongest &mdash; about a third or more of activity stays off the external roads precisely when arterials are busiest.</p>
           </li>
