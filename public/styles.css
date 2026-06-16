@@ -1245,3 +1245,96 @@ p { margin: 0 0 1rem; }
   color: var(--text, #1E2419); font-weight: 500; font-size: 0.95rem;
 }
 .amenity .am-ico { font-size: 1.1rem; line-height: 1; }
+
+/* ============================================================================
+ * TRAFFIC & ACCESS (reuses benefits/card pattern + existing tokens)
+ * ==========================================================================*/
+.traffic-intro { max-width: 70ch; margin-bottom: 0; }
+
+/* Framed heat-map figure */
+.traffic-map {
+  margin: 32px 0 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.traffic-map img {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #fff;
+}
+.traffic-map figcaption {
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+
+/* Local problem statement — set off from the body copy */
+.traffic-problem {
+  margin: 32px 0 0;
+  max-width: 72ch;
+  padding-left: 18px;
+  border-left: 3px solid var(--accent2);
+  color: var(--text);
+  font-size: 1.02rem;
+}
+
+/* Mechanism cards — mirrors .benefits-grid / .benefit-card */
+.mechanism-grid {
+  list-style: none;
+  margin: 36px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+.mechanism-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 26px 24px;
+  box-shadow: var(--shadow-sm);
+}
+.mechanism-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
+  background: var(--bg);
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+.mechanism-card h3 { font-size: 1.18rem; font-weight: 500; margin-bottom: 8px; }
+.mechanism-card p { margin: 0; color: var(--muted); font-size: 0.97rem; }
+
+/* Bottom line — heavier weight, the section's takeaway */
+.traffic-bottomline {
+  margin: 36px 0 0;
+  max-width: 72ch;
+  font-size: 1.08rem;
+  color: var(--text);
+}
+
+/* Caveat — small, quiet, honest */
+.traffic-caveat {
+  margin: 20px 0 0;
+  max-width: 72ch;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+@media (min-width: 720px) {
+  .mechanism-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 920px) {
+  .mechanism-grid { grid-template-columns: repeat(3, 1fr); }
+}

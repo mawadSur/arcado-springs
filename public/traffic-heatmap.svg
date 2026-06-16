@@ -1,0 +1,240 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="tmTitle tmDesc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <title id="tmTitle">Arcado Springs — Illustrative Corridor Traffic Heat Map</title>
+  <desc id="tmDesc">A schematic, not-to-scale illustration of the road network around 4541 Arcado Road in Lilburn, Georgia. Arcado Road runs as the central spine and feeds into the area's arterial roads. Each road segment is colored by its typical weekday evening peak congestion: green for free-flowing, amber for moderate, and red for congested. Killian Hill Road, Five Forks Trickum Road, US-29 / Lawrenceville Highway, and the Parkview High School approach on Cole Drive are shown as the most congested. A gold star marks the proposed Arcado Springs development site at the Arcado Road and Killian Hill Road corner. This is a typical-pattern illustration, not live or measured traffic data.</desc>
+
+  <defs>
+    <!-- soft drop shadow for floating cards/markers -->
+    <filter id="tmShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2.4" flood-color="#1E2419" flood-opacity="0.22"/>
+    </filter>
+    <filter id="tmStarShadow" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1E2419" flood-opacity="0.35"/>
+    </filter>
+    <!-- subtle paper grain via faint radial vignette -->
+    <radialGradient id="tmPaper" cx="42%" cy="36%" r="85%">
+      <stop offset="0%" stop-color="#FBF8F2"/>
+      <stop offset="100%" stop-color="#F1ECE0"/>
+    </radialGradient>
+    <!-- pulsing emphasis ring colors baked as gradient for the hotspot glow -->
+    <radialGradient id="tmHot" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#D7503A" stop-opacity="0.55"/>
+      <stop offset="70%" stop-color="#D7503A" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#D7503A" stop-opacity="0"/>
+    </radialGradient>
+    <!-- gold star gradient -->
+    <linearGradient id="tmGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D9B679"/>
+      <stop offset="100%" stop-color="#B08D57"/>
+    </linearGradient>
+    <!-- north-arrow gradient -->
+    <linearGradient id="tmNorth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2F5D3A"/>
+      <stop offset="100%" stop-color="#274d31"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ===================== BACKGROUND ===================== -->
+  <rect x="0" y="0" width="1000" height="640" fill="url(#tmPaper)"/>
+  <rect x="0" y="0" width="1000" height="640" fill="none" stroke="#E2D9C6" stroke-width="2"/>
+
+  <!-- faint parcel / block texture (decorative, low-contrast) -->
+  <g stroke="#E7DECB" stroke-width="1" opacity="0.6" aria-hidden="true">
+    <path d="M70 130 H930 M70 250 H930 M70 380 H930 M70 500 H930"/>
+    <path d="M210 110 V560 M380 110 V560 M560 110 V560 M740 110 V560"/>
+  </g>
+
+  <!-- ===================== TITLE BAND ===================== -->
+  <text x="60" y="58" font-size="29" font-weight="700" fill="#1E2419" letter-spacing="0.2">Arcado Springs — Corridor Traffic Heat Map</text>
+  <text x="60" y="84" font-size="15.5" fill="#2F5D3A" font-weight="600">4541 Arcado Rd SW · Lilburn, GA 30047 · Parkview High School cluster</text>
+
+  <!-- ===================== NORTH ARROW ===================== -->
+  <g transform="translate(905,150)" aria-label="North arrow" filter="url(#tmShadow)">
+    <circle cx="0" cy="0" r="30" fill="#FBF8F2" stroke="#D8CDB6" stroke-width="1.5"/>
+    <polygon points="0,-22 8,4 0,-2 -8,4" fill="url(#tmNorth)"/>
+    <polygon points="0,22 8,-4 0,2 -8,-4" fill="#C9BFA6"/>
+    <text x="0" y="-30" font-size="13" font-weight="700" fill="#1E2419" text-anchor="middle">N</text>
+  </g>
+
+  <!-- ===================== ROAD NETWORK ===================== -->
+  <!-- Roads are drawn casing-first (dark halo) then colored stroke on top. -->
+  <!-- Congestion ramp: green #3FAE6A (free) · amber #E5A341 (moderate) · red #D7503A (congested) -->
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ============ US-29 / LAWRENCEVILLE HWY (top, regional, congested) ============ -->
+    <path d="M95 168 C 300 150, 560 150, 905 178" stroke="#1E2419" stroke-opacity="0.18" stroke-width="22"/>
+    <path d="M95 168 C 300 150, 560 150, 905 178" stroke="#D7503A" stroke-width="14"/>
+
+    <!-- ============ KILLIAN HILL RD (primary arterial spine, congested; vertical-ish) ============ -->
+    <!-- runs from US-29 (top) down to Five Forks Trickum (bottom), passing the Arcado corner -->
+    <path d="M640 170 C 648 270, 612 360, 628 470 S 660 560, 700 588" stroke="#1E2419" stroke-opacity="0.18" stroke-width="24"/>
+    <path d="M640 170 C 648 270, 612 360, 628 470 S 660 560, 700 588" stroke="#D7503A" stroke-width="15"/>
+
+    <!-- ============ FIVE FORKS TRICKUM RD (bottom diagonal arterial, congested) ============ -->
+    <path d="M250 600 C 430 560, 600 560, 905 520" stroke="#1E2419" stroke-opacity="0.18" stroke-width="22"/>
+    <path d="M250 600 C 430 560, 600 560, 905 520" stroke="#D7503A" stroke-width="14"/>
+
+    <!-- ============ ARCADO RD (the SPINE) ============ -->
+    <!-- Western/residential end: free-flowing (green) -->
+    <path d="M95 360 C 200 352, 300 350, 372 352" stroke="#1E2419" stroke-opacity="0.18" stroke-width="22"/>
+    <path d="M95 360 C 200 352, 300 350, 372 352" stroke="#3FAE6A" stroke-width="13.5"/>
+    <!-- School-cluster middle: moderate (amber) -->
+    <path d="M372 352 C 460 354, 520 360, 575 372" stroke="#1E2419" stroke-opacity="0.18" stroke-width="22"/>
+    <path d="M372 352 C 460 354, 520 360, 575 372" stroke="#E5A341" stroke-width="13.5"/>
+    <!-- Approach to Killian Hill corner: congested (red) -->
+    <path d="M575 372 C 595 376, 615 380, 625 392" stroke="#1E2419" stroke-opacity="0.18" stroke-width="22"/>
+    <path d="M575 372 C 595 376, 615 380, 625 392" stroke="#D7503A" stroke-width="13.5"/>
+
+    <!-- ============ ROCKBRIDGE RD (moderate) — branches NW from Arcado's west end up toward US-29 ============ -->
+    <path d="M210 352 C 170 300, 150 250, 150 190" stroke="#1E2419" stroke-opacity="0.18" stroke-width="18"/>
+    <path d="M210 352 C 170 300, 150 250, 150 190" stroke="#E5A341" stroke-width="11"/>
+
+    <!-- ============ COLE DR (Parkview HS approach, congested at school peak) ============ -->
+    <!-- branches south off Arcado mid-cluster down to the school -->
+    <path d="M468 356 C 470 420, 452 470, 450 512" stroke="#1E2419" stroke-opacity="0.18" stroke-width="18"/>
+    <path d="M468 356 C 470 420, 452 470, 450 512" stroke="#D7503A" stroke-width="11"/>
+
+    <!-- ============ RONALD REAGAN PKWY (moderate, east regional) ============ -->
+    <path d="M905 300 C 860 360, 860 440, 905 460" stroke="#1E2419" stroke-opacity="0.18" stroke-width="18"/>
+    <path d="M905 300 C 860 360, 860 440, 905 460" stroke="#E5A341" stroke-width="11"/>
+
+    <!-- short connector stub: Killian Hill widening corridor highlight tick (dashed casing only, decorative) -->
+  </g>
+
+  <!-- ===================== INTERSECTION HOTSPOTS ===================== -->
+  <!-- Most congested node: Arcado Rd at Killian Hill Rd (the site corner & school gateway) -->
+  <g transform="translate(626,392)">
+    <circle cx="0" cy="0" r="46" fill="url(#tmHot)"/>
+    <circle cx="0" cy="0" r="10.5" fill="#D7503A" stroke="#FBF8F2" stroke-width="2.5"/>
+  </g>
+  <!-- secondary congested node: Killian Hill x Five Forks Trickum (programmed for upgrades) -->
+  <g transform="translate(665,560)">
+    <circle cx="0" cy="0" r="30" fill="url(#tmHot)"/>
+    <circle cx="0" cy="0" r="8" fill="#D7503A" stroke="#FBF8F2" stroke-width="2.2"/>
+  </g>
+  <!-- amber node: Five Forks Trickum x Cole Dr (school approach) -->
+  <g transform="translate(450,512)">
+    <circle cx="0" cy="0" r="7" fill="#E5A341" stroke="#FBF8F2" stroke-width="2.2"/>
+  </g>
+
+  <!-- ===================== DEVELOPMENT SITE (gold star) ===================== -->
+  <!-- placed at the Arcado Rd / Killian Hill Rd corner per research (Preserve at Killian Hill site) -->
+  <!-- leader line from corner up to the floating label pill -->
+  <path d="M588 384 L548 300" fill="none" stroke="#B08D57" stroke-width="1.6" stroke-dasharray="3 3" opacity="0.85"/>
+  <g transform="translate(588,384)" filter="url(#tmStarShadow)">
+    <path d="M0,-19 L5.6,-6.2 L19,-5.9 L8.4,2.6 L12,15.6 L0,7.8 L-12,15.6 L-8.4,2.6 L-19,-5.9 L-5.6,-6.2 Z"
+          fill="url(#tmGold)" stroke="#1E2419" stroke-width="1.6" stroke-linejoin="round"/>
+  </g>
+  <!-- site label pill (lifted up-left of the corner so it clears the Killian Hill label) -->
+  <g transform="translate(318,278)">
+    <rect x="0" y="-26" width="230" height="44" rx="9" fill="#FBF8F2" stroke="#B08D57" stroke-width="1.8" filter="url(#tmShadow)"/>
+    <path d="M30,-19 L33,-12.5 L40,-12.4 L34.6,-8.2 L36.5,-1.5 L30,-5.4 L23.5,-1.5 L25.4,-8.2 L20,-12.4 L27,-12.5 Z" fill="url(#tmGold)" stroke="#1E2419" stroke-width="0.9" stroke-linejoin="round"/>
+    <text x="52" y="-7" font-size="15" font-weight="700" fill="#1E2419">Arcado Springs</text>
+    <text x="52" y="10" font-size="11" font-weight="600" fill="#B08D57" letter-spacing="0.5">PROPOSED DEVELOPMENT</text>
+  </g>
+
+  <!-- ===================== ROAD LABELS ===================== -->
+  <g font-size="13.5" font-weight="700" fill="#1E2419">
+    <!-- US-29 -->
+    <g transform="translate(300,141)">
+      <rect x="-6" y="-15" width="248" height="22" rx="6" fill="#FBF8F2" fill-opacity="0.86"/>
+      <text x="0" y="1">US-29 / Lawrenceville Hwy</text>
+    </g>
+    <!-- Killian Hill -->
+    <g transform="translate(636,440) rotate(82)">
+      <rect x="-6" y="-15" width="150" height="22" rx="6" fill="#FBF8F2" fill-opacity="0.9"/>
+      <text x="0" y="1">Killian Hill Rd</text>
+    </g>
+    <!-- Five Forks Trickum -->
+    <g transform="translate(760,548) rotate(-8)">
+      <rect x="-6" y="-15" width="208" height="22" rx="6" fill="#FBF8F2" fill-opacity="0.9"/>
+      <text x="0" y="1">Five Forks Trickum Rd</text>
+    </g>
+    <!-- Arcado Rd (on the spine) -->
+    <g transform="translate(150,344)">
+      <rect x="-6" y="-15" width="104" height="22" rx="6" fill="#FBF8F2" fill-opacity="0.9"/>
+      <text x="0" y="1">Arcado Rd</text>
+    </g>
+    <!-- Rockbridge Rd -->
+    <g transform="translate(96,225) rotate(-71)">
+      <rect x="-6" y="-15" width="118" height="22" rx="6" fill="#FBF8F2" fill-opacity="0.86"/>
+      <text x="0" y="1">Rockbridge Rd</text>
+    </g>
+    <!-- Cole Dr -->
+    <g transform="translate(470,470)">
+      <rect x="-6" y="-15" width="64" height="22" rx="6" fill="#FBF8F2" fill-opacity="0.86"/>
+      <text x="0" y="1">Cole Dr</text>
+    </g>
+    <!-- Ronald Reagan Pkwy -->
+    <g transform="translate(836,392) rotate(78)">
+      <rect x="-6" y="-15" width="170" height="22" rx="6" fill="#FBF8F2" fill-opacity="0.86"/>
+      <text x="0" y="1">Ronald Reagan Pkwy</text>
+    </g>
+  </g>
+
+  <!-- ===================== TRAFFIC GENERATOR PINS (schools etc.) ===================== -->
+  <g font-size="11" font-weight="600" fill="#2F5D3A">
+    <!-- Parkview HS at end of Cole Dr -->
+    <g transform="translate(450,520)">
+      <circle cx="0" cy="0" r="5.5" fill="#2F5D3A" stroke="#FBF8F2" stroke-width="1.6"/>
+      <text x="10" y="4" fill="#1E2419" font-weight="700">Parkview HS</text>
+    </g>
+    <!-- Arcado Elementary on the spine -->
+    <g transform="translate(300,350)">
+      <circle cx="0" cy="0" r="4.5" fill="#2F5D3A" stroke="#FBF8F2" stroke-width="1.5"/>
+      <text x="9" y="-7" fill="#3a4a2f">Arcado Elem.</text>
+    </g>
+    <!-- Killian Hill Christian on Arcado -->
+    <g transform="translate(528,366)">
+      <circle cx="0" cy="0" r="4.5" fill="#2F5D3A" stroke="#FBF8F2" stroke-width="1.5"/>
+      <rect x="8" y="13" width="124" height="17" rx="5" fill="#FBF8F2" fill-opacity="0.85"/>
+      <text x="13" y="25" fill="#3a4a2f">Killian Hill Christian</text>
+    </g>
+    <!-- Trickum Middle on Killian Hill -->
+    <g transform="translate(644,232)">
+      <circle cx="0" cy="0" r="4.5" fill="#2F5D3A" stroke="#FBF8F2" stroke-width="1.5"/>
+      <text x="-10" y="4" text-anchor="end" fill="#3a4a2f">Trickum MS</text>
+    </g>
+  </g>
+
+  <!-- ===================== LEGEND CARD ===================== -->
+  <g transform="translate(60,452)" filter="url(#tmShadow)">
+    <rect x="0" y="0" width="266" height="132" rx="12" fill="#FBF8F2" stroke="#D8CDB6" stroke-width="1.5"/>
+    <text x="18" y="28" font-size="14.5" font-weight="700" fill="#1E2419">Typical weekday PM-peak flow</text>
+
+    <g transform="translate(18,48)">
+      <rect x="0" y="0" width="30" height="9" rx="4.5" fill="#3FAE6A"/>
+      <text x="42" y="9" font-size="13" fill="#1E2419">Free-flowing</text>
+    </g>
+    <g transform="translate(18,72)">
+      <rect x="0" y="0" width="30" height="9" rx="4.5" fill="#E5A341"/>
+      <text x="42" y="9" font-size="13" fill="#1E2419">Moderate</text>
+    </g>
+    <g transform="translate(18,96)">
+      <rect x="0" y="0" width="30" height="9" rx="4.5" fill="#D7503A"/>
+      <text x="42" y="9" font-size="13" fill="#1E2419">Congested</text>
+    </g>
+
+    <!-- markers column -->
+    <g transform="translate(170,48)">
+      <path d="M0,-7 L2.7,-2.3 L7.9,-2.1 L3.6,1.1 L5,6 L0,3 L-5,6 L-3.6,1.1 L-7.9,-2.1 L-2.7,-2.3 Z" transform="translate(8,4)" fill="url(#tmGold)" stroke="#1E2419" stroke-width="0.8"/>
+      <text x="24" y="9" font-size="12" fill="#1E2419">Proposed site</text>
+    </g>
+    <g transform="translate(170,72)">
+      <circle cx="8" cy="4" r="6" fill="url(#tmHot)"/>
+      <circle cx="8" cy="4" r="3.4" fill="#D7503A" stroke="#FBF8F2" stroke-width="1.2"/>
+      <text x="24" y="9" font-size="12" fill="#1E2419">Congestion hotspot</text>
+    </g>
+    <g transform="translate(170,96)">
+      <circle cx="8" cy="4" r="4.5" fill="#2F5D3A" stroke="#FBF8F2" stroke-width="1.3"/>
+      <text x="24" y="9" font-size="12" fill="#1E2419">School / trip magnet</text>
+    </g>
+  </g>
+
+  <!-- ===================== HONEST CAPTION ===================== -->
+  <g transform="translate(60,608)">
+    <rect x="-4" y="-15" width="700" height="24" rx="6" fill="#1E2419" fill-opacity="0.06"/>
+    <text x="8" y="2" font-size="12.5" font-style="italic" fill="#3a4032">Illustrative schematic of typical weekday peak congestion — not live or measured data. Geometry is not to scale.</text>
+  </g>
+
+</svg>
