@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2F5D3A" />
+  <meta name="color-scheme" content="light" />
+  <title>Arcado Springs — Before / After Traffic Simulation</title>
+  <meta name="description" content="A satellite view of the Arcado Road site and an interactive before/after simulation of how a walkable, mixed-use development changes the way cars flow on the corridor." />
+  <link rel="canonical" href="https://arcado-springs.vercel.app/traffic-sim.html" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3Ccircle%20cx='16'%20cy='22'%20r='2.4'%20fill='%23C9B896'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" /></noscript>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <style>
+    :root{
+      --bg:#F6F2EA; --surface:#FCFAF5; --text:#1E2419; --muted:#646B5D;
+      --accent:#2F5D3A; --accent-dk:#234a2d; --accent2:#B08D57; --accent2-ink:#876A38;
+      --line:#E4E0D6; --radius:14px; --wrap:1120px; --ease:cubic-bezier(.22,.61,.36,1);
+      --free:#3FAE6A; --mod:#E5A341; --jam:#D7503A;
+      --shadow-sm:0 4px 18px rgba(30,40,20,.07); --shadow-md:0 12px 40px rgba(30,40,20,.13);
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:"Inter",system-ui,sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    h1,h2,h3{font-family:"Fraunces",Georgia,serif;font-weight:400;line-height:1.1;letter-spacing:-.012em;margin:0}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{width:100%;max-width:var(--wrap);margin-inline:auto;padding-inline:clamp(20px,5vw,40px)}
+    .mono{font-family:"IBM Plex Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em;font-size:.7rem}
+    :focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+    .topnav{height:60px;display:flex;align-items:center;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:1000}
+    .topnav .wrap{display:flex;align-items:center;justify-content:space-between}
+    .brand{font-family:"Fraunces",serif;font-weight:500;font-size:1.15rem;color:var(--text)}
+    .brand b{color:var(--accent);font-weight:500}
+    .back{font-size:.9rem;font-weight:500}
+
+    header.hero{padding:clamp(36px,6vw,72px) 0 8px}
+    .eyebrow{color:var(--accent2-ink);font-weight:600;text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;margin:0 0 .6rem}
+    h1.title{font-size:clamp(2rem,5vw,3.2rem);max-width:18ch}
+    .lede{color:var(--muted);max-width:62ch;margin:1rem 0 0;font-size:1.06rem}
+
+    section{padding:clamp(28px,5vw,52px) 0}
+    h2.sec{font-size:clamp(1.5rem,3.4vw,2.1rem);margin-bottom:.4rem}
+    .sec-intro{color:var(--muted);max-width:64ch;margin:0 0 1.4rem}
+
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden}
+    #map{height:min(60vh,460px);width:100%;background:#dfe3da}
+    .map-cap,.sim-cap{color:var(--muted);font-size:.84rem;padding:.7rem 1rem;border-top:1px solid var(--line);display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .leaflet-container{font-family:"Inter",sans-serif}
+    .site-label{background:var(--accent);color:#fff;font-weight:600;font-size:.8rem;padding:3px 9px;border-radius:999px;white-space:nowrap;box-shadow:var(--shadow-sm)}
+
+    /* ---- Simulation ---- */
+    .sim-controls{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;margin-bottom:1rem}
+    .segmented{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px;box-shadow:var(--shadow-sm)}
+    .segmented button{font-family:inherit;font-weight:600;font-size:.95rem;border:0;background:transparent;color:var(--muted);padding:9px 20px;border-radius:999px;cursor:pointer;transition:background-color .2s var(--ease),color .2s var(--ease)}
+    .segmented button[aria-pressed="true"]{background:var(--accent);color:#fff}
+    .btn{font-family:inherit;font-weight:600;font-size:.92rem;border:1.5px solid var(--line);background:var(--surface);color:var(--text);padding:9px 16px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:border-color .2s var(--ease),background-color .2s var(--ease)}
+    .btn:hover{border-color:var(--accent2)}
+    .scenario-pill{margin-left:auto;font-weight:600;font-size:.85rem;padding:7px 14px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;transition:background-color .3s var(--ease),color .3s var(--ease)}
+    .scenario-pill .dot{width:9px;height:9px;border-radius:50%}
+
+    .sim-stage{position:relative;width:100%;aspect-ratio:1000/560;background:#e9ede2;border-radius:var(--radius);overflow:hidden}
+    .sim-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+    .legend{display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;margin-top:.9rem;font-size:.82rem;color:var(--muted)}
+    .legend span{display:inline-flex;align-items:center;gap:.45rem}
+    .legend i{width:14px;height:14px;border-radius:3px;display:inline-block}
+
+    .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-top:1.1rem}
+    @media(min-width:680px){.stats{grid-template-columns:repeat(4,1fr)}}
+    .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1rem 1.1rem}
+    .stat .k{font-family:"IBM Plex Mono",monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent2-ink)}
+    .stat .v{font-family:"Fraunces",serif;font-size:1.9rem;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:.25rem;transition:color .3s var(--ease)}
+    .stat .s{font-size:.8rem;color:var(--muted)}
+
+    .takeaway{background:rgba(47,93,58,.06);border:1px solid rgba(47,93,58,.18);border-radius:var(--radius);padding:1.1rem 1.25rem;margin-top:1.4rem;color:var(--text)}
+    footer{border-top:1px solid var(--line);padding:2rem 0;color:var(--muted);font-size:.82rem}
+    .disclaimer{max-width:80ch}
+
+    @media (prefers-reduced-motion: reduce){
+      html{scroll-behavior:auto}
+      .segmented button,.btn,.scenario-pill,.stat .v{transition:none}
+    }
+  </style>
+</head>
+<body>
+  <nav class="topnav"><div class="wrap">
+    <span class="brand">Arcado <b>Springs</b></span>
+    <a class="back" href="/">&larr; Back to overview</a>
+  </div></nav>
+
+  <header class="hero"><div class="wrap">
+    <p class="eyebrow">Traffic &amp; Mobility · Interactive model</p>
+    <h1 class="title">See how Arcado&nbsp;Springs changes the way traffic flows.</h1>
+    <p class="lede">First, the real site from above. Then a side-by-side simulation: <strong>today's pattern</strong>, where every errand is a drive out to a busy arterial &mdash; versus <strong>a walkable, mixed-use Arcado&nbsp;Springs</strong>, where many trips never become car trips at all, and the ones that remain are shorter.</p>
+  </div></header>
+
+  <section><div class="wrap">
+    <h2 class="sec">The site, from above</h2>
+    <p class="sec-intro">Live satellite imagery centered on <strong>4541 Arcado Rd, Lilburn, GA 30047</strong> &mdash; the proposed development sits where the corridor meets the Killian Hill arterial and the surrounding school cluster.</p>
+    <div class="card">
+      <div id="map" role="application" aria-label="Satellite map of the Arcado Road site in Lilburn, Georgia"></div>
+      <p class="map-cap"><span class="mono">Satellite</span> Real aerial imagery © Esri, Maxar, Earthstar Geographics. Location resolved from the street address; pan and zoom to explore.</p>
+    </div>
+  </div></section>
+
+  <section style="background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
+    <h2 class="sec">Before &amp; after: how the cars move</h2>
+    <p class="sec-intro">Toggle between the two scenarios and watch the corridor. Cars are colored by how freely they're moving &mdash; <span style="color:var(--free);font-weight:600">green</span> flowing, <span style="color:var(--jam);font-weight:600">red</span> stuck at the intersection.</p>
+
+    <div class="sim-controls">
+      <div class="segmented" role="group" aria-label="Choose scenario">
+        <button id="btn-before" aria-pressed="true">Before · today</button>
+        <button id="btn-after" aria-pressed="false">After · Arcado Springs</button>
+      </div>
+      <button class="btn" id="btn-play" aria-label="Pause animation">⏸ Pause</button>
+      <span class="scenario-pill" id="flow-pill"><span class="dot"></span><span id="flow-text">Congested</span></span>
+    </div>
+
+    <div class="sim-stage">
+      <canvas id="sim" aria-label="Animated traffic flow simulation of the Arcado Road corridor"></canvas>
+    </div>
+
+    <div class="legend" aria-hidden="true">
+      <span><i style="background:var(--free)"></i> Free-flowing car</span>
+      <span><i style="background:var(--jam)"></i> Stuck in congestion</span>
+      <span><i style="background:var(--accent2)"></i> Walking / biking (no car trip)</span>
+      <span><i style="background:#7d8a6e"></i> Roads</span>
+      <span><i style="background:var(--accent)"></i> Arcado Springs town center</span>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><div class="k">Cars on the corridor</div><div class="v" id="s-cars">—</div><div class="s">active vehicles right now</div></div>
+      <div class="stat"><div class="k">Trips kept off the road</div><div class="v" id="s-internal">—</div><div class="s">walked, biked, or stayed on-site</div></div>
+      <div class="stat"><div class="k">Avg. car trip</div><div class="v" id="s-trip">—</div><div class="s">shorter when destinations are near</div></div>
+      <div class="stat"><div class="k">Corridor flow</div><div class="v" id="s-flow">—</div><div class="s">at the Killian Hill corner</div></div>
+    </div>
+
+    <div class="takeaway" id="takeaway"></div>
+  </div></section>
+
+  <footer><div class="wrap">
+    <p class="disclaimer"><strong>This is an illustrative simulation, not a traffic study.</strong> The animation is a simplified model for communication; vehicle counts and trip lengths are schematic. The relationships it shows are grounded in published planning research: walkable mixed-use sites internalize roughly <strong>15–30%</strong> of trips (higher at the evening peak), and compact development cuts vehicle-miles-traveled by about <strong>20–40%</strong> versus dispersed, single-use sprawl (ITE/NCHRP 684, the National Household Travel Survey, EPA Smart Growth, Ewing &amp; Cervero 2010). Satellite imagery © Esri and partners. <a href="/">Return to the Arcado Springs overview →</a></p>
+  </div></footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+  /* ============================ Satellite map ============================ */
+  (function initMap(){
+    if (typeof L === "undefined") return;
+    var FALLBACK = [33.9446, -84.0533]; // approx Arcado Rd, Lilburn GA (refined by geocode below)
+    var map = L.map("map", { scrollWheelZoom:false, zoomControl:true }).setView(FALLBACK, 15);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 19, attribution: "Imagery © Esri, Maxar, Earthstar Geographics"
+    }).addTo(map);
+    map.on("click", function(){ map.scrollWheelZoom.enable(); });
+
+    function placeSite(lat, lng, exact){
+      var c = [lat, lng];
+      map.setView(c, 16);
+      L.circle(c, { radius: 140, color:"#B08D57", weight:2, fillColor:"#2F5D3A", fillOpacity:.18 }).addTo(map);
+      L.marker(c).addTo(map).bindTooltip("Proposed Arcado Springs", {permanent:true, direction:"top", className:"site-label", offset:[0,-6]});
+    }
+    // Resolve the real address client-side (no API key) — fall back gracefully.
+    fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" +
+          encodeURIComponent("4541 Arcado Rd, Lilburn, GA 30047"))
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(j){
+        if (j && j.length) placeSite(parseFloat(j[0].lat), parseFloat(j[0].lon), true);
+        else placeSite(FALLBACK[0], FALLBACK[1], false);
+      })
+      .catch(function(){ placeSite(FALLBACK[0], FALLBACK[1], false); });
+  })();
+
+  /* ======================== Traffic flow simulation ======================== */
+  (function initSim(){
+    var canvas = document.getElementById("sim");
+    if (!canvas) return;
+    var ctx = canvas.getContext("2d");
+    var W = 1000, H = 560;                 // logical coordinate space
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function fit(){
+      var rect = canvas.getBoundingClientRect();
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr * rect.width / W, 0, 0, dpr * rect.height / H, 0, 0);
+    }
+
+    // --- Network nodes (logical coords) ---
+    var N = {
+      subA:[70,110], subB:[70,300], subC:[70,470],
+      fA:[250,110], fB:[250,300], fC:[250,470],
+      arcW:[320,300], arcMid:[540,300], devEntry:[660,330], corner:[840,300],
+      killN:[840,70], killS:[840,520], outE:[980,300],
+      // town-center internal loop
+      d1:[600,360], d2:[760,360], d3:[760,470], d4:[600,470]
+    };
+    function seg(a,b){ return [N[a],N[b]]; }
+    // road polylines drawn beneath cars
+    var ROADS = [
+      seg("subA","fA"), seg("subB","fB"), seg("subC","fC"),
+      seg("fA","arcW"), seg("fB","arcW"), seg("fC","arcW"),
+      seg("arcW","arcMid"), seg("arcMid","corner"), seg("corner","outE"),
+      seg("killN","corner"), seg("corner","killS"),
+      seg("arcMid","devEntry"), seg("devEntry","d1"),
+      seg("d1","d2"), seg("d2","d3"), seg("d3","d4"), seg("d4","d1")
+    ];
+
+    function route(){ return Array.prototype.slice.call(arguments).map(function(k){return N[k];}); }
+    // Before: everyone drives out across the jammed corner (long trips)
+    var ROUTES_BEFORE = [
+      route("subA","fA","arcW","arcMid","corner","killN"),
+      route("subB","fB","arcW","arcMid","corner","outE"),
+      route("subC","fC","arcW","arcMid","corner","killS"),
+      route("subA","fA","arcW","arcMid","corner","outE"),
+      route("subC","fC","arcW","arcMid","corner","killN")
+    ];
+    // After: fewer cars; many trips end inside the town center (short); a few still go out
+    var ROUTES_AFTER_LOCAL = [
+      route("subA","fA","arcW","arcMid","devEntry","d1","d2"),
+      route("subB","fB","arcW","arcMid","devEntry","d1","d4"),
+      route("subC","fC","arcW","arcMid","devEntry","d1")
+    ];
+    var ROUTES_AFTER_THRU = [
+      route("subB","fB","arcW","arcMid","corner","outE"),
+      route("subA","fA","arcW","arcMid","corner","killN")
+    ];
+    // Pedestrian loop inside the town center (after only)
+    var PED_LOOP = route("d1","d2","d3","d4","d1");
+
+    var SCEN = {
+      before:{ cap:46, spawn:0.10, localShare:0, jam:0.86, peds:0, trip:"1.9 mi", internal:"0%",
+               flow:"Congested", flowColor:"#D7503A" },
+      after:{ cap:18, spawn:0.05, localShare:0.7, jam:0.30, peds:26, trip:"0.7 mi", internal:"~30%",
+              flow:"Free-flowing", flowColor:"#3FAE6A" }
+    };
+    var state = "before";
+    var running = !reduce;
+
+    // --- agents ---
+    var cars = [], peds = [];
+    function polyLen(p){ var L=0; for(var i=1;i<p.length;i++) L+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]); return L; }
+    function makeCar(){
+      var s = SCEN[state], r;
+      if (state==="after" && Math.random()<s.localShare) r = ROUTES_AFTER_LOCAL[(Math.random()*ROUTES_AFTER_LOCAL.length)|0];
+      else r = state==="after" ? ROUTES_AFTER_THRU[(Math.random()*ROUTES_AFTER_THRU.length)|0]
+                               : ROUTES_BEFORE[(Math.random()*ROUTES_BEFORE.length)|0];
+      return { r:r, len:polyLen(r), d:0, base:60+Math.random()*26, v:0 };
+    }
+    function makePed(){ return { t:Math.random(), dir:(Math.random()<.5?1:-1)*(0.0009+Math.random()*0.0007),
+                                 off:(Math.random()*16-8) }; }
+    function pointAt(poly, dist){
+      var d=dist;
+      for(var i=1;i<poly.length;i++){
+        var ax=poly[i-1][0],ay=poly[i-1][1],bx=poly[i][0],by=poly[i][1];
+        var L=Math.hypot(bx-ax,by-ay);
+        if(d<=L){ var t=L? d/L:0; return [ax+(bx-ax)*t, ay+(by-ay)*t, Math.atan2(by-ay,bx-ax)]; }
+        d-=L;
+      }
+      var n=poly.length-1; return [poly[n][0],poly[n][1],0];
+    }
+
+    function setScenario(next){
+      state = next;
+      document.getElementById("btn-before").setAttribute("aria-pressed", String(next==="before"));
+      document.getElementById("btn-after").setAttribute("aria-pressed", String(next==="after"));
+      var s = SCEN[next];
+      var pill = document.getElementById("flow-pill");
+      pill.style.background = next==="after" ? "rgba(63,174,106,.16)" : "rgba(215,80,58,.14)";
+      pill.style.color = next==="after" ? "#2c7a4b" : "#a33524";
+      pill.querySelector(".dot").style.background = s.flowColor;
+      document.getElementById("flow-text").textContent = s.flow;
+      // peds
+      peds = [];
+      for (var i=0;i<s.peds;i++) peds.push(makePed());
+      // stat values that are scenario-fixed
+      document.getElementById("s-internal").textContent = s.internal;
+      document.getElementById("s-trip").textContent = s.trip;
+      var fl = document.getElementById("s-flow"); fl.textContent = s.flow; fl.style.color = s.flowColor;
+      document.getElementById("takeaway").innerHTML = next==="after"
+        ? "<strong>After:</strong> with shops, dining, and homes on one walkable site, a real share of trips are made on foot or stay on-site, and the rest are shorter — so far fewer cars reach the Killian&nbsp;Hill corner, and the ones that do keep moving."
+        : "<strong>Before:</strong> in today's single-use pattern every errand is a drive out to a distant store or onto a busy arterial, concentrating cars onto two-lane Arcado&nbsp;Rd and jamming the signalized corner at peak hours.";
+      if (reduce) drawStaticFill();
+    }
+
+    function drawStaticFill(){ // ensure a populated frame when motion is reduced
+      cars = []; var s=SCEN[state]; for(var i=0;i<s.cap;i++){ var c=makeCar(); c.d=Math.random()*c.len; cars.push(c); }
+      render(); updateStats();
+    }
+
+    // --- drawing ---
+    function drawGround(){
+      ctx.fillStyle="#e9ede2"; ctx.fillRect(0,0,W,H);
+      // subdivisions (left) + greenery blocks
+      ctx.fillStyle="#dde3d3";
+      [[20,60],[20,250],[20,420]].forEach(function(p){ ctx.fillRect(p[0],p[1],120,90); });
+      // town center footprint
+      ctx.fillStyle="rgba(47,93,58,.12)"; ctx.strokeStyle="rgba(47,93,58,.55)"; ctx.lineWidth=2;
+      roundRect(575,335,210,160,14); ctx.fill(); ctx.stroke();
+      // little buildings in the center
+      ctx.fillStyle="rgba(47,93,58,.55)";
+      [[600,348,40,22],[652,348,40,22],[704,348,52,22],[600,420,52,20],[666,420,40,20],[718,420,40,20]].forEach(function(b){ ctx.fillRect(b[0],b[1],b[2],b[3]); });
+      ctx.fillStyle="var(--accent)";
+      ctx.font="600 13px Inter, sans-serif"; ctx.fillStyle="#2f5d3a"; ctx.textAlign="center";
+      ctx.fillText("ARCADO SPRINGS", 680, 487);
+    }
+    function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+    function drawRoads(){
+      ctx.lineCap="round"; ctx.lineJoin="round";
+      ctx.strokeStyle="#7d8a6e"; ctx.lineWidth=15;
+      ROADS.forEach(function(s){ ctx.beginPath(); ctx.moveTo(s[0][0],s[0][1]); ctx.lineTo(s[1][0],s[1][1]); ctx.stroke(); });
+      ctx.strokeStyle="#9aa888"; ctx.lineWidth=2; ctx.setLineDash([10,12]);
+      [seg("arcW","arcMid"),seg("arcMid","corner"),seg("corner","outE"),seg("killN","corner"),seg("corner","killS")]
+        .forEach(function(s){ ctx.beginPath(); ctx.moveTo(s[0][0],s[0][1]); ctx.lineTo(s[1][0],s[1][1]); ctx.stroke(); });
+      ctx.setLineDash([]);
+      // labels
+      ctx.fillStyle="#5b6650"; ctx.font="600 12px Inter, sans-serif"; ctx.textAlign="left";
+      ctx.fillText("Arcado Rd", 360, 290);
+      ctx.save(); ctx.translate(858,120); ctx.fillText("Killian Hill Rd", 0,0); ctx.restore();
+      ctx.fillStyle="#8a7350"; ctx.fillText("subdivisions", 24, 50);
+      // jam glow at corner (before)
+      var jam = SCEN[state].jam;
+      var g = ctx.createRadialGradient(N.corner[0],N.corner[1],4,N.corner[0],N.corner[1],90);
+      g.addColorStop(0,"rgba(215,80,58,"+(0.10+0.30*jam)+")"); g.addColorStop(1,"rgba(215,80,58,0)");
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(N.corner[0],N.corner[1],90,0,7); ctx.fill();
+    }
+    function carColor(v,base){
+      var r=Math.max(0,Math.min(1,v/base));            // 1 = free, 0 = stopped
+      var c1=[215,80,58], c2=[63,174,106];
+      return "rgb("+((c1[0]+(c2[0]-c1[0])*r)|0)+","+((c1[1]+(c2[1]-c1[1])*r)|0)+","+((c1[2]+(c2[2]-c1[2])*r)|0)+")";
+    }
+    function drawCar(c){
+      var p=pointAt(c.r,c.d);
+      ctx.save(); ctx.translate(p[0],p[1]); ctx.rotate(p[2]);
+      ctx.fillStyle=carColor(c.v,c.base); roundRect(-7,-4,14,8,2); ctx.fill();
+      ctx.restore();
+    }
+    function drawPed(pp){
+      var p=pointAt(PED_LOOP, pp.t*polyLen(PED_LOOP));
+      var nx=Math.cos(p[2]+Math.PI/2)*pp.off, ny=Math.sin(p[2]+Math.PI/2)*pp.off;
+      ctx.fillStyle="#B08D57"; ctx.beginPath(); ctx.arc(p[0]+nx,p[1]+ny,3,0,7); ctx.fill();
+    }
+    function render(){
+      ctx.clearRect(0,0,W,H);
+      drawGround(); drawRoads();
+      for(var i=0;i<peds.length;i++) drawPed(peds[i]);
+      for(var j=0;j<cars.length;j++) drawCar(cars[j]);
+    }
+
+    // --- sim step ---
+    var spawnAcc=0, last=0, statTick=0;
+    function nearCorner(p){ return Math.hypot(p[0]-N.corner[0],p[1]-N.corner[1])<95; }
+    function step(dt){
+      var s=SCEN[state];
+      spawnAcc+=dt;
+      var spawnEvery = 1/(s.spawn*60);   // seconds between spawns (approx)
+      while(spawnAcc>spawnEvery && cars.length<s.cap){ spawnAcc-=spawnEvery; cars.push(makeCar()); }
+      for(var i=cars.length-1;i>=0;i--){
+        var c=cars[i], p=pointAt(c.r,c.d);
+        var target=c.base;
+        // slow approaching/through the corner, much more in the jammed scenario
+        if(nearCorner(p)) target=c.base*(1-s.jam*0.85);
+        // simple car-following: slow if someone close ahead on same route
+        for(var k=0;k<cars.length;k++){ if(k!==i&&cars[k].r===c.r){ var gap=cars[k].d-c.d; if(gap>0&&gap<22){ target=Math.min(target,gap*2.2);} } }
+        c.v += (target-c.v)*Math.min(1,dt*4);
+        c.d += c.v*dt;
+        if(c.d>=c.len) cars.splice(i,1);
+      }
+      for(var q=0;q<peds.length;q++){ peds[q].t=(peds[q].t+peds[q].dir*dt*40+1)%1; }
+    }
+    function updateStats(){
+      document.getElementById("s-cars").textContent = cars.length;
+    }
+
+    function loop(ts){
+      if(!running){ return; }
+      if(!last) last=ts; var dt=Math.min(0.05,(ts-last)/1000); last=ts;
+      step(dt); render();
+      statTick+=dt; if(statTick>0.25){ statTick=0; updateStats(); }
+      raf=requestAnimationFrame(loop);
+    }
+    var raf=null;
+    function start(){ if(raf) cancelAnimationFrame(raf); last=0; raf=requestAnimationFrame(loop); }
+
+    // --- wire controls ---
+    document.getElementById("btn-before").addEventListener("click", function(){ setScenario("before"); });
+    document.getElementById("btn-after").addEventListener("click", function(){ setScenario("after"); });
+    var playBtn=document.getElementById("btn-play");
+    playBtn.addEventListener("click", function(){
+      running=!running;
+      playBtn.textContent = running ? "⏸ Pause" : "▶ Play";
+      playBtn.setAttribute("aria-label", running ? "Pause animation" : "Play animation");
+      if(running) start();
+    });
+    window.addEventListener("resize", function(){ fit(); if(!running||reduce) render(); });
+
+    // boot
+    fit(); setScenario("before");
+    if(reduce){ playBtn.textContent="▶ Play"; playBtn.setAttribute("aria-label","Play animation"); running=false; drawStaticFill(); }
+    else { start(); }
+  })();
+  </script>
+</body>
+</html>
