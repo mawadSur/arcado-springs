@@ -1,20 +1,36 @@
-# Arcado Springs — Land Development Demo
+# Arcado Springs — Land Development Preview
 
-A static showcase site for the **Arcado Springs** master-planned mixed-use development on Arcado Road.
+The public-facing concept site for the **Arcado Springs** master-planned mixed-use development
+on Arcado Road (shops, dining, and walkable streets, beside the Legends of Parkview subdivision).
+It's a shareable preview for residents, local businesses, and planning stakeholders.
 
-This is the public-facing concept demo (a shareable stakeholder preview). The full interactive
-3D visualization is built in Unity 6 (HDRP) and is **not** part of this repo — HDRP cannot build
-to WebGL, so the development is presented here through renders, a walkthrough video, and the site plan.
+The full interactive 3D walkthrough is built in **Unity 6 (HDRP)**. HDRP cannot build to WebGL,
+so the playable in-browser build is a separate effort (see **`WEBGL_BUILD_GUIDE.md`**); this site
+auto-detects that build when it's dropped in and otherwise shows the plan-based preview honestly.
 
 ## Structure
-- `index.html` — single-page showcase
-- `styles.css` — styling
-- `public/site-plan.jpg` — master site plan (Conception 1 & 2)
+- `public/index.html` — single-page site (hero, walkthrough player, gallery, master plan, two
+  conceptions, specs, "why it helps the community", feedback form)
+- `public/styles.css` — styling (Fraunces / Inter / IBM Plex Mono; warm civic palette)
+- `public/main.js` — nav, reveal animations, lightbox, site-plan pan/zoom, and the WebGL build
+  auto-loader (probes `public/unity-build/Build/`, falls back to the plan preview if absent)
+- `public/site-plan.jpg` — colored master site plan (Conception 1 & 2)
+- `public/screenshots/` — dimensioned CAD plan drawings
+- `public/unity-build/` — drop the exported Unity WebGL build here (auto-detected; see its README)
+- `public/vercel.json` — static config + WASM/Brotli MIME headers for the future WebGL build
+- `WEBGL_BUILD_GUIDE.md` — honest, step-by-step path to a real browser build (HDRP → URP → WebGL)
 
-## To update
-Swap the hero/gallery placeholders for real HDRP screenshots (put images in `public/`, point the
-`<figure>`/`.hero-media` at them), embed a trimmed walkthrough MP4 in the `.video-slot`, and fill in
-the real figures in the "At a glance" section.
+## To add the real 3D experience
+1. Capture a few in-engine frames from the Unity scene and drop them in `public/screenshots/`,
+   then point the hero / gallery `<img src>` at them for a stronger first impression.
+2. Produce the WebGL build per `WEBGL_BUILD_GUIDE.md` and place the output in
+   `public/unity-build/`. The player upgrades itself — no HTML edits needed.
 
 ## Deploy
-Auto-deploys to Vercel on push to `main`.
+Production branch is **`master`**.
+- **Git:** `git push origin master` (if the Vercel project is connected to the GitHub repo, this
+  auto-deploys).
+- **Vercel CLI:** from the repo root, `vercel login` then `vercel --prod` (the project is already
+  linked via `.vercel/project.json`).
+
+Live at **https://arcado-springs.vercel.app**.

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "_comment_project": "Arcado Springs landing page. Plain static files (index.html, styles.css, main.js, /screenshots, /unity-build). No framework, no build step.",
+  "_comment_brotli": "OPTIONAL Brotli support: if you export the Unity WebGL player with Compression Format = Brotli and NO decompression fallback, the files are named Build.wasm.br / Build.data.br / Build.framework.js.br. Vercel will NOT re-compress or strip them, so you must declare both the real Content-Type and Content-Encoding: br yourself. Add these objects to the 'headers' array below when you ship a Brotli build: { source: '/(.*)\\\\.wasm\\\\.br', headers: [ { key: Content-Type, value: application/wasm }, { key: Content-Encoding, value: br } ] }, { source: '/(.*)\\\\.data\\\\.br', headers: [ { key: Content-Type, value: application/octet-stream }, { key: Content-Encoding, value: br } ] }, { source: '/(.*)\\\\.framework\\\\.js\\\\.br', headers: [ { key: Content-Type, value: application/javascript }, { key: Content-Encoding, value: br } ] }",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/(.*)\\.wasm",
+      "headers": [
+        { "key": "Content-Type", "value": "application/wasm" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.data",
+      "headers": [
+        { "key": "Content-Type", "value": "application/octet-stream" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.symbols\\.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/octet-stream" }
+      ]
+    },
+    {
+      "source": "/unity-build/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/screenshots/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(css|js)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    }
+  ]
+}
