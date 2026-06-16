@@ -474,23 +474,6 @@ p { margin: 0 0 1rem; }
 /* ============================================================================
  * VISION
  * ==========================================================================*/
-/* Editorial plate: oversized lead image above the vision text/cards */
-.vision-plate {
-  margin: 0 auto clamp(40px, 6vw, 72px);
-}
-.vision-plate-img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 2400 / 1371;
-  object-fit: cover;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  background: #1b2614;
-}
-.vision-plate-cap {
-  margin: 14px 0 0;
-  font-size: 0.86rem;
-}
 .vision-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -705,6 +688,100 @@ p { margin: 0 0 1rem; }
   color: var(--muted);
   font-size: 1.02rem;
   line-height: 1.55;
+}
+
+/* ============================================================================
+ * COMMUNITY LIFE GALLERY — editorial image cards (echoes .spread + .precedent-card)
+ * ==========================================================================*/
+.community-life-intro { max-width: 60ch; margin-bottom: clamp(32px, 5vw, 52px); }
+
+.community-gallery {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(20px, 3.2vw, 32px);
+}
+.community-card {
+  margin: 0;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 16px;
+}
+.community-figure {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  background: #1b2614;
+  transition: transform .22s var(--ease), box-shadow .22s var(--ease);
+}
+.community-card:hover .community-figure {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+.community-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.community-img--wide { aspect-ratio: 1600 / 914; }
+.community-img--tall { aspect-ratio: 1600 / 1179; }
+
+.community-cap {
+  display: grid;
+  gap: 8px;
+  max-width: 54ch;
+}
+.community-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.community-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+  line-height: 1.14;
+  letter-spacing: -0.012em;
+  color: var(--text);
+}
+.community-text {
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+/* Graceful empty state — mirrors the lifestyle gallery placeholder */
+.community-card.is-empty .community-img { display: none; }
+.community-card.is-empty .community-figure {
+  background: linear-gradient(135deg, #EDE6D8, #E2D8C4);
+  border: 1px dashed var(--accent2-ink, #876A38);
+  box-shadow: var(--shadow-sm);
+}
+.community-ph { display: none; }
+.community-card.is-empty .community-ph {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.4rem; width: 100%; aspect-ratio: 1600 / 914; text-align: center; padding: 1.25rem;
+  color: var(--muted, #646B5D);
+}
+.community-card--wide.is-empty .community-ph { aspect-ratio: 1600 / 914; }
+.community-card:not(.community-card--wide).is-empty .community-ph { aspect-ratio: 1600 / 1179; }
+.community-ph b {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: var(--font-head); font-weight: 500;
+  color: var(--text, #1E2419); font-size: 1.05rem;
+}
+.community-ph b .icon { color: var(--accent); vertical-align: middle; }
+.community-ph span {
+  font-family: var(--font-mono);
+  font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase;
 }
 
 /* Legacy gallery grid (kept for any external use) */
@@ -1268,6 +1345,8 @@ p { margin: 0 0 1rem; }
   .spread--wide { grid-template-columns: 1fr; }
   .spread--wide .spread-cap { max-width: 60ch; }
   .benefits-grid { grid-template-columns: 1fr 1fr; }
+  .community-gallery { grid-template-columns: 1fr 1fr; }
+  .community-card--wide { grid-column: 1 / -1; }
   .audience-grid { grid-template-columns: repeat(3, 1fr); }
   .specs-grid {
     grid-template-columns: 1fr 1fr;
