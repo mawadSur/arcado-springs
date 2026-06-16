@@ -73,12 +73,13 @@
     <!-- ===================== HERO ===================== -->
     <section class="hero" id="hero" aria-labelledby="hero-title">
       <div class="hero-media" aria-hidden="true">
-        <img class="hero-img" src="site-plan.jpg"
-             alt="" fetchpriority="high" decoding="async" />
+        <img class="hero-img" src="lifestyle/hero.jpg"
+             alt="" fetchpriority="high" decoding="async"
+             onerror="this.onerror=null;this.src='site-plan.jpg'" />
         <div class="hero-scrim"></div>
       </div>
 
-      <span class="pill-mono hero-pill" aria-hidden="true">MASTER PLAN · CONCEPT PREVIEW</span>
+      <span class="pill-mono hero-pill" aria-hidden="true">ARCADO ROAD · CONCEPT PREVIEW</span>
 
       <div class="wrap hero-content" data-reveal>
         <p class="hero-eyebrow">A new walkable town center on Arcado Road</p>
@@ -102,7 +103,7 @@
       <div class="wrap trust-bar-inner">
         <span>A concept preview</span>
         <span aria-hidden="true">·</span>
-        <span>Last updated 15 Jun 2026</span>
+        <span>Last updated 16 Jun 2026</span>
         <span aria-hidden="true">·</span>
         <span>Not an offer or final approval</span>
         <span aria-hidden="true">·</span>
@@ -130,8 +131,8 @@
             <p>A main street and central plaza designed to be crossed on foot, not just driven past.</p>
           </li>
           <li class="vision-card">
-            <h3>Two design conceptions explored</h3>
-            <p>The layout is not final — two approaches are being weighed openly.</p>
+            <h3>3.6 acres of open green space</h3>
+            <p>Over a third of the site kept green — room to gather, walk, and breathe.</p>
           </li>
           <li class="vision-card">
             <h3>Adjacent to Legends of Parkview</h3>
@@ -182,47 +183,39 @@
       </div>
     </section>
 
-    <!-- ===================== GALLERY ===================== -->
+    <!-- ===================== LIFE / LIFESTYLE GALLERY (AI imagery) ===================== -->
     <section class="section" id="gallery" aria-labelledby="gallery-title">
       <div class="wrap">
-        <p class="eyebrow">Experience gallery</p>
-        <h2 class="section-title" id="gallery-title">The plan, drawn at true scale.</h2>
-        <p class="muted gallery-intro">Real planning drawings from the proposal — the same geometry the 3D walkthrough is built on.</p>
+        <p class="eyebrow">Life at Arcado Springs</p>
+        <h2 class="section-title" id="gallery-title">A day in the neighborhood.</h2>
+        <p class="muted gallery-intro">How the town center is designed to feel — neighbors walking the main street, gathering over dinner, and shopping local.</p>
 
-        <div class="gallery-grid">
-          <figure class="gallery-item gallery-item--wide" data-reveal>
-            <button class="gallery-trigger" type="button"
-                    data-lightbox="site-plan.jpg"
-                    data-caption="Arcado Springs master site plan, showing both design conceptions along the Arcado Road corridor beside the Legends of Parkview neighborhood: a walkable retail and dining spine with a central plaza, structured parking, and landscaped streets.">
-              <img src="site-plan.jpg" loading="lazy" decoding="async"
-                   alt="Colored master site plan of Arcado Springs along Arcado Road, showing two design conceptions of a linear walkable development with rows of retail and dining pads, a central circular plaza, parking, and landscaped edges, adjacent to the Legends of Parkview subdivision." />
-              <span class="img-tag" aria-hidden="true">Master plan · Both conceptions</span>
-            </button>
-            <figcaption>The master site plan — both design conceptions along the Arcado Road corridor, beside Legends of Parkview.</figcaption>
+        <div class="gallery-grid lifestyle-grid">
+          <figure class="gallery-item gallery-item--wide lifestyle-item" data-reveal>
+            <img class="lifestyle-img" src="lifestyle/walking.jpg" loading="lazy" decoding="async"
+                 alt="Neighbors walking along the tree-lined main street of Arcado Springs at golden hour, with storefronts and outdoor seating."
+                 onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
+            <span class="lifestyle-ph" aria-hidden="true"><b>🚶 Walking the main street</b><span>AI preview image coming soon</span></span>
+            <figcaption>Strolling the walkable, tree-lined main street.</figcaption>
           </figure>
 
-          <figure class="gallery-item gallery-item--wide" data-reveal>
-            <button class="gallery-trigger" type="button"
-                    data-lightbox="screenshots/arcado-01.png"
-                    data-caption="Dimensioned CAD layout of the retail corridor: two facing rows of commercial pads flanking a central boulevard, a circular plaza, marked parking bays, and continuous street-edge tree planting.">
-              <img src="screenshots/arcado-01.png" loading="lazy" decoding="async"
-                   alt="Landscape dimensioned CAD drawing of the Arcado Springs development, showing two long parallel rows of rectangular retail and commercial building footprints flanking a central boulevard, a circular plaza at center, marked parking bays, and rows of tree symbols along both edges, with dimension callouts in feet." />
-              <span class="img-tag" aria-hidden="true">CAD detail · Dimensioned layout</span>
-            </button>
-            <figcaption>A dimensioned working drawing of the corridor — the geometry the 3D model is built to.</figcaption>
+          <figure class="gallery-item lifestyle-item" data-reveal>
+            <img class="lifestyle-img" src="lifestyle/dining.jpg" loading="lazy" decoding="async"
+                 alt="People dining at outdoor patio tables outside a restaurant at Arcado Springs in warm evening light."
+                 onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
+            <span class="lifestyle-ph" aria-hidden="true"><b>🍽️ Dining on the patio</b><span>AI preview image coming soon</span></span>
+            <figcaption>Patio dining at the heart of the town center.</figcaption>
           </figure>
 
-          <figure class="gallery-item gallery-item--tall" data-reveal>
-            <button class="gallery-trigger" type="button"
-                    data-lightbox="screenshots/arcado-02.png"
-                    data-caption="Vertical CAD drawing emphasizing the length of the development spine: an elongated retail block with rhythmic landscaping, structured parking, and the central circular plaza.">
-              <img src="screenshots/arcado-02.png" loading="lazy" decoding="async"
-                   alt="Portrait-oriented dimensioned CAD drawing of the same Arcado Springs development viewed vertically, with a long commercial building block, evenly spaced landscape markers, rows of parking stalls, a circular plaza, and tree symbols lining both edges." />
-              <span class="img-tag" aria-hidden="true">CAD detail · Development spine</span>
-            </button>
-            <figcaption>The development spine, drawn vertically — an elongated retail block with structured parking and the central plaza.</figcaption>
+          <figure class="gallery-item lifestyle-item" data-reveal>
+            <img class="lifestyle-img" src="lifestyle/shopping.jpg" loading="lazy" decoding="async"
+                 alt="Shoppers browsing storefronts with shopping bags along the retail frontage of Arcado Springs."
+                 onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
+            <span class="lifestyle-ph" aria-hidden="true"><b>🛍️ Shopping local</b><span>AI preview image coming soon</span></span>
+            <figcaption>Browsing the shops along the retail frontage.</figcaption>
           </figure>
         </div>
+        <p class="muted gallery-foot">Lifestyle images are AI-generated impressions of the proposed design, not photographs.</p>
       </div>
     </section>
 
@@ -235,80 +228,46 @@
 
         <figure class="siteplan-mount">
           <div class="siteplan-stage" id="siteplan-stage" tabindex="0" role="img"
-               aria-label="Master CAD site plan of Arcado Springs. Drag or pinch to pan, double-tap or use the buttons to zoom.">
+               aria-label="Colored master site plan of Arcado Springs. Drag or pinch to pan, double-tap or use the buttons to zoom.">
             <img class="siteplan-img" id="siteplan-img" src="site-plan.jpg"
                  loading="lazy" decoding="async"
-                 alt="Colored master site plan of Arcado Springs showing both design conceptions along the Arcado Road corridor: rows of retail and dining pads, a central circular plaza, parking, and landscaped edges beside Legends of Parkview." />
+                 alt="Colored master site plan of Arcado Springs along the Arcado Road corridor: rows of retail and dining pads, a central circular plaza, parking, and landscaped edges beside Legends of Parkview." />
           </div>
           <div class="siteplan-controls" role="group" aria-label="Site plan zoom controls">
             <button class="zoom-btn" type="button" data-zoom="out" aria-label="Zoom out">&minus;</button>
             <button class="zoom-btn" type="button" data-zoom="reset" aria-label="Reset zoom">Reset</button>
             <button class="zoom-btn" type="button" data-zoom="in" aria-label="Zoom in">+</button>
           </div>
-          <figcaption class="muted">Drag to pan · scroll or use the buttons to zoom · double-click to reset. Annotated CAD drawing, not a rendered view.</figcaption>
+          <figcaption class="muted">Drag to pan · scroll or use the buttons to zoom · double-click to reset. Colored master plan of the proposed development.</figcaption>
         </figure>
       </div>
     </section>
 
-    <!-- ===================== TWO CONCEPTIONS ===================== -->
-    <section class="section" id="two-conceptions" aria-labelledby="conceptions-title">
-      <div class="wrap">
-        <p class="eyebrow">Still being shaped</p>
-        <h2 class="section-title" id="conceptions-title">Two conceptions, side by side.</h2>
-        <p class="muted">The design is not final — and that&rsquo;s by design. Compare the two layouts being weighed.</p>
-
-        <div class="compare" role="group" aria-label="Compare design conceptions">
-          <div class="compare-tabs" role="tablist" aria-label="Choose a conception">
-            <button class="compare-tab is-active" id="tab-1" role="tab"
-                    aria-selected="true" aria-controls="panel-1" type="button">Conception 1</button>
-            <button class="compare-tab" id="tab-2" role="tab"
-                    aria-selected="false" aria-controls="panel-2" type="button">Conception 2</button>
-          </div>
-
-          <div class="compare-panels">
-            <figure class="compare-panel is-active" id="panel-1" role="tabpanel"
-                    aria-labelledby="tab-1">
-              <img src="screenshots/arcado-01.png" loading="lazy" decoding="async"
-                   alt="Conception 1: horizontal master site plan with two facing rows of retail pads and a central boulevard." />
-              <figcaption><span class="badge-mono">CONCEPTION 1</span> Twin retail rows facing a central tree-lined boulevard and plaza.</figcaption>
-            </figure>
-            <figure class="compare-panel" id="panel-2" role="tabpanel"
-                    aria-labelledby="tab-2" hidden>
-              <img src="screenshots/arcado-02.png" loading="lazy" decoding="async"
-                   alt="Conception 2: vertical site plan emphasizing a single elongated retail spine with structured parking." />
-              <figcaption><span class="badge-mono">CONCEPTION 2</span> A single elongated retail spine with structured parking and the plaza anchoring the south end.</figcaption>
-            </figure>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- (Two-conceptions compare removed — single colored concept plan shown above) -->
 
     <!-- ===================== AT A GLANCE ===================== -->
     <section class="section section-alt" id="at-a-glance" aria-labelledby="glance-title">
       <div class="wrap">
         <p class="eyebrow">At a glance</p>
-        <h2 class="section-title" id="glance-title">The numbers, kept honest.</h2>
-        <p class="muted">Figures are confirmed during the planning process. We use an em-dash rather than invent a number.</p>
+        <h2 class="section-title" id="glance-title">What it brings to the neighborhood.</h2>
+        <p class="muted">Nine acres reimagined as a walkable town center — retail, dining, recreation, and open green space for the whole neighborhood.</p>
 
         <ul class="stats-grid" data-reveal>
-          <li class="stat-card"><span class="stat-num">&mdash;</span><span class="stat-label">Acres</span></li>
-          <li class="stat-card"><span class="stat-num">&mdash;</span><span class="stat-label">Retail units</span></li>
-          <li class="stat-card"><span class="stat-num">&mdash;</span><span class="stat-label">Dining spaces</span></li>
-          <li class="stat-card"><span class="stat-num">&mdash;</span><span class="stat-label">Parking stalls</span></li>
+          <li class="stat-card"><span class="stat-num">9</span><span class="stat-label">Acres of land</span></li>
+          <li class="stat-card"><span class="stat-num">12</span><span class="stat-label">Retail stores <span class="stat-plus">+&nbsp;1 anchor</span></span></li>
+          <li class="stat-card"><span class="stat-num">6</span><span class="stat-label">Dining spaces</span></li>
+          <li class="stat-card"><span class="stat-num">3.6</span><span class="stat-label">Acres open green space</span></li>
         </ul>
 
-        <h3 class="subhead">Project specs</h3>
-        <dl class="specs-grid" data-reveal>
-          <div class="spec-row"><dt>Engine</dt><dd>Unity 6 (HDRP)</dd></div>
-          <div class="spec-row"><dt>Experience</dt><dd>Real-time, interactive 3D — not a pre-rendered video</dd></div>
-          <div class="spec-row"><dt>Access</dt><dd>Open from a shared link, no account required</dd></div>
-          <div class="spec-row"><dt>Devices</dt><dd>Phone, tablet, laptop, or desktop</dd></div>
-          <div class="spec-row"><dt>Modes</dt><dd>Walk the streets on foot, or drive the route by car</dd></div>
-          <div class="spec-row"><dt>View</dt><dd>First-person and overhead site views</dd></div>
-          <div class="spec-row"><dt>Scale</dt><dd>Built true to the real-world site at 1:1</dd></div>
-          <div class="spec-row"><dt>Lighting</dt><dd>Dynamic lighting from daytime to dusk</dd></div>
-          <div class="spec-row"><dt>Status</dt><dd>Proposed design — in active community review</dd></div>
-        </dl>
+        <h3 class="subhead">Amenities for the neighborhood</h3>
+        <ul class="amenities" data-reveal>
+          <li class="amenity"><span class="am-ico" aria-hidden="true">🚲</span> Dedicated bicycle lane</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true">🛝</span> Kids play area</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true">🎾</span> Pickleball court</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true">🚶</span> Walkable main street</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true">🌳</span> Open green space</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true">🍽️</span> Outdoor patio dining</li>
+        </ul>
       </div>
     </section>
 
@@ -467,7 +426,7 @@
       </div>
 
       <div class="footer-meta">
-        <p>Last updated 15 Jun 2026</p>
+        <p>Last updated 16 Jun 2026</p>
         <p><a href="mailto:hello@arcadosprings.example">hello@arcadosprings.example</a></p>
         <p class="footer-disclaimer">In-engine visualization — final construction may vary. Arcado Springs is a proposed development presented for community review. Designs, layouts, and details shown in the 3D walkthrough are conceptual and subject to change based on public feedback, engineering, and approvals.</p>
       </div>
