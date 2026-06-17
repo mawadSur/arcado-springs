@@ -1,7 +1,8 @@
 /* ============================================================================
  * Arcado Springs Traffic Simulator — PRESENTATION (window.TS.presentation)
  * Guided-tour sequencer. Walks DATA.presentationSteps, applying each step's
- * preset + scenario + mode/side + layers + focusHotspot via the other modules.
+ * scenario + before/after side + layers + focusHotspot via the other modules.
+ * One fixed framed view; no camera presets or split mode.
  * Prev/Next/Exit buttons + arrow-key + Esc. Honors reduced-motion (static).
  * ==========================================================================*/
 (function () {
@@ -93,12 +94,10 @@
     var step = TS.DATA.presentationSteps[idx];
     if (!step) return;
 
-    // Scenario + mode/side.
+    // Scenario + before/after side (single map; the toggle swaps the overlay).
     if (step.scenario) {
       if (step.scenario.id) TS.sim.setScenario(step.scenario.id);
-      if (step.scenario.mode) { TS.config.mode = step.scenario.mode; TS.sim.setMode(step.scenario.mode); }
-      if (step.scenario.side) { TS.config.side = step.scenario.side; TS.sim.setSide(step.scenario.side); }
-      if (TS.ui) { TS.ui.setMode(TS.config.mode); if (step.scenario.side) TS.ui.setSide(step.scenario.side); }
+      if (step.scenario.side && TS.ui && TS.ui.setSide) TS.ui.setSide(step.scenario.side);
       if (TS.ui && TS.ui.applyScenario) TS.ui.applyScenario();
     }
 
@@ -108,9 +107,6 @@
     if (step.layers) for (var k in step.layers) if (step.layers.hasOwnProperty(k)) base[k] = step.layers[k];
     TS.config.layers = base;
     if (TS.ui && TS.ui.applyLayers) TS.ui.applyLayers();
-
-    // Camera preset.
-    if (step.preset && TS.ui && TS.ui.setPreset) TS.ui.setPreset(step.preset);
 
     // Narration + chrome.
     if (titleEl) titleEl.textContent = step.title;

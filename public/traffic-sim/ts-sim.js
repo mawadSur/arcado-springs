@@ -6,7 +6,7 @@
  * d from its prior fractional progress so cars don't jump on resize/preset.
  * Roads map to roles: STUDY (Arcado + Killian Hill) carry the heavy traffic,
  * congestion stroke + queue bars; CROSS (Camp Creek, Cole) carry lighter
- * ambient movement. Cap: <=150 active vehicles across visible sides.
+ * ambient movement. Cap: <=150 active vehicles on the single live side.
  * ==========================================================================*/
 (function () {
   "use strict";
@@ -96,10 +96,6 @@
     return {
       vehicles: [], peds: [], cyclists: [],
       spawnAcc: 0,
-      signals: {
-        mainX: { phase: "green", t: 0, durGreen: 6.5, durRed: 4.5 },
-        driveway: { phase: "green", t: 0, durGreen: 5.5, durRed: 3.0 }
-      },
       queues: { arcadoEB: 0, killianNBL: 0 },
       density: {} // roadName -> 0..1
     };
@@ -125,12 +121,11 @@
   }
 
   function activeSides() {
-    if (TS.config.mode === "split") return ["before", "after"];
+    // Single map: only the toggled side is live at a time.
     return [TS.config.side];
   }
   function perSideCap() {
-    var n = activeSides().length || 1;
-    return Math.floor(MAX_VEHICLES / n);
+    return MAX_VEHICLES;
   }
 
   /* AFTER reduces car demand via internal capture + walk shift. */
@@ -178,21 +173,10 @@
     return { roadKey: "Arcado Road", dir: Math.random() < 0.5 ? 1 : -1, d: p ? Math.random() * p.len : 0, len: p ? p.len : 0, v: 34 * (0.85 + Math.random() * 0.3), kind: "cyclist" };
   }
 
-  /* ---- signals ---- */
-  function stepSignals(s, dt) {
-    ["mainX", "driveway"].forEach(function (k) {
-      var sig = s.signals[k];
-      sig.t += dt;
-      var dur = sig.phase === "green" ? sig.durGreen : sig.durRed;
-      if (sig.t >= dur) { sig.t = 0; sig.phase = sig.phase === "green" ? "red" : "green"; }
-    });
-  }
-
   /* ---- step ---- */
   function stepSide(side, dt) {
     var s = sides[side];
     if (!s || !ready()) return;
-    stepSignals(s, dt);
 
     // Spawn.
     var perSec = effectiveCarRate(side) / 3600;
@@ -238,14 +222,14 @@
         }
       }
 
-      // Study-road congestion near the intersection stop bar.
+      // Study-road congestion near the (unsignalized) corner. Density-based:
+      // the closer to the corner and the heavier the demand, the slower the
+      // approach — backup/queues form by congestion, not by a signal phase.
       if (veh.study) {
         var sb = stopIdx[veh.roadKey] || 0;
-        var toStop = (sb - veh.d) * veh.dir; // >0 = approaching stop bar
+        var toStop = (sb - veh.d) * veh.dir; // >0 = approaching the corner
         var nearStop = toStop > -34 && toStop < 150;
         if (nearStop) {
-          // Red signal -> stop near the bar.
-          if (s.signals.mainX.phase === "red" && toStop > 0 && toStop < 60) target = 0;
           // General jam zone within 220px of the corner.
           var dCorner = Math.hypot(pos.x - isxPx[0], pos.y - isxPx[1]);
           if (dCorner < 220) target *= (1 - jamBase * 0.85);
@@ -302,7 +286,7 @@
     if (!s) return null;
     return {
       vehicles: s.vehicles, peds: s.peds, cyclists: s.cyclists,
-      signals: s.signals, queues: s.queues, density: s.density,
+      queues: s.queues, density: s.density,
       stopIdx: stopIdx, study: STUDY, cross: CROSS
     };
   }
@@ -371,7 +355,6 @@
   }
 
   function setScenario(id) { TS.config.activeScenarioId = id; reseed(); }
-  function setMode(m) { TS.config.mode = m; rebalance(); }
   function setSide(side) { TS.config.side = side; }
   function setTimeT(t) { TS.config.timeT = Math.max(0, Math.min(1, t)); }
 
@@ -379,19 +362,11 @@
     sides = { before: makeSideState(), after: makeSideState() };
     seed("before"); seed("after");
   }
-  function rebalance() {
-    var cap = perSideCap();
-    ["before", "after"].forEach(function (side) {
-      var s = sides[side];
-      while (s.vehicles.length > cap) s.vehicles.pop();
-    });
-  }
 
   TS.sim = {
     init: init,
     setProjection: setProjection,
     setScenario: setScenario,
-    setMode: setMode,
     setSide: setSide,
     setTimeT: setTimeT,
     getState: getState,

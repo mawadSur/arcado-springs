@@ -1,13 +1,13 @@
 /* ============================================================================
  * Arcado Springs Traffic Simulator — RENDER (window.TS.render)
  * Draws in CONTAINER PIXEL space using the projection cache from TS.map. The
- * canvas overlay sits exactly over the Leaflet container (same size/origin),
- * so there is NO camera matrix — Leaflet's pan/zoom IS the camera. The basemap
- * already draws + labels the gray streets, so this overlay NEVER redraws them.
- * It draws only: congestion stroke on the study corridor, queue bars, moving
- * vehicle glyphs, peds/cyclists, signal heads, the parcel highlight (fallback /
- * after side), and proposed-improvement rings. The "angled" preset tilts ONLY
- * this overlay via a CSS transform; the basemap stays flat.
+ * single canvas overlay sits exactly over the Leaflet container (same
+ * size/origin), so there is NO camera matrix — Leaflet's pan/zoom IS the
+ * camera. The basemap already draws + labels the gray streets, so this overlay
+ * NEVER redraws them. It draws only: congestion stroke on the study corridor,
+ * queue bars, moving vehicle glyphs, peds/cyclists, the parcel highlight
+ * (fallback only), and proposed-improvement rings. The Existing/Proposed toggle
+ * just swaps which traffic overlay is drawn over the one live basemap.
  * ==========================================================================*/
 (function () {
   "use strict";
@@ -46,16 +46,6 @@
     b.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   function resizeAll() { Object.keys(bindings).forEach(resize); }
-
-  /* The angled preset tilts the overlay element only (basemap stays flat). */
-  function applyOverlayTransform(side) {
-    var b = bindings[side];
-    if (!b) return;
-    var angled = (TS.config && TS.config.preset) === "angled";
-    b.canvas.style.transform = angled ? "perspective(900px) rotateX(13deg)" : "";
-    b.canvas.style.transformOrigin = "bottom center";
-  }
-  function applyAllTransforms() { Object.keys(bindings).forEach(applyOverlayTransform); }
 
   /* ---- color helpers ---- */
   function congestionColor(frac) {
@@ -160,26 +150,6 @@
   var _stopIdx = null;
   function state2(name) { return _stopIdx ? _stopIdx[name] : null; }
 
-  function drawSignals(ctx, state, side) {
-    if (!state || !proj) return;
-    drawSignalHead(ctx, proj.intersection, state.signals.mainX.phase);
-    if (sideShowsAfter(side)) {
-      var h = proj.hotspots && proj.hotspots["hs-newSignal"];
-      if (h) drawSignalHead(ctx, h, state.signals.driveway.phase);
-    }
-  }
-  function drawSignalHead(ctx, p, phase) {
-    if (!p) return;
-    ctx.save();
-    ctx.fillStyle = "#2a2a28";
-    roundRect(ctx, p[0] - 5, p[1] - 22, 10, 24, 3); ctx.fill();
-    ctx.fillStyle = phase === "red" ? COL.severe : "#3a3a36";
-    ctx.beginPath(); ctx.arc(p[0], p[1] - 16, 3.2, 0, 7); ctx.fill();
-    ctx.fillStyle = phase === "green" ? COL.free : "#3a3a36";
-    ctx.beginPath(); ctx.arc(p[0], p[1] - 4, 3.2, 0, 7); ctx.fill();
-    ctx.restore();
-  }
-
   function drawTurning(ctx) {
     if (!proj) return;
     var c = proj.intersection;
@@ -211,20 +181,19 @@
 
   function drawProposed(ctx, side) {
     if (!sideShowsAfter(side) || !proj || !proj.hotspots) return;
-    ["hs-newSignal", "hs-turnLane", "hs-driveway"].forEach(function (id) {
+    ["hs-siteAccess", "hs-turnLane", "hs-driveway"].forEach(function (id) {
       var p = proj.hotspots[id]; if (!p) return;
       ctx.save(); ctx.strokeStyle = COL.gold; ctx.lineWidth = 2; ctx.setLineDash([3, 3]);
       ctx.beginPath(); ctx.arc(p[0], p[1], 13, 0, 7); ctx.stroke(); ctx.restore();
     });
   }
 
-  /* Parcel highlight: Leaflet draws it on the live (left/before) basemap. We
-     only need a canvas parcel where there is NO live basemap behind the stage:
-     the synthetic split-after panel, or the whole fallback (no Leaflet) case. */
+  /* Parcel highlight: Leaflet draws it on the live basemap. We only need a
+     canvas parcel where there is NO live basemap behind the stage: the
+     fallback (no Leaflet) case. */
   function drawParcel(ctx, side) {
     if (!proj || !proj.site) return;
-    var liveBasemap = mapAvailable() && !(TS.config.mode === "split" && side === "after");
-    if (liveBasemap) return; // Leaflet polygon already shows it
+    if (mapAvailable()) return; // Leaflet polygon already shows it
     var s = proj.site;
     // Box roughly south of the frontage; size in px scaled from intersection dist.
     var scale = 1;
@@ -269,30 +238,20 @@
   }
 
   function sideShowsAfter(side) {
-    if (TS.config.mode === "split") return side === "after";
     return TS.config.side === "after";
   }
 
-  /* Which PHYSICAL canvas binding renders a given logical side. In split, the
-     two physical canvases map 1:1. In toggle there is one visible canvas
-     (#ts-canvas-before), so the active side renders into "before". */
-  function physicalFor(side) {
-    if (TS.config.mode === "split") return side;
-    return "before";
-  }
-
-  /* In split mode the AFTER panel has no live Leaflet basemap behind it, so we
-     paint a tinted paper background + fallback roads to read as a second panel.
-     The toggle/before stage stays transparent so the Leaflet map shows. */
+  /* Single canvas overlay (#ts-canvas-before) renders whichever side is toggled.
+     The Leaflet basemap shows through (overlay stays transparent) unless Leaflet
+     is unavailable, in which case we paint the paper fallback. */
   function drawFrame(state, layers, side) {
-    var b = bindings[physicalFor(side)];
+    var b = bindings["before"];
     if (!b) return;
     var ctx = b.ctx;
     if (state && state.stopIdx) _stopIdx = state.stopIdx;
     ctx.clearRect(0, 0, b.w, b.h);
 
-    var paintBg = !mapAvailable() || (TS.config.mode === "split" && side === "after");
-    if (paintBg) {
+    if (!mapAvailable()) {
       ctx.fillStyle = COL.paper; ctx.fillRect(0, 0, b.w, b.h);
       drawFallbackRoads(ctx);
     }
@@ -306,23 +265,13 @@
     if (layers.queues) drawQueues(ctx, state);
     drawVehicles(ctx, state);
     if (layers.pedCrossings || sideShowsAfter(side)) drawAgents(ctx, state);
-    if (layers.signals) drawSignals(ctx, state, side);
     if (layers.proposedImprovements) drawProposed(ctx, side);
   }
 
   function staticFrame() {
-    var sides = (TS.sim && TS.sim.activeSides) ? TS.sim.activeSides()
-      : (TS.config.mode === "split" ? ["before", "after"] : [TS.config.side]);
-    // Clear any physical canvas that won't be drawn this frame (e.g. the
-    // "after" canvas while in toggle mode) so stale pixels don't linger.
-    Object.keys(bindings).forEach(function (key) {
-      var willDraw = sides.some(function (s) { return physicalFor(s) === key; });
-      if (!willDraw) { var bb = bindings[key]; bb.ctx.clearRect(0, 0, bb.w, bb.h); }
-    });
-    sides.forEach(function (side) {
-      var state = TS.sim ? TS.sim.getState(side) : null;
-      drawFrame(state, TS.config.layers, side);
-    });
+    var side = (TS.sim && TS.sim.activeSides) ? TS.sim.activeSides()[0] : TS.config.side;
+    var state = TS.sim ? TS.sim.getState(side) : null;
+    drawFrame(state, TS.config.layers, side);
     if (TS.ui && TS.ui.syncMetrics && TS.sim) {
       TS.ui.syncMetrics(TS.sim.getMetrics("before"), TS.sim.getMetrics("after"));
     }
@@ -330,9 +279,8 @@
 
   TS.render = {
     init: init,
-    resize: function (side) { if (side) resize(side); else resizeAll(); applyAllTransforms(); },
+    resize: function (side) { if (side) resize(side); else resizeAll(); },
     setProjection: setProjection,
-    applyPresetTransform: applyAllTransforms,
     drawFrame: drawFrame,
     staticFrame: staticFrame,
     hasSide: function (side) { return !!bindings[side]; }
