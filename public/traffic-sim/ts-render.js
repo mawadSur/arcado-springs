@@ -1,76 +1,37 @@
 /* ============================================================================
  * Arcado Springs Traffic Simulator — RENDER (window.TS.render)
- * Canvas drawing in normalized 0..1 space mapped through a per-preset camera
- * matrix (scale/translate/skew faux-3D), recomputed ONLY on preset change or
- * resize — never per frame. One render binding per side (split = 2, toggle = 1).
- * CLS-safe: canvas width/height attrs derived from container; CSS reserves AR.
+ * Draws in CONTAINER PIXEL space using the projection cache from TS.map. The
+ * canvas overlay sits exactly over the Leaflet container (same size/origin),
+ * so there is NO camera matrix — Leaflet's pan/zoom IS the camera. The basemap
+ * already draws + labels the gray streets, so this overlay NEVER redraws them.
+ * It draws only: congestion stroke on the study corridor, queue bars, moving
+ * vehicle glyphs, peds/cyclists, signal heads, the parcel highlight (fallback /
+ * after side), and proposed-improvement rings. The "angled" preset tilts ONLY
+ * this overlay via a CSS transform; the basemap stays flat.
  * ==========================================================================*/
 (function () {
   "use strict";
   var TS = (window.TS = window.TS || {});
 
   var COL = {
-    ground: "#e9ede2", groundAlt: "#dfe5d6", road: "#7d8a6e", roadEdge: "#9aa888",
-    site: "rgba(47,93,58,.14)", siteStroke: "rgba(47,93,58,.55)", green: "#2F5D3A",
+    paper: "#F6F2EA", paperAlt: "#efe9dc",
+    fallbackRoad: "#c9cdbe", fallbackRoadEdge: "#b3b9a4",
+    site: "rgba(47,93,58,.14)", siteStroke: "#B08D57", green: "#2F5D3A",
     gold: "#B08D57", ink: "#3a4231",
     free: "#16a34a", moderate: "#eab308", heavy: "#f97316", severe: "#dc2626"
   };
 
-  var bindings = {}; // side -> {canvas, ctx, dpr, w, h, cam}
-  var nodeById = {};
-
-  function nodesReady() {
-    if (Object.keys(nodeById).length) return;
-    TS.DATA.nodes.forEach(function (n) { nodeById[n.id] = n; });
-  }
-  function node(id) { return nodeById[id]; }
+  var bindings = {}; // side -> {canvas, ctx, dpr, w, h}
+  var proj = null;   // shared projection cache
 
   function init(canvasEl, side) {
     if (!canvasEl) return;
-    nodesReady();
-    bindings[side] = {
-      canvas: canvasEl,
-      ctx: canvasEl.getContext("2d"),
-      dpr: 1, w: 0, h: 0,
-      cam: identityCam()
-    };
+    bindings[side] = { canvas: canvasEl, ctx: canvasEl.getContext("2d"), dpr: 1, w: 0, h: 0 };
     resize(side);
-    setPreset((TS.config && TS.config.preset) || "topdown");
   }
 
-  function identityCam() { return { sx: 1, sy: 1, tx: 0, ty: 0, skew: 0 }; }
-
-  /* Build a camera per preset. Normalized (0..1) -> pixel.
-     - topdown: fill canvas.
-     - angled: vertical compress + skew for faux-3D tilt + slight lift.
-     - intersectionZoom: zoom toward the main corner (0.8,0.46). */
-  function buildCam(b, presetId) {
-    var W = b.w, H = b.h;
-    var cam;
-    if (presetId === "angled") {
-      cam = { sx: W * 1.0, sy: H * 0.82, tx: 0, ty: H * 0.06, skew: 0.28 };
-    } else if (presetId === "intersectionZoom") {
-      var z = 2.0;
-      var fx = 0.8, fy = 0.46; // focus point in normalized space
-      cam = {
-        sx: W * z, sy: H * z,
-        tx: W * 0.5 - fx * W * z,
-        ty: H * 0.5 - fy * H * z,
-        skew: 0
-      };
-    } else {
-      cam = { sx: W, sy: H, tx: 0, ty: 0, skew: 0 };
-    }
-    return cam;
-  }
-
-  function project(b, x, y) {
-    var c = b.cam;
-    var px = x * c.sx + c.tx;
-    var py = y * c.sy + c.ty;
-    if (c.skew) px += (x - 0.5) * (0.5 - y) * c.skew * c.sx * 0.5; // faux perspective
-    return [px, py];
-  }
+  function setProjection(cache) { proj = cache; }
+  function mapAvailable() { return !!(TS.map && TS.map.isAvailable && TS.map.isAvailable()); }
 
   function resize(side) {
     var b = bindings[side];
@@ -83,37 +44,28 @@
     b.canvas.width = Math.round(b.w * dpr);
     b.canvas.height = Math.round(b.h * dpr);
     b.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    b.cam = buildCam(b, (TS.config && TS.config.preset) || "topdown");
   }
   function resizeAll() { Object.keys(bindings).forEach(resize); }
 
-  function setPreset(presetId) {
-    Object.keys(bindings).forEach(function (side) {
-      var b = bindings[side];
-      b.cam = buildCam(b, presetId);
-    });
+  /* The angled preset tilts the overlay element only (basemap stays flat). */
+  function applyOverlayTransform(side) {
+    var b = bindings[side];
+    if (!b) return;
+    var angled = (TS.config && TS.config.preset) === "angled";
+    b.canvas.style.transform = angled ? "perspective(900px) rotateX(13deg)" : "";
+    b.canvas.style.transformOrigin = "bottom center";
   }
+  function applyAllTransforms() { Object.keys(bindings).forEach(applyOverlayTransform); }
 
-  /* ---- drawing primitives ---- */
-  function edgePts(e) { return [node(e.from), node(e.to)]; }
-  function line(ctx, b, a1, a2, w, color, dash) {
-    var p1 = project(b, a1.x, a1.y), p2 = project(b, a2.x, a2.y);
-    ctx.save();
-    ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = "round"; ctx.lineJoin = "round";
-    if (dash) ctx.setLineDash(dash); else ctx.setLineDash([]);
-    ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.stroke();
-    ctx.restore();
-  }
-
+  /* ---- color helpers ---- */
   function congestionColor(frac) {
-    // frac 0..1 : 0 free, 1 severe
     var stops = [COL.free, COL.moderate, COL.heavy, COL.severe];
     var seg = Math.min(0.999, Math.max(0, frac)) * (stops.length - 1);
     var i = seg | 0, t = seg - i;
     return mix(stops[i], stops[i + 1] || stops[i], t);
   }
   function vehColor(v, base) {
-    var r = Math.max(0, Math.min(1, v / base)); // 1 free -> 0 stopped
+    var r = Math.max(0, Math.min(1, base ? v / base : 1));
     return congestionColor(1 - r);
   }
   function mix(c1, c2, t) {
@@ -122,182 +74,6 @@
   }
   function hex(h) { var n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 
-  function drawGround(ctx, b) {
-    ctx.fillStyle = COL.ground;
-    ctx.fillRect(0, 0, b.w, b.h);
-  }
-
-  function drawRoads(ctx, b, layers) {
-    TS.DATA.edges.forEach(function (e) {
-      if (e.cls === "ped-path") return;
-      if (e.afterOnly && !showAfter()) return;
-      if ((e.cls === "internal" || e.cls === "site-access" || e.cls === "turn-bay") && !showAfter()) return;
-      var w = e.cls === "major-arterial" ? 12 : e.cls === "arterial" ? 11 : e.cls === "internal" ? 6 : 8;
-      line(ctx, b, node(e.from), node(e.to), w, COL.road);
-    });
-    // center dashes on the arterial spine
-    ["e3", "e4", "e5", "e6", "e7", "e8", "e9"].forEach(function (id) {
-      var e = findEdge(id); if (e) line(ctx, b, node(e.from), node(e.to), 1.5, COL.roadEdge, [6, 8]);
-    });
-  }
-
-  function drawSiteFootprint(ctx, b, layers) {
-    // Town-center block
-    var nw = node("d1"), se = node("d3");
-    var p1 = project(b, nw.x - 0.04, nw.y - 0.06), p2 = project(b, se.x + 0.06, se.y + 0.06);
-    ctx.save();
-    ctx.fillStyle = COL.site; ctx.strokeStyle = COL.siteStroke; ctx.lineWidth = 1.5;
-    roundRect(ctx, p1[0], p1[1], p2[0] - p1[0], p2[1] - p1[1], 10);
-    ctx.fill(); ctx.stroke();
-    ctx.restore();
-    // plaza dot
-    var pl = node("plaza"), pp = project(b, pl.x, pl.y);
-    ctx.fillStyle = "rgba(47,93,58,.35)";
-    ctx.beginPath(); ctx.arc(pp[0], pp[1], 9, 0, 7); ctx.fill();
-    // project boundary (optional)
-    if (layers.projectBoundary) {
-      ctx.save();
-      ctx.strokeStyle = COL.gold; ctx.lineWidth = 2; ctx.setLineDash([8, 6]);
-      var b1 = project(b, 0.42, 0.62), b2 = project(b, 0.72, 0.94);
-      ctx.strokeRect(b1[0], b1[1], b2[0] - b1[0], b2[1] - b1[1]);
-      ctx.restore();
-    }
-  }
-
-  function drawCongestion(ctx, b, state) {
-    if (!state) return;
-    // Color the arterial spine by local density near each edge midpoint.
-    var spine = ["e3", "e4", "e5", "e6", "e9"];
-    spine.forEach(function (id) {
-      var e = findEdge(id); if (!e) return;
-      var a = node(e.from), c = node(e.to);
-      var mid = { x: (a.x + c.x) / 2, y: (a.y + c.y) / 2 };
-      // Use main-corner density as a proxy weighting by distance.
-      var mx = node("mainX");
-      var dm = Math.hypot(mid.x - mx.x, mid.y - mx.y);
-      var frac = Math.max(0, 1 - dm * 3.5) * Math.min(1, state.density.mainX / 14);
-      line(ctx, b, a, c, 13, congestionColor(frac), null);
-    });
-  }
-
-  function drawQueues(ctx, b, state) {
-    if (!state) return;
-    // Stack little blocks back from the main stop bar proportional to queue.
-    var mx = node("mainX");
-    var qE = Math.min(10, state.queues.qhot1);
-    for (var i = 0; i < qE; i++) {
-      var x = mx.x - 0.03 - i * 0.018;
-      var p = project(b, x, mx.y - 0.012);
-      ctx.fillStyle = COL.severe;
-      roundRect(ctx, p[0] - 4, p[1] - 3, 8, 6, 1.5); ctx.fill();
-    }
-    var qN = Math.min(8, state.queues.qhot2);
-    for (var j = 0; j < qN; j++) {
-      var y = mx.y - 0.03 - j * 0.018;
-      var pn = project(b, mx.x + 0.012, y);
-      ctx.fillStyle = COL.heavy;
-      roundRect(ctx, pn[0] - 3, pn[1] - 4, 6, 8, 1.5); ctx.fill();
-    }
-  }
-
-  function drawSignals(ctx, b, state) {
-    if (!state) return;
-    drawSignalHead(ctx, b, node("mainX"), state.signals.mainX.phase);
-    if (showAfter()) drawSignalHead(ctx, b, node("drivewayJ"), state.signals.driveway.phase);
-  }
-  function drawSignalHead(ctx, b, n, phase) {
-    var p = project(b, n.x, n.y - 0.05);
-    ctx.save();
-    ctx.fillStyle = "#2a2a28";
-    roundRect(ctx, p[0] - 5, p[1] - 12, 10, 24, 3); ctx.fill();
-    ctx.fillStyle = phase === "red" ? COL.severe : "#3a3a36";
-    ctx.beginPath(); ctx.arc(p[0], p[1] - 6, 3.2, 0, 7); ctx.fill();
-    ctx.fillStyle = phase === "green" ? COL.free : "#3a3a36";
-    ctx.beginPath(); ctx.arc(p[0], p[1] + 6, 3.2, 0, 7); ctx.fill();
-    ctx.restore();
-  }
-
-  function drawTurning(ctx, b) {
-    var mx = node("mainX");
-    arrow(ctx, b, mx.x - 0.06, mx.y - 0.01, mx.x - 0.02, mx.y - 0.01);
-    arrow(ctx, b, mx.x - 0.04, mx.y - 0.02, mx.x - 0.04, mx.y - 0.06);
-    arrow(ctx, b, mx.x + 0.01, mx.y - 0.04, mx.x + 0.05, mx.y - 0.04);
-  }
-  function arrow(ctx, b, x1, y1, x2, y2) {
-    var p1 = project(b, x1, y1), p2 = project(b, x2, y2);
-    ctx.save(); ctx.strokeStyle = COL.gold; ctx.fillStyle = COL.gold; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.stroke();
-    var a = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
-    ctx.beginPath(); ctx.moveTo(p2[0], p2[1]);
-    ctx.lineTo(p2[0] - 6 * Math.cos(a - 0.4), p2[1] - 6 * Math.sin(a - 0.4));
-    ctx.lineTo(p2[0] - 6 * Math.cos(a + 0.4), p2[1] - 6 * Math.sin(a + 0.4));
-    ctx.closePath(); ctx.fill(); ctx.restore();
-  }
-
-  function drawPedCrossings(ctx, b) {
-    [node("pedX1"), node("pedX2")].forEach(function (n) {
-      var p = project(b, n.x, n.y);
-      ctx.save(); ctx.strokeStyle = "#f4efe4"; ctx.lineWidth = 2;
-      for (var i = -2; i <= 2; i++) {
-        ctx.beginPath(); ctx.moveTo(p[0] + i * 3, p[1] - 8); ctx.lineTo(p[0] + i * 3, p[1] + 8); ctx.stroke();
-      }
-      ctx.restore();
-    });
-  }
-
-  function drawProposed(ctx, b) {
-    if (!showAfter()) return;
-    // Highlight new signal + turn lane + crossings with gold rings.
-    [node("drivewayJ"), node("turnLaneBay"), node("pedX1")].forEach(function (n) {
-      var p = project(b, n.x, n.y);
-      ctx.save(); ctx.strokeStyle = COL.gold; ctx.lineWidth = 2; ctx.setLineDash([3, 3]);
-      ctx.beginPath(); ctx.arc(p[0], p[1], 13, 0, 7); ctx.stroke(); ctx.restore();
-    });
-  }
-
-  function routeLen(pts) { var L = 0; for (var i = 1; i < pts.length; i++) L += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); return L; }
-  function pointAt(pts, d) {
-    var rem = d;
-    for (var i = 1; i < pts.length; i++) {
-      var a = pts[i - 1], c = pts[i], seg = Math.hypot(c.x - a.x, c.y - a.y);
-      if (rem <= seg || i === pts.length - 1) { var t = seg ? rem / seg : 0; return { x: a.x + (c.x - a.x) * t, y: a.y + (c.y - a.y) * t, a: Math.atan2(c.y - a.y, c.x - a.x) }; }
-      rem -= seg;
-    }
-    var last = pts[pts.length - 1]; return { x: last.x, y: last.y, a: 0 };
-  }
-
-  function drawVehicles(ctx, b, state) {
-    if (!state) return;
-    state.vehicles.forEach(function (veh) {
-      var q = pointAt(veh.route, veh.d);
-      var p = project(b, q.x, q.y);
-      var w = veh.kind === "bus" ? 16 : veh.kind === "truck" ? 14 : 11;
-      var h = veh.kind === "car" ? 6 : 7;
-      ctx.save(); ctx.translate(p[0], p[1]); ctx.rotate(q.a);
-      ctx.fillStyle = vehColor(veh.v, veh.base);
-      roundRect(ctx, -w / 2, -h / 2, w, h, 2); ctx.fill();
-      ctx.restore();
-    });
-  }
-  function drawAgents(ctx, b, state) {
-    if (!state) return;
-    state.cyclists.forEach(function (c) {
-      var q = pointAt(c.route, c.d), p = project(b, q.x, q.y);
-      ctx.fillStyle = COL.green;
-      ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, 7); ctx.fill();
-    });
-    state.peds.forEach(function (pd) {
-      var q = pointAt(pd.route, pd.d), p = project(b, q.x, q.y);
-      ctx.fillStyle = COL.gold;
-      ctx.beginPath(); ctx.arc(p[0], p[1], 2.6, 0, 7); ctx.fill();
-    });
-  }
-
-  function findEdge(id) { for (var i = 0; i < TS.DATA.edges.length; i++) if (TS.DATA.edges[i].id === id) return TS.DATA.edges[i]; return null; }
-  function showAfter() {
-    if (TS.config.mode === "split") return true; // after side drawn separately
-    return TS.config.side === "after";
-  }
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -308,59 +84,255 @@
     ctx.closePath();
   }
 
-  /* In split mode, each side must reflect its own before/after geometry even
-     though showAfter() is shared. We pass the side explicitly. */
-  function drawFrame(state, layers, side) {
-    var b = bindings[side];
-    if (!b) return;
-    var ctx = b.ctx;
-    var prevSide = TS.config._renderSide;
-    TS.config._renderSide = side; // used by showAfter via split awareness
-    ctx.clearRect(0, 0, b.w, b.h);
-    drawGround(ctx, b);
-    drawRoads(ctx, b, layers);
-    if (sideShowsAfter(side)) drawSiteFootprint(ctx, b, layers);
-    else if (layers.projectBoundary) drawSiteFootprint(ctx, b, layers);
-    if (layers.congestion) drawCongestion(ctx, b, state);
-    if (layers.pedCrossings) drawPedCrossings(ctx, b);
-    if (layers.turningMovements) drawTurning(ctx, b);
-    if (layers.queues) drawQueues(ctx, b, state);
-    drawVehicles(ctx, b, state);
-    if (layers.pedCrossings || sideShowsAfter(side)) drawAgents(ctx, b, state);
-    if (layers.signals) drawSignals(ctx, b, state);
-    if (layers.proposedImprovements && sideShowsAfter(side)) drawProposed(ctx, b);
-    TS.config._renderSide = prevSide;
+  function pointAtPx(pts, d) {
+    if (!pts || pts.length < 2) return { x: 0, y: 0, angle: 0 };
+    var rem = d;
+    for (var i = 1; i < pts.length; i++) {
+      var a = pts[i - 1], b = pts[i], seg = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (rem <= seg || i === pts.length - 1) {
+        var t = seg ? rem / seg : 0;
+        return { x: a[0] + (b[0] - a[0]) * t, y: a[1] + (b[1] - a[1]) * t, angle: Math.atan2(b[1] - a[1], b[0] - a[0]) };
+      }
+      rem -= seg;
+    }
+    var last = pts[pts.length - 1];
+    return { x: last[0], y: last[1], angle: 0 };
+  }
+  function strokePoly(ctx, pts, w, color, dash) {
+    if (!pts || pts.length < 2) return;
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.setLineDash(dash || []);
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.stroke();
+    ctx.restore();
   }
 
-  // Side-aware after check used while drawing a specific canvas.
+  function roadPts(name) { return proj && proj.roads ? proj.roads[name] : null; }
+
+  /* When Leaflet is blocked there is no basemap, so draw the real-shaped roads
+     ourselves on the paper background (gray, like the reference) — ONLY then. */
+  function drawFallbackRoads(ctx) {
+    if (mapAvailable() || !proj) return;
+    var order = ["Killian Hill Road", "Arcado Road", "Camp Creek Road", "Cole Drive"];
+    order.forEach(function (name) {
+      var pts = roadPts(name); if (!pts) return;
+      var w = name === "Killian Hill Road" ? 11 : 8;
+      strokePoly(ctx, pts, w + 2, COL.fallbackRoadEdge);
+      strokePoly(ctx, pts, w, COL.fallbackRoad);
+    });
+  }
+
+  function drawCongestion(ctx, state) {
+    if (!state || !proj) return;
+    // Thin overlay stroke on the study corridor, colored by local density.
+    state.study.forEach(function (name) {
+      var pts = roadPts(name); if (!pts) return;
+      var frac = state.density && state.density[name] != null ? state.density[name] : 0;
+      ctx.globalAlpha = 0.62;
+      strokePoly(ctx, pts, 5, congestionColor(frac));
+      ctx.globalAlpha = 1;
+    });
+  }
+
+  function drawQueues(ctx, state) {
+    if (!state || !proj) return;
+    drawQueueStack(ctx, "Arcado Road", state.queues.arcadoEB, COL.severe, 1);
+    drawQueueStack(ctx, "Killian Hill Road", state.queues.killianNBL, COL.heavy, 1);
+  }
+  function drawQueueStack(ctx, name, count, color, dir) {
+    var pts = roadPts(name); if (!pts || !state2(name)) return;
+    var sb = state2(name);
+    var n = Math.min(10, count);
+    for (var i = 0; i < n; i++) {
+      var d = sb - (8 + i * 9) * dir;
+      var q = pointAtPx(pts, d);
+      ctx.save();
+      ctx.translate(q.x, q.y); ctx.rotate(q.angle);
+      ctx.fillStyle = color;
+      roundRect(ctx, -4, -2.5, 8, 5, 1.4); ctx.fill();
+      ctx.restore();
+    }
+  }
+  // stop-bar distance lookup (shared with sim cache via state)
+  var _stopIdx = null;
+  function state2(name) { return _stopIdx ? _stopIdx[name] : null; }
+
+  function drawSignals(ctx, state, side) {
+    if (!state || !proj) return;
+    drawSignalHead(ctx, proj.intersection, state.signals.mainX.phase);
+    if (sideShowsAfter(side)) {
+      var h = proj.hotspots && proj.hotspots["hs-newSignal"];
+      if (h) drawSignalHead(ctx, h, state.signals.driveway.phase);
+    }
+  }
+  function drawSignalHead(ctx, p, phase) {
+    if (!p) return;
+    ctx.save();
+    ctx.fillStyle = "#2a2a28";
+    roundRect(ctx, p[0] - 5, p[1] - 22, 10, 24, 3); ctx.fill();
+    ctx.fillStyle = phase === "red" ? COL.severe : "#3a3a36";
+    ctx.beginPath(); ctx.arc(p[0], p[1] - 16, 3.2, 0, 7); ctx.fill();
+    ctx.fillStyle = phase === "green" ? COL.free : "#3a3a36";
+    ctx.beginPath(); ctx.arc(p[0], p[1] - 4, 3.2, 0, 7); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawTurning(ctx) {
+    if (!proj) return;
+    var c = proj.intersection;
+    arrow(ctx, c[0] - 34, c[1] + 8, c[0] - 8, c[1] + 8);
+    arrow(ctx, c[0] - 18, c[1] - 6, c[0] - 18, c[1] - 30);
+    arrow(ctx, c[0] + 6, c[1] - 18, c[0] + 30, c[1] - 18);
+  }
+  function arrow(ctx, x1, y1, x2, y2) {
+    ctx.save(); ctx.strokeStyle = COL.gold; ctx.fillStyle = COL.gold; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    var a = Math.atan2(y2 - y1, x2 - x1);
+    ctx.beginPath(); ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 6 * Math.cos(a - 0.4), y2 - 6 * Math.sin(a - 0.4));
+    ctx.lineTo(x2 - 6 * Math.cos(a + 0.4), y2 - 6 * Math.sin(a + 0.4));
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+
+  function drawPedCrossings(ctx) {
+    if (!proj || !proj.hotspots) return;
+    ["hs-pedCrossing", "hs-driveway"].forEach(function (id) {
+      var p = proj.hotspots[id]; if (!p) return;
+      ctx.save(); ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.globalAlpha = 0.95;
+      for (var i = -2; i <= 2; i++) {
+        ctx.beginPath(); ctx.moveTo(p[0] + i * 3, p[1] - 7); ctx.lineTo(p[0] + i * 3, p[1] + 7); ctx.stroke();
+      }
+      ctx.restore();
+    });
+  }
+
+  function drawProposed(ctx, side) {
+    if (!sideShowsAfter(side) || !proj || !proj.hotspots) return;
+    ["hs-newSignal", "hs-turnLane", "hs-driveway"].forEach(function (id) {
+      var p = proj.hotspots[id]; if (!p) return;
+      ctx.save(); ctx.strokeStyle = COL.gold; ctx.lineWidth = 2; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.arc(p[0], p[1], 13, 0, 7); ctx.stroke(); ctx.restore();
+    });
+  }
+
+  /* Parcel highlight: Leaflet draws it on the live (left/before) basemap. We
+     only need a canvas parcel where there is NO live basemap behind the stage:
+     the synthetic split-after panel, or the whole fallback (no Leaflet) case. */
+  function drawParcel(ctx, side) {
+    if (!proj || !proj.site) return;
+    var liveBasemap = mapAvailable() && !(TS.config.mode === "split" && side === "after");
+    if (liveBasemap) return; // Leaflet polygon already shows it
+    var s = proj.site;
+    // Box roughly south of the frontage; size in px scaled from intersection dist.
+    var scale = 1;
+    if (proj.intersection) scale = Math.max(0.6, Math.min(2.2, Math.hypot(proj.intersection[0] - s[0], proj.intersection[1] - s[1]) / 160));
+    var hw = 46 * scale, hh = 34 * scale;
+    var cx = s[0] - 8 * scale, cy = s[1] + 26 * scale;
+    ctx.save();
+    ctx.fillStyle = COL.site; ctx.strokeStyle = COL.siteStroke; ctx.lineWidth = 2;
+    roundRect(ctx, cx - hw, cy - hh, hw * 2, hh * 2, 8);
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawVehicles(ctx, state) {
+    if (!state || !proj) return;
+    state.vehicles.forEach(function (veh) {
+      var pts = roadPts(veh.roadKey); if (!pts) return;
+      var q = pointAtPx(pts, veh.d);
+      var w = veh.kind === "bus" ? 13 : veh.kind === "truck" ? 11 : 8;
+      var h = veh.kind === "car" ? 5 : 6;
+      var ang = q.angle + (veh.dir < 0 ? Math.PI : 0);
+      ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(ang);
+      ctx.fillStyle = veh.study ? vehColor(veh.v, veh.base) : "#8a93a6";
+      roundRect(ctx, -w / 2, -h / 2, w, h, 1.8); ctx.fill();
+      ctx.restore();
+    });
+  }
+  function drawAgents(ctx, state) {
+    if (!state || !proj) return;
+    state.cyclists.forEach(function (c) {
+      var pts = roadPts(c.roadKey); if (!pts) return;
+      var q = pointAtPx(pts, c.d);
+      ctx.fillStyle = COL.green;
+      ctx.beginPath(); ctx.arc(q.x, q.y, 3, 0, 7); ctx.fill();
+    });
+    state.peds.forEach(function (pd) {
+      var pts = roadPts(pd.roadKey); if (!pts) return;
+      var q = pointAtPx(pts, pd.d);
+      ctx.fillStyle = COL.gold;
+      ctx.beginPath(); ctx.arc(q.x, q.y, 2.6, 0, 7); ctx.fill();
+    });
+  }
+
   function sideShowsAfter(side) {
     if (TS.config.mode === "split") return side === "after";
     return TS.config.side === "after";
   }
-  // Override showAfter to consult the side currently rendering.
-  showAfter = function () {
-    var side = TS.config._renderSide;
-    if (!side) {
-      if (TS.config.mode === "split") return true;
-      return TS.config.side === "after";
+
+  /* Which PHYSICAL canvas binding renders a given logical side. In split, the
+     two physical canvases map 1:1. In toggle there is one visible canvas
+     (#ts-canvas-before), so the active side renders into "before". */
+  function physicalFor(side) {
+    if (TS.config.mode === "split") return side;
+    return "before";
+  }
+
+  /* In split mode the AFTER panel has no live Leaflet basemap behind it, so we
+     paint a tinted paper background + fallback roads to read as a second panel.
+     The toggle/before stage stays transparent so the Leaflet map shows. */
+  function drawFrame(state, layers, side) {
+    var b = bindings[physicalFor(side)];
+    if (!b) return;
+    var ctx = b.ctx;
+    if (state && state.stopIdx) _stopIdx = state.stopIdx;
+    ctx.clearRect(0, 0, b.w, b.h);
+
+    var paintBg = !mapAvailable() || (TS.config.mode === "split" && side === "after");
+    if (paintBg) {
+      ctx.fillStyle = COL.paper; ctx.fillRect(0, 0, b.w, b.h);
+      drawFallbackRoads(ctx);
     }
-    return sideShowsAfter(side);
-  };
+
+    if (sideShowsAfter(side)) drawParcel(ctx, side);
+    else if (layers.projectBoundary) drawParcel(ctx, side);
+
+    if (layers.congestion) drawCongestion(ctx, state);
+    if (layers.pedCrossings) drawPedCrossings(ctx);
+    if (layers.turningMovements) drawTurning(ctx);
+    if (layers.queues) drawQueues(ctx, state);
+    drawVehicles(ctx, state);
+    if (layers.pedCrossings || sideShowsAfter(side)) drawAgents(ctx, state);
+    if (layers.signals) drawSignals(ctx, state, side);
+    if (layers.proposedImprovements) drawProposed(ctx, side);
+  }
 
   function staticFrame() {
-    Object.keys(bindings).forEach(function (side) {
+    var sides = (TS.sim && TS.sim.activeSides) ? TS.sim.activeSides()
+      : (TS.config.mode === "split" ? ["before", "after"] : [TS.config.side]);
+    // Clear any physical canvas that won't be drawn this frame (e.g. the
+    // "after" canvas while in toggle mode) so stale pixels don't linger.
+    Object.keys(bindings).forEach(function (key) {
+      var willDraw = sides.some(function (s) { return physicalFor(s) === key; });
+      if (!willDraw) { var bb = bindings[key]; bb.ctx.clearRect(0, 0, bb.w, bb.h); }
+    });
+    sides.forEach(function (side) {
       var state = TS.sim ? TS.sim.getState(side) : null;
       drawFrame(state, TS.config.layers, side);
     });
-    if (TS.ui && TS.ui.syncMetrics) {
+    if (TS.ui && TS.ui.syncMetrics && TS.sim) {
       TS.ui.syncMetrics(TS.sim.getMetrics("before"), TS.sim.getMetrics("after"));
     }
   }
 
   TS.render = {
     init: init,
-    resize: function (side) { if (side) resize(side); else resizeAll(); },
-    setPreset: setPreset,
+    resize: function (side) { if (side) resize(side); else resizeAll(); applyAllTransforms(); },
+    setProjection: setProjection,
+    applyPresetTransform: applyAllTransforms,
     drawFrame: drawFrame,
     staticFrame: staticFrame,
     hasSide: function (side) { return !!bindings[side]; }

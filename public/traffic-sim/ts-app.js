@@ -40,9 +40,20 @@
       _renderSide: null
     };
 
-    // 3. Map (graceful if Leaflet missing).
+    // 3. Map (graceful if Leaflet missing). Leaflet IS the coordinate system;
+    //    it builds the projection cache (real lat/lng -> container pixels).
     var mapOk = false;
     try { mapOk = TS.map.init("ts-map"); } catch (e) { mapOk = false; }
+
+    // Re-projection lifecycle: latLngToContainerPoint runs ONLY inside the map's
+    // projectAll(), which fires on init / resize / preset change. Every fire
+    // hands the fresh pixel cache to sim + render; the rAF loop reads cache only.
+    if (TS.map.onReproject) {
+      TS.map.onReproject(function (cache) {
+        if (TS.sim && TS.sim.setProjection) TS.sim.setProjection(cache);
+        if (TS.render && TS.render.setProjection) TS.render.setProjection(cache);
+      });
+    }
 
     // 4. Render bindings — one per side.
     var cBefore = document.getElementById("ts-canvas-before");
@@ -50,7 +61,13 @@
     if (cBefore) TS.render.init(cBefore, "before");
     if (cAfter) TS.render.init(cAfter, "after");
 
-    // 5. Sim.
+    // Seed the render cache from the map's first projection (may be the
+    // synthetic affine fallback if Leaflet is blocked).
+    if (TS.render.setProjection && TS.map.getProjection) {
+      TS.render.setProjection(TS.map.getProjection());
+    }
+
+    // 5. Sim (reads the projection cache to build pixel polylines).
     TS.sim.init();
 
     // 6. UI.
@@ -66,9 +83,12 @@
     // Also wire the in-page hotspot button list (works with or without Leaflet).
     wireHotspotButtons();
 
-    // Keep canvases sized to their containers (CLS-safe + crisp).
+    // Keep canvases sized to their containers (CLS-safe + crisp). On resize:
+    // invalidateSize -> projectAll (re-projection event) -> resize canvases.
     if (TS.map.onResize) TS.map.onResize(function () { TS.render.resize(); });
     window.addEventListener("resize", debounce(function () {
+      if (TS.map.notifyResize) TS.map.notifyResize(); // invalidateSize + reproject
+      else TS.render.resize();
       TS.render.resize();
       if (!TS.config.playing || TS.config.reducedMotion) TS.render.staticFrame();
     }, 150));
@@ -89,6 +109,10 @@
       TS.render.staticFrame();
     } else {
       TS.sim.start();
+      // Paint one representative frame immediately so the canvas is not blank
+      // if the IntersectionObserver pauses the loop before the first rAF tick
+      // (e.g. section below the fold on first load).
+      TS.render.staticFrame();
     }
   }
 

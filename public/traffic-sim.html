@@ -66,11 +66,8 @@
       <p>Every number here is an illustrative planning-model estimate (ITE-style trip generation with mixed-use internal capture and walk-mode trip reduction). It is <strong>not</strong> a measured or sealed traffic study, and the level-of-service grades are not an official LOS determination.</p>
     </div>
 
-    <!-- Locked satellite basemap (Leaflet + Esri). Sim runs even if this fails. -->
-    <div class="card" style="margin:1.2rem 0">
-      <div id="ts-map" role="img" aria-label="Locked satellite map of the Arcado Road site in Lilburn, Georgia, centered on the proposed Arcado Springs development."></div>
-      <p class="map-cap"><span class="mono">Satellite</span> Real aerial imagery &copy; Esri, Maxar, Earthstar Geographics. View is fixed per camera preset; the animated traffic runs in the canvas below.</p>
-    </div>
+    <!-- Honest framing of the basemap source (license requires attribution). -->
+    <p class="map-cap map-cap--top"><span class="mono">Street map</span> Locked light street basemap &copy; OpenStreetMap, &copy; CARTO, framed on the real site at 4541 Arcado Rd SW and the Killian Hill Road signal. The animated traffic below follows these same real road lines.</p>
 
     <!-- Controls -->
     <div class="sim-controls">
@@ -105,17 +102,22 @@
       <button class="btn" type="button" data-cam="intersectionZoom" aria-pressed="false">Key-intersection zoom</button>
     </div>
 
-    <!-- Canvas stage: split = two, toggle = one (after hidden via CSS) -->
+    <!-- Stage: ONE locked Leaflet map (#ts-map) is the basemap + projection
+         source, behind the canvas overlays. The overlay canvases sit exactly
+         over the map (same size/origin) and follow the projected real roads.
+         Split = two side-by-side panels (left over the live map, right a
+         tinted-paper panel sharing the same projection); toggle = one panel. -->
     <div class="sim-stages is-split" id="ts-stages">
+      <div id="ts-map" role="img" aria-label="Locked light street map of the Arcado Road corridor in Lilburn, Georgia."></div>
       <figure class="ts-stage" id="ts-stage-before">
         <span class="ts-stage-tag">Existing &middot; today</span>
-        <canvas id="ts-canvas-before" width="600" height="360" role="img"
-                aria-label="Animated traffic simulation of the existing Arcado Road corridor."></canvas>
+        <canvas id="ts-canvas-before" width="600" height="380" role="img"
+                aria-label="Animated traffic simulation of the existing Arcado Road corridor, following the real road lines."></canvas>
       </figure>
       <figure class="ts-stage" id="ts-stage-after">
         <span class="ts-stage-tag">Proposed &middot; Arcado Springs</span>
-        <canvas id="ts-canvas-after" width="600" height="360" role="img"
-                aria-label="Animated traffic simulation of the proposed Arcado Springs build-out."></canvas>
+        <canvas id="ts-canvas-after" width="600" height="380" role="img"
+                aria-label="Animated traffic simulation of the proposed Arcado Springs build-out, following the real road lines."></canvas>
       </figure>
     </div>
 
@@ -212,8 +214,8 @@
         <ul>
           <li>Demand &amp; capacity from a calibrated HCM/Synchro model; queues and delay exported per scenario.</li>
           <li>A microsimulation engine (VISSIM or open-source SUMO) for vehicle-level dynamics and signal coordination.</li>
-          <li>Geospatial basemap (this page uses Leaflet + Esri World Imagery), with the network as a node/edge graph.</li>
-          <li>A lightweight canvas/WebGL renderer for the animated agents, decoupled from the basemap reprojection.</li>
+          <li>Geospatial basemap (this page uses Leaflet + a CARTO/OpenStreetMap light street basemap), with the real road network as projected lat/lng polylines.</li>
+          <li>A lightweight canvas overlay for the animated agents, decoupled from and re-projected against the locked basemap.</li>
           <li>Outputs reviewed and sealed by a licensed traffic engineer before any official LOS determination.</li>
         </ul>
       </div>
@@ -264,7 +266,7 @@
 
   <!-- ===================== FOOTER ===================== -->
   <footer class="site-footer"><div class="wrap">
-    <p class="disclaimer"><strong>This is an illustrative simulation, not a traffic study.</strong> Vehicle counts and movements are schematic and the metrics are planning-model estimates, not measured data or an official level-of-service determination. The relationships it shows are grounded in published research: walkable mixed-use sites internalize roughly 15&ndash;30% of trips (higher at the evening peak), and compact development cuts vehicle-miles-traveled by about 20&ndash;40% versus dispersed, single-use sprawl (ITE / NCHRP 684, the National Household Travel Survey, EPA Smart Growth, Ewing &amp; Cervero 2010). Satellite imagery &copy; Esri and partners. <a href="/">Return to the Arcado Springs overview &rarr;</a></p>
+    <p class="disclaimer"><strong>This is an illustrative simulation, not a traffic study.</strong> Vehicle counts and movements are schematic and the metrics are planning-model estimates, not measured data or an official level-of-service determination. The relationships it shows are grounded in published research: walkable mixed-use sites internalize roughly 15&ndash;30% of trips (higher at the evening peak), and compact development cuts vehicle-miles-traveled by about 20&ndash;40% versus dispersed, single-use sprawl (ITE / NCHRP 684, the National Household Travel Survey, EPA Smart Growth, Ewing &amp; Cervero 2010). Street basemap &copy; OpenStreetMap contributors, &copy; CARTO. <a href="/">Return to the Arcado Springs overview &rarr;</a></p>
   </div></footer>
 
   <!-- Leaflet (optional; sim runs even if this is blocked) -->

@@ -121,17 +121,16 @@ h2.sec { font-size: clamp(1.5rem, 3.4vw, 2.1rem); margin-bottom: .4rem; }
 .honesty-banner .mono { color: var(--accent2-ink); white-space: nowrap; padding-top: 2px; }
 .honesty-banner p { margin: 0; font-size: .9rem; }
 
-/* ---------- Map ---------- */
+/* ---------- Map / basemap ---------- */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
-#ts-map { height: min(46vh, 380px); width: 100%; background: #dfe3da; }
-#ts-map.map-unavailable { display: none; }
-.leaflet-container { font-family: var(--font-body); }
+.leaflet-container { font-family: var(--font-body); background: #eef1ec; }
 .ts-hotspot-icon { background: transparent; border: 0; }
 .ts-hotspot-dot {
   display: block; width: 14px; height: 14px; border-radius: 50%;
   background: var(--accent2); border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); cursor: pointer;
 }
 .map-cap { color: var(--muted); font-size: .84rem; padding: .7rem 1rem; border-top: 1px solid var(--line); }
+.map-cap--top { border-top: 0; border-bottom: 1px solid var(--line); padding: 0 0 .9rem; margin: 0 0 1rem; }
 
 /* ---------- Controls ---------- */
 .sim-controls { display: flex; flex-wrap: wrap; gap: .7rem; align-items: center; margin-bottom: 1rem; }
@@ -163,19 +162,62 @@ input[type="range"].ts-range { flex: 1; min-width: 180px; accent-color: var(--ac
 
 .cam-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
 
-/* ---------- Stage / canvases ---------- */
-.sim-stages { display: grid; gap: .8rem; }
-.sim-stages.is-split { grid-template-columns: 1fr; }
-@media (min-width: 760px) { .sim-stages.is-split { grid-template-columns: 1fr 1fr; } }
-.ts-stage {
-  position: relative; width: 100%; aspect-ratio: 1000 / 600; background: #e9ede2;
-  border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm);
+/* ---------- Stage / canvases ----------
+ * ONE Leaflet map (#ts-map) fills the stage and is the projection source +
+ * basemap. The overlay canvases sit exactly over it (same size/origin) and are
+ * clipped to their panel. Split = before (left half, over the live map) +
+ * after (right half, tinted-paper panel). Toggle = one full-width canvas. */
+.sim-stages {
+  position: relative; width: 100%; aspect-ratio: 1000 / 600;
+  border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow-sm); background: #eef1ec;
 }
-.ts-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* The map is the projection source + live basemap. It sits behind the BEFORE
+   stage: full-width in toggle, left half in split (the right half is the
+   paper "after" panel that shares the same half-width projection). */
+#ts-map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 0; }
+#ts-map.map-unavailable { display: none; }
+.ts-stage {
+  position: absolute; top: 0; bottom: 0; margin: 0; z-index: 1; pointer-events: none;
+}
+#ts-stage-before { left: 0; right: 0; }
+#ts-stage-after  { left: 0; right: 0; }
+/* Canvas overlays: pointer-events none so Leaflet keeps attribution + markers
+   interactive; hotspot clicks are handled by Leaflet divIcon markers. */
+.ts-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 .ts-stage-tag {
-  position: absolute; top: 10px; left: 10px; z-index: 2; font-family: var(--font-mono);
+  position: absolute; top: 10px; z-index: 3; font-family: var(--font-mono);
   font-size: .64rem; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px;
   border-radius: 999px; background: rgba(29, 26, 22, .72); color: #fff;
+}
+#ts-stage-before .ts-stage-tag { left: 10px; }
+#ts-stage-after .ts-stage-tag { right: 10px; }
+
+/* Split: map + before occupy the LEFT half; after occupies the RIGHT half
+   (tinted-paper panel). Each panel shows the FULL corridor at half width via
+   its own half-width projection. A hairline divider sits between them. */
+.sim-stages.is-split #ts-map { right: 50%; }
+.sim-stages.is-split #ts-stage-before { right: 50%; }
+.sim-stages.is-split #ts-stage-after  { left: 50%; }
+.sim-stages.is-split::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px;
+  margin-left: -1px; background: rgba(29,26,22,.22); z-index: 4; pointer-events: none;
+}
+
+/* Toggle: the BEFORE stage + map fill the whole frame; AFTER stage hidden. */
+#ts-stage-after[hidden] { display: none; }
+#ts-stage-before[hidden] { display: none; }
+
+/* Narrow screens (~<560px): side-by-side halves get too thin, so split stacks
+   vertically — map + before on top, after on the bottom. The stage grows
+   taller so each panel keeps a readable aspect. Both panels still share the
+   one (top-half) projection. */
+@media (max-width: 560px) {
+  .sim-stages.is-split { aspect-ratio: 1000 / 900; }
+  .sim-stages.is-split #ts-map { right: 0; bottom: 50%; }
+  .sim-stages.is-split #ts-stage-before { right: 0; bottom: 50%; }
+  .sim-stages.is-split #ts-stage-after  { left: 0; top: 50%; }
+  .sim-stages.is-split::after { top: 50%; left: 0; right: 0; bottom: auto; width: auto; height: 2px; margin-left: 0; margin-top: -1px; }
 }
 
 /* ---------- Legend ---------- */
