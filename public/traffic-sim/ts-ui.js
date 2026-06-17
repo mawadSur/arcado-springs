@@ -1,8 +1,8 @@
 /* ============================================================================
  * Arcado Springs Traffic Simulator — UI (window.TS.ui)
- * Wires scenario picker, mode (split/toggle), before/after toggle, play/pause,
- * timeline slider, layer checkboxes, hotspot popups, metric cards. Full
- * keyboard operability + ARIA. Honesty label sits beside the metrics.
+ * Wires scenario picker, the single Existing/Proposed before/after toggle,
+ * play/pause, timeline slider, layer checkboxes, hotspot popups, metric cards.
+ * Full keyboard operability + ARIA. Honesty label sits beside the metrics.
  * ==========================================================================*/
 (function () {
   "use strict";
@@ -26,28 +26,24 @@
     buildLayerToggles();
     buildMetricCards();
     wireControls();
-    applyModeUI();
+    updateSideUI();
     setScenarioLabel();
     requestPlayStateUI();
   }
 
   function cacheEls() {
     els.scenario = $("ts-scenario");
-    els.modeSplit = $("ts-mode-split");
-    els.modeToggle = $("ts-mode-toggle");
     els.sideGroup = $("ts-side-group");
     els.sideBefore = $("ts-side-before");
     els.sideAfter = $("ts-side-after");
     els.play = $("ts-play");
     els.timeline = $("ts-timeline");
     els.timeLabel = $("ts-time-label");
-    els.cams = document.querySelectorAll("[data-cam]");
     els.layers = $("ts-layers");
     els.metrics = $("ts-metrics");
     els.scenarioPill = $("ts-scenario-pill");
     els.stages = $("ts-stages");
     els.stageBefore = $("ts-stage-before");
-    els.stageAfter = $("ts-stage-after");
     els.popup = $("ts-popup");
     els.popupTitle = $("ts-popup-title");
     els.popupBefore = $("ts-popup-before");
@@ -118,8 +114,6 @@
       rerenderStatic();
     });
 
-    if (els.modeSplit) els.modeSplit.addEventListener("click", function () { setMode("split"); });
-    if (els.modeToggle) els.modeToggle.addEventListener("click", function () { setMode("toggle"); });
     if (els.sideBefore) els.sideBefore.addEventListener("click", function () { setSide("before"); });
     if (els.sideAfter) els.sideAfter.addEventListener("click", function () { setSide("after"); });
 
@@ -129,46 +123,12 @@
       els.timeline.addEventListener("input", function () { setTimeFromSlider(); rerenderStatic(); });
     }
 
-    Array.prototype.forEach.call(els.cams, function (btn) {
-      btn.addEventListener("click", function () {
-        var p = btn.getAttribute("data-cam");
-        setPreset(p);
-        Array.prototype.forEach.call(els.cams, function (b) { b.setAttribute("aria-pressed", String(b === btn)); });
-      });
-    });
-
     if (els.popupClose) els.popupClose.addEventListener("click", closeHotspot);
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && els.popup && !els.popup.hidden) closeHotspot();
     });
   }
 
-  function setMode(m) {
-    TS.config.mode = m;
-    TS.sim.setMode(m);
-    applyModeUI();
-    rebindRenderers();
-    // Mode change can resize the stages; reproject + re-feed the render cache.
-    if (TS.map && TS.map.notifyResize) TS.map.notifyResize();
-    if (TS.render && TS.render.setProjection && TS.map && TS.map.getProjection) {
-      TS.render.setProjection(TS.map.getProjection());
-    }
-    setPreset(TS.config.preset);
-    rerenderStatic();
-  }
-  function applyModeUI() {
-    var split = TS.config.mode === "split";
-    if (els.stages) els.stages.classList.toggle("is-split", split);
-    if (els.modeSplit) els.modeSplit.setAttribute("aria-pressed", String(split));
-    if (els.modeToggle) els.modeToggle.setAttribute("aria-pressed", String(!split));
-    if (els.sideGroup) els.sideGroup.hidden = split;
-    if (els.stageAfter) els.stageAfter.hidden = !split;
-    if (els.stageBefore) {
-      var lbl = els.stageBefore.querySelector(".ts-stage-tag");
-      if (lbl) lbl.textContent = split ? "Existing · today" : (TS.config.side === "after" ? "Proposed · Arcado Springs" : "Existing · today");
-    }
-    if (!split) updateSideUI();
-  }
   function setSide(side) {
     TS.config.side = side;
     TS.sim.setSide(side);
@@ -182,15 +142,6 @@
       var lbl = els.stageBefore.querySelector(".ts-stage-tag");
       if (lbl) lbl.textContent = TS.config.side === "after" ? "Proposed · Arcado Springs" : "Existing · today";
     }
-  }
-
-  /* Renderers must be (re)bound when toggling split (2 canvases) vs toggle (1). */
-  function rebindRenderers() {
-    var cBefore = $("ts-canvas-before");
-    var cAfter = $("ts-canvas-after");
-    if (cBefore) TS.render.init(cBefore, "before");
-    if (TS.config.mode === "split" && cAfter) TS.render.init(cAfter, "after");
-    else if (cAfter) TS.render.init(cAfter, "after"); // keep bound; hidden by CSS
   }
 
   function togglePlay() {
@@ -208,17 +159,6 @@
       ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
       : '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
     els.play.innerHTML = icon + '<span>' + (playing ? "Pause" : "Play") + '</span>';
-  }
-
-  function setPreset(p) {
-    TS.config.preset = p;
-    // topdown/angled share the framed Leaflet view; intersectionZoom moves it.
-    // TS.map.setPreset reprojects (-> sim.setProjection + render.setProjection
-    // via the onReproject subscription registered in ts-app).
-    if (TS.map && TS.map.setPreset) TS.map.setPreset(p);
-    // The "angled" tilt is purely an overlay-canvas CSS transform (basemap flat).
-    if (TS.render && TS.render.applyPresetTransform) TS.render.applyPresetTransform();
-    rerenderStatic();
   }
 
   function setTimeFromSlider() {
@@ -364,9 +304,7 @@
     syncMetrics: syncMetrics,
     openHotspot: openHotspot,
     closeHotspot: closeHotspot,
-    setMode: setMode,
     setSide: setSide,
-    setPreset: setPreset,
     requestPlayStateUI: requestPlayStateUI,
     setScenarioLabel: setScenarioLabel,
     applyLayers: function () { buildLayerToggles(); },

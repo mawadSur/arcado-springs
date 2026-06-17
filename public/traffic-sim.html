@@ -59,7 +59,7 @@
   <!-- ===================== SIMULATION ===================== -->
   <section class="section-alt" id="ts-sim-section" aria-labelledby="ts-sim-title"><div class="wrap">
     <h2 class="sec" id="ts-sim-title">The corridor, simulated</h2>
-    <p class="sec-intro">Compare today's road (Existing) against the proposed build-out (Proposed). Vehicles are colored by how freely they move on the congestion scale &mdash; <span style="color:var(--accent);font-weight:600">green</span> free-flowing through <span style="color:#b91c1c;font-weight:600">red</span> stuck at the signal.</p>
+    <p class="sec-intro">Compare today's road (Existing) against the proposed build-out (Proposed). Vehicles are colored by how freely they move on the congestion scale &mdash; <span style="color:var(--accent);font-weight:600">green</span> free-flowing through <span style="color:#b91c1c;font-weight:600">red</span> stuck in the backup at the corner.</p>
 
     <div class="honesty-banner" role="note">
       <span class="mono">Illustrative model</span>
@@ -67,15 +67,11 @@
     </div>
 
     <!-- Honest framing of the basemap source (license requires attribution). -->
-    <p class="map-cap map-cap--top"><span class="mono">Street map</span> Locked light street basemap &copy; OpenStreetMap, &copy; CARTO, framed on the real site at 4541 Arcado Rd SW and the Killian Hill Road signal. The animated traffic below follows these same real road lines.</p>
+    <p class="map-cap map-cap--top"><span class="mono">Street map</span> Locked light street basemap &copy; OpenStreetMap, &copy; CARTO, framed on the real site at 4541 Arcado Rd SW and the Killian Hill Road junction. The animated traffic below follows these same real road lines.</p>
 
     <!-- Controls -->
     <div class="sim-controls">
-      <div class="segmented" role="group" aria-label="Display mode">
-        <button id="ts-mode-split" aria-pressed="true">Split screen</button>
-        <button id="ts-mode-toggle" aria-pressed="false">Before / after</button>
-      </div>
-      <div class="segmented" id="ts-side-group" role="group" aria-label="Choose scenario side" hidden>
+      <div class="segmented" id="ts-side-group" role="group" aria-label="Choose scenario side">
         <button id="ts-side-before" aria-pressed="false">Existing</button>
         <button id="ts-side-after" aria-pressed="true">Proposed</button>
       </div>
@@ -96,28 +92,17 @@
       <span class="time-readout" id="ts-time-label">8:00 AM</span>
     </div>
 
-    <div class="cam-row" role="group" aria-label="Camera presets">
-      <button class="btn" type="button" data-cam="topdown" aria-pressed="true">Top-down 2D</button>
-      <button class="btn" type="button" data-cam="angled" aria-pressed="false">Angled 3D</button>
-      <button class="btn" type="button" data-cam="intersectionZoom" aria-pressed="false">Key-intersection zoom</button>
-    </div>
-
     <!-- Stage: ONE locked Leaflet map (#ts-map) is the basemap + projection
-         source, behind the canvas overlays. The overlay canvases sit exactly
-         over the map (same size/origin) and follow the projected real roads.
-         Split = two side-by-side panels (left over the live map, right a
-         tinted-paper panel sharing the same projection); toggle = one panel. -->
-    <div class="sim-stages is-split" id="ts-stages">
+         source, behind the canvas overlay. The overlay canvas sits exactly
+         over the map (same size/origin) and follows the projected real roads.
+         The Existing/Proposed toggle swaps which traffic overlay is drawn over
+         the single live basemap. -->
+    <div class="sim-stages" id="ts-stages">
       <div id="ts-map" role="img" aria-label="Locked light street map of the Arcado Road corridor in Lilburn, Georgia."></div>
       <figure class="ts-stage" id="ts-stage-before">
-        <span class="ts-stage-tag">Existing &middot; today</span>
-        <canvas id="ts-canvas-before" width="600" height="380" role="img"
-                aria-label="Animated traffic simulation of the existing Arcado Road corridor, following the real road lines."></canvas>
-      </figure>
-      <figure class="ts-stage" id="ts-stage-after">
         <span class="ts-stage-tag">Proposed &middot; Arcado Springs</span>
-        <canvas id="ts-canvas-after" width="600" height="380" role="img"
-                aria-label="Animated traffic simulation of the proposed Arcado Springs build-out, following the real road lines."></canvas>
+        <canvas id="ts-canvas-before" width="600" height="380" role="img"
+                aria-label="Animated traffic simulation of the Arcado Road corridor, following the real road lines."></canvas>
       </figure>
     </div>
 
@@ -161,17 +146,17 @@
       <article class="story-card">
         <span class="step-num">THE ISSUE TODAY</span>
         <h3>Every errand is a drive</h3>
-        <p>Arcado Rd is a two-lane collector funneling subdivision and school traffic to one signalized corner with Killian Hill Rd. In today's single-use pattern, almost every trip becomes a car trip out to that busy corner, and the school and commute peaks pile it all into a few tight hours.</p>
+        <p>Arcado Rd is a two-lane collector funneling subdivision and school traffic to one busy corner with Killian Hill Rd. In today's single-use pattern, almost every trip becomes a car trip out to that busy corner, and the school and commute peaks pile it all into a few tight hours.</p>
       </article>
       <article class="story-card">
         <span class="step-num">WHAT CHANGES</span>
         <h3>Homes, shops, and dining on one walkable site</h3>
-        <p>When destinations sit together, a real share of trips start and end on-site or on foot. The build-out also organizes site access: one coordinated driveway, a new signal timed with the main corner, a dedicated left-turn lane, and protected pedestrian crossings.</p>
+        <p>When destinations sit together, a real share of trips start and end on-site or on foot. The build-out also organizes site access: one coordinated driveway, a dedicated left-turn lane, and protected pedestrian crossings &mdash; with the corner staying an unsignalized junction.</p>
       </article>
       <article class="story-card">
         <span class="step-num">HOW THE PATTERN SHIFTS</span>
         <h3>Fewer cars, and the rest keep moving</h3>
-        <p>Internal capture and walking remove trips at the source, so fewer cars ever reach the corner. The turn lane keeps the through lane clear, and the coordinated signal moves traffic in steady platoons instead of stop-and-go &mdash; so queues form later and clear faster.</p>
+        <p>Internal capture and walking remove trips at the source, so fewer cars ever reach the corner. The dedicated turn lane keeps the through lane clear, and managed site access lets turning traffic merge in predictable gaps instead of stop-and-go &mdash; so queues form later and clear faster.</p>
       </article>
       <article class="story-card">
         <span class="step-num">WHAT PEOPLE NOTICE</span>
@@ -196,7 +181,7 @@
           <li>ITE-style trip generation sets the baseline external demand per scenario and scales it over the time window (peak-of-peak mid-window).</li>
           <li>Mixed-use <strong>internal capture</strong> reduces external trips at the source &mdash; modeled at about 15&ndash;30% (roughly 30%+ at the PM peak), consistent with NCHRP Report 684.</li>
           <li>A <strong>walk/bike mode shift</strong> removes additional short trips entirely (about 7&ndash;10% here).</li>
-          <li>Supply-side fixes &mdash; a new coordinated signal and a dedicated left-turn bay &mdash; raise saturation flow and cut spillback. Lower demand plus higher capacity yields lower delay, shorter queues, higher throughput, and a better LOS grade.</li>
+          <li>Supply-side fixes &mdash; a dedicated left-turn bay and managed site access at one consolidated driveway &mdash; keep the through lane clear and cut spillback at the unsignalized junction. Lower demand plus higher effective capacity yields lower delay, shorter queues, higher throughput, and a better LOS grade.</li>
         </ul>
       </div>
       <div class="method-card">

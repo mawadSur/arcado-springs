@@ -1,8 +1,9 @@
 /* ============================================================================
  * Arcado Springs Traffic Simulator — APP (window.TS.boot orchestrator)
  * Strict init order on DOMContentLoaded. Freezes DATA, sets config defaults,
- * inits map -> render(s) -> sim -> ui -> presentation, attaches visibility +
- * IntersectionObserver pause logic, applies preset, starts (or static frame).
+ * inits map -> render -> sim -> ui -> presentation, attaches visibility +
+ * IntersectionObserver pause logic, sets scenario, starts (or static frame).
+ * Single framed top-down view; single canvas overlay; before/after toggle.
  * Runs last. Cross-module calls go only through documented methods.
  * ==========================================================================*/
 (function () {
@@ -29,9 +30,7 @@
     var reduced = detectReducedMotion();
     TS.config = {
       activeScenarioId: "am-peak",
-      mode: "split",
       side: "after",
-      preset: "topdown",
       playing: !reduced,
       timeT: 0.5,
       layers: defaultLayers(),
@@ -55,11 +54,9 @@
       });
     }
 
-    // 4. Render bindings — one per side.
+    // 4. Render binding — one canvas overlay over the single live basemap.
     var cBefore = document.getElementById("ts-canvas-before");
-    var cAfter = document.getElementById("ts-canvas-after");
     if (cBefore) TS.render.init(cBefore, "before");
-    if (cAfter) TS.render.init(cAfter, "after");
 
     // Seed the render cache from the map's first projection (may be the
     // synthetic affine fallback if Leaflet is blocked).
@@ -100,8 +97,8 @@
     });
     attachIntersectionObserver();
 
-    // 9. Apply preset + start (or freeze to static frame).
-    TS.ui.setPreset(TS.config.preset);
+    // 9. Apply scenario + start (or freeze to static frame). One fixed framed
+    //    top-down view is set by the map on init; there are no camera presets.
     TS.sim.setScenario(TS.config.activeScenarioId);
     if (reduced) {
       TS.config.playing = false;

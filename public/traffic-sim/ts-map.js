@@ -1,10 +1,10 @@
 /* ============================================================================
  * Arcado Springs Traffic Simulator — MAP (window.TS.map)
  * Leaflet IS the coordinate system. A LOCKED CARTO Voyager basemap frames the
- * site + Killian Hill signal; real road polylines (TS.CORRIDOR.roads) are
+ * site + Killian Hill junction; real road polylines (TS.CORRIDOR.roads) are
  * projected to container pixels via latLngToContainerPoint. Projection is
- * CACHED (projectAll) and recomputed ONLY on init / resize / preset change —
- * never per animation frame. Degrades gracefully if Leaflet (L) is unavailable:
+ * CACHED (projectAll) and recomputed ONLY on init / resize — never per
+ * animation frame. Degrades gracefully if Leaflet (L) is unavailable:
  * a synthetic affine projection of CORRIDOR lat/lng lets the canvas sim run.
  * ==========================================================================*/
 (function () {
@@ -180,25 +180,6 @@
     reprojectCbs.forEach(function (cb) { try { cb(lastCache); } catch (e) {} });
   }
 
-  /* ---- camera presets (a preset = a Leaflet view change + reproject) ---- */
-  function setPreset(presetId) {
-    if (available && map) {
-      if (presetId === "intersectionZoom") {
-        var isx = C().intersection.ll;
-        map.setView([isx[0], isx[1]], 17, { animate: true, duration: 0.6 });
-      } else {
-        // topdown + angled share the framed view (angled tilts only the overlay).
-        applyFramedView();
-      }
-      // Leaflet animates async; re-project after the move settles.
-      map.once("moveend zoomend", function () { projectAll(); });
-      // Also project now so a frame is ready immediately for fast presets.
-      projectAll();
-    } else {
-      projectAll();
-    }
-  }
-
   /* ---- hotspot markers (real lat/lng; click/keyboard accessible) ---- */
   function addHotspots(cb) {
     onHotspotClick = cb;
@@ -250,9 +231,8 @@
     if (available && map) {
       try {
         map.invalidateSize(false);
-        // Re-frame so the corridor stays framed after a container size change
-        // (toggle <-> split halves the width). intersectionZoom keeps its view.
-        if (!TS.config || TS.config.preset !== "intersectionZoom") applyFramedView();
+        // Re-frame so the corridor stays framed after a container size change.
+        applyFramedView();
       } catch (e) {}
     }
     var sz = getContainerSize();
@@ -269,7 +249,6 @@
     projectAll: projectAll,
     getProjection: getProjection,
     onReproject: onReproject,
-    setPreset: setPreset,
     addHotspots: addHotspots,
     getContainerSize: getContainerSize,
     onResize: onResize,

@@ -80,7 +80,7 @@
       {
         id: "midday", label: "Midday",
         timeWindow: { start: "11:00 AM", end: "1:00 PM", peakAt: "12:00 PM" },
-        description: "Moderate, flatter demand (lunch + errands). Signal + driveway organization still trims delay; capture is moderate.",
+        description: "Moderate, flatter demand (lunch + errands). Turn lane + driveway organization still trims delay; capture is moderate.",
         demandProfile: {
           type: "flat-bump",
           points: [{ t: 0, mult: 0.6 }, { t: 0.4, mult: 0.85 }, { t: 0.5, mult: 0.9 }, { t: 0.6, mult: 0.88 }, { t: 1, mult: 0.62 }],
@@ -100,7 +100,7 @@
       {
         id: "future-buildout", label: "Future build-out",
         timeWindow: { start: "4:00 PM", end: "6:00 PM", peakAt: "5:15 PM" },
-        description: "PM peak at projected regional 2035 demand (~+18%). BEFORE degrades sharply; AFTER (with capture, signal, turn lane, complementing the Killian Hill widening) holds an acceptable LOS.",
+        description: "PM peak at projected regional 2035 demand (~+18%). BEFORE degrades sharply; AFTER (with capture, turn lane, managed site access, complementing the Killian Hill widening) holds an acceptable LOS.",
         demandProfile: {
           type: "bell-skewed-late",
           points: [{ t: 0, mult: 0.6 }, { t: 0.25, mult: 0.85 }, { t: 0.5, mult: 1 }, { t: 0.7, mult: 1.05 }, { t: 1, mult: 0.68 }],
@@ -120,7 +120,7 @@
     ],
 
     metrics: [
-      { id: "avgDelay", label: "Avg control delay", unit: "s/veh", lowerIsBetter: true, format: "integer", decimals: 0, description: "Average signalized intersection control delay per vehicle (illustrative HCM-style)." },
+      { id: "avgDelay", label: "Avg control delay", unit: "s/veh", lowerIsBetter: true, format: "integer", decimals: 0, description: "Average intersection control delay per vehicle at the main junction (illustrative HCM-style)." },
       { id: "corridorTravelTime", label: "Corridor travel time", unit: "min", lowerIsBetter: true, format: "decimal", decimals: 1, description: "Modeled time to traverse the Arcado Rd study corridor end to end." },
       { id: "maxQueue", label: "Max queue length", unit: "ft", lowerIsBetter: true, format: "integer", decimals: 0, description: "Longest 95th-percentile queue at the critical approach." },
       { id: "throughput", label: "Throughput", unit: "veh/hr", lowerIsBetter: false, format: "integer", decimals: 0, description: "Vehicles served through the main intersection per hour at peak." },
@@ -130,56 +130,55 @@
 
     layers: [
       { id: "congestion", label: "Congestion heatmap", defaultOn: true, description: "Study-corridor coloring by density on the free-flow to severe scale.", colorScale: ["#16a34a", "#eab308", "#f97316", "#dc2626"] },
-      { id: "queues", label: "Queue lengths", defaultOn: true, description: "Stacked vehicle queues drawn back from stop bars." },
-      { id: "signals", label: "Traffic signals", defaultOn: true, description: "Red/green signal heads at the main intersection and (after) the new driveway signal." },
+      { id: "queues", label: "Queue lengths", defaultOn: true, description: "Stacked vehicle queues drawn back from the busy corner, by density." },
       { id: "turningMovements", label: "Turning movements", defaultOn: false, description: "Arrows showing left/through/right volumes at intersections." },
       { id: "siteAccess", label: "Site access", defaultOn: true, description: "Proposed driveway, added left-turn bay, and on-site capture (after only)." },
       { id: "pedCrossings", label: "Pedestrian crossings", defaultOn: true, description: "The corridor crossings plus pedestrian/cyclist agents on the frontage." },
-      { id: "proposedImprovements", label: "Proposed improvements", defaultOn: true, description: "Highlights new signal + turn lane + crossings; only meaningful in the after scenario." },
+      { id: "proposedImprovements", label: "Proposed improvements", defaultOn: true, description: "Highlights the dedicated turn lane, managed site access, and crossings; only meaningful in the after scenario." },
       { id: "projectBoundary", label: "Project boundary", defaultOn: false, description: "Highlighted outline of the ~9-acre parcel on Arcado Rd." }
     ],
 
     /* Hotspots carry REAL lat/lng. ids preserved so presentationSteps work. */
     hotspots: [
       { id: "hs-mainX", label: "Main intersection: Arcado Rd & Killian Hill Rd", type: "intersection", ll: [33.883026, -84.11597],
-        beforeText: "This corner is where everything piles up. Today the light has no separate turn for cars heading into the area, so a single left-turning car can hold up everyone behind it. At rush hour the line of cars stretches well back down Arcado Road.",
-        afterText: "With an organized site entrance and a smarter signal, cars turning into Arcado Springs get out of the way of through traffic. The line at the corner is noticeably shorter and the light moves more cars each cycle." },
-      { id: "hs-driveway", label: "New site driveway", type: "site-access", ll: [33.879684, -84.119758],
+        beforeText: "This corner is where everything piles up. Today there is no separate turn lane for cars heading into the area, so a single left-turning car can hold up everyone behind it. At rush hour the line of cars stretches well back down Arcado Road.",
+        afterText: "With a dedicated turn lane and an organized site entrance, cars turning into Arcado Springs get out of the way of through traffic, and fewer cars reach the corner in the first place. The line at this unsignalized junction is noticeably shorter and it moves more cars each hour." },
+      { id: "hs-driveway", label: "Managed site driveway", type: "site-access", ll: [33.879684, -84.119758],
         beforeText: "Today there is no organized entrance here. Cars hunting for shops elsewhere make extra trips out to the busy corner instead of having one clear place to turn in.",
-        afterText: "One clearly marked, signal-coordinated driveway gives drivers a single, predictable place to enter and leave the site, so turning traffic no longer mixes unpredictably with the through lane." },
-      { id: "hs-newSignal", label: "New traffic signal at the driveway", type: "signal", ll: [33.880133, -84.119126],
-        beforeText: "There is no signal here today, so turning into or out of the area means waiting for a gap in oncoming traffic, which backs cars up behind you.",
-        afterText: "A new signal, timed together with the main corner, creates safe protected gaps for turning and crossing on foot, and keeps the through traffic flowing in steady platoons instead of stop-and-go." },
+        afterText: "One clearly marked, consolidated driveway gives drivers a single, predictable place to enter and leave the site, so turning traffic no longer mixes unpredictably with the through lane." },
+      { id: "hs-siteAccess", label: "Site access management", type: "site-access", ll: [33.880133, -84.119126],
+        beforeText: "Today, scattered curb cuts and informal turning mean cars merge wherever they can, and turning into or out of the area means hunting for a gap in oncoming traffic, which backs cars up behind you.",
+        afterText: "Access management — consolidating entries, channelizing turns, and capturing trips on-site — lets turning traffic use predictable gaps and keeps the through traffic flowing, without adding a signal at this junction." },
       { id: "hs-turnLane", label: "Added left-turn lane", type: "turn-lane", ll: [33.881707, -84.117945],
         beforeText: "With only one lane each way, a car waiting to turn left blocks the cars behind it, stalling the whole road during the turn.",
         afterText: "A dedicated left-turn pocket lets turning cars pull aside and wait without stopping the through lane, so traffic behind keeps moving." },
       { id: "hs-pedCrossing", label: "Pedestrian crossing", type: "crossing", ll: [33.879653, -84.112693],
         beforeText: "Crossing the road on foot today means a long wait for a gap, which is why almost everyone drives even for short trips.",
-        afterText: "A protected crossing tied to the signal lets people walk to the shops and green space safely. Every person who walks is one car that never enters the road." },
+        afterText: "A protected crossing with channelized site access lets people walk to the shops and green space safely. Every person who walks is one car that never enters the road." },
       { id: "hs-queue", label: "Killian Hill approach queue", type: "queue", ll: [33.881694, -84.114689],
         beforeText: "This is where the back of the line forms. When the corner jams, the queue spills back along the approach and blocks the entrance to the area.",
         afterText: "With fewer car trips overall and a turn lane keeping the through lane clear, the queue forms later and clears faster, so spillback past the site entrance is rare." }
     ],
 
     presentationSteps: [
-      { id: "step-existing", order: 1, title: "Today's corridor", preset: "topdown", scenario: { id: "am-peak", mode: "toggle", side: "before" },
-        layers: { congestion: true, queues: true, signals: true, siteAccess: false, proposedImprovements: false },
+      { id: "step-existing", order: 1, title: "Today's corridor", scenario: { id: "am-peak", side: "before" },
+        layers: { congestion: true, queues: true, siteAccess: false, proposedImprovements: false },
         narration: "This is Arcado Road today during the morning rush. Subdivision and school traffic funnels onto one two-lane collector and out to the corner with Killian Hill Road.", focusHotspot: null },
-      { id: "step-bottlenecks", order: 2, title: "Where it breaks down", preset: "intersectionZoom", scenario: { id: "am-peak", mode: "toggle", side: "before" },
+      { id: "step-bottlenecks", order: 2, title: "Where it breaks down", scenario: { id: "am-peak", side: "before" },
         layers: { congestion: true, queues: true, turningMovements: true },
-        narration: "Zoom in on the corner. With no separate turn lane, one left-turning car stalls the lane behind it, the queue spills back, and the signal cannot clear the demand. This is the bottleneck.", focusHotspot: "hs-mainX" },
-      { id: "step-proposed", order: 3, title: "The proposed fixes", preset: "angled", scenario: { id: "am-peak", mode: "toggle", side: "after" },
-        layers: { siteAccess: true, proposedImprovements: true, signals: true, pedCrossings: true },
-        narration: "Now the build-out: a single organized driveway, a new coordinated signal, a dedicated left-turn lane, and protected pedestrian crossings to the shops and green.", focusHotspot: "hs-driveway" },
-      { id: "step-after-sim", order: 4, title: "After: how it flows", preset: "topdown", scenario: { id: "pm-peak", mode: "toggle", side: "after" },
-        layers: { congestion: true, queues: true, signals: true, pedCrossings: true, siteAccess: true },
+        narration: "Look at the corner. With no separate turn lane, one left-turning car stalls the lane behind it, the backup spills back, and this unsignalized junction cannot clear the demand. This is the bottleneck.", focusHotspot: "hs-mainX" },
+      { id: "step-proposed", order: 3, title: "The proposed fixes", scenario: { id: "am-peak", side: "after" },
+        layers: { siteAccess: true, proposedImprovements: true, pedCrossings: true },
+        narration: "Now the build-out: a single consolidated driveway, managed site access, a dedicated left-turn lane, and protected pedestrian crossings to the shops and green — keeping the junction unsignalized.", focusHotspot: "hs-driveway" },
+      { id: "step-after-sim", order: 4, title: "After: how it flows", scenario: { id: "pm-peak", side: "after" },
+        layers: { congestion: true, queues: true, pedCrossings: true, siteAccess: true },
         narration: "Watch the evening peak after build-out. Many trips now start and end on-site or on foot, so fewer cars reach the corner, and the ones that do keep moving.", focusHotspot: null },
-      { id: "step-sidebyside", order: 5, title: "Before vs. after", preset: "topdown", scenario: { id: "pm-peak", mode: "split" },
-        layers: { congestion: true, queues: true },
-        narration: "Side by side at the evening peak: same regional demand, two outcomes. Average delay drops, the queue shortens, and the corner moves more cars per hour.", focusHotspot: null },
-      { id: "step-takeaways", order: 6, title: "The takeaway", preset: "topdown", scenario: { id: "am-peak", mode: "toggle", side: "after" },
+      { id: "step-sidebyside", order: 5, title: "Before vs. after", scenario: { id: "pm-peak", side: "after" },
+        layers: { congestion: true, queues: true, proposedImprovements: true },
+        narration: "Same evening peak, same regional demand — flip the Existing / Proposed toggle to compare. Average delay drops, the queue shortens, and the corner moves more cars per hour.", focusHotspot: null },
+      { id: "step-takeaways", order: 6, title: "The takeaway", scenario: { id: "am-peak", side: "after" },
         layers: { congestion: true, proposedImprovements: true },
-        narration: "Mixed-use walkability removes car trips at the source; organized access smooths what remains. In the AM peak that is roughly a 47 percent cut in average delay. These are illustrative planning estimates, not a sealed traffic study.", focusHotspot: null }
+        narration: "Mixed-use walkability removes car trips at the source; managed access and a turn lane smooth what remains. In the AM peak that is roughly a 47 percent cut in average delay. These are illustrative planning estimates, not a sealed traffic study.", focusHotspot: null }
     ]
   };
 })();
