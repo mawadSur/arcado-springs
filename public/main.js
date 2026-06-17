@@ -393,10 +393,14 @@
    *    screenshot fallback visible. No fake "playable" claim.
    * ==================================================================== */
   var BUILD_DIR = "unity-build/Build/";
+  // The shipping build was produced from a build folder named "WebGL", so Unity
+  // emits WebGL.loader.js and WebGL.{data,framework.js,wasm}.unityweb files
+  // (Brotli-compressed, decompressed in JS by Unity's own loader). The legacy
+  // ArcadoSprings.loader.js name is kept as a fallback so an alternately-named
+  // build still auto-discovers.
   var LOADER_CANDIDATES = [
-    "unity-build.loader.js",
-    "Build.loader.js",
-    "web.loader.js"
+    "WebGL.loader.js",
+    "ArcadoSprings.loader.js"
   ];
 
   // HEAD-probe a URL; resolve(true) only on a 2xx response.
@@ -463,20 +467,28 @@
     if (progress) progress.hidden = false;
     if (caption) caption.textContent = "Loading the walkthrough…";
 
+    // The shipping build derives every filename from the build folder name
+    // ("WebGL"), NOT the product name. It ships with Brotli compression AND
+    // decompression fallback = TRUE, so the data/framework/wasm assets carry
+    // the .unityweb extension and Unity's OWN loader decompresses them in
+    // JavaScript. We therefore point the config straight at the .unityweb URLs;
+    // the server returns them as plain static bytes with NO Content-Encoding
+    // header (see vercel.json) so the browser does not pre-decompress them.
     var base = BUILD_DIR + loaderFile.replace(/\.loader\.js$/, "");
-    // The wasm/data/framework names are derived from the same base. We point at
-    // the canonical names and let the loader pick up the compressed (.br)
-    // variants the server actually serves.
     var config = {
-      dataUrl: base + ".data",
-      frameworkUrl: base + ".framework.js",
-      codeUrl: base + ".wasm",
-      streamingAssetsUrl: "unity-build/StreamingAssets",
-      companyName: "Arcado",
-      productName: "Arcado Springs",
+      dataUrl: base + ".data.unityweb",
+      frameworkUrl: base + ".framework.js.unityweb",
+      codeUrl: base + ".wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Arcado Springs",
+      productName: "ArcadoSprings",
       productVersion: "1.0"
     };
 
+    loadUnityScript(stage, loaderFile, config, canvas, fill, label, caption, progress);
+  }
+
+  function loadUnityScript(stage, loaderFile, config, canvas, fill, label, caption, progress) {
     var script = document.createElement("script");
     script.src = BUILD_DIR + loaderFile;
     script.onload = function () {

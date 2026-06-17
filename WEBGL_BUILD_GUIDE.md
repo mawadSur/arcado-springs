@@ -100,14 +100,21 @@ HDRP build (the realism work, the drivable car, NPCs) stays untouched.
 Edit ▸ Project Settings ▸ **Player** ▸ (WebGL tab):
 
 - **Publishing Settings ▸ Compression Format:**
-  - **Brotli** — smallest payload, best for the deployed Vercel site. Requires the server to
-    send `Content-Encoding: br` (Vercel does for `.br` assets, and Unity also ships a
-    decompression fallback). **Use this for production.**
+  - **Brotli** — smallest payload, best for the deployed Vercel site. **Use this for
+    production**, AND enable **Decompression Fallback** (see below). This is the exact
+    combination the site is wired for.
   - **Disabled** — use this for **quick local testing** (open via a simple static server
     with no special headers). Larger files, but zero server-config friction.
   - Avoid **Gzip** unless your host can't do Brotli.
-  - Also enable **Decompression Fallback** if you serve from a host that can't set the
-    `Content-Encoding` header — it makes the build self-decompress in JS.
+- **Publishing Settings ▸ Decompression Fallback: ENABLE it.** With fallback on, Unity's own
+  `loader.js` fetches the `.br` files and decompresses them in JavaScript, so the server must
+  serve them as **plain static bytes with NO `Content-Encoding` header**. `vercel.json` is
+  configured exactly this way (it sets only `Content-Type` + `Cache-Control` on
+  `/unity-build/Build/*`, never `Content-Encoding`).
+  - **Footgun — do NOT set `Content-Encoding: br`.** That is only correct for Brotli builds
+    *without* decompression fallback. Combining `Content-Encoding: br` with fallback-on makes
+    the browser pre-decompress and then Unity decompress again, producing garbage and a broken
+    player. Leave the headers in `vercel.json` as they are.
 - **Color Space:** this project is **Linear** (`m_ActiveColorSpace: 1`). WebGL 2.0 supports
   Linear, so you can keep it. If you ever target the old WebGL 1.0 path you'd be forced to
   Gamma — not relevant here, keep **Linear**.
