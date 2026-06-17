@@ -1,75 +1,40 @@
 /* ============================================================================
  * Arcado Springs Traffic Simulator — DATA (single source of truth)
- * window.TS.DATA: mapCenter, nodes, edges, scenarios, metrics, layers,
- * hotspots, presentationSteps. Pure data, no logic. Frozen by ts-app boot.
+ * window.TS.CORRIDOR: real OSM geometry (embedded, NOT fetched) for the
+ *   Arcado Rd / Killian Hill Rd corridor at 4541 Arcado Rd SW, Lilburn GA.
+ * window.TS.DATA: mapCenter, scenarios, metrics, layers, hotspots,
+ *   presentationSteps. Pure data, no logic. Frozen by ts-app boot.
  * Every number here is an ILLUSTRATIVE planning-model estimate.
  * ==========================================================================*/
 (function () {
   "use strict";
   var TS = (window.TS = window.TS || {});
 
-  TS.DATA = {
-    mapCenter: {
-      address: "4541 Arcado Rd, Lilburn, GA 30047",
-      fallback: { lat: 33.9446, lng: -84.0533 },
-      defaultZoom: 15,
-      siteZoom: 16,
-      tiles: {
-        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        maxZoom: 19,
-        attribution: "Imagery © Esri, Maxar, Earthstar Geographics"
-      },
-      presets: {
-        topdown: { lat: 33.9446, lng: -84.0533, zoom: 16 },
-        angled: { lat: 33.9446, lng: -84.0533, zoom: 16 },
-        intersectionZoom: { lat: 33.9446, lng: -84.0521, zoom: 18 }
-      }
+  /* ---- Embedded real geometry (verbatim from corridor-osm.json) ---- */
+  TS.CORRIDOR = {
+    center: [33.87985, -84.119684],
+    site: [33.87985, -84.119684],
+    siteLabel: "4541 Arcado Rd SW — Arcado Springs",
+    intersection: { name: "Arcado Rd & Killian Hill Rd", ll: [33.883026, -84.11597] },
+    bounds: [[33.865601, -84.133657], [33.888629, -84.097376]],
+    basemap: {
+      voyager: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      attribution: "© OpenStreetMap, © CARTO"
     },
+    roads: [
+      { name: "Killian Hill Road", class: "secondary", path: [[33.888629, -84.123983], [33.885686, -84.120643], [33.883893, -84.117301], [33.883336, -84.116371], [33.883026, -84.11597], [33.881694, -84.114689], [33.880367, -84.11327], [33.879653, -84.112693], [33.878611, -84.112075], [33.878161, -84.111658], [33.87782, -84.111128], [33.876731, -84.108551], [33.876415, -84.107995], [33.875395, -84.106649], [33.87469, -84.106027], [33.872341, -84.104433], [33.870359, -84.102423], [33.869593, -84.101537], [33.869098, -84.100608], [33.868927, -84.099821], [33.868924, -84.099195], [33.869125, -84.097376]] },
+      { name: "Arcado Road", class: "tertiary", path: [[33.887611, -84.111966], [33.886717, -84.113218], [33.885532, -84.114473], [33.884708, -84.115101], [33.883026, -84.11597], [33.881707, -84.117945], [33.880133, -84.119126], [33.879684, -84.119758], [33.878496, -84.12235], [33.87779, -84.123599], [33.877098, -84.125189], [33.876763, -84.125804], [33.876481, -84.126095], [33.874685, -84.127369], [33.874425, -84.127662], [33.873799, -84.128662], [33.873628, -84.128862], [33.873229, -84.129101]] },
+      { name: "Camp Creek Road", class: "tertiary", path: [[33.885087, -84.133657], [33.883223, -84.131933], [33.882482, -84.131049], [33.882103, -84.130725], [33.881426, -84.130447], [33.880308, -84.129663], [33.878498, -84.129055], [33.87753, -84.129124], [33.877228, -84.12902], [33.876658, -84.128581], [33.87572, -84.128069], [33.875441, -84.127659], [33.875209, -84.126964]] },
+      { name: "Cole Drive", class: "tertiary", path: [[33.875209, -84.126964], [33.87506, -84.126621], [33.874694, -84.126228], [33.872908, -84.125033], [33.87106, -84.123971], [33.869704, -84.122873], [33.869175, -84.122263], [33.868867, -84.12175], [33.868525, -84.120888], [33.868364, -84.1203], [33.868169, -84.119918], [33.867397, -84.119258], [33.86639, -84.118527], [33.866008, -84.118355], [33.865601, -84.118328]] }
+    ]
+  };
 
-    /* Corridor graph in NORMALIZED canvas coordinates (0..1). */
-    nodes: [
-      { id: "subW", label: "Legends of Parkview / west subdivisions", x: 0.04, y: 0.30, type: "source", desc: "Residential trip origin west of site" },
-      { id: "subSW", label: "South neighborhood feed", x: 0.04, y: 0.62, type: "source", desc: "Secondary residential origin" },
-      { id: "arcW", label: "Arcado Rd west approach", x: 0.20, y: 0.46, type: "road", desc: "Two-lane collector entering frame from west" },
-      { id: "siteFrontW", label: "Site frontage (west)", x: 0.36, y: 0.50, type: "road", desc: "Arcado Rd along the north edge of the parcel" },
-      { id: "drivewayJ", label: "Site driveway junction", x: 0.46, y: 0.52, type: "intersection", desc: "Proposed main site access onto Arcado Rd (becomes signalized AFTER)" },
-      { id: "siteFrontE", label: "Site frontage (east)", x: 0.58, y: 0.50, type: "road", desc: "Arcado Rd continuing toward the main corner" },
-      { id: "turnLaneBay", label: "Added left-turn bay", x: 0.52, y: 0.58, type: "road", desc: "Dedicated left-turn storage into the site (AFTER only); removes turners from the through lane" },
-      { id: "mainXN", label: "Killian Hill Rd north leg", x: 0.80, y: 0.16, type: "road", desc: "Arterial approaching the signalized corner from north" },
-      { id: "mainX", label: "Arcado Rd x Killian Hill Rd", x: 0.80, y: 0.46, type: "intersection", desc: "Primary signalized intersection and chief bottleneck" },
-      { id: "mainXS", label: "Killian Hill Rd south leg", x: 0.80, y: 0.84, type: "road", desc: "Arterial leaving the corner to the south" },
-      { id: "arcE", label: "Arcado Rd east exit", x: 0.97, y: 0.46, type: "sink", desc: "Through traffic leaving frame east" },
-      { id: "d1", label: "Town-center loop NW", x: 0.50, y: 0.70, type: "internal", desc: "Internal walkable street node" },
-      { id: "d2", label: "Town-center loop NE", x: 0.66, y: 0.70, type: "internal", desc: "Internal walkable street node" },
-      { id: "d3", label: "Town-center loop SE", x: 0.66, y: 0.88, type: "internal", desc: "Internal walkable street node" },
-      { id: "d4", label: "Town-center loop SW", x: 0.50, y: 0.88, type: "internal", desc: "Internal walkable street node" },
-      { id: "plaza", label: "Central plaza / green", x: 0.58, y: 0.79, type: "plaza", desc: "3.6-acre open green; ped/bike hub" },
-      { id: "pedX1", label: "Frontage crossing", x: 0.41, y: 0.50, type: "crossing", desc: "Pedestrian crossing of Arcado Rd at the site frontage (AFTER: signal-protected)" },
-      { id: "pedX2", label: "Driveway crossing", x: 0.46, y: 0.46, type: "crossing", desc: "Crossing tied to the new driveway signal phase" },
-      { id: "qhot1", label: "Corner eastbound queue", x: 0.66, y: 0.46, type: "hotspot", desc: "Eastbound queue spillback approaching the main signal" },
-      { id: "qhot2", label: "Northbound left queue", x: 0.80, y: 0.30, type: "hotspot", desc: "Northbound-to-westbound left-turn queue on Killian Hill" }
-    ],
-
-    edges: [
-      { id: "e1", from: "subW", to: "arcW", lanes: 1, cls: "collector", label: "west feed" },
-      { id: "e2", from: "subSW", to: "arcW", lanes: 1, cls: "collector", label: "south feed" },
-      { id: "e3", from: "arcW", to: "siteFrontW", lanes: 2, cls: "arterial", label: "Arcado Rd" },
-      { id: "e4", from: "siteFrontW", to: "drivewayJ", lanes: 2, cls: "arterial", label: "Arcado Rd frontage" },
-      { id: "e5", from: "drivewayJ", to: "siteFrontE", lanes: 2, cls: "arterial", label: "Arcado Rd frontage" },
-      { id: "e6", from: "siteFrontE", to: "mainX", lanes: 2, cls: "arterial", label: "Arcado Rd approach" },
-      { id: "e7", from: "mainXN", to: "mainX", lanes: 2, cls: "major-arterial", label: "Killian Hill Rd N" },
-      { id: "e8", from: "mainX", to: "mainXS", lanes: 2, cls: "major-arterial", label: "Killian Hill Rd S" },
-      { id: "e9", from: "mainX", to: "arcE", lanes: 2, cls: "arterial", label: "Arcado Rd east" },
-      { id: "e10", from: "drivewayJ", to: "turnLaneBay", lanes: 1, cls: "turn-bay", afterOnly: true, label: "added left-turn bay" },
-      { id: "e11", from: "turnLaneBay", to: "d1", lanes: 1, cls: "site-access", label: "into site" },
-      { id: "e12", from: "d1", to: "d2", lanes: 1, cls: "internal", label: "main street" },
-      { id: "e13", from: "d2", to: "d3", lanes: 1, cls: "internal", label: "east lane" },
-      { id: "e14", from: "d3", to: "d4", lanes: 1, cls: "internal", label: "south lane" },
-      { id: "e15", from: "d4", to: "d1", lanes: 1, cls: "internal", label: "west lane" },
-      { id: "e16", from: "d1", to: "plaza", lanes: 0, cls: "ped-path", label: "plaza path" },
-      { id: "e17", from: "d3", to: "plaza", lanes: 0, cls: "ped-path", label: "plaza path" },
-      { id: "e18", from: "pedX1", to: "d1", lanes: 0, cls: "ped-path", label: "frontage crossing path" }
-    ],
+  TS.DATA = {
+    /* Geometry now comes from CORRIDOR; mapCenter is just descriptive. */
+    mapCenter: {
+      address: "4541 Arcado Rd SW, Lilburn, GA 30047",
+      siteLabel: "4541 Arcado Rd SW — Arcado Springs"
+    },
 
     scenarios: [
       {
@@ -164,34 +129,35 @@
     ],
 
     layers: [
-      { id: "congestion", label: "Congestion heatmap", defaultOn: true, description: "Edge coloring by density on the free-flow to severe scale.", colorScale: ["#16a34a", "#eab308", "#f97316", "#dc2626"] },
+      { id: "congestion", label: "Congestion heatmap", defaultOn: true, description: "Study-corridor coloring by density on the free-flow to severe scale.", colorScale: ["#16a34a", "#eab308", "#f97316", "#dc2626"] },
       { id: "queues", label: "Queue lengths", defaultOn: true, description: "Stacked vehicle queues drawn back from stop bars." },
       { id: "signals", label: "Traffic signals", defaultOn: true, description: "Red/green signal heads at the main intersection and (after) the new driveway signal." },
       { id: "turningMovements", label: "Turning movements", defaultOn: false, description: "Arrows showing left/through/right volumes at intersections." },
-      { id: "siteAccess", label: "Site access", defaultOn: true, description: "Proposed driveway, added left-turn bay, and internal loop (after only)." },
-      { id: "pedCrossings", label: "Pedestrian crossings", defaultOn: true, description: "The two crossings plus pedestrian/cyclist agents on dedicated paths." },
+      { id: "siteAccess", label: "Site access", defaultOn: true, description: "Proposed driveway, added left-turn bay, and on-site capture (after only)." },
+      { id: "pedCrossings", label: "Pedestrian crossings", defaultOn: true, description: "The corridor crossings plus pedestrian/cyclist agents on the frontage." },
       { id: "proposedImprovements", label: "Proposed improvements", defaultOn: true, description: "Highlights new signal + turn lane + crossings; only meaningful in the after scenario." },
-      { id: "projectBoundary", label: "Project boundary", defaultOn: false, description: "Dashed outline of the ~9-acre parcel." }
+      { id: "projectBoundary", label: "Project boundary", defaultOn: false, description: "Highlighted outline of the ~9-acre parcel on Arcado Rd." }
     ],
 
+    /* Hotspots carry REAL lat/lng. ids preserved so presentationSteps work. */
     hotspots: [
-      { id: "hs-mainX", label: "Main intersection: Arcado Rd & Killian Hill Rd", type: "intersection", position: { x: 0.80, y: 0.46 },
+      { id: "hs-mainX", label: "Main intersection: Arcado Rd & Killian Hill Rd", type: "intersection", ll: [33.883026, -84.11597],
         beforeText: "This corner is where everything piles up. Today the light has no separate turn for cars heading into the area, so a single left-turning car can hold up everyone behind it. At rush hour the line of cars stretches well back down Arcado Road.",
         afterText: "With an organized site entrance and a smarter signal, cars turning into Arcado Springs get out of the way of through traffic. The line at the corner is noticeably shorter and the light moves more cars each cycle." },
-      { id: "hs-driveway", label: "New site driveway", type: "site-access", position: { x: 0.46, y: 0.52 },
+      { id: "hs-driveway", label: "New site driveway", type: "site-access", ll: [33.879684, -84.119758],
         beforeText: "Today there is no organized entrance here. Cars hunting for shops elsewhere make extra trips out to the busy corner instead of having one clear place to turn in.",
         afterText: "One clearly marked, signal-coordinated driveway gives drivers a single, predictable place to enter and leave the site, so turning traffic no longer mixes unpredictably with the through lane." },
-      { id: "hs-newSignal", label: "New traffic signal at the driveway", type: "signal", position: { x: 0.46, y: 0.46 },
+      { id: "hs-newSignal", label: "New traffic signal at the driveway", type: "signal", ll: [33.880133, -84.119126],
         beforeText: "There is no signal here today, so turning into or out of the area means waiting for a gap in oncoming traffic, which backs cars up behind you.",
         afterText: "A new signal, timed together with the main corner, creates safe protected gaps for turning and crossing on foot, and keeps the through traffic flowing in steady platoons instead of stop-and-go." },
-      { id: "hs-turnLane", label: "Added left-turn lane", type: "turn-lane", position: { x: 0.52, y: 0.58 },
+      { id: "hs-turnLane", label: "Added left-turn lane", type: "turn-lane", ll: [33.881707, -84.117945],
         beforeText: "With only one lane each way, a car waiting to turn left blocks the cars behind it, stalling the whole road during the turn.",
         afterText: "A dedicated left-turn pocket lets turning cars pull aside and wait without stopping the through lane, so traffic behind keeps moving." },
-      { id: "hs-pedCrossing", label: "Pedestrian crossing", type: "crossing", position: { x: 0.41, y: 0.50 },
-        beforeText: "Crossing Arcado Road on foot today means a long wait for a gap, which is why almost everyone drives even for short trips.",
+      { id: "hs-pedCrossing", label: "Pedestrian crossing", type: "crossing", ll: [33.879653, -84.112693],
+        beforeText: "Crossing the road on foot today means a long wait for a gap, which is why almost everyone drives even for short trips.",
         afterText: "A protected crossing tied to the signal lets people walk to the shops and green space safely. Every person who walks is one car that never enters the road." },
-      { id: "hs-queue", label: "Eastbound queue hotspot", type: "queue", position: { x: 0.66, y: 0.46 },
-        beforeText: "This is where the back of the line forms. When the corner jams, the queue spills back along the frontage and blocks the area entrance.",
+      { id: "hs-queue", label: "Killian Hill approach queue", type: "queue", ll: [33.881694, -84.114689],
+        beforeText: "This is where the back of the line forms. When the corner jams, the queue spills back along the approach and blocks the entrance to the area.",
         afterText: "With fewer car trips overall and a turn lane keeping the through lane clear, the queue forms later and clears faster, so spillback past the site entrance is rare." }
     ],
 

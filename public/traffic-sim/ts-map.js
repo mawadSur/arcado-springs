@@ -1,9 +1,11 @@
 /* ============================================================================
  * Arcado Springs Traffic Simulator — MAP (window.TS.map)
- * Locked Leaflet basemap with Esri World Imagery, fixed site coordinates (no
- * external geocode), per-preset setView (animated, infrequent — NOT per frame),
- * project-boundary circle, accessible hotspot markers. Degrades gracefully if
- * Leaflet (L) is unavailable: the canvas sim still runs.
+ * Leaflet IS the coordinate system. A LOCKED CARTO Voyager basemap frames the
+ * site + Killian Hill signal; real road polylines (TS.CORRIDOR.roads) are
+ * projected to container pixels via latLngToContainerPoint. Projection is
+ * CACHED (projectAll) and recomputed ONLY on init / resize / preset change —
+ * never per animation frame. Degrades gracefully if Leaflet (L) is unavailable:
+ * a synthetic affine projection of CORRIDOR lat/lng lets the canvas sim run.
  * ==========================================================================*/
 (function () {
   "use strict";
@@ -12,29 +14,48 @@
   var map = null;
   var available = false;
   var containerEl = null;
-  var siteLatLng = null;
-  var boundaryCircle = null;
+  var parcelLayer = null;
   var hotspotMarkers = {};
   var resizeCbs = [];
+  var reprojectCbs = [];
   var onHotspotClick = null;
+  var lastCache = null;
+  var fallbackSize = { w: 600, h: 360 };
+
+  var C = function () { return TS.CORRIDOR; };
 
   function leafletReady() {
     return typeof window.L !== "undefined" && window.L && typeof window.L.map === "function";
+  }
+
+  /* ---- framed default view: tight box around site + intersection ---- */
+  function framedBounds() {
+    var co = C();
+    var site = co.site, isx = co.intersection.ll;
+    var minLat = site[0] - 0.006;
+    var maxLat = isx[0] + 0.004;
+    var minLng = Math.min(site[1], isx[1]) - 0.006;
+    var maxLng = Math.max(site[1], isx[1]) + 0.006;
+    return [[minLat, minLng], [maxLat, maxLng]];
+  }
+
+  function applyFramedView() {
+    if (!map) return;
+    map.fitBounds(framedBounds(), { padding: [12, 12], animate: false });
   }
 
   function init(elId) {
     containerEl = document.getElementById(elId);
     if (!containerEl) return false;
     if (!leafletReady()) {
-      // Leaflet failed to load (e.g. CDN blocked). Mark unavailable; sim runs.
-      containerEl.classList.add("map-unavailable");
-      containerEl.setAttribute("aria-hidden", "true");
+      // Leaflet failed to load (e.g. CDN blocked). Mark unavailable; sim still
+      // runs via a synthetic affine projection (see getProjection fallback).
       available = false;
+      containerEl.classList.add("map-unavailable");
       return false;
     }
     var L = window.L;
-    var D = TS.DATA.mapCenter;
-    var fb = [D.fallback.lat, D.fallback.lng];
+    var co = C();
 
     try {
       map = L.map(elId, {
@@ -45,24 +66,24 @@
         keyboard: false,
         touchZoom: false,
         zoomControl: false,
-        attributionControl: true
-      }).setView(fb, D.defaultZoom);
+        attributionControl: true,
+        zoomSnap: 0
+      });
 
-      L.tileLayer(D.tiles.url, {
-        maxZoom: D.tiles.maxZoom,
-        attribution: D.tiles.attribution
+      L.tileLayer(co.basemap.voyager, {
+        subdomains: "abcd",
+        maxZoom: 20,
+        attribution: co.basemap.attribution
       }).addTo(map);
 
+      applyFramedView();
       available = true;
-      siteLatLng = fb.slice();
-      drawBoundary();
+      drawParcel();
 
-      // Use the known-correct fallback coordinates for the address; the map
-      // view is locked to presets anyway, so no external geocode is needed.
-      setPreset((TS.config && TS.config.preset) || "topdown");
+      // First projection after tiles/map ready.
+      projectAll();
       notifyResize();
 
-      window.addEventListener("resize", notifyResize);
       return true;
     } catch (e) {
       available = false;
@@ -70,63 +91,172 @@
     }
   }
 
-  function drawBoundary() {
-    if (!available || !siteLatLng) return;
+  /* ~9-acre highlighted parcel box on the south side of Arcado Rd at the site. */
+  function drawParcel() {
+    if (!available) return;
     var L = window.L;
-    if (boundaryCircle) { map.removeLayer(boundaryCircle); boundaryCircle = null; }
-    boundaryCircle = L.circle(siteLatLng, {
-      radius: 150, color: "#B08D57", weight: 2,
-      fillColor: "#2F5D3A", fillOpacity: 0.12, interactive: false
+    if (parcelLayer) { map.removeLayer(parcelLayer); parcelLayer = null; }
+    var s = C().site;
+    // ~9 acres ≈ 36,400 m². A ~190m x 190m box, offset slightly south of the
+    // Arcado Rd frontage. Lat degree ≈ 111,320 m; lng degree ≈ 92,500 m here.
+    var dLat = 0.00085, dLng = 0.00115;
+    var cLat = s[0] - 0.0006, cLng = s[1] - 0.0004;
+    var ring = [
+      [cLat + dLat, cLng - dLng],
+      [cLat + dLat, cLng + dLng],
+      [cLat - dLat, cLng + dLng],
+      [cLat - dLat, cLng - dLng]
+    ];
+    parcelLayer = L.polygon(ring, {
+      color: "#B08D57", weight: 2, fillColor: "#2F5D3A",
+      fillOpacity: 0.12, interactive: false
     }).addTo(map);
   }
 
-  /* Add clickable hotspot markers. Positions are normalized to the corridor,
-     so we place them around the site center with small lat/lng offsets that
-     mirror the canvas layout. They open the same popups as canvas hotspots. */
+  /* ---- projection ---- */
+  function project(lat, lng) {
+    if (available && map) {
+      var p = map.latLngToContainerPoint(window.L.latLng(lat, lng));
+      return [p.x, p.y];
+    }
+    return affine(lat, lng);
+  }
+
+  // Synthetic fit-bounds affine used when Leaflet is unavailable so real road
+  // SHAPES still render (Web-Mercator-ish; lng linear, lat linear over a small
+  // span). Frames the same tight box as the live map.
+  function affine(lat, lng) {
+    var b = framedBounds();
+    var minLat = b[0][0], minLng = b[0][1], maxLat = b[1][0], maxLng = b[1][1];
+    var sz = getContainerSize();
+    var w = sz.w || fallbackSize.w, h = sz.h || fallbackSize.h;
+    var pad = 12;
+    var iw = Math.max(1, w - pad * 2), ih = Math.max(1, h - pad * 2);
+    var sx = iw / (maxLng - minLng);
+    var sy = ih / (maxLat - minLat);
+    var s = Math.min(sx, sy); // keep aspect, centered
+    var offX = pad + (iw - s * (maxLng - minLng)) / 2;
+    var offY = pad + (ih - s * (maxLat - minLat)) / 2;
+    var px = offX + (lng - minLng) * s;
+    var py = offY + (maxLat - lat) * s; // north is up
+    return [px, py];
+  }
+
+  function projectRoad(road) {
+    var out = [];
+    for (var i = 0; i < road.path.length; i++) {
+      out.push(project(road.path[i][0], road.path[i][1]));
+    }
+    return out;
+  }
+
+  function projectAll() {
+    var co = C();
+    var roads = {};
+    co.roads.forEach(function (r) { roads[r.name] = projectRoad(r); });
+    var hs = {};
+    (TS.DATA.hotspots || []).forEach(function (h) {
+      hs[h.id] = project(h.ll[0], h.ll[1]);
+    });
+    lastCache = {
+      roads: roads,
+      hotspots: hs,
+      site: project(co.site[0], co.site[1]),
+      intersection: project(co.intersection.ll[0], co.intersection.ll[1]),
+      size: getContainerSize()
+    };
+    repositionHotspotMarkers();
+    notifyReproject();
+    return lastCache;
+  }
+
+  function getProjection() {
+    if (!lastCache) projectAll();
+    return lastCache;
+  }
+
+  function onReproject(cb) { if (typeof cb === "function") reprojectCbs.push(cb); }
+  function notifyReproject() {
+    reprojectCbs.forEach(function (cb) { try { cb(lastCache); } catch (e) {} });
+  }
+
+  /* ---- camera presets (a preset = a Leaflet view change + reproject) ---- */
+  function setPreset(presetId) {
+    if (available && map) {
+      if (presetId === "intersectionZoom") {
+        var isx = C().intersection.ll;
+        map.setView([isx[0], isx[1]], 17, { animate: true, duration: 0.6 });
+      } else {
+        // topdown + angled share the framed view (angled tilts only the overlay).
+        applyFramedView();
+      }
+      // Leaflet animates async; re-project after the move settles.
+      map.once("moveend zoomend", function () { projectAll(); });
+      // Also project now so a frame is ready immediately for fast presets.
+      projectAll();
+    } else {
+      projectAll();
+    }
+  }
+
+  /* ---- hotspot markers (real lat/lng; click/keyboard accessible) ---- */
   function addHotspots(cb) {
     onHotspotClick = cb;
-    if (!available || !siteLatLng) return;
+    if (!available || !map) return;
     var L = window.L;
-    var lat0 = siteLatLng[0], lng0 = siteLatLng[1];
-    // Map normalized (x,y) over a ~600m box centered on site.
-    var span = 0.004; // ~lat/lng span across the corridor frame
-    TS.DATA.hotspots.forEach(function (h) {
-      var dx = (h.position.x - 0.5) * span * 1.6;
-      var dy = (0.5 - h.position.y) * span;
-      var ll = [lat0 + dy, lng0 + dx];
+    (TS.DATA.hotspots || []).forEach(function (h) {
       var icon = L.divIcon({
         className: "ts-hotspot-icon",
         html: '<span class="ts-hotspot-dot" aria-hidden="true"></span>',
         iconSize: [18, 18]
       });
-      var m = L.marker(ll, { icon: icon, keyboard: true, title: h.label, alt: h.label }).addTo(map);
+      var m = L.marker(h.ll, { icon: icon, keyboard: true, title: h.label, alt: h.label }).addTo(map);
       m.on("click", function () { if (onHotspotClick) onHotspotClick(h.id); });
       hotspotMarkers[h.id] = m;
     });
   }
-
-  function setPreset(presetId) {
-    if (!available) return;
-    var p = TS.DATA.mapCenter.presets[presetId];
-    if (!p) return;
-    // Center on site if geocoded, applying the preset's relative zoom + nudge.
-    var lat = siteLatLng ? siteLatLng[0] : p.lat;
-    var lng = siteLatLng ? siteLatLng[1] : p.lng;
-    // Intersection zoom nudges east toward the Killian Hill corner.
-    if (presetId === "intersectionZoom") lng += 0.0012;
-    map.setView([lat, lng], p.zoom, { animate: true, duration: 0.6 });
+  function repositionHotspotMarkers() {
+    if (!available || !map) return;
+    // Markers stay at their real lat/lng; Leaflet re-projects them itself when
+    // the view changes, so this is a no-op safety re-anchor (guarded).
+    (TS.DATA.hotspots || []).forEach(function (h) {
+      var m = hotspotMarkers[h.id];
+      if (m && typeof m.setLatLng === "function") m.setLatLng(h.ll);
+    });
   }
 
   function getContainerSize() {
-    if (!containerEl) return { w: 0, h: 0 };
-    var r = containerEl.getBoundingClientRect();
-    return { w: Math.round(r.width), h: Math.round(r.height) };
+    // Prefer the map container; if Leaflet is blocked it is display:none (0px),
+    // so fall back to the stage element (the real overlay size), then a default.
+    var el = containerEl;
+    if (el) {
+      var r = el.getBoundingClientRect();
+      if (Math.round(r.width) > 0 && Math.round(r.height) > 0) {
+        return { w: Math.round(r.width), h: Math.round(r.height) };
+      }
+    }
+    var stage = document.getElementById("ts-stages");
+    if (stage) {
+      var sr = stage.getBoundingClientRect();
+      if (Math.round(sr.width) > 0 && Math.round(sr.height) > 0) {
+        return { w: Math.round(sr.width), h: Math.round(sr.height) };
+      }
+    }
+    return { w: fallbackSize.w, h: fallbackSize.h };
   }
 
   function onResize(cb) { if (typeof cb === "function") resizeCbs.push(cb); }
   function notifyResize() {
-    if (available && map) { try { map.invalidateSize(false); } catch (e) {} }
+    if (available && map) {
+      try {
+        map.invalidateSize(false);
+        // Re-frame so the corridor stays framed after a container size change
+        // (toggle <-> split halves the width). intersectionZoom keeps its view.
+        if (!TS.config || TS.config.preset !== "intersectionZoom") applyFramedView();
+      } catch (e) {}
+    }
     var sz = getContainerSize();
+    projectAll();
     resizeCbs.forEach(function (cb) { try { cb(sz); } catch (e) {} });
   }
 
@@ -134,10 +264,16 @@
 
   TS.map = {
     init: init,
+    project: project,
+    projectRoad: projectRoad,
+    projectAll: projectAll,
+    getProjection: getProjection,
+    onReproject: onReproject,
     setPreset: setPreset,
     addHotspots: addHotspots,
     getContainerSize: getContainerSize,
     onResize: onResize,
+    notifyResize: notifyResize,
     isAvailable: isAvailable
   };
 })();

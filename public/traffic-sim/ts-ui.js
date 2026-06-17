@@ -45,6 +45,7 @@
     els.layers = $("ts-layers");
     els.metrics = $("ts-metrics");
     els.scenarioPill = $("ts-scenario-pill");
+    els.stages = $("ts-stages");
     els.stageBefore = $("ts-stage-before");
     els.stageAfter = $("ts-stage-after");
     els.popup = $("ts-popup");
@@ -147,11 +148,17 @@
     TS.sim.setMode(m);
     applyModeUI();
     rebindRenderers();
+    // Mode change can resize the stages; reproject + re-feed the render cache.
+    if (TS.map && TS.map.notifyResize) TS.map.notifyResize();
+    if (TS.render && TS.render.setProjection && TS.map && TS.map.getProjection) {
+      TS.render.setProjection(TS.map.getProjection());
+    }
     setPreset(TS.config.preset);
     rerenderStatic();
   }
   function applyModeUI() {
     var split = TS.config.mode === "split";
+    if (els.stages) els.stages.classList.toggle("is-split", split);
     if (els.modeSplit) els.modeSplit.setAttribute("aria-pressed", String(split));
     if (els.modeToggle) els.modeToggle.setAttribute("aria-pressed", String(!split));
     if (els.sideGroup) els.sideGroup.hidden = split;
@@ -205,8 +212,12 @@
 
   function setPreset(p) {
     TS.config.preset = p;
+    // topdown/angled share the framed Leaflet view; intersectionZoom moves it.
+    // TS.map.setPreset reprojects (-> sim.setProjection + render.setProjection
+    // via the onReproject subscription registered in ts-app).
     if (TS.map && TS.map.setPreset) TS.map.setPreset(p);
-    if (TS.render && TS.render.setPreset) TS.render.setPreset(p);
+    // The "angled" tilt is purely an overlay-canvas CSS transform (basemap flat).
+    if (TS.render && TS.render.applyPresetTransform) TS.render.applyPresetTransform();
     rerenderStatic();
   }
 
