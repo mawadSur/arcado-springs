@@ -237,6 +237,134 @@
     });
   }
 
+  /* ---- captured local trips (feeder streets) ---- */
+  function feederPts(name) { return proj && proj.feeders ? proj.feeders[name] : null; }
+
+  // Soft "catchment" highlight: the feeder streets the local trips originate on.
+  function drawCatchment(ctx, state) {
+    if (!proj || !proj.feeders || !state || !state.feedNames) return;
+    ctx.save();
+    ctx.globalAlpha = 0.18;
+    state.feedNames.forEach(function (name) {
+      var pts = feederPts(name); if (!pts) return;
+      strokePoly(ctx, pts, 7, COL.green);
+    });
+    ctx.globalAlpha = 0.5;
+    state.feedNames.forEach(function (name) {
+      var pts = feederPts(name); if (!pts) return;
+      strokePoly(ctx, pts, 1.4, COL.green, [2, 4]);
+    });
+    ctx.restore();
+  }
+
+  // Short directional arrow conveying the agent's heading (inward pull / outflow).
+  function dirArrow(ctx, x, y, ang, color) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(-5, 0); ctx.lineTo(4, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(4, 0); ctx.lineTo(0.5, -2.6); ctx.lineTo(0.5, 2.6);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawCaptures(ctx, state, side) {
+    if (!state || !proj || !state.captures) return;
+    var after = sideShowsAfter(side);
+    var site = proj.site;
+    state.captures.forEach(function (a) {
+      var x, y, ang;
+      if (a.phase === "corridor") {
+        var rp = roadPts(a.corridorKey); if (!rp) return;
+        var q = pointAtPx(rp, a.corridorD);
+        x = q.x; y = q.y; ang = q.angle + (a.corridorDir < 0 ? Math.PI : 0);
+      } else {
+        var fp = feederPts(a.feederKey); if (!fp) return;
+        var q2 = pointAtPx(fp, a.d);
+        ang = q2.angle + (a.dir < 0 ? Math.PI : 0);
+        if (a.phase === "arriving" && site) {
+          // Converge on the parcel/site marker and fade in (parking).
+          var t = Math.max(0, Math.min(1, a.arrive));
+          x = q2.x + (site[0] - q2.x) * t;
+          y = q2.y + (site[1] - q2.y) * t;
+          ang = Math.atan2(site[1] - q2.y, site[0] - q2.x);
+        } else { x = q2.x; y = q2.y; }
+      }
+
+      var fade = a.phase === "arriving" ? Math.max(0, 1 - a.arrive) : 1;
+      ctx.save();
+      ctx.globalAlpha = 0.92 * fade;
+      if (after) {
+        // Proposed: green, free-flowing; mode glyphs (car / ped / cyclist).
+        if (a.mode === "walk") {
+          ctx.fillStyle = COL.gold;
+          ctx.beginPath(); ctx.arc(x, y, 2.6, 0, 7); ctx.fill();
+        } else if (a.mode === "bike") {
+          ctx.fillStyle = COL.green;
+          ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.fill();
+        } else {
+          ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+          ctx.fillStyle = COL.free;
+          roundRect(ctx, -4, -2.5, 8, 5, 1.6); ctx.fill();
+          ctx.restore();
+        }
+        // Inward-pull arrow toward the site (only while travelling, not parked).
+        if (a.phase !== "arriving" && site) {
+          var aAng = Math.atan2(site[1] - y, site[0] - x);
+          ctx.globalAlpha = 0.5 * fade;
+          dirArrow(ctx, x, y, aAng, COL.green);
+        }
+      } else {
+        // Existing: a car routing OUT to the jammed corner — colored by speed.
+        var col = a.phase === "corridor" ? vehColor(a.v, a.base) : COL.moderate;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+        ctx.fillStyle = col;
+        roundRect(ctx, -4, -2.5, 8, 5, 1.6); ctx.fill();
+        ctx.restore();
+        // Outflow arrow toward the intersection.
+        if (proj.intersection) {
+          var oAng = Math.atan2(proj.intersection[1] - y, proj.intersection[0] - x);
+          ctx.globalAlpha = 0.45;
+          dirArrow(ctx, x, y, oAng, COL.heavy);
+        }
+      }
+      ctx.restore();
+    });
+  }
+
+  /* Canvas parcel label + Proposed glow — only when there is NO live basemap
+     (fallback). Leaflet draws the parcel polygon + label/marker otherwise. */
+  function drawParcelLabel(ctx, side) {
+    if (mapAvailable() || !proj || !proj.site) return;
+    var s = proj.site;
+    var scale = 1;
+    if (proj.intersection) scale = Math.max(0.6, Math.min(2.2, Math.hypot(proj.intersection[0] - s[0], proj.intersection[1] - s[1]) / 160));
+    var cx = s[0] - 8 * scale, cy = s[1] + 26 * scale;
+    var reduced = !!(TS.config && TS.config.reducedMotion);
+    if (sideShowsAfter(side) && !reduced) {
+      // Subtle, slow destination glow (suppressed under reduced motion).
+      var pulse = 0.5 + 0.5 * Math.sin(Date.now() / 650);
+      ctx.save();
+      ctx.globalAlpha = 0.10 + 0.10 * pulse;
+      ctx.fillStyle = COL.green;
+      ctx.beginPath(); ctx.arc(cx, cy, (40 + 8 * pulse) * scale, 0, 7); ctx.fill();
+      ctx.restore();
+    }
+    // Destination marker dot.
+    ctx.save();
+    ctx.fillStyle = COL.green; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx, cy, 5, 0, 7); ctx.fill(); ctx.stroke();
+    // Label chip.
+    ctx.font = "600 10px " + "Inter, system-ui, sans-serif";
+    var label = "ARCADO SPRINGS";
+    var tw = ctx.measureText(label).width;
+    var lx = cx - tw / 2 - 6, ly = cy - 38 * scale - 9;
+    ctx.fillStyle = "rgba(47,93,58,.92)";
+    roundRect(ctx, lx, ly, tw + 12, 16, 8); ctx.fill();
+    ctx.fillStyle = "#ffffff"; ctx.textBaseline = "middle"; ctx.textAlign = "center";
+    ctx.fillText(label, cx, ly + 8);
+    ctx.restore();
+  }
+
   function sideShowsAfter(side) {
     return TS.config.side === "after";
   }
@@ -259,12 +387,19 @@
     if (sideShowsAfter(side)) drawParcel(ctx, side);
     else if (layers.projectBoundary) drawParcel(ctx, side);
 
+    // Catchment streets under the moving traffic.
+    if (layers.localTrips) drawCatchment(ctx, state);
+
     if (layers.congestion) drawCongestion(ctx, state);
     if (layers.pedCrossings) drawPedCrossings(ctx);
     if (layers.turningMovements) drawTurning(ctx);
     if (layers.queues) drawQueues(ctx, state);
     drawVehicles(ctx, state);
     if (layers.pedCrossings || sideShowsAfter(side)) drawAgents(ctx, state);
+    // Captured local trips: a distinct layer ABOVE corridor traffic.
+    if (layers.localTrips) drawCaptures(ctx, state, side);
+    // Parcel label/glow (fallback only; Leaflet draws it live otherwise).
+    drawParcelLabel(ctx, side);
     if (layers.proposedImprovements) drawProposed(ctx, side);
   }
 
@@ -274,6 +409,9 @@
     drawFrame(state, TS.config.layers, side);
     if (TS.ui && TS.ui.syncMetrics && TS.sim) {
       TS.ui.syncMetrics(TS.sim.getMetrics("before"), TS.sim.getMetrics("after"));
+    }
+    if (TS.ui && TS.ui.syncCapture && TS.sim && TS.sim.captureTripsPerHr) {
+      TS.ui.syncCapture(TS.sim.captureTripsPerHr(side));
     }
   }
 

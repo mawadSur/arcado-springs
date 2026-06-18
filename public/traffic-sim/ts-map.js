@@ -15,6 +15,7 @@
   var available = false;
   var containerEl = null;
   var parcelLayer = null;
+  var parcelMarker = null;
   var hotspotMarkers = {};
   var resizeCbs = [];
   var reprojectCbs = [];
@@ -91,11 +92,15 @@
     }
   }
 
-  /* ~9-acre highlighted parcel box on the south side of Arcado Rd at the site. */
+  /* ~9-acre highlighted parcel box on the south side of Arcado Rd at the site.
+     Green-tinted fill + sand/gold border, a destination marker, and an
+     "ARCADO SPRINGS" label so it reads as the place trips are heading. A
+     reduced-motion-aware glow pulse (CSS) runs only in the Proposed side. */
   function drawParcel() {
     if (!available) return;
     var L = window.L;
     if (parcelLayer) { map.removeLayer(parcelLayer); parcelLayer = null; }
+    if (parcelMarker) { map.removeLayer(parcelMarker); parcelMarker = null; }
     var s = C().site;
     // ~9 acres ≈ 36,400 m². A ~190m x 190m box, offset slightly south of the
     // Arcado Rd frontage. Lat degree ≈ 111,320 m; lng degree ≈ 92,500 m here.
@@ -108,9 +113,35 @@
       [cLat - dLat, cLng - dLng]
     ];
     parcelLayer = L.polygon(ring, {
-      color: "#B08D57", weight: 2, fillColor: "#2F5D3A",
-      fillOpacity: 0.12, interactive: false
+      className: "ts-parcel-poly",
+      color: "#B08D57", weight: 2.5, fillColor: "#2F5D3A",
+      fillOpacity: 0.16, interactive: false
     }).addTo(map);
+
+    var pin = L.divIcon({
+      className: "ts-parcel-marker",
+      html: '<span class="ts-parcel-dot" aria-hidden="true"></span>' +
+            '<span class="ts-parcel-label">ARCADO SPRINGS</span>',
+      iconSize: [0, 0], iconAnchor: [0, 0]
+    });
+    parcelMarker = L.marker([cLat, cLng], {
+      icon: pin, interactive: false, keyboard: false,
+      alt: "Arcado Springs development parcel", zIndexOffset: 500
+    }).addTo(map);
+    syncParcelState();
+  }
+
+  /* Toggle the Proposed-only pulse class on the parcel layers. Called on side
+     change so the "destination" glow only reads in the Proposed scenario, and
+     is suppressed under reduced motion via CSS. */
+  function syncParcelState() {
+    if (!available) return;
+    var proposed = !!(TS.config && TS.config.side === "after");
+    if (parcelLayer && parcelLayer._path) {
+      parcelLayer._path.classList.toggle("is-destination", proposed);
+    }
+    var mEl = parcelMarker && parcelMarker.getElement ? parcelMarker.getElement() : null;
+    if (mEl) mEl.classList.toggle("is-destination", proposed);
   }
 
   /* ---- projection ---- */
@@ -154,12 +185,15 @@
     var co = C();
     var roads = {};
     co.roads.forEach(function (r) { roads[r.name] = projectRoad(r); });
+    var feeders = {};
+    (co.feeders || []).forEach(function (f) { feeders[f.name] = projectRoad(f); });
     var hs = {};
     (TS.DATA.hotspots || []).forEach(function (h) {
       hs[h.id] = project(h.ll[0], h.ll[1]);
     });
     lastCache = {
       roads: roads,
+      feeders: feeders,
       hotspots: hs,
       site: project(co.site[0], co.site[1]),
       intersection: project(co.intersection.ll[0], co.intersection.ll[1]),
@@ -253,6 +287,7 @@
     getContainerSize: getContainerSize,
     onResize: onResize,
     notifyResize: notifyResize,
+    syncParcelState: syncParcelState,
     isAvailable: isAvailable
   };
 })();

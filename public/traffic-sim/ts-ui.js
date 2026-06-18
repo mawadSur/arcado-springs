@@ -29,6 +29,7 @@
     updateSideUI();
     setScenarioLabel();
     requestPlayStateUI();
+    syncCaptureFromSim();
   }
 
   function cacheEls() {
@@ -49,6 +50,9 @@
     els.popupBefore = $("ts-popup-before");
     els.popupAfter = $("ts-popup-after");
     els.popupClose = $("ts-popup-close");
+    els.capture = $("ts-capture-chip");
+    els.captureN = $("ts-capture-n");
+    els.captureText = $("ts-capture-text");
   }
 
   function buildScenarioOptions() {
@@ -111,6 +115,7 @@
       TS.sim.setScenario(els.scenario.value);
       setScenarioLabel();
       setTimeFromSlider();
+      syncCaptureFromSim();
       rerenderStatic();
     });
 
@@ -120,7 +125,7 @@
     if (els.play) els.play.addEventListener("click", togglePlay);
 
     if (els.timeline) {
-      els.timeline.addEventListener("input", function () { setTimeFromSlider(); rerenderStatic(); });
+      els.timeline.addEventListener("input", function () { setTimeFromSlider(); syncCaptureFromSim(); rerenderStatic(); });
     }
 
     if (els.popupClose) els.popupClose.addEventListener("click", closeHotspot);
@@ -133,7 +138,29 @@
     TS.config.side = side;
     TS.sim.setSide(side);
     updateSideUI();
+    if (TS.map && TS.map.syncParcelState) TS.map.syncParcelState();
+    syncCaptureFromSim();
     rerenderStatic();
+  }
+
+  /* Capture callout chip: "≈ N local trips/hr stay on-site — off Killian Hill
+     Rd". N is the scenario's internal-capture + walk share from the model (kept
+     consistent with the metrics); Existing shows the inverse honest framing. */
+  function syncCapture(n) {
+    if (!els.capture) return;
+    var after = TS.config.side === "after";
+    if (after) {
+      if (els.captureN) els.captureN.textContent = "≈ " + Math.max(0, Math.round(n));
+      if (els.captureText) els.captureText.textContent = " local trips/hr stay on-site — off Killian Hill Rd";
+    } else {
+      if (els.captureN) els.captureN.textContent = "0";
+      if (els.captureText) els.captureText.textContent = " trips captured today — every local errand drives out to the corner";
+    }
+    els.capture.setAttribute("data-side", after ? "after" : "before");
+  }
+  function syncCaptureFromSim() {
+    if (!TS.sim || !TS.sim.captureTripsPerHr) return;
+    syncCapture(TS.sim.captureTripsPerHr(TS.config.side));
   }
   function updateSideUI() {
     if (els.sideBefore) els.sideBefore.setAttribute("aria-pressed", String(TS.config.side === "before"));
@@ -302,12 +329,14 @@
   TS.ui = {
     init: init,
     syncMetrics: syncMetrics,
+    syncCapture: syncCapture,
+    syncCaptureFromSim: syncCaptureFromSim,
     openHotspot: openHotspot,
     closeHotspot: closeHotspot,
     setSide: setSide,
     requestPlayStateUI: requestPlayStateUI,
     setScenarioLabel: setScenarioLabel,
     applyLayers: function () { buildLayerToggles(); },
-    applyScenario: function () { setScenarioLabel(); }
+    applyScenario: function () { setScenarioLabel(); syncCaptureFromSim(); }
   };
 })();

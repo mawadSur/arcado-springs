@@ -26,7 +26,19 @@
       { name: "Arcado Road", class: "tertiary", path: [[33.887611, -84.111966], [33.886717, -84.113218], [33.885532, -84.114473], [33.884708, -84.115101], [33.883026, -84.11597], [33.881707, -84.117945], [33.880133, -84.119126], [33.879684, -84.119758], [33.878496, -84.12235], [33.87779, -84.123599], [33.877098, -84.125189], [33.876763, -84.125804], [33.876481, -84.126095], [33.874685, -84.127369], [33.874425, -84.127662], [33.873799, -84.128662], [33.873628, -84.128862], [33.873229, -84.129101]] },
       { name: "Camp Creek Road", class: "tertiary", path: [[33.885087, -84.133657], [33.883223, -84.131933], [33.882482, -84.131049], [33.882103, -84.130725], [33.881426, -84.130447], [33.880308, -84.129663], [33.878498, -84.129055], [33.87753, -84.129124], [33.877228, -84.12902], [33.876658, -84.128581], [33.87572, -84.128069], [33.875441, -84.127659], [33.875209, -84.126964]] },
       { name: "Cole Drive", class: "tertiary", path: [[33.875209, -84.126964], [33.87506, -84.126621], [33.874694, -84.126228], [33.872908, -84.125033], [33.87106, -84.123971], [33.869704, -84.122873], [33.869175, -84.122263], [33.868867, -84.12175], [33.868525, -84.120888], [33.868364, -84.1203], [33.868169, -84.119918], [33.867397, -84.119258], [33.86639, -84.118527], [33.866008, -84.118355], [33.865601, -84.118328]] }
-    ]
+    ],
+    /* Real neighborhood feeder streets (verbatim from corridor-osm.json). Trips
+       on these are what Arcado Springs can capture on-site (Proposed) instead of
+       routing them out to the congested Killian Hill corner (Existing). */
+    feeders: [
+      { name: "Village Green Court", path: [[33.881794, -84.124436], [33.881913, -84.124598], [33.882385, -84.124944], [33.883294, -84.122943], [33.880562, -84.121177], [33.880378, -84.121149], [33.880209, -84.1212], [33.879702, -84.121496], [33.879445, -84.121524], [33.871723, -84.116339]] },
+      { name: "King David Drive", path: [[33.884548, -84.121348], [33.88159, -84.119349], [33.881155, -84.118943], [33.880986, -84.118679], [33.880944, -84.118485]] },
+      { name: "Windsong Lane", path: [[33.884607, -84.119946], [33.884215, -84.119574], [33.882521, -84.118406], [33.881865, -84.117734]] },
+      { name: "Emily Drive", path: [[33.879944, -84.126401], [33.88013, -84.126439], [33.880732, -84.126847], [33.88088, -84.126887], [33.881413, -84.126095], [33.881545, -84.12585], [33.881517, -84.125716], [33.880985, -84.125434], [33.880287, -84.125221], [33.879487, -84.124553], [33.87907, -84.124417], [33.878303, -84.124357], [33.877995, -84.124206], [33.877614, -84.123953], [33.877318, -84.123679], [33.875767, -84.121994], [33.870561, -84.11847], [33.869266, -84.121359], [33.868867, -84.12175]] },
+      { name: "Arcadia Place", path: [[33.880133, -84.119126], [33.879659, -84.118609], [33.876848, -84.116655]] },
+      { name: "Orange Jungle Drive", path: [[33.88118, -84.123373], [33.881375, -84.123289], [33.881579, -84.123095], [33.881659, -84.122947], [33.881705, -84.122716], [33.881671, -84.122282], [33.881791, -84.121971]] }
+    ],
+    catchmentNote: "Local residential streets within ~500m whose trips Arcado Springs can capture on-site."
   };
 
   TS.DATA = {
@@ -133,6 +145,7 @@
       { id: "queues", label: "Queue lengths", defaultOn: true, description: "Stacked vehicle queues drawn back from the busy corner, by density." },
       { id: "turningMovements", label: "Turning movements", defaultOn: false, description: "Arrows showing left/through/right volumes at intersections." },
       { id: "siteAccess", label: "Site access", defaultOn: true, description: "Proposed driveway, added left-turn bay, and on-site capture (after only)." },
+      { id: "localTrips", label: "Local trips to site", defaultOn: true, description: "Neighborhood trips that Arcado Springs captures on-site (Proposed) instead of routing out to the Killian Hill corner (Existing), plus the catchment streets they come from." },
       { id: "pedCrossings", label: "Pedestrian crossings", defaultOn: true, description: "The corridor crossings plus pedestrian/cyclist agents on the frontage." },
       { id: "proposedImprovements", label: "Proposed improvements", defaultOn: true, description: "Highlights the dedicated turn lane, managed site access, and crossings; only meaningful in the after scenario." },
       { id: "projectBoundary", label: "Project boundary", defaultOn: false, description: "Highlighted outline of the ~9-acre parcel on Arcado Rd." }

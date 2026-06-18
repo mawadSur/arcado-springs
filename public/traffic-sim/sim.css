@@ -190,6 +190,53 @@ input[type="range"].ts-range { flex: 1; min-width: 180px; accent-color: var(--ac
 .legend { display: flex; flex-wrap: wrap; gap: .55rem 1.2rem; margin-top: .9rem; font-size: .82rem; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: .45rem; }
 .legend i { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+.legend i.legend-cap {
+  border-radius: 50%; background: var(--free);
+  box-shadow: 0 0 0 2px rgba(47, 93, 58, .25);
+}
+
+/* ---------- Trip-capture callout chip ---------- */
+.capture-chip {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .55rem .7rem; margin-top: .9rem;
+  padding: .7rem 1rem; border-radius: 999px; font-size: .92rem;
+  border: 1px solid rgba(47, 93, 58, .28); background: rgba(47, 93, 58, .09); color: var(--accent-dk);
+}
+.capture-chip svg { color: var(--accent); flex: none; }
+.capture-chip .capture-text { font-weight: 500; }
+.capture-chip .capture-text b { font-family: var(--font-head); font-weight: 600; font-variant-numeric: tabular-nums; }
+.capture-chip .capture-note {
+  margin-left: auto; color: var(--accent2-ink); border: 1px solid rgba(176, 141, 87, .4);
+  background: rgba(176, 141, 87, .12); padding: 3px 9px; border-radius: 999px;
+}
+.capture-chip[data-side="before"] {
+  border-color: rgba(185, 28, 28, .28); background: rgba(185, 28, 28, .07); color: #7f1d1d;
+}
+.capture-chip[data-side="before"] svg { color: #b91c1c; }
+
+/* ---------- Highlighted development parcel (Leaflet layers) ---------- */
+.leaflet-interactive.ts-parcel-poly { transition: fill-opacity .3s var(--ease); }
+.leaflet-interactive.ts-parcel-poly.is-destination {
+  fill-opacity: .22; animation: ts-parcel-pulse 2.4s var(--ease) infinite;
+}
+.ts-parcel-marker { background: transparent; border: 0; pointer-events: none; }
+.ts-parcel-dot {
+  position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--accent); border: 2px solid #fff; box-shadow: 0 1px 5px rgba(0, 0, 0, .45);
+}
+.ts-parcel-label {
+  position: absolute; left: 10px; top: -10px; white-space: nowrap;
+  font-family: var(--font-mono); font-size: .58rem; font-weight: 500; letter-spacing: .08em;
+  text-transform: uppercase; color: #fff; background: rgba(47, 93, 58, .92);
+  padding: 3px 8px; border-radius: 999px; box-shadow: 0 1px 5px rgba(0, 0, 0, .35);
+}
+.ts-parcel-marker.is-destination .ts-parcel-dot {
+  animation: ts-dot-pulse 2.4s var(--ease) infinite;
+}
+@keyframes ts-parcel-pulse { 0%, 100% { stroke-opacity: 1; } 50% { stroke-opacity: .5; } }
+@keyframes ts-dot-pulse {
+  0%, 100% { box-shadow: 0 1px 5px rgba(0, 0, 0, .45), 0 0 0 0 rgba(47, 93, 58, .5); }
+  50% { box-shadow: 0 1px 5px rgba(0, 0, 0, .45), 0 0 0 8px rgba(47, 93, 58, 0); }
+}
 
 /* ---------- Layers ---------- */
 .layers-wrap { margin-top: 1.2rem; }
@@ -314,6 +361,10 @@ footer.site-footer { border-top: 1px solid var(--line); padding: 2.2rem 0; color
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .btn, .segmented button, .ts-metric-val, .scenario-pill, select.ts-select { transition: none; }
+  /* Freeze the destination pulse/glow to a representative static state. */
+  .leaflet-interactive.ts-parcel-poly.is-destination,
+  .ts-parcel-marker.is-destination .ts-parcel-dot { animation: none; }
+  .leaflet-interactive.ts-parcel-poly.is-destination { fill-opacity: .22; }
 }
 
 /* ---------- Narrow screens (~380px) ---------- */

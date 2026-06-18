@@ -13,9 +13,12 @@
   var TS = (window.TS = window.TS || {});
 
   var MAX_VEHICLES = 150;
+  var MAX_CAPTURES = 26;     // local-trip agents (additional, distinct layer)
   var sides = {};            // 'before' | 'after' -> per-side state
   var proj = null;           // projection cache (pixel polylines)
   var poly = {};             // roadName -> {pts, len}
+  var feedPoly = {};         // feederName -> {pts, len, siteEnd} (siteEnd: 1|-1)
+  var feedNames = [];        // feeder names with valid geometry
   var STUDY = ["Arcado Road", "Killian Hill Road"];
   var CROSS = ["Camp Creek Road", "Cole Drive"];
   var stopIdx = {};          // roadName -> polyline index nearest intersection
@@ -58,7 +61,6 @@
   function setProjection(cache) {
     proj = cache || (TS.map && TS.map.getProjection ? TS.map.getProjection() : null);
     if (!proj) return;
-    var prev = poly;
     poly = {};
     Object.keys(proj.roads).forEach(function (name) {
       var pts = proj.roads[name];
@@ -67,12 +69,26 @@
     sitePx = proj.site;
     isxPx = proj.intersection;
 
+    // Feeder pixel polylines. siteEnd = +1 means d→len heads toward the site.
+    feedPoly = {}; feedNames = [];
+    var feeders = proj.feeders || {};
+    Object.keys(feeders).forEach(function (name) {
+      var pts = feeders[name];
+      if (!pts || pts.length < 2) return;
+      var len = polyLen(pts); if (!(len > 0)) return;
+      var a = pts[0], b = pts[pts.length - 1];
+      var dA = sitePx ? Math.hypot(a[0] - sitePx[0], a[1] - sitePx[1]) : 0;
+      var dB = sitePx ? Math.hypot(b[0] - sitePx[0], b[1] - sitePx[1]) : 1;
+      feedPoly[name] = { pts: pts, len: len, siteEnd: dB <= dA ? 1 : -1 };
+      feedNames.push(name);
+    });
+
     // Precompute stop-bar index (distance to intersection) per study road.
     STUDY.forEach(function (name) {
       if (poly[name]) stopIdx[name] = distAtNearestVertex(poly[name].pts, isxPx);
     });
 
-    // Rescale existing vehicles' d from prior fractional progress so they don't
+    // Rescale existing agents' d from prior fractional progress so they don't
     // jump when the polyline pixel length changes (resize/preset).
     ["before", "after"].forEach(function (side) {
       var s = sides[side];
@@ -80,6 +96,7 @@
       s.vehicles.forEach(rescale);
       s.peds.forEach(rescale);
       s.cyclists.forEach(rescale);
+      s.captures.forEach(rescaleCap);
     });
     function rescale(v) {
       var p = poly[v.roadKey];
@@ -88,6 +105,11 @@
       v.len = p.len;
       v.d = frac * p.len;
     }
+    function rescaleCap(c) {
+      var p = feedPoly[c.feederKey]; if (!p) return;
+      var frac = c.len ? Math.max(0, Math.min(1, c.d / c.len)) : 0;
+      c.len = p.len; c.d = frac * p.len;
+    }
   }
   function ready() { return !!(poly["Arcado Road"] && poly["Killian Hill Road"]); }
 
@@ -95,7 +117,8 @@
   function makeSideState() {
     return {
       vehicles: [], peds: [], cyclists: [],
-      spawnAcc: 0,
+      captures: [],            // local-trip agents on the feeder streets
+      spawnAcc: 0, capAcc: 0,
       queues: { arcadoEB: 0, killianNBL: 0 },
       density: {} // roadName -> 0..1
     };
@@ -171,6 +194,89 @@
   function makeCyclist() {
     var p = poly["Arcado Road"];
     return { roadKey: "Arcado Road", dir: Math.random() < 0.5 ? 1 : -1, d: p ? Math.random() * p.len : 0, len: p ? p.len : 0, v: 34 * (0.85 + Math.random() * 0.3), kind: "cyclist" };
+  }
+
+  /* ---- captured local trips (feeder streets) ----
+     A local trip runs the neighborhood end of a feeder toward the site end.
+     PROPOSED: it pulls INTO the parcel (free/green, may walk/bike) and fades on
+     arrival. EXISTING: the same trip joins Arcado Rd toward the congested Killian
+     Hill corner (car, slower/redder). Toggling DIVERTS flow corner<->site. */
+  function capturesReady() { return feedNames.length > 0; }
+
+  function makeCapture(side) {
+    var feederKey = pick(feedNames), fp = feedPoly[feederKey];
+    if (!fp) return null;
+    var dir = fp.siteEnd;                 // +1 -> d→len heads to site; -1 -> d→0
+    var mode = "car";                     // Proposed peels a few to walk/bike
+    if (side === "after") {
+      var wb = curScenario().demandProfile.walkBikeShift.after || 0;
+      if (Math.random() < Math.min(0.45, wb * 3.2)) mode = Math.random() < 0.5 ? "walk" : "bike";
+    }
+    var spd = (mode === "walk" ? 16 : mode === "bike" ? 34 : 52) * (0.85 + Math.random() * 0.3);
+    return {
+      feederKey: feederKey, dir: dir, d: dir > 0 ? 0 : fp.len, len: fp.len,
+      v: spd, base: spd, mode: mode, side: side,
+      phase: "feeder", arrive: 0,         // arrive: 0..1 fade-on-park (Proposed)
+      corridorKey: null, corridorD: 0, corridorDir: 1
+    };
+  }
+
+  /* Illustrative captured local trips per hour, from the scenario's internal-
+     capture + walk share (consistent with metrics). Existing captures none. */
+  function captureTripsPerHr(side) {
+    if (side !== "after") return 0;
+    var dp = curScenario().demandProfile;
+    var share = (dp.internalCapture.after || 0) + (dp.walkBikeShift.after || 0);
+    return Math.round(dp.baseVehPerHr * share * demandAt(TS.config.timeT));
+  }
+
+  function stepCaptures(side, dt) {
+    var s = sides[side];
+    if (!s || !capturesReady()) return;
+    if (!TS.config.layers || !TS.config.layers.localTrips) { s.captures.length = 0; return; }
+
+    var dp = curScenario().demandProfile;
+    var share = (dp.internalCapture.after || 0) + (dp.walkBikeShift.after || 0);
+    var rate = Math.max(0.25, dp.baseVehPerHr * share * demandAt(TS.config.timeT) / 3600);
+    s.capAcc += rate * dt * 0.9;
+    while (s.capAcc >= 1 && s.captures.length < MAX_CAPTURES) {
+      s.capAcc -= 1;
+      var c = makeCapture(side); if (c) s.captures.push(c);
+    }
+
+    var arcado = poly["Arcado Road"];
+    for (var i = s.captures.length - 1; i >= 0; i--) {
+      var a = s.captures[i], fp = feedPoly[a.feederKey];
+      if (!fp) { s.captures.splice(i, 1); continue; }
+
+      if (a.phase === "feeder") {
+        a.len = fp.len; a.d += a.v * a.dir * dt;
+        if (a.dir > 0 ? a.d >= fp.len : a.d <= 0) {
+          if (side === "after") a.phase = "arriving";
+          else {                          // Existing: hop onto Arcado Rd to corner
+            a.phase = "corridor"; a.corridorKey = "Arcado Road";
+            if (arcado && isxPx) {
+              var pos = pointAtPx(fp.pts, a.dir > 0 ? fp.len : 0);
+              a.corridorD = distAtNearestVertex(arcado.pts, [pos.x, pos.y]);
+              a.corridorDir = distAtNearestVertex(arcado.pts, isxPx) >= a.corridorD ? 1 : -1;
+            }
+          }
+        }
+      } else if (a.phase === "arriving") {  // Proposed: converge on parcel, fade
+        a.arrive += dt * 1.3;
+        if (a.arrive >= 1) { s.captures.splice(i, 1); continue; }
+      } else if (a.phase === "corridor") {  // Existing: slow at the jammed corner
+        var p = poly[a.corridorKey];
+        if (!p) { s.captures.splice(i, 1); continue; }
+        a.len = p.len;
+        var cp = pointAtPx(p.pts, a.corridorD);
+        var dCorner = isxPx ? Math.hypot(cp.x - isxPx[0], cp.y - isxPx[1]) : 999;
+        var jam = (side === "before" ? 0.7 : 0.35) * (0.5 + 0.5 * demandAt(TS.config.timeT));
+        a.v += (a.base * (dCorner < 200 ? 1 - jam * 0.85 : 1) - a.v) * Math.min(1, dt * 5);
+        a.corridorD += a.v * a.corridorDir * dt;
+        if (a.corridorD <= -2 || a.corridorD >= a.len + 2 || dCorner < 16) { s.captures.splice(i, 1); }
+      }
+    }
   }
 
   /* ---- step ---- */
@@ -258,6 +364,7 @@
 
     advanceLoop(s.peds, dt);
     advanceLoop(s.cyclists, dt);
+    stepCaptures(side, dt);
 
     // Normalize per-road density (vehicles -> 0..1), weighted toward intersection.
     s.density = {};
@@ -286,6 +393,7 @@
     if (!s) return null;
     return {
       vehicles: s.vehicles, peds: s.peds, cyclists: s.cyclists,
+      captures: s.captures, feedNames: feedNames,
       queues: s.queues, density: s.density,
       stopIdx: stopIdx, study: STUDY, cross: CROSS
     };
@@ -326,6 +434,7 @@
     if (statAcc > 0.3) {
       statAcc = 0;
       if (TS.ui && TS.ui.syncMetrics) TS.ui.syncMetrics(getMetrics("before"), getMetrics("after"));
+      if (TS.ui && TS.ui.syncCapture) TS.ui.syncCapture(captureTripsPerHr(TS.config.side));
     }
     rafId = requestAnimationFrame(loop);
   }
@@ -352,6 +461,14 @@
     var wantCyc = side === "after" ? 4 : 1;
     for (var p = 0; p < wantPed; p++) s.peds.push(makePed());
     for (var c = 0; c < wantCyc; c++) s.cyclists.push(makeCyclist());
+    // Seed a handful of local-trip agents already in motion along the feeders.
+    if (capturesReady() && TS.config.layers && TS.config.layers.localTrips) {
+      for (var k = 0; k < Math.floor(MAX_CAPTURES * 0.5); k++) {
+        var cap = makeCapture(side); if (!cap) break;
+        cap.d = cap.dir > 0 ? Math.random() * cap.len : cap.len * (1 - Math.random());
+        s.captures.push(cap);
+      }
+    }
   }
 
   function setScenario(id) { TS.config.activeScenarioId = id; reseed(); }
@@ -371,6 +488,7 @@
     setTimeT: setTimeT,
     getState: getState,
     getMetrics: getMetrics,
+    captureTripsPerHr: captureTripsPerHr,
     start: start,
     stop: stop,
     step: function (dt) { activeSides().forEach(function (side) { stepSide(side, dt); }); },
