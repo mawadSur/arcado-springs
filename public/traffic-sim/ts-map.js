@@ -33,10 +33,12 @@
   function framedBounds() {
     var co = C();
     var site = co.site, isx = co.intersection.ll;
-    var minLat = site[0] - 0.006;
-    var maxLat = isx[0] + 0.004;
-    var minLng = Math.min(site[1], isx[1]) - 0.006;
-    var maxLng = Math.max(site[1], isx[1]) + 0.006;
+    // Tight frame focused on the site + the neighborhood feeders (NW) and the
+    // Killian Hill junction (NE) — close enough that the trip-capture reads.
+    var minLat = site[0] - 0.0030;
+    var maxLat = isx[0] + 0.0019;
+    var minLng = Math.min(site[1], isx[1]) - 0.0052;
+    var maxLng = Math.max(site[1], isx[1]) + 0.0022;
     return [[minLat, minLng], [maxLat, maxLng]];
   }
 

@@ -244,15 +244,22 @@
   function drawCatchment(ctx, state) {
     if (!proj || !proj.feeders || !state || !state.feedNames) return;
     ctx.save();
-    ctx.globalAlpha = 0.18;
+    // Wide soft-green glow = the neighborhood "catchment" that feeds the project.
+    ctx.globalAlpha = 0.30;
     state.feedNames.forEach(function (name) {
       var pts = feederPts(name); if (!pts) return;
-      strokePoly(ctx, pts, 7, COL.green);
+      strokePoly(ctx, pts, 10, COL.green);
     });
-    ctx.globalAlpha = 0.5;
+    // Crisp dashed centre line that flows toward the site (animated unless reduced).
+    var reduced = !!(TS.config && TS.config.reducedMotion);
+    var off = reduced ? 0 : (Date.now() / 80) % 16;
+    ctx.globalAlpha = 0.75;
     state.feedNames.forEach(function (name) {
       var pts = feederPts(name); if (!pts) return;
-      strokePoly(ctx, pts, 1.4, COL.green, [2, 4]);
+      ctx.save();
+      ctx.lineDashOffset = -off;
+      strokePoly(ctx, pts, 2.4, COL.green, [5, 5]);
+      ctx.restore();
     });
     ctx.restore();
   }
@@ -260,10 +267,16 @@
   // Short directional arrow conveying the agent's heading (inward pull / outflow).
   function dirArrow(ctx, x, y, ang, color) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
-    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.moveTo(-5, 0); ctx.lineTo(4, 0); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(4, 0); ctx.lineTo(0.5, -2.6); ctx.lineTo(0.5, 2.6);
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.moveTo(-7, 0); ctx.lineTo(5, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(6, 0); ctx.lineTo(1, -3.4); ctx.lineTo(1, 3.4);
     ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  function capCar(ctx, x, y, ang, fill) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+    ctx.fillStyle = fill; ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 1;
+    roundRect(ctx, -6, -3.6, 12, 7.2, 2); ctx.fill(); ctx.stroke();
     ctx.restore();
   }
 
@@ -296,34 +309,28 @@
       if (after) {
         // Proposed: green, free-flowing; mode glyphs (car / ped / cyclist).
         if (a.mode === "walk") {
-          ctx.fillStyle = COL.gold;
-          ctx.beginPath(); ctx.arc(x, y, 2.6, 0, 7); ctx.fill();
+          ctx.fillStyle = COL.gold; ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(x, y, 3.4, 0, 7); ctx.fill(); ctx.stroke();
         } else if (a.mode === "bike") {
-          ctx.fillStyle = COL.green;
-          ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.fill();
+          ctx.fillStyle = COL.green; ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(x, y, 4, 0, 7); ctx.fill(); ctx.stroke();
         } else {
-          ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
-          ctx.fillStyle = COL.free;
-          roundRect(ctx, -4, -2.5, 8, 5, 1.6); ctx.fill();
-          ctx.restore();
+          capCar(ctx, x, y, ang, COL.free);
         }
         // Inward-pull arrow toward the site (only while travelling, not parked).
         if (a.phase !== "arriving" && site) {
           var aAng = Math.atan2(site[1] - y, site[0] - x);
-          ctx.globalAlpha = 0.5 * fade;
+          ctx.globalAlpha = 0.75 * fade;
           dirArrow(ctx, x, y, aAng, COL.green);
         }
       } else {
         // Existing: a car routing OUT to the jammed corner — colored by speed.
         var col = a.phase === "corridor" ? vehColor(a.v, a.base) : COL.moderate;
-        ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
-        ctx.fillStyle = col;
-        roundRect(ctx, -4, -2.5, 8, 5, 1.6); ctx.fill();
-        ctx.restore();
+        capCar(ctx, x, y, ang, col);
         // Outflow arrow toward the intersection.
         if (proj.intersection) {
           var oAng = Math.atan2(proj.intersection[1] - y, proj.intersection[0] - x);
-          ctx.globalAlpha = 0.45;
+          ctx.globalAlpha = 0.7;
           dirArrow(ctx, x, y, oAng, COL.heavy);
         }
       }

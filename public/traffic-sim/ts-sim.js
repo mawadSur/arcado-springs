@@ -13,7 +13,7 @@
   var TS = (window.TS = window.TS || {});
 
   var MAX_VEHICLES = 150;
-  var MAX_CAPTURES = 26;     // local-trip agents (additional, distinct layer)
+  var MAX_CAPTURES = 36;     // local-trip agents (additional, distinct layer)
   var sides = {};            // 'before' | 'after' -> per-side state
   var proj = null;           // projection cache (pixel polylines)
   var poly = {};             // roadName -> {pts, len}
