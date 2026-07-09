@@ -499,13 +499,14 @@
       createUnityInstance(canvas, config, function (p) {
         var pct = Math.round((p || 0) * 100);
         if (fill) fill.style.width = pct + "%";
-        if (label) label.textContent = "Loading walkthrough… " + pct + "%";
+        var pctEl = document.getElementById("player-progress-pct");
+        if (pctEl) pctEl.textContent = pct + "%";
       }).then(function () {
         if (progress) progress.hidden = true;
         setState(stage, "playing");
         if (caption) {
           caption.textContent =
-            "Use W/A/S/D or the arrow keys to move · mouse to look around.";
+            "Use W/A/S/D or the arrow keys to move and the mouse to look around. Press Esc to release the mouse pointer.";
         }
         try { canvas.focus(); } catch (e) {}
       }).catch(function (err) {

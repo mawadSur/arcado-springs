@@ -552,22 +552,31 @@ p { margin: 0 0 1rem; }
 .player-launch-btn { font-size: 1.05rem; cursor: pointer; border: 0; }
 .player-launch-note { color: rgba(255,255,255,.82); font-size: .85rem; margin: 0; }
 
-.player-progress { background: #16210f; }
+.player-progress {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(47,93,58,.55), transparent 62%),
+    #14200d;
+  gap: 12px;
+}
+.player-progress-title { color:#fff; margin:0; font-weight:700; font-size:clamp(1.05rem,2.6vw,1.32rem); letter-spacing:.01em; }
 .player-progress-bar {
-  width: min(360px, 70%);
-  height: 6px;
+  width: min(460px, 84%);
+  height: 14px;
   border-radius: 999px;
   background: rgba(255,255,255,.16);
   overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08);
 }
 .player-progress-bar span {
   display: block;
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, var(--sand), #fff);
-  transition: width .2s ease;
+  background: linear-gradient(90deg, #2f5d3a, var(--sand, #c9b896) 70%, #fff);
+  box-shadow: 0 0 16px rgba(201,184,150,.85);
+  transition: width .25s ease;
 }
-.player-progress-label { color: rgba(255,255,255,.8); font-size: .85rem; letter-spacing: .02em; margin: 0; }
+.player-progress-pct { color:#fff; margin:0; font-weight:800; font-size:clamp(1.5rem,5vw,2rem); font-variant-numeric:tabular-nums; line-height:1; }
+.player-progress-label { color: rgba(255,255,255,.85); font-size: .92rem; letter-spacing: .01em; margin: 0; max-width: 44ch; }
 
 .player-fallback { position: absolute; inset: 0; z-index: 1; }
 .player-fallback-img {
@@ -1831,3 +1840,24 @@ p { margin: 0 0 1rem; }
   .precedent-card--feature .precedent-oneliner { max-width: 80ch; }
   .precedents-sources-list { grid-template-columns: 1fr 1fr; gap: 8px 28px; }
 }
+
+/* ── Precedent proof photos (real, freely-licensed) ──────────────────── */
+.precedent-img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 2px 0 14px;
+  display: block;
+  background: #e8e4da;
+}
+.precedent-card--feature .precedent-img { aspect-ratio: 16 / 8; }
+.precedent-img-credit {
+  font-size: .7rem;
+  color: rgba(0,0,0,.42);
+  margin: -10px 0 12px;
+  letter-spacing: .01em;
+}
+.location-line { margin-top: 6px; }
+.location-map-link { color: var(--brand, #2f5d3a); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+.location-map-link:hover { text-decoration: underline; }

@@ -237,6 +237,10 @@
             <p>Over a third of the site kept green — room to gather, walk, and breathe.</p>
           </li>
           <li class="vision-card">
+            <h3>Bike greenway &amp; resident amenities</h3>
+            <p>A tree-lined cycling loop around the whole site, plus a clubhouse, pool, and courts for residents.</p>
+          </li>
+          <li class="vision-card">
             <h3>Adjacent to Legends of Parkview</h3>
             <p>Sited beside the existing neighborhood it&rsquo;s meant to serve.</p>
           </li>
@@ -254,7 +258,7 @@
           from the same model as the plans below. The visuals are real-time game-engine graphics
           (think a handheld-console look rather than the offline, photoreal renders elsewhere on this page),
           traded for the freedom to move through the space yourself. Use <strong>W/A/S/D</strong> or the
-          arrow keys to walk and the mouse to look around.
+          arrow keys to walk and the mouse to look around. Press <strong>Esc</strong> at any time to release the mouse pointer.
           <span class="player-mobile-note">Best on a desktop or laptop, full-screen.</span></p>
         <p class="muted player-intro">It streams a large (around 100&nbsp;MB) real-time build to your device, so it
           runs best on a desktop or laptop over broadband, and the first load takes a bit — give it a
@@ -275,8 +279,10 @@
 
           <!-- Loading bar — shown while the Unity instance downloads/initializes -->
           <div class="player-progress" id="player-progress" hidden>
+            <p class="player-progress-title">Loading the walkthrough</p>
             <div class="player-progress-bar"><span id="player-progress-fill"></span></div>
-            <p class="player-progress-label" id="player-progress-label">Loading walkthrough&hellip;</p>
+            <p class="player-progress-pct" id="player-progress-pct">0%</p>
+            <p class="player-progress-label" id="player-progress-label">Streaming a ~100&nbsp;MB real-time 3D build &mdash; the first load takes a moment.</p>
           </div>
 
           <!-- Fallback — shown when NO build is present. The screenshots ARE the experience. -->
@@ -383,10 +389,11 @@
       <div class="wrap">
         <p class="eyebrow">At a glance</p>
         <h2 class="section-title" id="glance-title">What it brings to the neighborhood.</h2>
-        <p class="muted">Nine acres reimagined as a walkable town center — retail, dining, recreation, and open green space for the whole neighborhood.</p>
+        <p class="muted">9.44 acres reimagined as a walkable town center — retail, dining, recreation, and open green space for the whole neighborhood.</p>
+        <p class="muted location-line"><a class="location-map-link" href="https://www.google.com/maps/search/?api=1&amp;query=33.87985%2C-84.11968" target="_blank" rel="noopener noreferrer"><svg class="icon icon-inline" aria-hidden="true"><use href="#i-map-pin"/></svg> 4541 Arcado Rd SW, Lilburn, GA &mdash; View on Google Maps</a></p>
 
         <ul class="stats-grid" data-reveal>
-          <li class="stat-card"><span class="stat-num" data-count="9">9</span><span class="stat-label">Acres of land</span></li>
+          <li class="stat-card"><span class="stat-num" data-count="9.44">9.44</span><span class="stat-label">Acres of land</span></li>
           <li class="stat-card"><span class="stat-num" data-count="12">12</span><span class="stat-label">Retail stores <span class="stat-plus">+&nbsp;1 anchor</span></span></li>
           <li class="stat-card"><span class="stat-num" data-count="6">6</span><span class="stat-label">Dining spaces</span></li>
           <li class="stat-card"><span class="stat-num" data-count="3.6">3.6</span><span class="stat-label">Acres open green space</span></li>
@@ -525,13 +532,6 @@
         <h2 class="section-title" id="traffic-title">How Arcado Springs helps cut traffic</h2>
         <p class="muted traffic-intro">The simplest way to ease traffic is to keep cars off the road in the first place. When homes, shops, dining, and offices sit on one walkable site, a meaningful share of everyday trips never need a car at all &mdash; you walk from your door to the caf&eacute; or to lunch. And the trips that still need a car are shorter, because the destination is right here instead of a drive away. The result is fewer cars, for fewer miles, spending less time on Arcado Rd and the roads around it.</p>
 
-        <figure class="traffic-map" data-reveal>
-          <img src="traffic-heatmap.svg"
-               alt="Illustrative schematic heat map of the Arcado Road corridor in Lilburn, Georgia. Arcado Road runs as the central spine — green at the residential west end, amber through the school cluster, and red at its congested corner with Killian Hill Road. Named arterials branch off color-coded by typical weekday evening-peak congestion, with the proposed Arcado Springs site marked by a gold star and the busiest intersections flagged as red hotspots."
-               loading="lazy" decoding="async" />
-          <figcaption class="muted">Illustrative schematic of typical weekday peak congestion &mdash; not live or measured data. Geometry is not to scale.</figcaption>
-        </figure>
-
         <p class="traffic-problem">Arcado Rd is a two-lane collector that funnels subdivision and school traffic &mdash; Parkview High, Trickum Middle, Arcado Elementary, and Killian Hill Christian &mdash; onto its signalized corner with Killian Hill Rd, the area&rsquo;s main arterial. Today every errand starts with a drive out to a distant store or onto a busy arterial, and the morning and afternoon school peaks concentrate that demand into a few tight hours. Killian Hill is already being widened from two lanes to five between Arcado Rd and Church St (a roughly $25M project), which tells you capacity here is the chief concern.</p>
 
         <ul class="mechanism-grid">
@@ -571,38 +571,7 @@
 
         <p class="traffic-sim-cta" style="margin:1.5rem 0 0"><a class="btn btn-primary" href="traffic-sim.html" style="text-decoration:none">&#9654;&nbsp; See the before / after traffic simulation</a> <span class="muted" style="font-size:.88rem">&mdash; satellite view + animated car flow</span></p>
 
-        <p class="muted traffic-caveat">These figures are general planning estimates drawn from national, peer-reviewed transportation research (ITE/NCHRP, the National Household Travel Survey, EPA Smart Growth, and Ewing &amp; Cervero). They are real and well-documented but site-specific: actual results depend on the land-use mix, how walkable the site truly is internally, and how well it connects to its surroundings &mdash; so they should be read as ranges, not guarantees. The accompanying heat map is an illustrative schematic of typical corridor conditions, not measured traffic counts.</p>
-      </div>
-    </section>
-
-    <!-- ===================== HOW IT WORKS ===================== -->
-    <section class="section section-alt" id="how-it-works" aria-labelledby="how-title">
-      <div class="wrap">
-        <p class="eyebrow">How it works</p>
-        <h2 class="section-title" id="how-title">Five steps, no install.</h2>
-
-        <ol class="steps">
-          <li class="step" data-reveal>
-            <span class="step-num" aria-hidden="true">1</span>
-            <p>Open the walkthrough from any link on your phone or computer — nothing to install.</p>
-          </li>
-          <li class="step" data-reveal>
-            <span class="step-num" aria-hidden="true">2</span>
-            <p>Choose to explore on foot through the shops, dining, and streets, or hop in the car to drive the route.</p>
-          </li>
-          <li class="step" data-reveal>
-            <span class="step-num" aria-hidden="true">3</span>
-            <p>Move through the town center at true scale and watch the lighting shift from day toward dusk.</p>
-          </li>
-          <li class="step" data-reveal>
-            <span class="step-num" aria-hidden="true">4</span>
-            <p>Notice what works and what gives you pause — the scale of a building, a crossing, a parking area, a sightline.</p>
-          </li>
-          <li class="step" data-reveal>
-            <span class="step-num" aria-hidden="true">5</span>
-            <p>Share your feedback through the engagement form, and help shape the design before construction begins.</p>
-          </li>
-        </ol>
+        <p class="muted traffic-caveat">These figures are general planning estimates drawn from national, peer-reviewed transportation research (ITE/NCHRP, the National Household Travel Survey, EPA Smart Growth, and Ewing &amp; Cervero). They are real and well-documented but site-specific: actual results depend on the land-use mix, how walkable the site truly is internally, and how well it connects to its surroundings &mdash; so they should be read as ranges, not guarantees.</p>
       </div>
     </section>
 
@@ -645,7 +614,7 @@
 
         <p class="precedents-throughline" data-reveal>
           <span class="precedents-throughline-label">The pattern that repeats</span>
-          A programmable public green is built first as the social anchor; walkable, local-favored dining and shops cluster around it; a steady calendar of concerts, farmers markets, run clubs, and holiday lighting turns visitors into regulars &mdash; and that community life then pulls private investment and lifts the whole area. The green is the magnet; the programming is what makes it a third place. That DNA is scale-independent, which is exactly why it maps onto a ~9-acre Lilburn project.
+          A programmable public green is built first as the social anchor; walkable, local-favored dining and shops cluster around it; a steady calendar of concerts, farmers markets, run clubs, and holiday lighting turns visitors into regulars &mdash; and that community life then pulls private investment and lifts the whole area. The green is the magnet; the programming is what makes it a third place. That DNA is scale-independent, which is exactly why it maps onto a ~9.44-acre Lilburn project.
         </p>
 
         <ul class="precedent-grid">
@@ -654,7 +623,9 @@
               <span class="precedent-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span>
               <span class="precedent-flag">Closest local proof</span>
             </div>
-            <h3 class="precedent-name">Downtown Duluth / Duluth Town Green</h3>
+            <img class="precedent-img" src="precedents/duluth.jpg" alt="Downtown Duluth - walkable Main Street with storefronts, street trees and pedestrians" loading="lazy" decoding="async" />
+              <p class="precedent-img-credit">Photo: John Phelan, CC BY 4.0, via Wikimedia Commons</p>
+              <h3 class="precedent-name">Downtown Duluth / Duluth Town Green</h3>
             <p class="precedent-loc muted">Duluth, Georgia (Gwinnett County) &mdash; ~10 miles northeast of Atlanta</p>
             <p class="precedent-oneliner">A &ldquo;dead downtown&rdquo; of consignment shops and a Big Lots that, anchored by a 2001 Town Green and amphitheater and then the Parsons Alley restaurant district, became a walkable dining-and-events destination &mdash; the clearest local proof that a public green plus a catalytic restaurant block can revive a struggling core.</p>
             <ul class="precedent-points">
@@ -671,11 +642,13 @@
             <div class="precedent-head">
               <span class="precedent-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-tree"/></svg></span>
             </div>
-            <h3 class="precedent-name">Suwanee Town Center</h3>
+            <img class="precedent-img" src="precedents/suwanee.jpg" alt="Suwanee Town Center Park - the signature elevated pedestrian bridge over the lake" loading="lazy" decoding="async" />
+              <p class="precedent-img-credit">Photo: John Phelan, CC BY 4.0, via Wikimedia Commons</p>
+              <h3 class="precedent-name">Suwanee Town Center</h3>
             <p class="precedent-loc muted">Suwanee, Georgia (Gwinnett County) &mdash; ~19,000&ndash;20,000 residents</p>
             <p class="precedent-oneliner">A built-from-scratch town center whose civic core began as a single 10-acre park &mdash; almost exactly Arcado&rsquo;s footprint &mdash; and grew into the social heart of a fast-growing suburb drawing ~200,000 visitors a year.</p>
             <ul class="precedent-points">
-              <li>The civic core started as a 10-acre urban park (opened December 2003) &mdash; the single most directly comparable unit to Arcado&rsquo;s ~9 acres &mdash; later expanding into a ~63-acre district.</li>
+              <li>The civic core started as a 10-acre urban park (opened December 2003) &mdash; the single most directly comparable unit to Arcado&rsquo;s ~9.44 acres &mdash; later expanding into a ~63-acre district.</li>
               <li>The park hosts 40+ events a year and draws approximately 200,000 visitors annually as the city&rsquo;s &ldquo;front yard.&rdquo;</li>
               <li>Named a Georgia Exceptional Main Street (GEMS) community in 2025 &mdash; the program&rsquo;s highest honor &mdash; and a 2026 Visionary City Award honoree.</li>
               <li>Twice named a Money magazine Best Place to Live (2007, 2013), recognition closely tied to the Town Center (correlation, not isolated causation).</li>
@@ -688,7 +661,9 @@
             <div class="precedent-head">
               <span class="precedent-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg></span>
             </div>
-            <h3 class="precedent-name">Peachtree Corners Town Center</h3>
+            <img class="precedent-img" src="precedents/peachtree-corners.jpg" alt="Peachtree Corners Town Green - the central lawn and lit walking path" loading="lazy" decoding="async" />
+              <p class="precedent-img-credit">Photo: Thomson200, CC0, via Wikimedia Commons</p>
+              <h3 class="precedent-name">Peachtree Corners Town Center</h3>
             <p class="precedent-loc muted">Peachtree Corners, Georgia (Gwinnett County) &mdash; incorporated 2012, ~50,000 residents</p>
             <p class="precedent-oneliner">A young suburb with no historic downtown built itself a walkable one from scratch &mdash; a Town Center anchored by a ~2-acre Town Green &mdash; proving a modest green plus a tight restaurant cluster can become a community&rsquo;s living room.</p>
             <ul class="precedent-points">
@@ -705,7 +680,9 @@
             <div class="precedent-head">
               <span class="precedent-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-utensils"/></svg></span>
             </div>
-            <h3 class="precedent-name">Alpharetta City Center</h3>
+            <img class="precedent-img" src="precedents/alpharetta.jpg" alt="Downtown Alpharetta - brick storefronts, street trees and sidewalk life" loading="lazy" decoding="async" />
+              <p class="precedent-img-credit">Photo: Thomson200, CC0, via Wikimedia Commons</p>
+              <h3 class="precedent-name">Alpharetta City Center</h3>
             <p class="precedent-loc muted">Alpharetta, Georgia (North Fulton, metro Atlanta) &mdash; ~25 miles north of Atlanta</p>
             <p class="precedent-oneliner">A civic-anchored downtown that grew walkable dining from ~5 restaurants to ~40&ndash;50 by favoring local, chef-driven tenants over chains &mdash; the clearest precedent for a &ldquo;no corporate chains&rdquo; programming-led identity.</p>
             <ul class="precedent-points">
@@ -723,7 +700,9 @@
               <span class="precedent-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-map-pin"/></svg></span>
               <span class="precedent-flag precedent-flag--scale">Scale benchmark</span>
             </div>
-            <h3 class="precedent-name">Avalon</h3>
+            <img class="precedent-img" src="precedents/avalon.jpg" alt="Avalon, Alpharetta - the walkable mixed-use main street with shops and people" loading="lazy" decoding="async" />
+              <p class="precedent-img-credit">Photo: Thomson200, CC0, via Wikimedia Commons</p>
+              <h3 class="precedent-name">Avalon</h3>
             <p class="precedent-loc muted">Alpharetta, Georgia (North Fulton, metro Atlanta) &mdash; 400 Avalon Blvd</p>
             <p class="precedent-oneliner">The 86-acre regional benchmark that proved a stalled, foreclosed suburban site can become metro Atlanta&rsquo;s most-emulated walkable town center &mdash; included as the directional &ldquo;what&rsquo;s possible at scale,&rdquo; not a one-to-one comparison.</p>
             <ul class="precedent-points">
@@ -742,7 +721,7 @@
           A human thread runs through them: a recurring <b>run club</b> at Duluth, Alpharetta, and Avalon &mdash; the small, weekly ritual that turns a public green into a place people belong to.
         </p>
 
-        <p class="muted precedents-caveat">These are precedents, not guarantees. Every project here differs from Arcado Springs in scale, timeline, and funding: most were city-led, voter- or municipally-funded efforts (Suwanee&rsquo;s $17.7M bond, Peachtree Corners&rsquo; and Alpharetta&rsquo;s public-private partnerships) executed over 10&ndash;20+ years, and Avalon is roughly 9&ndash;10x Arcado&rsquo;s footprint at a ~$1B regional scale. A ~9-acre, privately led Lilburn project will not reproduce their dollar figures, tenant counts, or civic anchors, and several headline numbers here are official estimates, developer-reported figures, or projections rather than audited results. Property-value gains near these centers correlate with the developments but also with broader regional growth, so causation should not be overstated. What these cases reliably demonstrate is the pattern &mdash; a programmed public green plus walkable local dining can become a genuine community heart &mdash; not the specific outcomes any one site will achieve.</p>
+        <p class="muted precedents-caveat">These are precedents, not guarantees. Every project here differs from Arcado Springs in scale, timeline, and funding: most were city-led, voter- or municipally-funded efforts (Suwanee&rsquo;s $17.7M bond, Peachtree Corners&rsquo; and Alpharetta&rsquo;s public-private partnerships) executed over 10&ndash;20+ years, and Avalon is roughly 9&ndash;10x Arcado&rsquo;s footprint at a ~$1B regional scale. A ~9.44-acre, privately led Lilburn project will not reproduce their dollar figures, tenant counts, or civic anchors, and several headline numbers here are official estimates, developer-reported figures, or projections rather than audited results. Property-value gains near these centers correlate with the developments but also with broader regional growth, so causation should not be overstated. What these cases reliably demonstrate is the pattern &mdash; a programmed public green plus walkable local dining can become a genuine community heart &mdash; not the specific outcomes any one site will achieve.</p>
 
         <details class="precedents-sources">
           <summary>All sources (31)</summary>
