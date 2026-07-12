@@ -472,8 +472,9 @@
     // decompression fallback = TRUE, so the data/framework/wasm assets carry
     // the .unityweb extension and Unity's OWN loader decompresses them in
     // JavaScript. We therefore point the config straight at the .unityweb URLs;
-    // the server returns them as plain static bytes with NO Content-Encoding
-    // header (see vercel.json) so the browser does not pre-decompress them.
+    // the host serves them as plain static bytes with NO Content-Encoding
+    // header (Vercel treats .unityweb as octet-stream and does not re-compress
+    // it) so the browser does not pre-decompress them.
     var base = BUILD_DIR + loaderFile.replace(/\.loader\.js$/, "");
     var config = {
       dataUrl: base + ".data.unityweb",
@@ -486,6 +487,42 @@
     };
 
     loadUnityScript(stage, loaderFile, config, canvas, fill, label, caption, progress);
+  }
+
+  // Move keyboard focus onto the Unity canvas so W/A/S/D and the arrow keys
+  // reach the game rather than the page. preventScroll stops the browser from
+  // jumping the page when focus lands on the (tabindex="-1") canvas.
+  function focusCanvas(canvas) {
+    if (!canvas) return;
+    try { canvas.focus({ preventScroll: true }); }
+    catch (e) { try { canvas.focus(); } catch (e2) {} }
+  }
+
+  // The build only captures the keyboard while its canvas is focused. Unity
+  // calls preventDefault() on the canvas mousedown, which suppresses the
+  // browser's default "focus on click" — so once focus leaves the canvas
+  // (clicking a link, the page, or the in-scene UI), a click back into the
+  // scene would NOT restore it and W/A/S/D would silently stop working (arrow
+  // keys would scroll the page instead). We reassert focus ourselves on any
+  // pointer press within the player, in the capture phase so it runs before
+  // Unity's own handler on the same event.
+  function keepCanvasFocused(stage, canvas) {
+    if (!stage || !canvas) return;
+    function grab() {
+      focusCanvas(canvas);
+      // Re-assert after Unity finishes handling the same pointer event.
+      setTimeout(function () { focusCanvas(canvas); }, 0);
+    }
+    if ("PointerEvent" in window) {
+      stage.addEventListener("pointerdown", function (e) {
+        // Touch has no physical keyboard to route to — skip the focus churn.
+        if (e && e.pointerType === "touch") return;
+        grab();
+      }, true);
+    } else {
+      // Fallback for legacy browsers without Pointer Events.
+      stage.addEventListener("mousedown", grab, true);
+    }
   }
 
   function loadUnityScript(stage, loaderFile, config, canvas, fill, label, caption, progress) {
@@ -508,7 +545,18 @@
           caption.textContent =
             "Use W/A/S/D or the arrow keys to move and the mouse to look around. Press Esc to release the mouse pointer.";
         }
-        try { canvas.focus(); } catch (e) {}
+        keepCanvasFocused(stage, canvas);
+        // Grab focus on load ONLY if the user has not already moved it away.
+        // The ~100MB build can stream for a while, so they may have scrolled
+        // off to read or type in the feedback form meanwhile. Because
+        // focusCanvas now uses preventScroll, an unconditional grab would
+        // silently steal focus (and route their keystrokes into the scene as
+        // W/A/S/D) with no visible cue. The capture-phase keepCanvasFocused
+        // listener already restores focus the instant they click back in.
+        var active = document.activeElement;
+        if (!active || active === document.body || stage.contains(active)) {
+          focusCanvas(canvas);
+        }
       }).catch(function (err) {
         failTo(stage, "Could not start the walkthrough" +
           (err && err.message ? ": " + err.message : "."));
