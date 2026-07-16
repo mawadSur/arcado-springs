@@ -489,13 +489,30 @@
     loadUnityScript(stage, loaderFile, config, canvas, fill, label, caption, progress);
   }
 
+  // Browsers that don't support FocusOptions.preventScroll silently IGNORE
+  // the options object rather than throw, so try/catch can't detect it —
+  // probe with a getter instead (the getter only runs where the dictionary
+  // member is read, i.e. where preventScroll is supported).
+  var SUPPORTS_PREVENT_SCROLL = false;
+  try {
+    document.createElement("div").focus(
+      Object.defineProperty({}, "preventScroll", {
+        get: function () { SUPPORTS_PREVENT_SCROLL = true; return true; }
+      })
+    );
+  } catch (e) {}
+
   // Move keyboard focus onto the Unity canvas so W/A/S/D and the arrow keys
-  // reach the game rather than the page. preventScroll stops the browser from
-  // jumping the page when focus lands on the (tabindex="-1") canvas.
+  // reach the game rather than the page. preventScroll (where supported)
+  // stops the browser from jumping the page when focus lands on the
+  // (tabindex="-1") canvas; callers only grab while the player is on-screen,
+  // so on browsers without it the legacy scroll-into-view is a small nudge
+  // at worst.
   function focusCanvas(canvas) {
     if (!canvas) return;
-    try { canvas.focus({ preventScroll: true }); }
-    catch (e) { try { canvas.focus(); } catch (e2) {} }
+    try {
+      canvas.focus(SUPPORTS_PREVENT_SCROLL ? { preventScroll: true } : undefined);
+    } catch (e) {}
   }
 
   // The build only captures the keyboard while its canvas is focused. Unity
@@ -514,11 +531,10 @@
       setTimeout(function () { focusCanvas(canvas); }, 0);
     }
     if ("PointerEvent" in window) {
-      stage.addEventListener("pointerdown", function (e) {
-        // Touch has no physical keyboard to route to — skip the focus churn.
-        if (e && e.pointerType === "touch") return;
-        grab();
-      }, true);
+      // All pointer types, touch included: 2-in-1s and iPads with hardware
+      // keyboards need a tap to restore focus too, and focusing a canvas
+      // (not editable) never pops a virtual keyboard.
+      stage.addEventListener("pointerdown", grab, true);
     } else {
       // Fallback for legacy browsers without Pointer Events.
       stage.addEventListener("mousedown", grab, true);
@@ -546,15 +562,23 @@
             "Use W/A/S/D or the arrow keys to move and the mouse to look around. Press Esc to release the mouse pointer.";
         }
         keepCanvasFocused(stage, canvas);
-        // Grab focus on load ONLY if the user has not already moved it away.
-        // The ~100MB build can stream for a while, so they may have scrolled
-        // off to read or type in the feedback form meanwhile. Because
-        // focusCanvas now uses preventScroll, an unconditional grab would
-        // silently steal focus (and route their keystrokes into the scene as
-        // W/A/S/D) with no visible cue. The capture-phase keepCanvasFocused
-        // listener already restores focus the instant they click back in.
+        // Grab focus on load ONLY if the user still looks parked at the
+        // player: focus hasn't moved to a control elsewhere AND the player is
+        // on-screen. The ~100MB build can stream for a while, so they may
+        // have scrolled off to read or type in the feedback form meanwhile —
+        // and activeElement === body can't distinguish "waiting at the
+        // player" from "scrolled away reading" (clicking plain text blurs
+        // back to body), so check the viewport too. A silent (preventScroll)
+        // grab while they read would reroute Space/arrows from page scrolling
+        // into the scene with no visible cue. The capture-phase
+        // keepCanvasFocused listener restores focus the instant they click or
+        // tap back in.
         var active = document.activeElement;
-        if (!active || active === document.body || stage.contains(active)) {
+        var rect = stage.getBoundingClientRect();
+        var viewH = window.innerHeight || document.documentElement.clientHeight || 0;
+        var stageInView = rect.bottom > 0 && rect.top < viewH;
+        if (stageInView &&
+            (!active || active === document.body || stage.contains(active))) {
           focusCanvas(canvas);
         }
       }).catch(function (err) {
