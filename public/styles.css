@@ -552,6 +552,29 @@ p { margin: 0 0 1rem; }
 .player-launch-btn { font-size: 1.05rem; cursor: pointer; border: 0; }
 .player-launch-note { color: rgba(255,255,255,.82); font-size: .85rem; margin: 0; }
 
+.player-esc-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%) translateY(6px);
+  z-index: 3;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: rgba(20, 30, 18, .88);
+  border: 1px solid rgba(255,255,255,.22);
+  color: #fff;
+  font-size: .9rem;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.player-esc-hint.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .player-progress {
   background:
     radial-gradient(120% 90% at 50% 0%, rgba(47,93,58,.55), transparent 62%),

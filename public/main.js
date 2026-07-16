@@ -541,6 +541,29 @@
     }
   }
 
+  // When the build captures the mouse (pointer lock, used for camera look),
+  // tell the visitor how to get their cursor back. "Press Esc" is invisible
+  // knowledge for non-gamers, and while locked they cannot click anything.
+  function installPointerLockHint(stage, canvas) {
+    if (!stage || !canvas || !("pointerLockElement" in document)) return;
+    var hint = document.createElement("div");
+    hint.className = "player-esc-hint";
+    hint.setAttribute("role", "status");
+    hint.textContent = "Mouse captured for looking around — press Esc to release your cursor";
+    stage.appendChild(hint);
+    var hideTimer = null;
+    document.addEventListener("pointerlockchange", function () {
+      if (document.pointerLockElement === canvas) {
+        hint.classList.add("is-visible");
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(function () { hint.classList.remove("is-visible"); }, 5000);
+      } else {
+        clearTimeout(hideTimer);
+        hint.classList.remove("is-visible");
+      }
+    });
+  }
+
   function loadUnityScript(stage, loaderFile, config, canvas, fill, label, caption, progress) {
     var script = document.createElement("script");
     script.src = BUILD_DIR + loaderFile;
@@ -554,7 +577,10 @@
         if (fill) fill.style.width = pct + "%";
         var pctEl = document.getElementById("player-progress-pct");
         if (pctEl) pctEl.textContent = pct + "%";
-      }).then(function () {
+      }).then(function (instance) {
+        // Expose the instance for console diagnostics (SendMessage, Quit) —
+        // Unity provides no other handle to a running WebGL build.
+        window.unityInstance = instance;
         if (progress) progress.hidden = true;
         setState(stage, "playing");
         if (caption) {
@@ -562,6 +588,7 @@
             "Use W/A/S/D or the arrow keys to move and the mouse to look around. Press Esc to release the mouse pointer.";
         }
         keepCanvasFocused(stage, canvas);
+        installPointerLockHint(stage, canvas);
         // Grab focus on load ONLY if the user still looks parked at the
         // player: focus hasn't moved to a control elsewhere AND the player is
         // on-screen. The ~100MB build can stream for a while, so they may
