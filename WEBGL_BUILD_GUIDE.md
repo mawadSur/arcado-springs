@@ -219,3 +219,9 @@ where the headers are set correctly.
 Copy / commit the populated `web/unity-build/` folder alongside `index.html` and redeploy the
 static site (the showcase currently deploys via Vercel CLI). Once `unity-build/Build/` is live,
 the player section upgrades itself to the real walkthrough automatically.
+
+> **Git LFS:** `public/unity-build/Build/WebGL.data.unityweb` (~95 MB) is tracked by
+> Git LFS (see `.gitattributes`) because it sits right under GitHub's 100 MB hard limit.
+> On a fresh machine run `git lfs install` once; after that, commit rebuilt data files
+> exactly like any other file. The Vercel project has Git LFS enabled, so deploys pull
+> the real file, not the pointer.
