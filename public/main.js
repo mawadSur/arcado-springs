@@ -8,7 +8,7 @@
  *   4. Lightbox for the gallery
  *   5. Site-plan pan/zoom (user-initiated only)
  *   6. Two-conceptions tabbed compare
- *   7. Feedback form (client-side, no backend — honest acknowledgement)
+ *   7. Feedback form -> /api/comments (pre-moderated) + approved-comments render
  *   8. Unity WebGL walkthrough loader (from the provided loaderJs)
  * ==========================================================================*/
 (function () {
@@ -358,7 +358,7 @@
   }
 
   /* ------------------------------------------------------------------ *
-   * 7. FEEDBACK FORM (no backend — honest local acknowledgement)
+   * 7. FEEDBACK FORM -> POST /api/comments (queued for moderation)
    * ------------------------------------------------------------------ */
   function setFormStatus(el, msg, ok) {
     if (!el) return;
