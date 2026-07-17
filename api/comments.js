@@ -26,7 +26,11 @@ async function readList(pathname) {
   try {
     const { blobs } = await list({ prefix: pathname, limit: 1 });
     if (!blobs || blobs.length === 0) return [];
-    const r = await fetch(blobs[0].url, { cache: 'no-store' });
+    // Blob public URLs are CDN-cached (default 30 days) at a STABLE pathname, so
+    // a plain re-fetch after an overwrite returns stale content. Bust the CDN
+    // cache key with a unique query param so every read gets the latest version.
+    const fresh = blobs[0].url + (blobs[0].url.includes('?') ? '&' : '?') + '_ts=' + Date.now();
+    const r = await fetch(fresh, { cache: 'no-store' });
     if (!r.ok) return [];
     const data = await r.json();
     return Array.isArray(data) ? data : [];
@@ -43,6 +47,7 @@ async function writeList(pathname, arr) {
     addRandomSuffix: false,
     contentType: 'application/json',
     allowOverwrite: true,
+    cacheControlMaxAge: 0, // minimize CDN caching of this mutable list
   });
 }
 
