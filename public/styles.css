@@ -16,8 +16,6 @@
   --line: #E4E0D6;
 
   --sand: #C9B896;         /* light sand, for player overlays */
-  --green: #2F5D3A;
-  --green-dk: #234a2d;
 
   --font-head: "Fraunces", Georgia, "Times New Roman", serif;
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -529,7 +527,8 @@ p { margin: 0 0 1rem; }
   background: #11180e;
 }
 .player[data-state="playing"] .player-canvas,
-.player[data-state="launch"] .player-canvas { display: block; }
+.player[data-state="launch"] .player-canvas,
+.player[data-state="progress"] .player-canvas { display: block; }
 
 .player-launch,
 .player-progress {
@@ -641,6 +640,10 @@ p { margin: 0 0 1rem; }
 .player[data-state="playing"] .player-fallback,
 .player[data-state="fallback"] .player-launch,
 .player[data-state="fallback"] .player-progress { display: none !important; }
+/* "progress" is the only state that lets .player-progress paint; hide the
+   launch overlay + screenshot fallback so the loading bar is the sole layer. */
+.player[data-state="progress"] .player-launch,
+.player[data-state="progress"] .player-fallback { display: none !important; }
 
 .player-caption { font-size: .9rem; margin: 0; }
 
@@ -1419,10 +1422,16 @@ p { margin: 0 0 1rem; }
     padding: 8px 0 16px;
     border-bottom: 1px solid var(--line);
     box-shadow: var(--shadow-md);
+    max-height: calc(100svh - var(--nav-h));
+    overflow-y: auto;
     transform: translateY(-12px);
     opacity: 0;
     pointer-events: none;
-    transition: transform .25s var(--ease), opacity .25s var(--ease);
+    /* visibility:hidden takes the closed links out of the tab order and off the
+       AT tree (opacity+pointer-events alone left 7 invisible links focusable);
+       delay it to the end of the fade so the slide-out still animates. */
+    visibility: hidden;
+    transition: transform .25s var(--ease), opacity .25s var(--ease), visibility 0s linear .25s;
   }
   .nav-links a {
     color: var(--text);
@@ -1436,6 +1445,8 @@ p { margin: 0 0 1rem; }
     transform: translateY(0);
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
+    transition: transform .25s var(--ease), opacity .25s var(--ease), visibility 0s;
   }
   /* hamburger -> X */
   .nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -1877,10 +1888,37 @@ p { margin: 0 0 1rem; }
 .precedent-card--feature .precedent-img { aspect-ratio: 16 / 8; }
 .precedent-img-credit {
   font-size: .7rem;
-  color: rgba(0,0,0,.42);
+  color: var(--muted); /* required CC attribution — was rgba(0,0,0,.42) ≈ 3.0:1, below AA */
   margin: -10px 0 12px;
   letter-spacing: .01em;
 }
 .location-line { margin-top: 6px; }
-.location-map-link { color: var(--brand, #2f5d3a); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+.location-map-link { color: var(--accent); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
 .location-map-link:hover { text-decoration: underline; }
+
+/* ============================================================================
+ * COMMUNITY VOICES (approved comments) + feedback-form honeypot
+ * ==========================================================================*/
+/* Error state for the feedback status line (light red for the dark CTA). */
+.form-status.is-error { color: #f6b0a8; }
+
+/* Honeypot: off-screen so people never see it; bots fill it and get dropped. */
+.hp-field { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+.voices-intro { max-width: 60ch; }
+.comments-list { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 14px; }
+.comment-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+}
+.comment-meta { display: flex; align-items: baseline; gap: 10px; margin: 0 0 6px; flex-wrap: wrap; }
+.comment-name { font-weight: 600; color: var(--text); }
+.comment-role {
+  font-family: var(--font-mono); font-size: .64rem; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent2-ink);
+}
+.comment-body { margin: 0; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.comments-empty { margin-top: 22px; font-style: italic; }

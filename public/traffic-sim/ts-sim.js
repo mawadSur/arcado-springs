@@ -24,6 +24,24 @@
   var stopIdx = {};          // roadName -> polyline index nearest intersection
   var sitePx = null, isxPx = null;
 
+  /* ---- Fixed-time signal at Arcado Rd & Killian Hill Rd ----
+     The junction is signalized (confirmed: Gwinnett County mast-arm signal with
+     dual left-turn lanes on Arcado). Modeled as a simple two-phase fixed-time
+     cycle — Arcado green, all-red clearance, Killian green, clearance. Vehicles
+     hold at their stop bar on red and release on green. The honest bottleneck:
+     when arrivals per cycle exceed what the green can clear, the queue grows
+     cycle after cycle (BEFORE, at peak); lower demand lets each green empty it
+     (AFTER). Illustrative timing, not Gwinnett's actual signal plan. */
+  var sigClock = 0;
+  var SIG_CYCLE = 8.0, SIG_ARC_GREEN = 3.4, SIG_CLEAR = 0.6;
+  function signalState() {
+    var ph = sigClock % SIG_CYCLE;
+    var arcGreen = ph < SIG_ARC_GREEN;
+    var kilStart = SIG_ARC_GREEN + SIG_CLEAR;
+    var kilGreen = ph >= kilStart && ph < (SIG_CYCLE - SIG_CLEAR);
+    return { arcGreen: arcGreen, kilGreen: kilGreen, phase: ph, cycle: SIG_CYCLE };
+  }
+
   /* ---- pixel-polyline geometry helpers ---- */
   function segLen(a, b) { return Math.hypot(b[0] - a[0], b[1] - a[1]); }
   function polyLen(pts) {
@@ -284,6 +302,10 @@
     var s = sides[side];
     if (!s || !ready()) return;
 
+    // Advance the shared signal clock once per frame (single active side).
+    sigClock += dt;
+    var sig = signalState();
+
     // Spawn.
     var perSec = effectiveCarRate(side) / 3600;
     s.spawnAcc += perSec * dt * 4; // visual density scaling
@@ -328,19 +350,27 @@
         }
       }
 
-      // Study-road congestion near the (unsignalized) corner. Density-based:
-      // the closer to the corner and the heavier the demand, the slower the
-      // approach — backup/queues form by congestion, not by a signal phase.
+      // Signalized corner. Vehicles hold at their stop bar on red and release on
+      // green. The standing queue is the bottleneck: when arrivals per cycle
+      // exceed what the green clears, the line grows cycle after cycle (BEFORE at
+      // peak); lower demand lets each green empty it (AFTER).
       if (veh.study) {
         var sb = stopIdx[veh.roadKey] || 0;
-        var toStop = (sb - veh.d) * veh.dir; // >0 = approaching the corner
-        var nearStop = toStop > -34 && toStop < 150;
-        if (nearStop) {
-          // General jam zone within 220px of the corner.
+        var toStop = (sb - veh.d) * veh.dir; // >0 = approaching the stop bar
+        var approaching = toStop > 2 && toStop < 240;
+        var greenForRoad = veh.roadKey === "Arcado Road" ? sig.arcGreen : sig.kilGreen;
+        if (approaching && !greenForRoad) {
+          // Red: decelerate smoothly to a stop ~6px short of the bar.
+          target = Math.min(target, Math.max(0, (toStop - 6) * 0.85));
+        } else if (approaching && greenForRoad && side === "before") {
+          // Green, but with no dedicated left-turn lane the turning cars block the
+          // through movement, so this oversaturated approach releases slowly and
+          // leaves a residual queue at the end of green.
           var dCorner = Math.hypot(pos.x - isxPx[0], pos.y - isxPx[1]);
-          if (dCorner < 220) target *= (1 - jamBase * 0.85);
+          if (dCorner < 150) target *= (1 - jamBase * 0.6);
         }
-        if (target < veh.base * 0.28 && nearStop) {
+        // Tally the standing queue (stopped/crawling cars on the approach).
+        if (target < veh.base * 0.3 && approaching) {
           if (veh.roadKey === "Arcado Road") s.queues.arcadoEB += 1;
           else s.queues.killianNBL += 1;
         }
@@ -395,7 +425,8 @@
       vehicles: s.vehicles, peds: s.peds, cyclists: s.cyclists,
       captures: s.captures, feedNames: feedNames,
       queues: s.queues, density: s.density,
-      stopIdx: stopIdx, study: STUDY, cross: CROSS
+      stopIdx: stopIdx, study: STUDY, cross: CROSS,
+      signal: signalState()
     };
   }
 

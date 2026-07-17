@@ -167,6 +167,29 @@
     ctx.closePath(); ctx.fill(); ctx.restore();
   }
 
+  /* Signal head at the Arcado Rd / Killian Hill Rd junction. Two lights: left =
+     Arcado corridor phase, right = Killian Hill phase. Makes the queue-on-red /
+     release-on-green behavior legible as an actual signal. */
+  function drawSignal(ctx, state) {
+    if (!proj || !proj.intersection || !state || !state.signal) return;
+    var c = proj.intersection, sig = state.signal;
+    var cx = c[0] + 16, cy = c[1] - 16;
+    ctx.save();
+    ctx.fillStyle = "rgba(29,26,22,.92)";
+    ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = 1;
+    roundRect(ctx, cx - 10.5, cy - 6.5, 21, 13, 4); ctx.fill(); ctx.stroke();
+    function light(x, on) {
+      ctx.beginPath(); ctx.arc(x, cy, 3.1, 0, 7);
+      ctx.fillStyle = on ? "#22c55e" : "#dc2626";
+      ctx.shadowColor = on ? "rgba(34,197,94,.95)" : "rgba(220,38,38,.7)";
+      ctx.shadowBlur = on ? 6 : 2.5;
+      ctx.fill();
+    }
+    light(cx - 5, sig.arcGreen);
+    light(cx + 5, sig.kilGreen);
+    ctx.restore();
+  }
+
   function drawPedCrossings(ctx) {
     if (!proj || !proj.hotspots) return;
     ["hs-pedCrossing", "hs-driveway"].forEach(function (id) {
@@ -402,6 +425,8 @@
     if (layers.turningMovements) drawTurning(ctx);
     if (layers.queues) drawQueues(ctx, state);
     drawVehicles(ctx, state);
+    // Signal head at the junction (always shown — the corner is signalized).
+    drawSignal(ctx, state);
     if (layers.pedCrossings || sideShowsAfter(side)) drawAgents(ctx, state);
     // Captured local trips: a distinct layer ABOVE corridor traffic.
     if (layers.localTrips) drawCaptures(ctx, state, side);

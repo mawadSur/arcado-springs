@@ -38,6 +38,42 @@
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" /></noscript>
 
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Structured data: helps search + AI answer engines identify the place and site. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://arcado-springs.vercel.app/#website",
+        "url": "https://arcado-springs.vercel.app/",
+        "name": "Arcado Springs",
+        "description": "A real-time, interactive 3D walkthrough of a proposed walkable town center on Arcado Road in Lilburn, GA.",
+        "inLanguage": "en-US"
+      },
+      {
+        "@type": "Place",
+        "@id": "https://arcado-springs.vercel.app/#place",
+        "name": "Arcado Springs",
+        "description": "A proposed 9.44-acre walkable, mixed-use town center in Lilburn, GA, beside the Legends of Parkview neighborhood.",
+        "url": "https://arcado-springs.vercel.app/",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "4541 Arcado Rd SW",
+          "addressLocality": "Lilburn",
+          "addressRegion": "GA",
+          "addressCountry": "US"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 33.87985,
+          "longitude": -84.11968
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -205,7 +241,7 @@
       <div class="wrap trust-bar-inner">
         <span>A concept preview</span>
         <span aria-hidden="true">·</span>
-        <span>Last updated 16 Jun 2026</span>
+        <span>Last updated 16 Jul 2026</span>
         <span aria-hidden="true">·</span>
         <span>Not an offer or final approval</span>
         <span aria-hidden="true">·</span>
@@ -219,14 +255,14 @@
         <div class="vision-lead" data-reveal>
           <p class="eyebrow">The vision</p>
           <h2 class="section-title" id="vision-title">A destination on the corridor, not just another strip.</h2>
-          <p class="lede-text">Arcado Springs is a proposed mixed-use community: a compact, walkable town center of shops and dining woven into the streets beside the Legends of Parkview neighborhood. Instead of asking you to read it off a blueprint, we built it as a living place you can explore — street-level retail, restaurants with patio seating, and green public space.</p>
+          <p class="lede-text">Arcado Springs is a proposed mixed-use community: a compact, walkable town center &mdash; a neighborhood grocery anchor, local shops, caf&eacute;s and dining, and a limited number of homes &mdash; woven into the streets beside the Legends of Parkview neighborhood. Instead of asking you to read it off a blueprint, we built it as a living place you can explore — street-level retail, restaurants with patio seating, and green public space.</p>
           <p class="muted">Move through the storefronts, sit at the caf&eacute; tables, follow the sidewalks to the corner, and get behind the wheel to drive the streets the way you would on any ordinary afternoon. This isn&rsquo;t a marketing flythrough — it&rsquo;s a real-time 3D model built in Unity 6, sized to the actual parcel, so what you walk is what is genuinely being proposed.</p>
         </div>
 
         <ul class="vision-cards" data-reveal>
           <li class="vision-card">
-            <h3>Mixed-use retail, dining &amp; community</h3>
-            <p>Storefronts and restaurants at street level, with public space to gather.</p>
+            <h3>Grocery anchor, retail &amp; dining</h3>
+            <p>A neighborhood grocery anchor, local storefronts, and caf&eacute;s and restaurants at street level, with public space to gather.</p>
           </li>
           <li class="vision-card">
             <h3>Walkable streetscape &amp; plazas</h3>
@@ -267,7 +303,11 @@
         <!-- 16:9 responsive stage. main.js toggles which state is visible. -->
         <div class="player" id="player-stage" data-state="loading">
           <!-- Unity canvas (only used when a build is present) -->
-          <canvas id="unity-canvas" class="player-canvas" tabindex="-1"></canvas>
+          <canvas id="unity-canvas" class="player-canvas" tabindex="-1"
+                  role="application"
+                  aria-label="Interactive 3D walkthrough of Arcado Springs. Once loaded, use W, A, S, D or the arrow keys to walk and the mouse to look around; press Escape to release the mouse.">
+            This interactive 3D walkthrough needs a browser with WebGL. The master site plan further down this page shows the same proposed layout.
+          </canvas>
 
           <!-- Launch overlay — shown when a build IS present, before the user starts it -->
           <div class="player-launch" id="player-launch" hidden>
@@ -280,7 +320,9 @@
           <!-- Loading bar — shown while the Unity instance downloads/initializes -->
           <div class="player-progress" id="player-progress" hidden>
             <p class="player-progress-title">Loading the walkthrough</p>
-            <div class="player-progress-bar"><span id="player-progress-fill"></span></div>
+            <div class="player-progress-bar" id="player-progress-bar" role="progressbar"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+                 aria-label="Walkthrough download progress"><span id="player-progress-fill"></span></div>
             <p class="player-progress-pct" id="player-progress-pct">0%</p>
             <p class="player-progress-label" id="player-progress-label">Streaming a ~100&nbsp;MB real-time 3D build &mdash; the first load takes a moment.</p>
           </div>
@@ -294,7 +336,7 @@
         </div>
 
         <!-- Honest caption. main.js rewrites this depending on detected state. -->
-        <p class="muted player-caption" id="player-caption">Checking for the live build&hellip;</p>
+        <p class="muted player-caption" id="player-caption" aria-live="polite">Checking for the live build&hellip;</p>
       </div>
     </section>
 
@@ -366,8 +408,8 @@
         <p class="muted siteplan-intro">Residents trust a drawing they can read. This is the proposal&rsquo;s master plan — pan and zoom to inspect the retail frontage, central plaza, dining patios, parking, and the neighborhood edge.</p>
 
         <figure class="siteplan-mount">
-          <div class="siteplan-stage" id="siteplan-stage" tabindex="0" role="img"
-               aria-label="Colored master site plan of Arcado Springs. Drag or pinch to pan, double-tap or use the buttons to zoom.">
+          <div class="siteplan-stage" id="siteplan-stage" tabindex="0" role="group"
+               aria-label="Interactive master site plan. Drag to pan; scroll, use the buttons, or press plus and minus to zoom; press 0 to reset.">
             <img class="siteplan-img" id="siteplan-img" src="site-plan.jpg"
                  loading="lazy" decoding="async"
                  alt="Colored master site plan of Arcado Springs along the Arcado Road corridor: rows of retail and dining pads, a central circular plaza, parking, and landscaped edges beside Legends of Parkview." />
@@ -394,7 +436,7 @@
 
         <ul class="stats-grid" data-reveal>
           <li class="stat-card"><span class="stat-num" data-count="9.44">9.44</span><span class="stat-label">Acres of land</span></li>
-          <li class="stat-card"><span class="stat-num" data-count="12">12</span><span class="stat-label">Retail stores <span class="stat-plus">+&nbsp;1 anchor</span></span></li>
+          <li class="stat-card"><span class="stat-num" data-count="12">12</span><span class="stat-label">Retail stores <span class="stat-plus">+&nbsp;1 grocery anchor</span></span></li>
           <li class="stat-card"><span class="stat-num" data-count="6">6</span><span class="stat-label">Dining spaces</span></li>
           <li class="stat-card"><span class="stat-num" data-count="3.6">3.6</span><span class="stat-label">Acres open green space</span></li>
         </ul>
@@ -569,7 +611,7 @@
 
         <p class="traffic-bottomline">No single feature fixes traffic on its own &mdash; the gains come from stacking them: trips captured on-site, the rest made shorter, errands chained into one outing, and short hops shifted to walking and biking. Together, a genuinely walkable mixed-use site puts fewer cars on Arcado Rd, for fewer miles, with less pressure at the Killian Hill peaks. It complements the road widening already underway rather than competing with it.</p>
 
-        <p class="traffic-sim-cta" style="margin:1.5rem 0 0"><a class="btn btn-primary" href="traffic-sim.html" style="text-decoration:none">&#9654;&nbsp; See the before / after traffic simulation</a> <span class="muted" style="font-size:.88rem">&mdash; satellite view + animated car flow</span></p>
+        <p class="traffic-sim-cta" style="margin:1.5rem 0 0"><a class="btn btn-primary" href="traffic-sim.html" style="text-decoration:none">&#9654;&nbsp; See the before / after traffic simulation</a> <span class="muted" style="font-size:.88rem">&mdash; street map view + animated car flow</span></p>
 
         <p class="muted traffic-caveat">These figures are general planning estimates drawn from national, peer-reviewed transportation research (ITE/NCHRP, the National Household Travel Survey, EPA Smart Growth, and Ewing &amp; Cervero). They are real and well-documented but site-specific: actual results depend on the land-use mix, how walkable the site truly is internally, and how well it connects to its surroundings &mdash; so they should be read as ranges, not guarantees.</p>
       </div>
@@ -599,7 +641,7 @@
           </article>
         </div>
 
-        <p class="muted process-note">This preview sits early in the public planning process — before final approvals. Feedback collected here is summarized for the project team and the planning record, so your input is part of how the design moves forward.</p>
+        <p class="muted process-note">This preview sits early in the public planning process — before final approvals. Comments are reviewed, posted below for the community to see, and shared with the project team, so your input is part of how the design moves forward.</p>
       </div>
     </section>
 
@@ -607,7 +649,7 @@
     <section class="section section-alt precedents" id="precedents" aria-labelledby="precedents-title">
       <div class="wrap">
         <div class="section-head" data-reveal>
-          <p class="eyebrow"><span class="section-index" aria-hidden="true">10</span> Proven elsewhere</p>
+          <p class="eyebrow">Proven elsewhere</p>
           <h2 class="section-title" id="precedents-title">It already works, a few miles away.</h2>
           <p class="muted precedents-intro">Five walkable town centers in metro Atlanta&rsquo;s suburbs &mdash; most in Gwinnett County, the same county as Lilburn &mdash; offer a tested playbook for what Arcado Springs is attempting: turning an underused site into a community&rsquo;s social heart with a programmed public green, walkable local dining, and homes. Each took a declining or stalled site and made it the place a suburb gathers, and each generated measurable follow-on investment and a real calendar of community life. They differ widely in scale and in who paid for them, so they&rsquo;re best read as proof of the pattern, not as forecasts.</p>
         </div>
@@ -623,7 +665,7 @@
               <span class="precedent-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-store"/></svg></span>
               <span class="precedent-flag">Closest local proof</span>
             </div>
-            <img class="precedent-img" src="precedents/duluth.jpg" alt="Downtown Duluth - walkable Main Street with storefronts, street trees and pedestrians" loading="lazy" decoding="async" />
+            <img class="precedent-img" src="precedents/duluth.jpg" alt="Downtown Duluth - walkable Main Street with storefronts, street trees and pedestrians" loading="lazy" decoding="async" width="1200" height="900" />
               <p class="precedent-img-credit">Photo: John Phelan, CC BY 4.0, via Wikimedia Commons</p>
               <h3 class="precedent-name">Downtown Duluth / Duluth Town Green</h3>
             <p class="precedent-loc muted">Duluth, Georgia (Gwinnett County) &mdash; ~10 miles northeast of Atlanta</p>
@@ -642,7 +684,7 @@
             <div class="precedent-head">
               <span class="precedent-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-tree"/></svg></span>
             </div>
-            <img class="precedent-img" src="precedents/suwanee.jpg" alt="Suwanee Town Center Park - the signature elevated pedestrian bridge over the lake" loading="lazy" decoding="async" />
+            <img class="precedent-img" src="precedents/suwanee.jpg" alt="Suwanee Town Center Park - the signature elevated pedestrian bridge over the lake" loading="lazy" decoding="async" width="1200" height="900" />
               <p class="precedent-img-credit">Photo: John Phelan, CC BY 4.0, via Wikimedia Commons</p>
               <h3 class="precedent-name">Suwanee Town Center</h3>
             <p class="precedent-loc muted">Suwanee, Georgia (Gwinnett County) &mdash; ~19,000&ndash;20,000 residents</p>
@@ -661,7 +703,7 @@
             <div class="precedent-head">
               <span class="precedent-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg></span>
             </div>
-            <img class="precedent-img" src="precedents/peachtree-corners.jpg" alt="Peachtree Corners Town Green - the central lawn and lit walking path" loading="lazy" decoding="async" />
+            <img class="precedent-img" src="precedents/peachtree-corners.jpg" alt="Peachtree Corners Town Green - the central lawn and lit walking path" loading="lazy" decoding="async" width="1200" height="900" />
               <p class="precedent-img-credit">Photo: Thomson200, CC0, via Wikimedia Commons</p>
               <h3 class="precedent-name">Peachtree Corners Town Center</h3>
             <p class="precedent-loc muted">Peachtree Corners, Georgia (Gwinnett County) &mdash; incorporated 2012, ~50,000 residents</p>
@@ -680,7 +722,7 @@
             <div class="precedent-head">
               <span class="precedent-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-utensils"/></svg></span>
             </div>
-            <img class="precedent-img" src="precedents/alpharetta.jpg" alt="Downtown Alpharetta - brick storefronts, street trees and sidewalk life" loading="lazy" decoding="async" />
+            <img class="precedent-img" src="precedents/alpharetta.jpg" alt="Downtown Alpharetta - brick storefronts, street trees and sidewalk life" loading="lazy" decoding="async" width="1200" height="800" />
               <p class="precedent-img-credit">Photo: Thomson200, CC0, via Wikimedia Commons</p>
               <h3 class="precedent-name">Alpharetta City Center</h3>
             <p class="precedent-loc muted">Alpharetta, Georgia (North Fulton, metro Atlanta) &mdash; ~25 miles north of Atlanta</p>
@@ -700,7 +742,7 @@
               <span class="precedent-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-map-pin"/></svg></span>
               <span class="precedent-flag precedent-flag--scale">Scale benchmark</span>
             </div>
-            <img class="precedent-img" src="precedents/avalon.jpg" alt="Avalon, Alpharetta - the walkable mixed-use main street with shops and people" loading="lazy" decoding="async" />
+            <img class="precedent-img" src="precedents/avalon.jpg" alt="Avalon, Alpharetta - the walkable mixed-use main street with shops and people" loading="lazy" decoding="async" width="1200" height="800" />
               <p class="precedent-img-credit">Photo: Thomson200, CC0, via Wikimedia Commons</p>
               <h3 class="precedent-name">Avalon</h3>
             <p class="precedent-loc muted">Alpharetta, Georgia (North Fulton, metro Atlanta) &mdash; 400 Avalon Blvd</p>
@@ -775,7 +817,12 @@
         <p class="cta-body">Take ten minutes to walk Arcado Springs and tell us what you think. The plan is still being shaped, and your perspective — on the streets, the shops, the traffic, and the spaces in between — is what makes it better. The earlier you weigh in, the more your voice can change.</p>
 
         <form class="feedback-form" id="feedback-form" novalidate>
-          <p class="form-note">Your comment becomes part of the community record. Name is optional.</p>
+          <p class="form-note">Comments are reviewed before they appear below for neighbors to see. Name is optional.</p>
+
+          <!-- Honeypot: real people never see or fill this; automated bots do, and get dropped. -->
+          <div class="hp-field" aria-hidden="true">
+            <label>Leave this field empty <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+          </div>
 
           <div class="field">
             <label for="f-name">Name <span class="optional">(optional)</span></label>
@@ -798,12 +845,23 @@
           </div>
 
           <div class="cta-actions">
-            <button class="btn btn-primary" type="submit">Explore Arcado Springs</button>
-            <a class="link-arrow link-arrow-light" href="mailto:hello@arcadosprings.example">Contact the team &rarr;</a>
+            <button class="btn btn-primary" type="submit">Post my comment</button>
+            <a class="link-arrow link-arrow-light" href="mailto:mawad@surconsultinggroup.com">Contact the team &rarr;</a>
           </div>
 
           <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
         </form>
+      </div>
+    </section>
+
+    <!-- ===================== COMMUNITY VOICES (approved comments) ===================== -->
+    <section class="section community-voices" id="community-voices" aria-labelledby="voices-title">
+      <div class="wrap">
+        <p class="eyebrow">Community voices</p>
+        <h2 class="section-title" id="voices-title">What neighbors are saying</h2>
+        <p class="muted voices-intro">Reviewed comments from residents, local businesses, and stakeholders. Add yours using the form above.</p>
+        <ul class="comments-list" id="comments-list"></ul>
+        <p class="muted comments-empty" id="comments-empty" hidden>No comments yet — approved comments will appear here.</p>
       </div>
     </section>
   </main>
@@ -817,8 +875,8 @@
       </div>
 
       <div class="footer-meta">
-        <p>Last updated 16 Jun 2026</p>
-        <p><a href="mailto:hello@arcadosprings.example">hello@arcadosprings.example</a></p>
+        <p>Last updated 16 Jul 2026</p>
+        <p><a href="mailto:mawad@surconsultinggroup.com">mawad@surconsultinggroup.com</a></p>
         <p class="footer-disclaimer">In-engine visualization — final construction may vary. Arcado Springs is a proposed development presented for community review. Designs, layouts, and details shown in the 3D walkthrough are conceptual and subject to change based on public feedback, engineering, and approvals.</p>
       </div>
     </div>

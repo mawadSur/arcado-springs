@@ -360,6 +360,17 @@
   /* ------------------------------------------------------------------ *
    * 7. FEEDBACK FORM (no backend — honest local acknowledgement)
    * ------------------------------------------------------------------ */
+  function setFormStatus(el, msg, ok) {
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.toggle("is-ok", !!ok);
+    el.classList.toggle("is-error", !ok);
+  }
+
+  function roleLabel(r) {
+    return r === "business" ? "Local business" : r === "planner" ? "Planner / stakeholder" : "Resident";
+  }
+
   function initForm() {
     var form = byId("feedback-form");
     var status = byId("form-status");
@@ -367,23 +378,89 @@
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      var comment = byId("f-comment");
-      if (comment && !comment.value.trim()) {
-        if (status) {
-          status.textContent = "Please add a short comment before sending.";
-          status.classList.remove("is-ok");
-        }
-        comment.focus();
+      var commentEl = byId("f-comment");
+      var comment = commentEl ? commentEl.value.trim() : "";
+      if (!comment) {
+        setFormStatus(status, "Please add a short comment before sending.", false);
+        if (commentEl) commentEl.focus();
         return;
       }
-      if (status) {
-        status.textContent =
-          "Thank you — your input has been noted for the community record. " +
-          "We read every comment as the design is shaped.";
-        status.classList.add("is-ok");
-      }
-      form.reset();
+      var hp = form.querySelector('[name="website"]');       // honeypot
+      var roleEl = form.querySelector('[name="role"]:checked');
+      var nameEl = byId("f-name");
+      var payload = {
+        name: nameEl ? nameEl.value : "",
+        role: roleEl ? roleEl.value : "resident",
+        comment: comment,
+        website: hp ? hp.value : ""
+      };
+      var btn = form.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
+      setFormStatus(status, "Sending…", true);
+
+      fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(function (r) {
+        if (r.ok) return r.json();
+        return r.json().then(
+          function (j) { throw new Error((j && j.error) || "error"); },
+          function () { throw new Error("error"); }
+        );
+      }).then(function () {
+        setFormStatus(status,
+          "Thank you — your comment was submitted and will appear below once it’s reviewed.", true);
+        form.reset();
+      }).catch(function () {
+        setFormStatus(status,
+          "Sorry — we couldn’t send your comment just now. Please try again, or email us.", false);
+      }).finally(function () {
+        if (btn) btn.disabled = false;
+      });
     });
+  }
+
+  /* Load + render approved community comments. User text is set via
+     textContent ONLY (never innerHTML), so a comment can't inject markup. */
+  function initComments() {
+    var listEl = byId("comments-list");
+    if (!listEl) return;
+    var emptyEl = byId("comments-empty");
+
+    fetch("/api/comments", { headers: { "Accept": "application/json" } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        var comments = (data && data.comments) ? data.comments : [];
+        if (!comments.length) { if (emptyEl) emptyEl.hidden = false; return; }
+        var frag = document.createDocumentFragment();
+        comments.forEach(function (c) {
+          if (!c || !c.comment) return;
+          var li = document.createElement("li");
+          li.className = "comment-card";
+
+          var meta = document.createElement("p");
+          meta.className = "comment-meta";
+          var who = document.createElement("span");
+          who.className = "comment-name";
+          who.textContent = (c.name && c.name.trim()) ? c.name.trim() : "Neighbor";
+          var role = document.createElement("span");
+          role.className = "comment-role";
+          role.textContent = roleLabel(c.role);
+          meta.appendChild(who);
+          meta.appendChild(role);
+
+          var body = document.createElement("p");
+          body.className = "comment-body";
+          body.textContent = c.comment;
+
+          li.appendChild(meta);
+          li.appendChild(body);
+          frag.appendChild(li);
+        });
+        listEl.appendChild(frag);
+      })
+      .catch(function () { if (emptyEl) emptyEl.hidden = false; });
   }
 
   /* ==================================================================== *
@@ -465,6 +542,11 @@
 
     if (launch) launch.hidden = true;
     if (progress) progress.hidden = false;
+    // Reveal the loading overlay. The CSS hides .player-progress in EVERY other
+    // state (loading/launch/playing/fallback), so without a dedicated "progress"
+    // state the bar stays display:none and the visitor watches a black canvas
+    // through the ~100MB stream. This state shows the bar and hides launch/fallback.
+    setState(stage, "progress");
     if (caption) caption.textContent = "Loading the walkthrough…";
 
     // The shipping build derives every filename from the build folder name
@@ -577,6 +659,8 @@
         if (fill) fill.style.width = pct + "%";
         var pctEl = document.getElementById("player-progress-pct");
         if (pctEl) pctEl.textContent = pct + "%";
+        var barEl = document.getElementById("player-progress-bar");
+        if (barEl) barEl.setAttribute("aria-valuenow", String(pct));
       }).then(function (instance) {
         // Expose the instance for console diagnostics (SendMessage, Quit) —
         // Unity provides no other handle to a running WebGL build.
@@ -660,6 +744,7 @@
     initSitePlan();
     initCompare();
     initForm();
+    initComments();
     initWalkthrough();
   });
 })();

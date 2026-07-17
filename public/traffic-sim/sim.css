@@ -367,6 +367,36 @@ footer.site-footer { border-top: 1px solid var(--line); padding: 2.2rem 0; color
   .leaflet-interactive.ts-parcel-poly.is-destination { fill-opacity: .22; }
 }
 
+/* ---------- Tablet / phone nav: keep the brand fixed and let the section
+   links scroll horizontally instead of overflowing (and clipping) the 60px
+   sticky bar. The main site collapses its nav under 820px; this page had no
+   collapse at all. ---------- */
+@media (max-width: 720px) {
+  .topnav .wrap { gap: 12px; }
+  .brand { flex: none; }
+  .topnav .wrap > nav {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    min-width: 0;                 /* allow shrink inside the flex row so scroll works */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;        /* Firefox */
+  }
+  .topnav .wrap > nav::-webkit-scrollbar { display: none; }
+  .topnav nav a { margin-left: 0; white-space: nowrap; flex: none; }
+}
+
+/* ---------- Give the primary sim controls a 44px minimum tap target on
+   phones (they were ~31-35px — below the target the main site standardizes
+   on, and these are how a phone user drives the sim). ---------- */
+@media (max-width: 640px) {
+  .btn,
+  .segmented button,
+  .ts-hotspot-btn,
+  select.ts-select { min-height: 44px; }
+}
+
 /* ---------- Narrow screens (~380px) ---------- */
 @media (max-width: 420px) {
   body { font-size: 16px; }

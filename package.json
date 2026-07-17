@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "name": "arcado-springs-site",
+  "dependencies": { "@vercel/blob": "^2.6.1" }
+}
