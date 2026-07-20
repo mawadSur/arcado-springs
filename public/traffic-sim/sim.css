@@ -382,6 +382,11 @@ footer.site-footer { border-top: 1px solid var(--line); padding: 2.2rem 0; color
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;        /* Firefox */
+    /* Right-edge fade signals the links scroll (scrollbar is hidden) so the
+       last link reads as "more →" instead of a hard clip. */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent);
+            mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent);
+    padding-right: 6px;
   }
   .topnav .wrap > nav::-webkit-scrollbar { display: none; }
   .topnav nav a { margin-left: 0; white-space: nowrap; flex: none; }

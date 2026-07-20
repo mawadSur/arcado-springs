@@ -174,6 +174,10 @@
     <symbol id="i-play-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M8 5.5l11 6.5-11 6.5z" fill="currentColor" stroke="none"/>
     </symbol>
+    <symbol id="i-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 5.5h16v10H10l-4.5 3.2v-3.2H4z"/>
+      <path d="M8.5 10.5h7M8.5 13h4"/>
+    </symbol>
   </svg>
 
   <!-- ===================== NAV ===================== -->
@@ -212,7 +216,7 @@
         <img class="hero-img" src="lifestyle/hero.jpg"
              alt="" fetchpriority="high" decoding="async"
              width="2400" height="1371"
-             onerror="this.onerror=null;this.src='site-plan.jpg'" />
+             onerror="this.onerror=null;this.src='master-plan.jpg'" />
         <div class="hero-scrim"></div>
       </div>
 
@@ -290,18 +294,22 @@
       <div class="wrap">
         <p class="eyebrow">Interactive walkthrough</p>
         <h2 class="section-title" id="walkthrough-title">Walk Arcado Springs in your browser</h2>
-        <p class="muted player-intro">A real-time 3D build of the master plan, running live in your browser — built
-          from the same model as the plans below. The visuals are real-time game-engine graphics
-          (think a handheld-console look rather than the offline, photoreal renders elsewhere on this page),
-          traded for the freedom to move through the space yourself. Use <strong>W/A/S/D</strong> or the
-          arrow keys to walk and the mouse to look around. Walk up to any parked car and press <strong>E</strong>
-          to get in and drive it &mdash; the same <strong>W/A/S/D</strong> keys steer and <strong>Space</strong> is the
-          handbrake &mdash; then press <strong>F</strong> to get out and continue on foot. Press <strong>Esc</strong> at
-          any time to release the mouse pointer.
-          <span class="player-mobile-note">Best on a desktop or laptop, full-screen.</span></p>
-        <p class="muted player-intro">It streams a large (around 100&nbsp;MB) real-time build to your device, so it
-          runs best on a desktop or laptop over broadband, and the first load takes a bit — give it a
-          moment after you press Launch while it downloads.</p>
+        <p class="muted player-intro">A real-time 3D build of the master plan, running live in your browser &mdash; built
+          from the same model as the plans below. The visuals are real-time game-engine graphics (a
+          handheld-console look, not the photoreal renders elsewhere on this page), traded for the freedom
+          to move through the space yourself. It streams a large (~100&nbsp;MB) build, so it runs best on a
+          desktop or laptop over broadband and the first load takes a moment.
+          <span class="player-mobile-note">Best full-screen on a desktop or laptop.</span></p>
+
+        <details class="player-controls">
+          <summary>How to move &amp; drive</summary>
+          <ul class="player-controls-list">
+            <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or the arrow keys to walk; move the mouse to look around.</li>
+            <li>Walk up to any parked car and press <kbd>E</kbd> to get in and drive it.</li>
+            <li>Driving uses the same <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> keys to steer, <kbd>Space</kbd> for the handbrake, and <kbd>F</kbd> to get out and continue on foot.</li>
+            <li><kbd>Esc</kbd> releases the mouse pointer at any time.</li>
+          </ul>
+        </details>
 
         <!-- 16:9 responsive stage. main.js toggles which state is visible. -->
         <div class="player" id="player-stage" data-state="loading">
@@ -332,7 +340,7 @@
 
           <!-- Fallback — shown when NO build is present. The screenshots ARE the experience. -->
           <div class="player-fallback" id="player-fallback" hidden>
-            <img class="player-fallback-img" src="site-plan.jpg"
+            <img class="player-fallback-img" src="master-plan.jpg"
                  alt="Arcado Springs master site plan — interactive walkthrough preview" loading="lazy" />
             <span class="player-badge"><svg class="icon icon-play" aria-hidden="true"><use href="#i-play-triangle"/></svg> Interactive walkthrough — live build deploying soon</span>
           </div>
@@ -413,7 +421,7 @@
         <figure class="siteplan-mount">
           <div class="siteplan-stage" id="siteplan-stage" tabindex="0" role="group"
                aria-label="Interactive master site plan. Drag to pan; scroll, use the buttons, or press plus and minus to zoom; press 0 to reset.">
-            <img class="siteplan-img" id="siteplan-img" src="site-plan.jpg"
+            <img class="siteplan-img" id="siteplan-img" src="master-plan.jpg"
                  loading="lazy" decoding="async"
                  alt="Colored master site plan of Arcado Springs along the Arcado Road corridor: rows of retail and dining pads, a central circular plaza, parking, and landscaped edges beside Legends of Parkview." />
           </div>
@@ -810,7 +818,7 @@
     <!-- ===================== GIVE FEEDBACK (final CTA) ===================== -->
     <section class="cta" id="give-feedback" aria-labelledby="cta-title">
       <div class="cta-media" aria-hidden="true">
-        <img src="site-plan.jpg" alt="" loading="lazy" decoding="async" />
+        <img src="master-plan.jpg" alt="" loading="lazy" decoding="async" />
         <div class="cta-scrim"></div>
       </div>
 
@@ -864,7 +872,12 @@
         <h2 class="section-title" id="voices-title">What neighbors are saying</h2>
         <p class="muted voices-intro">Reviewed comments from residents, local businesses, and stakeholders. Add yours using the form above.</p>
         <ul class="comments-list" id="comments-list"></ul>
-        <p class="muted comments-empty" id="comments-empty" hidden>No comments yet — approved comments will appear here.</p>
+        <div class="comments-empty" id="comments-empty" hidden>
+          <span class="comments-empty-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span>
+          <p class="comments-empty-title">Be the first to weigh in.</p>
+          <p class="comments-empty-text">Approved comments from neighbors, local businesses, and stakeholders will appear here. Yours could be the one that starts the conversation.</p>
+          <a class="btn btn-primary comments-empty-cta" href="#give-feedback">Share your thoughts</a>
+        </div>
       </div>
     </section>
   </main>
