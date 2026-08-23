@@ -4,3 +4,10 @@ node_modules/
 *.log
 .vercel
 .gstack/
+
+# Private project management docs — repo is PUBLIC, never commit these
+status/
+real_dev_plan.md
+
+# Local env pulls (contain live tokens)
+.env*
