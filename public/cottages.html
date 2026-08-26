@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2F5D3A" />
+  <meta name="color-scheme" content="light" />
+
+  <title>Arcado Springs — The Cottages Concept Study</title>
+  <meta name="description" content="A concept study for one-level 55+ cottage living on the Arcado Road site in Lilburn, GA — architectural renderings, floor plans, and a site concept, shared for owner and stakeholder review." />
+
+  <!-- Unlisted concept study: reachable by link, kept out of search results. -->
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Favicon: inline SVG (no extra request, always resolves) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3Ccircle%20cx='16'%20cy='22'%20r='2.4'%20fill='%23C9B896'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3Ccircle%20cx='16'%20cy='22'%20r='2.4'%20fill='%23C9B896'/%3E%3C/svg%3E" />
+
+  <!-- Open Graph / social: so a privately shared link previews nicely -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Arcado Springs" />
+  <meta property="og:url" content="https://arcado-springs.vercel.app/cottages.html" />
+  <meta property="og:title" content="The Cottages at Arcado Springs — Concept Study" />
+  <meta property="og:description" content="One-level 55+ cottage living behind the trees on Arcado Road: architectural renderings, two illustrative floor plans, and a site concept." />
+  <meta property="og:image" content="https://arcado-springs.vercel.app/cottages/hero.jpg" />
+  <meta property="og:image:alt" content="Golden-hour concept rendering of a tree-lined lane of one-story craftsman cottages with deep front porches." />
+  <meta property="og:locale" content="en_US" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Cottages at Arcado Springs — Concept Study" />
+  <meta name="twitter:image" content="https://arcado-springs.vercel.app/cottages/hero.jpg" />
+
+  <!-- Google Fonts: Fraunces (headings), Inter (body), IBM Plex Mono (honesty signals) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" /></noscript>
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Page-scoped styles for the floor-plan cards. Consumes the site's tokens
+       (same approach as decisions.html) — nothing here overrides styles.css. -->
+  <style>
+    .ch-plans { display: grid; gap: 34px; margin-top: 38px; }
+    .ch-plan {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .ch-plan-inner { display: grid; }
+    @media (min-width: 920px) {
+      .ch-plan-inner { grid-template-columns: 1.15fr 0.85fr; }
+      .ch-plan-media { border-right: 1px solid var(--line); border-bottom: 0 !important; }
+    }
+    .ch-plan-media {
+      background: #fff;
+      padding: clamp(14px, 2.5vw, 26px);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+    }
+    .ch-plan-media .gallery-trigger { border: 0; box-shadow: none; background: #fff; }
+    .ch-plan-media .gallery-trigger:hover { transform: none; box-shadow: none; }
+    .ch-plan-body { padding: 28px 26px; }
+    .ch-plan-kicker {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent2-ink);
+    }
+    .ch-plan-name {
+      font-family: var(--font-head);
+      font-size: clamp(1.5rem, 3vw, 1.9rem);
+      line-height: 1.1;
+      margin: 6px 0 4px;
+    }
+    .ch-plan-lede { color: var(--muted); font-size: 0.98rem; margin: 10px 0 18px; }
+    .ch-specs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 18px;
+      margin: 0 0 18px;
+      padding: 16px 18px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .ch-spec dt {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    .ch-spec dd { margin: 0; font-weight: 600; font-size: 0.98rem; }
+    .ch-plan-points { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    .ch-plan-points li {
+      position: relative;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .ch-plan-points li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.52em;
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(47, 93, 58, 0.22);
+      border: 2px solid var(--accent);
+      box-sizing: border-box;
+    }
+    .ch-plan-3d { margin: 18px 0 0; }
+    .ch-plan-3d figcaption { margin-top: 10px; color: var(--muted); font-size: 0.85rem; }
+    .ch-figure { margin: 34px 0 0; }
+    .ch-figure figcaption { margin-top: 12px; color: var(--muted); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ===================== ICON SPRITE (subset used on this page) ===================== -->
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="i-walk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="13" cy="4" r="1.6"/>
+      <path d="M13 7.5l-3 2.2L11 14l-2 6"/>
+      <path d="M13 13l3 1.5 2 4"/>
+      <path d="M11 10l-3.5 2"/>
+    </symbol>
+    <symbol id="i-paddle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="10" cy="8.5" r="5.5"/>
+      <path d="M6.4 12.6l-3.2 4.6a1.6 1.6 0 0 0 2.6 1.9l3-4.4"/>
+      <circle cx="18" cy="16" r="1.3"/>
+    </symbol>
+    <symbol id="i-tree" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l5 7h-3l3 5H7l3-5H7l5-7z"/>
+      <path d="M12 15v6"/>
+    </symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l7 3v5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6l7-3z"/>
+      <path d="M9 12l2 2 4-4"/>
+    </symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/>
+    </symbol>
+    <symbol id="i-accessibility" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="4" r="1.4"/>
+      <path d="M4 8h16"/>
+      <path d="M9 8v4l-2 8"/>
+      <path d="M15 8v4l2 8"/>
+    </symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 11l8-7 8 7"/>
+      <path d="M6 9.5V20h12V9.5"/>
+      <path d="M10 20v-5h4v5"/>
+    </symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2.5" y="8" width="19" height="8" rx="1.6" transform="rotate(-45 12 12)"/>
+      <path d="M9 7l1.5 1.5M11.5 9.5L13 11M14 6l1.5 1.5M16.5 8.5L18 10"/>
+    </symbol>
+    <symbol id="i-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21c4.5-4.5 7-7.6 7-11a7 7 0 1 0-14 0c0 3.4 2.5 6.5 7 11z"/>
+      <circle cx="12" cy="10" r="2.5"/>
+    </symbol>
+  </svg>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav" id="nav" data-nav>
+    <div class="wrap nav-inner">
+      <a class="brand" href="/" aria-label="Arcado Springs home">
+        <span class="brand-mark">Arcado <span class="brand-accent">Springs</span></span>
+        <span class="badge-mono" aria-hidden="true">CONCEPT</span>
+      </a>
+
+      <nav class="nav-links" id="nav-links" aria-label="Primary">
+        <a href="#idea">The idea</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#plans">Floor plans</a>
+        <a href="#interiors">Interiors</a>
+        <a href="#site">The site</a>
+        <a class="nav-feedback" href="/">&larr; Overview</a>
+      </nav>
+
+      <button class="nav-toggle" id="nav-toggle" type="button"
+              aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <span id="top" class="anchor-top"></span>
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" id="hero" aria-labelledby="hero-title">
+      <div class="hero-media" aria-hidden="true">
+        <img class="hero-img" src="cottages/hero.jpg"
+             alt="" fetchpriority="high" decoding="async"
+             width="2400" height="1340"
+             onerror="this.onerror=null;this.src='master-plan.jpg'" />
+        <div class="hero-scrim"></div>
+      </div>
+
+      <span class="pill-mono hero-pill" aria-hidden="true">ARCADO ROAD · CONCEPT STUDY</span>
+
+      <div class="wrap hero-content" data-reveal>
+        <p class="hero-eyebrow">The Cottages at Arcado Springs — A 55+ concept study · Lilburn, GA</p>
+        <h1 class="hero-title" id="hero-title">One-level cottage living, tucked behind the trees on Arcado Road.</h1>
+        <span class="hero-rule" aria-hidden="true"></span>
+        <p class="hero-lede">This page explores one option under study for the Arcado Road site: a small neighborhood of single-story cottage homes for neighbors 55 and better &mdash; deep front porches on a garden lane, a clubhouse green, and the creek woods preserved at the back. Renderings and floor plans below show how it could look and live.</p>
+
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#plans">See the floor plans</a>
+          <a class="btn btn-ghost" href="#architecture">View the architecture</a>
+        </div>
+        <p class="hero-honesty">AI-generated concept imagery of an option under study &mdash; not a filed plan.</p>
+      </div>
+
+      <a class="scroll-cue" href="#idea" aria-label="Scroll to the idea">
+        <span class="scroll-cue-chevron" aria-hidden="true"></span>
+      </a>
+    </section>
+
+    <!-- ===================== TRUST BAR ===================== -->
+    <div class="trust-bar" role="note" aria-label="Concept study transparency notice">
+      <div class="wrap trust-bar-inner">
+        <span>A concept study</span>
+        <span aria-hidden="true">·</span>
+        <span>Last updated 26 Aug 2026</span>
+        <span aria-hidden="true">·</span>
+        <span>Not an application, offer, or approval</span>
+        <span aria-hidden="true">·</span>
+        <span>Imagery is AI-generated, not photographs</span>
+      </div>
+    </div>
+
+    <!-- ===================== THE IDEA ===================== -->
+    <section class="section" id="idea" aria-labelledby="idea-title">
+      <div class="wrap">
+        <p class="eyebrow">The idea</p>
+        <h2 class="section-title" id="idea-title">Right-sized homes for the neighbors we already have.</h2>
+        <p class="lede-text">Many longtime residents around Arcado Road love the neighborhood but no longer need the house &mdash; the stairs, the yard, the upkeep. This study looks at a quiet cottage court of roughly 44&ndash;50 detached, single-story homes reserved for ages 55 and better: a way to stay close to the church, the doctor, the grandkids, and the streets you know, in a home that finally fits.</p>
+        <p class="muted">Every home would be one level with a zero-step entry, on a small low-maintenance homesite, arranged along a garden lane that ends at the preserved creek woods. It is being studied alongside the town-center concept shown on the <a href="/">main overview</a>, and would require its own survey work, engineering, and a rezoning before anything could move forward.</p>
+
+        <ul class="stats-grid" data-reveal>
+          <li class="stat-card"><span class="stat-num" data-count="47">47</span><span class="stat-label">Cottage homes <span class="stat-plus">study range 44&ndash;50</span></span></li>
+          <li class="stat-card"><span class="stat-num" data-count="1">1</span><span class="stat-label">Story &mdash; every home, no stairs</span></li>
+          <li class="stat-card"><span class="stat-num" data-count="1600">1600</span><span class="stat-label">Square feet <span class="stat-plus">plans from ~1,450 SF</span></span></li>
+          <li class="stat-card"><span class="stat-num" data-count="40">40</span><span class="stat-label">% fewer car trips than conventional homes</span></li>
+        </ul>
+
+        <h3 class="subhead">What cottage living includes</h3>
+        <ul class="amenities" data-reveal>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></span> Clubhouse &amp; village green</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-paddle"/></svg></span> Pickleball courts</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-walk"/></svg></span> Walking loop &amp; sidewalks</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-tree"/></svg></span> Preserved creek woods</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-accessibility"/></svg></span> Zero-step entries</li>
+          <li class="amenity"><span class="am-ico" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg></span> Low-maintenance homesites</li>
+        </ul>
+        <p class="muted gallery-foot">Home count and sizes are a study range &mdash; the final number depends on the boundary survey and engineering now being scoped.</p>
+      </div>
+    </section>
+
+    <!-- ===================== ARCHITECTURE ===================== -->
+    <section class="section section-alt" id="architecture" aria-labelledby="architecture-title">
+      <div class="wrap">
+        <p class="eyebrow">Architecture</p>
+        <h2 class="section-title" id="architecture-title">Small homes, deep porches, honest materials.</h2>
+        <p class="muted">The architectural character under study is Southern cottage: board-and-batten and lap siding in warm whites, sages, and soft clays; gabled rooflines; stone piers and cedar posts; and a real front porch on every home &mdash; close enough to the lane to say good morning.</p>
+
+        <div class="lifestyle-spreads">
+          <figure class="spread spread--wide lifestyle-item" data-reveal>
+            <div class="spread-figure">
+              <img class="lifestyle-img" src="cottages/elevations.jpg" loading="lazy" decoding="async"
+                   width="1584" height="672"
+                   alt="AI-generated architectural elevation study of three one-story cottage facades side by side: warm white board-and-batten, sage green lap siding with brick, and clay-beige siding with stone accents."
+                   onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
+              <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-ruler"/></svg> Elevation studies</b><span>AI concept image coming soon</span></span>
+            </div>
+            <figcaption class="spread-cap">
+              <span class="spread-index" aria-hidden="true">01</span>
+              <span class="spread-kicker"><svg class="icon icon-inline" aria-hidden="true"><use href="#i-ruler"/></svg> Elevation studies</span>
+              <span class="spread-title">Three exterior schemes, one family of homes.</span>
+              <span class="spread-text">Varied siding, color, and porch details keep the lane from feeling repetitive &mdash; while a shared scale and roofline keep it feeling like one neighborhood.</span>
+            </figcaption>
+          </figure>
+
+          <figure class="spread spread--right lifestyle-item" data-reveal>
+            <div class="spread-figure">
+              <img class="lifestyle-img" src="cottages/exterior.jpg" loading="lazy" decoding="async"
+                   width="1500" height="1006"
+                   alt="AI-generated concept rendering of a single one-story craftsman cottage with a deep covered front porch, cedar posts on stone piers, warm white siding, and a small cottage garden."
+                   onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
+              <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-home"/></svg> The cottage</b><span>AI concept image coming soon</span></span>
+            </div>
+            <figcaption class="spread-cap">
+              <span class="spread-index" aria-hidden="true">02</span>
+              <span class="spread-kicker"><svg class="icon icon-inline" aria-hidden="true"><use href="#i-home"/></svg> The cottage</span>
+              <span class="spread-title">A porch you actually live on.</span>
+              <span class="spread-text">Cedar posts on stone piers, a gable overhead, and room for two rockers and a ceiling fan &mdash; the porch is the front room of every cottage.</span>
+            </figcaption>
+          </figure>
+
+          <figure class="spread spread--left lifestyle-item" data-reveal>
+            <div class="spread-figure">
+              <img class="lifestyle-img" src="cottages/streetscape.jpg" loading="lazy" decoding="async"
+                   width="1600" height="893"
+                   alt="AI-generated concept rendering seen from a cottage front porch: rocking chairs in the foreground and close-set one-story cottages across a tree-lined lane, with neighbors chatting on the sidewalk."
+                   onerror="this.closest('.lifestyle-item').classList.add('is-empty')" />
+              <span class="lifestyle-ph" aria-hidden="true"><b><svg class="icon icon-inline" aria-hidden="true"><use href="#i-walk"/></svg> The lane</b><span>AI concept image coming soon</span></span>
+            </div>
+            <figcaption class="spread-cap">
+              <span class="spread-index" aria-hidden="true">03</span>
+              <span class="spread-kicker"><svg class="icon icon-inline" aria-hidden="true"><use href="#i-walk"/></svg> The lane</span>
+              <span class="spread-title">A street scaled to a stroll, not a shortcut.</span>
+              <span class="spread-text">Close-set porches, shade trees, and a sidewalk loop &mdash; the kind of lane where a walk to the mailbox turns into a conversation.</span>
+            </figcaption>
+          </figure>
+        </div>
+        <p class="muted gallery-foot">Architectural images are AI-generated concept impressions, not final designs or photographs.</p>
+      </div>
+    </section>
+
+    <!-- ===================== FLOOR PLANS ===================== -->
+    <section class="section" id="plans" aria-labelledby="plans-title">
+      <div class="wrap">
+        <p class="eyebrow">Floor plans</p>
+        <h2 class="section-title" id="plans-title">Two plans. Zero stairs.</h2>
+        <p class="muted">Both study plans put the living space &mdash; great room, dining, kitchen &mdash; across the back of the home, opening to a covered outdoor room. The primary suite sits in a quiet rear corner; a second bedroom and full bath welcome guests up front. Click either drawing to enlarge it.</p>
+
+        <div class="ch-plans">
+          <!-- Plan A -->
+          <article class="ch-plan" data-reveal aria-labelledby="plan-a-name">
+            <div class="ch-plan-inner">
+              <div class="ch-plan-media">
+                <button class="gallery-trigger" type="button" data-lightbox="cottages/plan-a.svg"
+                        data-caption="The Springbrook — illustrative concept plan, ~1,450 SF, 2 bed / 2 bath. Not for construction; dimensions approximate.">
+                  <img src="cottages/plan-a.svg" loading="lazy" decoding="async" width="570" height="1032"
+                       alt="Schematic floor plan of The Springbrook: about 1,450 square feet, 2 bedrooms, 2 baths, open great room, dining and kitchen across the rear, 2-car garage, covered front porch and rear patio." />
+                  <span class="img-tag">Illustrative plan</span>
+                </button>
+              </div>
+              <div class="ch-plan-body">
+                <p class="ch-plan-kicker">Plan A · ~1,450 SF · 2 bed / 2 bath</p>
+                <h3 class="ch-plan-name" id="plan-a-name">The Springbrook</h3>
+                <p class="ch-plan-lede">The essentials, done generously &mdash; one open living space, two real bedrooms, and not a single wasted hallway.</p>
+
+                <dl class="ch-specs">
+                  <div class="ch-spec"><dt>Conditioned area</dt><dd>~1,450 SF</dd></div>
+                  <div class="ch-spec"><dt>Bedrooms / baths</dt><dd>2 / 2</dd></div>
+                  <div class="ch-spec"><dt>Garage</dt><dd>2-car attached</dd></div>
+                  <div class="ch-spec"><dt>Outdoor rooms</dt><dd>Front porch + rear patio</dd></div>
+                </dl>
+
+                <ul class="ch-plan-points">
+                  <li>Open great room, dining, and island kitchen across the rear</li>
+                  <li>Primary suite with walk-in closet and double-vanity bath</li>
+                  <li>Guest bedroom and full bath at the front of the home</li>
+                  <li>Laundry connects directly to the garage &mdash; groceries in, no steps</li>
+                </ul>
+
+                <figure class="ch-plan-3d">
+                  <button class="gallery-trigger" type="button" data-lightbox="cottages/plan-a-3d.jpg"
+                          data-caption="The Springbrook — AI-generated furnished concept view of the plan.">
+                    <img src="cottages/plan-a-3d.jpg" loading="lazy" decoding="async" width="1400" height="1045"
+                         alt="AI-generated furnished top-down cutaway view of The Springbrook floor plan showing the open living area, two bedrooms, and two baths." />
+                    <span class="img-tag">AI concept view</span>
+                  </button>
+                  <figcaption>How the plan could live, furnished &mdash; an AI-generated impression.</figcaption>
+                </figure>
+              </div>
+            </div>
+          </article>
+
+          <!-- Plan B -->
+          <article class="ch-plan" data-reveal aria-labelledby="plan-b-name">
+            <div class="ch-plan-inner">
+              <div class="ch-plan-media">
+                <button class="gallery-trigger" type="button" data-lightbox="cottages/plan-b.svg"
+                        data-caption="The Laurel — illustrative concept plan, ~1,600 SF, 2 bed + den / 2 bath. Not for construction; dimensions approximate.">
+                  <img src="cottages/plan-b.svg" loading="lazy" decoding="async" width="594" height="1092"
+                       alt="Schematic floor plan of The Laurel: about 1,600 square feet, 2 bedrooms plus a den, 2 baths, open great room with fireplace, walk-in pantry, 2-car garage, covered front and rear porches." />
+                  <span class="img-tag">Illustrative plan</span>
+                </button>
+              </div>
+              <div class="ch-plan-body">
+                <p class="ch-plan-kicker">Plan B · ~1,600 SF · 2 bed + den / 2 bath</p>
+                <h3 class="ch-plan-name" id="plan-b-name">The Laurel</h3>
+                <p class="ch-plan-lede">A den with french doors, a fireplace, a walk-in pantry, and a bigger covered porch &mdash; the plan for hosting the whole family on Sunday.</p>
+
+                <dl class="ch-specs">
+                  <div class="ch-spec"><dt>Conditioned area</dt><dd>~1,600 SF</dd></div>
+                  <div class="ch-spec"><dt>Bedrooms / baths</dt><dd>2 + den / 2</dd></div>
+                  <div class="ch-spec"><dt>Garage</dt><dd>2-car attached</dd></div>
+                  <div class="ch-spec"><dt>Outdoor rooms</dt><dd>Front porch + rear porch</dd></div>
+                </dl>
+
+                <ul class="ch-plan-points">
+                  <li>Great room with fireplace, open to dining and the island kitchen</li>
+                  <li>Den / flex room with french doors &mdash; office, hobbies, or guests</li>
+                  <li>Walk-in pantry and a laundry-mudroom off the garage</li>
+                  <li>16-foot covered rear porch for morning coffee in the shade</li>
+                </ul>
+
+                <figure class="ch-plan-3d">
+                  <button class="gallery-trigger" type="button" data-lightbox="cottages/plan-b-3d.jpg"
+                          data-caption="The Laurel — AI-generated furnished concept view of the plan.">
+                    <img src="cottages/plan-b-3d.jpg" loading="lazy" decoding="async" width="1400" height="1045"
+                         alt="AI-generated furnished top-down cutaway view of The Laurel floor plan showing the open living area with fireplace, den, two bedrooms, and two baths." />
+                    <span class="img-tag">AI concept view</span>
+                  </button>
+                  <figcaption>How the plan could live, furnished &mdash; an AI-generated impression.</figcaption>
+                </figure>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <p class="muted gallery-foot">Illustrative concept plans &mdash; not for construction. Dimensions are approximate and will change with engineering and builder selection.</p>
+      </div>
+    </section>
+
+    <!-- ===================== INTERIORS ===================== -->
+    <section class="section section-alt" id="interiors" aria-labelledby="interiors-title">
+      <div class="wrap">
+        <p class="eyebrow">Interiors</p>
+        <h2 class="section-title" id="interiors-title">One big, bright room at the heart of it.</h2>
+        <p class="muted">The whole idea of the cottage is that daily life happens in one generous, light-filled space &mdash; kitchen, table, and sitting room together under a vaulted ceiling, with wide doorways and no thresholds to think about.</p>
+
+        <figure class="ch-figure" data-reveal>
+          <button class="gallery-trigger" type="button" data-lightbox="cottages/interior.jpg"
+                  data-caption="AI-generated interior concept: the vaulted great room and kitchen of a ~1,600 SF cottage.">
+            <img src="cottages/interior.jpg" loading="lazy" decoding="async" width="1400" height="1045"
+                 alt="AI-generated interior concept rendering of a vaulted open great room and cream shaker kitchen with island, fireplace, and glass doors to a covered porch."
+                 onerror="this.closest('figure').style.display='none'" />
+            <span class="img-tag">AI concept</span>
+          </button>
+          <figcaption>Vaulted great room and kitchen &mdash; an AI-generated concept impression, not a built interior.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===================== THE SITE ===================== -->
+    <section class="section" id="site" aria-labelledby="site-title">
+      <div class="wrap">
+        <p class="eyebrow">The site concept</p>
+        <h2 class="section-title" id="site-title">A garden lane that ends at the creek woods.</h2>
+        <p class="muted location-line"><a class="location-map-link" href="https://www.google.com/maps/search/?api=1&amp;query=33.87985%2C-84.11968" target="_blank" rel="noopener noreferrer"><svg class="icon icon-inline" aria-hidden="true"><use href="#i-map-pin"/></svg> Arcado Rd SW, Lilburn, GA &mdash; View on Google Maps</a></p>
+
+        <figure class="ch-figure" data-reveal>
+          <button class="gallery-trigger" type="button" data-lightbox="cottages/aerial.jpg"
+                  data-caption="AI-generated aerial concept of the cottage court — illustrative only, pending boundary and topographic survey.">
+            <img src="cottages/aerial.jpg" loading="lazy" decoding="async" width="1600" height="893"
+                 alt="AI-generated aerial concept rendering of a cottage-court neighborhood: a single entrance from a two-lane road, a central lane of small one-story cottages, a clubhouse green with pickleball courts near the entry, and preserved forest at the rear."
+                 onerror="this.closest('figure').style.display='none'" />
+            <span class="img-tag">AI concept</span>
+          </button>
+          <figcaption>Illustrative aerial impression &mdash; the actual layout will follow the boundary survey and civil engineering.</figcaption>
+        </figure>
+
+        <ul class="vision-cards" data-reveal>
+          <li class="vision-card">
+            <h3>One quiet entrance</h3>
+            <p>A single landscaped entry from Arcado Road, studied with a dedicated left-turn lane so neighborhood traffic keeps moving.</p>
+          </li>
+          <li class="vision-card">
+            <h3>The woods stay</h3>
+            <p>The creek corridor at the back of the site would remain undisturbed wooded buffer &mdash; the springs behind the name, kept as they are.</p>
+          </li>
+          <li class="vision-card">
+            <h3>A respectful edge</h3>
+            <p>A planted landscape buffer along every neighboring backyard, with one-story rooflines that sit lower than the trees around them.</p>
+          </li>
+          <li class="vision-card">
+            <h3>The green up front</h3>
+            <p>Clubhouse, village green, and pickleball courts near the entrance &mdash; the social heart of the lane, and its front door.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== WHY COTTAGES ===================== -->
+    <section class="section section-alt" id="why" aria-labelledby="why-title">
+      <div class="wrap">
+        <p class="eyebrow">Why this option is on the table</p>
+        <h2 class="section-title" id="why-title">The gentlest thing that could be built here.</h2>
+
+        <ul class="benefits-grid">
+          <li class="benefit-card" data-reveal>
+            <span class="benefit-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg></span>
+            <h3>No added school enrollment</h3>
+            <p>Homes reserved for ages 55 and better add zero students to nearby schools &mdash; the single biggest concern neighbors raised about earlier concepts for this land.</p>
+          </li>
+          <li class="benefit-card" data-reveal>
+            <span class="benefit-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-compass"/></svg></span>
+            <h3>Lighter on Arcado Road</h3>
+            <p>Age-55+ households drive markedly less &mdash; on the order of 40% fewer daily trips than conventional single-family homes &mdash; and mostly outside rush hour.</p>
+          </li>
+          <li class="benefit-card" data-reveal>
+            <span class="benefit-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg></span>
+            <h3>Neighbors staying neighbors</h3>
+            <p>Longtime residents who want one level and less yard shouldn&rsquo;t have to leave the area to find it. Cottages let people right-size without moving away.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== CTA ===================== -->
+    <section class="cta" id="feedback" aria-labelledby="cta-title">
+      <div class="cta-media" aria-hidden="true">
+        <img src="cottages/clubhouse.jpg" alt="" loading="lazy" decoding="async"
+             onerror="this.onerror=null;this.src='master-plan.jpg'" />
+        <div class="cta-scrim"></div>
+      </div>
+
+      <div class="wrap cta-content" data-reveal>
+        <p class="eyebrow eyebrow-light">Early thoughts welcome</p>
+        <h2 class="cta-title" id="cta-title">What would make this worth building?</h2>
+        <p class="cta-body">This is a study, not a submission &mdash; which makes it exactly the right moment to hear what matters to you. Share your thoughts on the overview page&rsquo;s comment board, or write to the team directly.</p>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href="/#give-feedback">Share your thoughts</a>
+          <a class="link-arrow link-arrow-light" href="mailto:mawad@surconsultinggroup.com">Contact the team &rarr;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer" aria-labelledby="footer-title">
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark" id="footer-title">Arcado <span class="brand-accent">Springs</span></span>
+        <p class="footer-tag">Concept study for owner + stakeholder review.</p>
+      </div>
+
+      <div class="footer-meta">
+        <p>Last updated 26 Aug 2026</p>
+        <p><a href="mailto:mawad@surconsultinggroup.com">mawad@surconsultinggroup.com</a></p>
+        <p class="footer-disclaimer">The Cottages at Arcado Springs is a concept study presented for review &mdash; not an application, an offer, or an approved plan. All imagery on this page is AI-generated concept illustration; floor plans are schematic and not for construction. Home count, sizes, layout, and features are subject to survey, engineering, market study, and city approvals, and may change or may not proceed at all.</p>
+        <p><a href="/">&larr; Return to the Arcado Springs overview</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== LIGHTBOX ===================== -->
+  <div class="lightbox" id="lightbox" hidden aria-hidden="true">
+    <div class="lightbox-backdrop" data-lightbox-close></div>
+    <figure class="lightbox-figure" role="dialog" aria-modal="true" aria-label="Enlarged image">
+      <button class="lightbox-close" type="button" data-lightbox-close aria-label="Close">&times;</button>
+      <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+      <figcaption class="lightbox-caption" id="lightbox-caption"></figcaption>
+    </figure>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

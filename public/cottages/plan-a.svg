@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 570 1032" role="img" aria-label="Schematic floor plan of The Springbrook, a one-story cottage of about 1,450 square feet with two bedrooms and two baths.">
+<title>The Springbrook</title>
+<rect x="0.5" y="0.5" width="569" height="1031" rx="10" fill="#FCFAF5" stroke="#E4E0D6"/>
+<text x="34" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="27" fill="#1E2419">The Springbrook</text>
+<rect x="36" y="66" width="44" height="3" fill="#2F5D3A"/>
+<text x="36" y="92" font-family="'Courier New', monospace" font-size="11.5" letter-spacing="1.6" fill="#876A38">PLAN A · ~1,450 SF · 2 BED / 2 BATH · 2-CAR GARAGE</text>
+<rect x="78" y="700" width="252" height="252" fill="#F6F2EA" stroke="#646B5D" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="204.0" y="824.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="600" fill="#646B5D">2-CAR GARAGE</text>
+<text x="204.0" y="838.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">21'0" × 21'0"</text>
+<rect x="342" y="700" width="144" height="72" fill="#F6F2EA" stroke="#646B5D" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="414.0" y="734.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="600" fill="#646B5D">PORCH</text>
+<text x="414.0" y="748.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">12'0" × 6'0"</text>
+<rect x="150" y="148" width="144" height="96" fill="#F6F2EA" stroke="#646B5D" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="222.0" y="194.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="600" fill="#646B5D">PATIO</text>
+<text x="222.0" y="208.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">12'0" × 8'0"</text>
+<rect x="78" y="556" width="84" height="144" fill="rgba(176,141,87,0.10)" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="120.0" y="627.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" fill="#1E2419">LAUNDRY</text>
+<text x="120.0" y="641.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">7'0" × 12'0"</text>
+<rect x="162" y="556" width="132" height="144" fill="rgba(47,93,58,0.06)" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="228.0" y="627.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#1E2419">BEDROOM 2</text>
+<text x="228.0" y="641.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">11'0" × 12'0"</text>
+<rect x="294" y="556" width="72" height="144" fill="rgba(176,141,87,0.10)" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="330.0" y="627.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" fill="#1E2419">BATH 2</text>
+<text x="330.0" y="641.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">6'0" × 12'0"</text>
+<rect x="366" y="556" width="72" height="144" fill="#FFFFFF" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="402.0" y="627.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" fill="#1E2419">FOYER</text>
+<text x="402.0" y="641.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">6'0" × 12'0"</text>
+<rect x="438" y="640" width="96" height="60" fill="#F6F2EA" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="486.0" y="674.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="600" fill="#1E2419">COATS</text>
+<rect x="438" y="556" width="96" height="84" fill="#F6F2EA" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="486.0" y="602.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" fill="#1E2419">WALK-IN</text>
+<rect x="78" y="496" width="60" height="60" fill="#F6F2EA" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="108.0" y="530.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="600" fill="#1E2419">PANTRY</text>
+<rect x="138" y="496" width="300" height="60" fill="#FFFFFF" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="288.0" y="530.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" fill="#1E2419">GALLERY</text>
+<rect x="438" y="388" width="96" height="168" fill="rgba(176,141,87,0.10)" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="486.0" y="471.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="600" fill="#1E2419">PRIMARY BATH</text>
+<text x="486.0" y="485.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">8'0" × 14'0"</text>
+<rect x="78" y="388" width="156" height="108" fill="#FFFFFF" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="156.0" y="441.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#1E2419">KITCHEN</text>
+<text x="156.0" y="455.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">13'0" × 9'0"</text>
+<rect x="234" y="388" width="204" height="108" fill="#FFFFFF" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="336.0" y="441.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#1E2419">DINING</text>
+<text x="336.0" y="455.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">17'0" × 9'0"</text>
+<rect x="78" y="244" width="288" height="144" fill="#FFFFFF" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="222.0" y="315.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#1E2419">GREAT ROOM</text>
+<text x="222.0" y="329.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">24'0" × 12'0"</text>
+<rect x="366" y="244" width="168" height="144" fill="rgba(47,93,58,0.06)" stroke="#4b5244" stroke-width="1.3" stroke-opacity="0.62"/>
+<text x="450.0" y="315.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#1E2419">PRIMARY SUITE</text>
+<text x="450.0" y="329.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">14'0" × 12'0"</text>
+<rect x="132.0" y="460.0" width="60" height="30.0" rx="3" fill="#fff" stroke="#4b5244" stroke-width="1.1" stroke-opacity="0.62"/>
+<rect x="78" y="244" width="456" height="456" fill="none" stroke="#1E2419" stroke-width="3"/>
+<line x1="384.0" y1="700" x2="420.0" y2="700" stroke="#FCFAF5" stroke-width="5"/>
+<line x1="102" y1="700" x2="138" y2="700" stroke="#FCFAF5" stroke-width="5"/>
+<line x1="186" y1="244" x2="258" y2="244" stroke="#FCFAF5" stroke-width="5"/>
+<line x1="198" y1="556" x2="234" y2="556" stroke="#FCFAF5" stroke-width="5"/>
+<line x1="318" y1="556" x2="348.0" y2="556" stroke="#FCFAF5" stroke-width="5"/>
+<line x1="390" y1="556" x2="426" y2="556" stroke="#FCFAF5" stroke-width="5"/>
+<line x1="438" y1="532" x2="438" y2="502.0" stroke="#FCFAF5" stroke-width="5"/>
+<line x1="462" y1="388" x2="498" y2="388" stroke="#FCFAF5" stroke-width="5"/>
+<line x1="474" y1="556" x2="504.0" y2="556" stroke="#FCFAF5" stroke-width="5"/>
+<line x1="366" y1="364" x2="366" y2="328" stroke="#FCFAF5" stroke-width="5"/>
+<line x1="198" y1="697.8" x2="246" y2="697.8" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="198" y1="702.2" x2="246" y2="702.2" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="126" y1="241.8" x2="186" y2="241.8" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="126" y1="246.2" x2="186" y2="246.2" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="258" y1="241.8" x2="318" y2="241.8" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="258" y1="246.2" x2="318" y2="246.2" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="414" y1="241.8" x2="462" y2="241.8" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="414" y1="246.2" x2="462" y2="246.2" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="531.8" y1="340" x2="531.8" y2="292" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="536.2" y1="340" x2="536.2" y2="292" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="75.8" y1="460" x2="75.8" y2="412" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="80.2" y1="460" x2="80.2" y2="412" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="75.8" y1="340" x2="75.8" y2="292" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="80.2" y1="340" x2="80.2" y2="292" stroke="#1E2419" stroke-width="1.1"/>
+<line x1="78" y1="132" x2="534" y2="132" stroke="#876A38" stroke-width="1"/>
+<line x1="78" y1="127" x2="78" y2="137" stroke="#876A38" stroke-width="1"/>
+<line x1="534" y1="127" x2="534" y2="137" stroke="#876A38" stroke-width="1"/>
+<text x="306.0" y="126" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#876A38">38'0"</text>
+<line x1="58" y1="244" x2="58" y2="700" stroke="#876A38" stroke-width="1"/>
+<line x1="53" y1="244" x2="63" y2="244" stroke="#876A38" stroke-width="1"/>
+<line x1="53" y1="700" x2="63" y2="700" stroke="#876A38" stroke-width="1"/>
+<text x="50" y="472.0" transform="rotate(-90 50 472.0)" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#876A38">38'0"</text>
+<text x="34" y="1002" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">Illustrative concept plan — not for construction.</text>
+<text x="34" y="1016" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#646B5D">Dimensions approximate. ~1,444 SF conditioned.</text>
+<line x1="414" y1="1006" x2="534" y2="1006" stroke="#646B5D" stroke-width="1.4"/>
+<line x1="414" y1="1001" x2="414" y2="1011" stroke="#646B5D" stroke-width="1.2"/>
+<line x1="474.0" y1="1001" x2="474.0" y2="1011" stroke="#646B5D" stroke-width="1.2"/>
+<line x1="534" y1="1001" x2="534" y2="1011" stroke="#646B5D" stroke-width="1.2"/>
+<text x="534" y="997" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="9.5" fill="#646B5D">0&#8202;–&#8202;10 FT</text>
+</svg>
