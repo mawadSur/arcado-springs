@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Unlisted submission web page builder — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Unlisted submission web page builder</h1><p class="src-note">Python · 320 lines · <a href="/data-room/src/submission/tools/build_site.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Build the unlisted results page  public/cottages/submission/index.html  from the package.
+
+Re-runnable: copies drawings/renderings/docs that exist, skips what doesn&#x27;t. Neighbors&#x27; names are
+redacted on the web copy of the adjoining-owners list (the full list stays in the local package).
+&quot;&quot;&quot;
+import json, os, re, shutil, html, datetime, sys
+from pathlib import Path
+
+W = Path(&#x27;/home/mawad/arcado-springs/status/cottage-submission-2026-08-28&#x27;)
+PUB = Path(&#x27;/home/mawad/arcado-springs/public&#x27;)
+OUT = PUB / &#x27;cottages&#x27; / &#x27;submission&#x27;
+(OUT / &#x27;drawings&#x27;).mkdir(parents=True, exist_ok=True)
+(OUT / &#x27;renderings&#x27;).mkdir(parents=True, exist_ok=True)
+(OUT / &#x27;docs&#x27;).mkdir(parents=True, exist_ok=True)
+
+TODAY = datetime.date.today().strftime(&#x27;%d %b %Y&#x27;)
+
+# ------------------------------------------------------------------ markdown → html (small, dependency-free)
+def inline(s):
+    s = html.escape(s, quote=False)
+    s = re.sub(r&#x27;`([^`]+)`&#x27;, r&#x27;&lt;code&gt;\1&lt;/code&gt;&#x27;, s)
+    s = re.sub(r&#x27;\*\*(.+?)\*\*&#x27;, r&#x27;&lt;strong&gt;\1&lt;/strong&gt;&#x27;, s)
+    s = re.sub(r&#x27;(?&lt;![\w*])\*(?!\s)(.+?)(?&lt;!\s)\*(?!\w)&#x27;, r&#x27;&lt;em&gt;\1&lt;/em&gt;&#x27;, s)
+    s = re.sub(r&#x27;\[([^\]]+)\]\((https?://[^)\s]+)\)&#x27;, r&#x27;&lt;a href=&quot;\2&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;\1&lt;/a&gt;&#x27;, s)
+    s = re.sub(r&#x27;(?&lt;![&quot;\&#x27;&gt;=])(https?://[^\s&lt;)]+)&#x27;, r&#x27;&lt;a href=&quot;\1&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;\1&lt;/a&gt;&#x27;, s)
+    return s
+
+def md_to_html(text, redact=None):
+    lines = text.replace(&#x27;\r&#x27;, &#x27;&#x27;).split(&#x27;\n&#x27;)
+    # strip YAML front matter
+    if lines and lines[0].strip() == &#x27;---&#x27;:
+        try:
+            end = lines[1:].index(&#x27;---&#x27;) + 1
+            lines = lines[end + 1:]
+        except ValueError:
+            pass
+    out, i, n = [], 0, len(lines)
+    para = []
+    def flush():
+        if para:
+            out.append(&#x27;&lt;p&gt;&#x27; + inline(&#x27; &#x27;.join(para)) + &#x27;&lt;/p&gt;&#x27;)
+            para.clear()
+    while i &lt; n:
+        ln = lines[i]
+        st = ln.strip()
+        if st.startswith(&#x27;&lt;!--&#x27;):
+            i += 1; continue
+        if st.startswith(&#x27;```&#x27;):
+            flush(); j = i + 1; buf = []
+            while j &lt; n and not lines[j].strip().startswith(&#x27;```&#x27;):
+                buf.append(lines[j]); j += 1
+            out.append(&#x27;&lt;pre&gt;&lt;code&gt;&#x27; + html.escape(&#x27;\n&#x27;.join(buf)) + &#x27;&lt;/code&gt;&lt;/pre&gt;&#x27;)
+            i = j + 1; continue
+        m = re.match(r&#x27;^(#{1,6})\s+(.*)$&#x27;, st)
+        if m:
+            flush(); lvl = min(len(m.group(1)) + 1, 5)
+            out.append(f&#x27;&lt;h{lvl}&gt;{inline(m.group(2))}&lt;/h{lvl}&gt;&#x27;); i += 1; continue
+        if st.startswith(&#x27;|&#x27;) and i + 1 &lt; n and re.match(r&#x27;^\|?\s*:?-{2,}&#x27;, lines[i + 1].strip()):
+            flush(); hdr = [c.strip() for c in st.strip(&#x27;|&#x27;).split(&#x27;|&#x27;)]
+            rows = []; j = i + 2
+            while j &lt; n and lines[j].strip().startswith(&#x27;|&#x27;):
+                rows.append([c.strip() for c in lines[j].strip().strip(&#x27;|&#x27;).split(&#x27;|&#x27;)]); j += 1
+            t = [&#x27;&lt;div class=&quot;tbl-wrap&quot;&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&#x27; + &#x27;&#x27;.join(f&#x27;&lt;th&gt;{inline(c)}&lt;/th&gt;&#x27; for c in hdr) + &#x27;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&#x27;]
+            for r in rows:
+                cells = r + [&#x27;&#x27;] * (len(hdr) - len(r))
+                if redact: cells = [redact(c) for c in cells]
+                t.append(&#x27;&lt;tr&gt;&#x27; + &#x27;&#x27;.join(f&#x27;&lt;td&gt;{inline(c)}&lt;/td&gt;&#x27; for c in cells[:len(hdr)]) + &#x27;&lt;/tr&gt;&#x27;)
+            t.append(&#x27;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&#x27;); out.append(&#x27;&#x27;.join(t)); i = j; continue
+        if st.startswith(&#x27;&gt;&#x27;):
+            flush(); buf = []
+            while i &lt; n and lines[i].strip().startswith(&#x27;&gt;&#x27;):
+                buf.append(lines[i].strip()[1:].strip()); i += 1
+            out.append(&#x27;&lt;blockquote&gt;&#x27; + inline(&#x27; &#x27;.join(buf)) + &#x27;&lt;/blockquote&gt;&#x27;); continue
+        m = re.match(r&#x27;^(\s*)([-*]|\d+[.)])\s+(.*)$&#x27;, ln)
+        if m:
+            flush(); ordered = m.group(2)[0].isdigit(); items = []
+            while i &lt; n:
+                m2 = re.match(r&#x27;^(\s*)([-*]|\d+[.)])\s+(.*)$&#x27;, lines[i])
+                if not m2:
+                    # continuation line
+                    if lines[i].startswith(&#x27;  &#x27;) and lines[i].strip() and items:
+                        items[-1] += &#x27; &#x27; + lines[i].strip(); i += 1; continue
+                    break
+                items.append(m2.group(3)); i += 1
+            tag = &#x27;ol&#x27; if ordered else &#x27;ul&#x27;
+            out.append(f&#x27;&lt;{tag}&gt;&#x27; + &#x27;&#x27;.join(f&#x27;&lt;li&gt;{inline(x)}&lt;/li&gt;&#x27; for x in items) + f&#x27;&lt;/{tag}&gt;&#x27;); continue
+        if st == &#x27;&#x27;:
+            flush(); i += 1; continue
+        if re.match(r&#x27;^-{3,}$&#x27;, st):
+            flush(); out.append(&#x27;&lt;hr&gt;&#x27;); i += 1; continue
+        para.append(st); i += 1
+    flush()
+    return &#x27;\n&#x27;.join(out)
+
+# ------------------------------------------------------------------ data
+def load(p, default=None):
+    try: return json.load(open(p))
+    except Exception: return default
+layout = load(W / &#x27;data/layout.json&#x27;, {})
+plans = load(W / &#x27;data/plans.json&#x27;, {})
+elev = load(W / &#x27;data/elevations.json&#x27;, {})
+M = layout.get(&#x27;metrics&#x27;, {})
+owners = load(W / &#x27;data/owners-found.json&#x27;, {})
+
+# redaction for the adjoining-owner table on the web copy
+owner_names = set()
+if isinstance(owners, dict):
+    for v in owners.values():
+        for k in (&#x27;OWNERNAME1&#x27;, &#x27;OWNERNAME2&#x27;, &#x27;OWNER1&#x27;, &#x27;OWNER2&#x27;, &#x27;OWNERNAME&#x27;):
+            if isinstance(v, dict) and v.get(k): owner_names.add(str(v[k]).strip())
+elif isinstance(owners, list):
+    for v in owners:
+        for k in (&#x27;OWNERNAME1&#x27;, &#x27;OWNERNAME2&#x27;, &#x27;OWNERNAME&#x27;):
+            if v.get(k): owner_names.add(str(v[k]).strip())
+def redact_names(cell):
+    c = cell
+    for nm in owner_names:
+        if nm and nm.upper() in c.upper() and &#x27;AWAD&#x27; not in nm.upper() and &#x27;MENDEZ&#x27; not in nm.upper():
+            c = re.sub(re.escape(nm), &#x27;[owner of record — see local package]&#x27;, c, flags=re.I)
+    return c
+
+# ------------------------------------------------------------------ copy assets
+def copy_if(src, dst):
+    if src.exists():
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst); return True
+    return False
+
+drawings = {}
+for name in [&#x27;mcp-web.svg&#x27;, &#x27;mcp-sheet.svg&#x27;, &#x27;mcp-sheet.png&#x27;, &#x27;mcp-front.png&#x27;, &#x27;mcp-rear.png&#x27;,
+             &#x27;plan-a.svg&#x27;, &#x27;plan-a.png&#x27;, &#x27;plan-a-sheet.svg&#x27;, &#x27;plan-a-sheet.png&#x27;, &#x27;plan-a-lot.svg&#x27;, &#x27;plan-a-lot.png&#x27;,
+             &#x27;plan-b.svg&#x27;, &#x27;plan-b.png&#x27;, &#x27;plan-b-sheet.svg&#x27;, &#x27;plan-b-sheet.png&#x27;, &#x27;plan-b-lot.svg&#x27;, &#x27;plan-b-lot.png&#x27;,
+             &#x27;elev-a-sheet.svg&#x27;, &#x27;elev-a-sheet.png&#x27;, &#x27;elev-b-sheet.svg&#x27;, &#x27;elev-b-sheet.png&#x27;,
+             &#x27;elev-a-front.svg&#x27;, &#x27;elev-a-rear.svg&#x27;, &#x27;elev-a-left.svg&#x27;, &#x27;elev-a-right.svg&#x27;,
+             &#x27;elev-b-front.svg&#x27;, &#x27;elev-b-rear.svg&#x27;, &#x27;elev-b-left.svg&#x27;, &#x27;elev-b-right.svg&#x27;]:
+    if copy_if(W / &#x27;drawings&#x27; / name, OUT / &#x27;drawings&#x27; / name): drawings[name] = f&#x27;drawings/{name}&#x27;
+
+# renderings: resize to web (≤ 1800 px wide, q85) if PIL available
+renders = []
+try:
+    from PIL import Image
+    HAVE_PIL = True
+except Exception:
+    HAVE_PIL = False
+render_meta = load(W / &#x27;renderings/manifest.json&#x27;, [])
+for f in sorted((W / &#x27;renderings&#x27;).glob(&#x27;*.jpg&#x27;)) + sorted((W / &#x27;renderings&#x27;).glob(&#x27;*.png&#x27;)):
+    dst = OUT / &#x27;renderings&#x27; / (f.stem + &#x27;.jpg&#x27;)
+    if HAVE_PIL:
+        im = Image.open(f).convert(&#x27;RGB&#x27;)
+        if im.width &gt; 1800: im = im.resize((1800, int(im.height * 1800 / im.width)), Image.LANCZOS)
+        im.save(dst, &#x27;JPEG&#x27;, quality=85, optimize=True, progressive=True)
+    else:
+        shutil.copy2(f, dst)
+    meta = next((m for m in render_meta if m.get(&#x27;filename&#x27;, &#x27;&#x27;).endswith(f.name) or m.get(&#x27;slug&#x27;) == f.stem), {})
+    renders.append({&#x27;file&#x27;: f&#x27;renderings/{dst.name}&#x27;, &#x27;title&#x27;: meta.get(&#x27;title&#x27;, f.stem.replace(&#x27;-&#x27;, &#x27; &#x27;).title()),
+                    &#x27;caption&#x27;: meta.get(&#x27;caption&#x27;, &#x27;&#x27;), &#x27;status&#x27;: meta.get(&#x27;qa_status&#x27;, &#x27;&#x27;)})
+
+# documents
+DOC_ORDER = [&#x27;01-application-form-data.md&#x27;, &#x27;02-development-summary.md&#x27;, &#x27;03-letter-of-intent.md&#x27;,
+             &#x27;04-standards-governing-zoning-power.md&#x27;, &#x27;05-legal-description-DRAFT.md&#x27;, &#x27;06-adjoining-property-owners.md&#x27;,
+             &#x27;07-conflict-of-interest-and-certifications.md&#x27;, &#x27;08-technical-memoranda.md&#x27;, &#x27;09-rendering-plan.md&#x27;,
+             &#x27;10-submittal-checklist-and-roadmap.md&#x27;, &#x27;11-site-context-brief.md&#x27;, &#x27;12-outline-specifications.md&#x27;,
+             &#x27;13-verification-report.md&#x27;]
+import sys as _sys
+_sys.path.insert(0, str(W.parent / &#x27;dataroom&#x27;))
+import policy as _policy   # single source of truth for what may be published
+
+docs = []
+for name in DOC_ORDER:
+    p = W / &#x27;docs&#x27; / name
+    if not p.exists(): continue
+    # never publish a document the data-room tiering policy rates owner-only
+    if _policy.tier(f&#x27;status/cottage-submission-2026-08-28/docs/{name}&#x27;) == &#x27;confidential&#x27;:
+        print(f&#x27;  skipping {name}: owner-only per policy.tier()&#x27;)
+        continue
+    txt = p.read_text(encoding=&#x27;utf-8&#x27;, errors=&#x27;replace&#x27;)
+    # same excision + internal-path scrub the data room applies to its shareable copies
+    txt = _policy.excise(f&#x27;status/cottage-submission-2026-08-28/docs/{name}&#x27;, txt)
+    title = next((l.lstrip(&#x27;# &#x27;).strip() for l in txt.splitlines() if l.startswith(&#x27;# &#x27;)), name)
+    body = md_to_html(txt, redact=redact_names if name.startswith(&#x27;06&#x27;) else None)
+    slug = name.replace(&#x27;.md&#x27;, &#x27;&#x27;)
+    (OUT / &#x27;docs&#x27; / f&#x27;{slug}.html&#x27;).write_text(f&#x27;&#x27;&#x27;&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;meta name=&quot;robots&quot; content=&quot;noindex,nofollow&quot;&gt;&lt;title&gt;{html.escape(title)} — Arcado Springs Cottages submission&lt;/title&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;../../../styles.css&quot;&gt;&lt;link rel=&quot;stylesheet&quot; href=&quot;../submission.css&quot;&gt;&lt;/head&gt;&lt;body class=&quot;doc-page&quot;&gt;&lt;main class=&quot;wrap doc-body&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;&lt;a href=&quot;../&quot;&gt;&amp;larr; Submission package&lt;/a&gt;&lt;/p&gt;{body}&lt;/main&gt;&lt;/body&gt;&lt;/html&gt;&#x27;&#x27;&#x27;, encoding=&#x27;utf-8&#x27;)
+    docs.append({&#x27;slug&#x27;: slug, &#x27;title&#x27;: title, &#x27;name&#x27;: name, &#x27;words&#x27;: len(txt.split())})
+
+# verification summary (optional)
+verify = load(W / &#x27;verify/summary.json&#x27;, None)
+
+# ------------------------------------------------------------------ page
+def stat(label, value, sub=&#x27;&#x27;):
+    return f&#x27;&lt;li class=&quot;stat-card&quot;&gt;&lt;span class=&quot;stat-num&quot;&gt;{value}&lt;/span&gt;&lt;span class=&quot;stat-label&quot;&gt;{label}{(&quot; &lt;span class=stat-plus&gt;&quot;+sub+&quot;&lt;/span&gt;&quot;) if sub else &quot;&quot;}&lt;/span&gt;&lt;/li&gt;&#x27;
+
+lots = M.get(&#x27;lots&#x27;, &#x27;—&#x27;); dens = M.get(&#x27;density_du_ac_deeded&#x27;, &#x27;—&#x27;); osp = M.get(&#x27;open_space_pct_deeded&#x27;, &#x27;—&#x27;)
+areas_a = (plans.get(&#x27;plan_a&#x27;) or plans.get(&#x27;A&#x27;) or {}).get(&#x27;areas&#x27;, {}) if isinstance(plans, dict) else {}
+areas_b = (plans.get(&#x27;plan_b&#x27;) or plans.get(&#x27;B&#x27;) or {}).get(&#x27;areas&#x27;, {}) if isinstance(plans, dict) else {}
+
+def img_block(src, alt, caption, wide=False):
+    return f&#x27;&#x27;&#x27;&lt;figure class=&quot;sub-fig{&#x27; sub-fig--wide&#x27; if wide else &#x27;&#x27;}&quot; data-reveal&gt;
+  &lt;button class=&quot;gallery-trigger&quot; type=&quot;button&quot; data-lightbox=&quot;{src}&quot; data-caption=&quot;{html.escape(caption, quote=True)}&quot;&gt;
+    &lt;img src=&quot;{src}&quot; loading=&quot;lazy&quot; decoding=&quot;async&quot; alt=&quot;{html.escape(alt, quote=True)}&quot;&gt;&lt;span class=&quot;img-tag&quot;&gt;Click to enlarge&lt;/span&gt;
+  &lt;/button&gt;&lt;figcaption&gt;{caption}&lt;/figcaption&gt;&lt;/figure&gt;&#x27;&#x27;&#x27;
+
+sections = []
+# hero / overview
+sections.append(f&#x27;&#x27;&#x27;
+&lt;section class=&quot;section&quot; id=&quot;overview&quot;&gt;&lt;div class=&quot;wrap&quot;&gt;
+  &lt;p class=&quot;eyebrow&quot;&gt;Rezoning submission package — working draft&lt;/p&gt;
+  &lt;h1 class=&quot;section-title&quot;&gt;The Cottages at Arcado Springs — R-1 → R-2 submission&lt;/h1&gt;
+  &lt;p class=&quot;lede-text&quot;&gt;Everything the City of Lilburn&#x27;s 2026 rezoning instructions ask for, rebuilt on the property&#x27;s real geometry (Gwinnett GIS parcel fabric: a 236–246 ft × ~1,740 ft strip, 9.44 ac deeded), the R-2 cottage-home standards of Zoning Ordinance 2023-603, and the June 2026 Comprehensive Plan Amendment (&quot;Suburban-Low&quot; — single-family cottages are an appropriate use).&lt;/p&gt;
+  &lt;ul class=&quot;stats-grid&quot; data-reveal&gt;
+    {stat(&#x27;Cottage lots&#x27;, lots, &#x27;both sides of one lane&#x27;)}
+    {stat(&#x27;Units per acre&#x27;, dens, &#x27;R-2 allows 8&#x27;)}
+    {stat(&#x27;% common open space&#x27;, osp, &#x27;buffers, greens, creek woods, ponds&#x27;)}
+    {stat(&#x27;Typical lot&#x27;, &quot;50&#x27; × 100&#x27;&quot;, &#x27;5,000 SF (min 3,000)&#x27;)}
+  &lt;/ul&gt;
+  &lt;p class=&quot;muted gallery-foot&quot;&gt;Generated {TODAY}. Drawings and documents are DRAFT concept work for the pre-application conference — not sealed, not filed. Boundary from Gwinnett GIS; a Georgia RLS survey governs. Adjoining property owners are named on the plan sheets and in Item 6, as the application requires and as survey convention puts them on a boundary drawing; those names come from the Gwinnett County public parcel record.&lt;/p&gt;
+&lt;/div&gt;&lt;/section&gt;&#x27;&#x27;&#x27;)
+
+# site plan
+if &#x27;mcp-web.svg&#x27; in drawings or &#x27;mcp-sheet.png&#x27; in drawings:
+    figs = &#x27;&#x27;
+    if &#x27;mcp-sheet.png&#x27; in drawings: figs += img_block(drawings[&#x27;mcp-sheet.png&#x27;], &#x27;Master concept plan sheet C-1&#x27;, &#x27;Sheet C-1 — Master Concept Plan, ARCH D 24×36 at 1&quot;=60\&#x27; (boundary bearings, adjoining owners and zoning, buffers, setbacks, stream buffers, sewer, contours, lots, lane, amenity, ponds, site data table).&#x27;, wide=True)
+    if &#x27;mcp-front.png&#x27; in drawings: figs += img_block(drawings[&#x27;mcp-front.png&#x27;], &#x27;Front 500 ft of the site plan&#x27;, &#x27;Front 500 ft — Arcado Rd entrance (SW third of the frontage), clubhouse and village green, pickleball, guest/mail parking, first lots.&#x27;)
+    if &#x27;mcp-rear.png&#x27; in drawings: figs += img_block(drawings[&#x27;mcp-rear.png&#x27;], &#x27;Rear 500 ft of the site plan&#x27;, &#x27;Rear 500 ft — stream-head woods with 50/75-ft buffers, Pond 2, terminal hammerhead, Phase 2 sewer options.&#x27;)
+    if &#x27;mcp-web.svg&#x27; in drawings: figs += f&#x27;&lt;p class=&quot;muted&quot;&gt;&lt;a class=&quot;link-arrow&quot; href=&quot;{drawings[&quot;mcp-web.svg&quot;]}&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Open the vector plan (SVG) in a new tab &amp;rarr;&lt;/a&gt;{&quot; &amp;middot; &lt;a class=link-arrow href=drawings/mcp-sheet.svg target=_blank rel=noopener&gt;Sheet C-1 SVG &amp;rarr;&lt;/a&gt;&quot; if &quot;mcp-sheet.svg&quot; in drawings else &quot;&quot;}&lt;/p&gt;&#x27;
+    sections.append(f&#x27;&lt;section class=&quot;section section-alt&quot; id=&quot;siteplan&quot;&gt;&lt;div class=&quot;wrap&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Item 8 · Site plan&lt;/p&gt;&lt;h2 class=&quot;section-title&quot;&gt;Master Concept Plan on the real parcel geometry.&lt;/h2&gt;&lt;p class=&quot;muted&quot;&gt;One private lane on the strip\&#x27;s centerline, 50\&#x27;×100\&#x27; cottage lots on both sides with the 20-ft undisturbed buffer held inside the rear of each lot (§313(1)), hammerhead turnarounds instead of cul-de-sac circles (Table 4.2), two dry water-quality ponds on the south-west side, and the stream-head woods preserved at the rear.&lt;/p&gt;&lt;div class=&quot;sub-grid&quot;&gt;{figs}&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;&#x27;)
+
+# floor plans
+fp = &#x27;&#x27;
+for key, title, areas in ((&#x27;a&#x27;, &#x27;Plan A — The Springbrook&#x27;, areas_a), (&#x27;b&#x27;, &#x27;Plan B — The Laurel&#x27;, areas_b)):
+    imgs = &#x27;&#x27;
+    for suffix, cap in ((&#x27;&#x27;, &#x27;dimensioned plan&#x27;), (&#x27;-lot&#x27;, &#x27;sited on a typical 50\&#x27;×100\&#x27; lot&#x27;), (&#x27;-sheet&#x27;, &#x27;ARCH C sheet with area tabulation&#x27;)):
+        nm = f&#x27;plan-{key}{suffix}.png&#x27;
+        if nm in drawings: imgs += img_block(drawings[nm], f&#x27;{title} {cap}&#x27;, f&#x27;{title} — {cap}.&#x27;)
+    if imgs:
+        a = areas or {}
+        fp += f&#x27;&lt;h3 class=&quot;subhead&quot;&gt;{title}&lt;/h3&gt;&lt;p class=&quot;muted&quot;&gt;Conditioned {a.get(&quot;conditioned&quot;, &quot;—&quot;)} SF · porch {a.get(&quot;porch&quot;, &quot;—&quot;)} SF · garage {a.get(&quot;garage&quot;, &quot;—&quot;)} SF · under roof {a.get(&quot;total_under_roof&quot;, &quot;—&quot;)} SF&lt;/p&gt;&lt;div class=&quot;sub-grid&quot;&gt;{imgs}&lt;/div&gt;&#x27;
+if fp:
+    sections.append(f&#x27;&lt;section class=&quot;section&quot; id=&quot;plans&quot;&gt;&lt;div class=&quot;wrap&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Item 11 · Floor plans&lt;/p&gt;&lt;h2 class=&quot;section-title&quot;&gt;Two one-story plans, drawn to fit the lot and the code.&lt;/h2&gt;&lt;p class=&quot;muted&quot;&gt;38\&#x27;×38\&#x27; and 40\&#x27;×40\&#x27; bodies inside a 40-ft buildable width (50-ft lot, 5-ft side yards); zero-step entries, 36-in doors, 5-ft turning circles; garages recessed 5 ft behind the front wall (Table 4.2).&lt;/p&gt;{fp}&lt;/div&gt;&lt;/section&gt;&#x27;)
+
+# elevations
+ev = &#x27;&#x27;
+for key, title in ((&#x27;a&#x27;, &#x27;Plan A elevations&#x27;), (&#x27;b&#x27;, &#x27;Plan B elevations&#x27;)):
+    nm = f&#x27;elev-{key}-sheet.png&#x27;
+    if nm in drawings: ev += img_block(drawings[nm], title, f&#x27;{title} — front, rear, left, right at 1/8&quot;=1\&#x27;-0&quot; with dimensions, materials and colour schemes.&#x27;, wide=True)
+if ev:
+    sections.append(f&#x27;&lt;section class=&quot;section section-alt&quot; id=&quot;elevations&quot;&gt;&lt;div class=&quot;wrap&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Item 11 · Elevations&lt;/p&gt;&lt;h2 class=&quot;section-title&quot;&gt;Every street-visible side, to scale, with colors and materials.&lt;/h2&gt;&lt;div class=&quot;sub-grid&quot;&gt;{ev}&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;&#x27;)
+
+# renderings
+if renders:
+    rg = &#x27;&#x27;.join(img_block(r[&#x27;file&#x27;], r[&#x27;title&#x27;], (r[&#x27;title&#x27;] + (&#x27; — &#x27; + r[&#x27;caption&#x27;] if r[&#x27;caption&#x27;] else &#x27;&#x27;) + (f&#x27; &lt;span class=&quot;pill-mono&quot;&gt;{r[&quot;status&quot;]}&lt;/span&gt;&#x27; if r[&#x27;status&#x27;] else &#x27;&#x27;))) for r in renders)
+    sections.append(f&#x27;&lt;section class=&quot;section&quot; id=&quot;renderings&quot;&gt;&lt;div class=&quot;wrap&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Item 11 · Renderings&lt;/p&gt;&lt;h2 class=&quot;section-title&quot;&gt;Dimension-locked AI renderings.&lt;/h2&gt;&lt;p class=&quot;muted&quot;&gt;Each image was generated from the drawings above as reference input with a prompt that states the real dimensions (strip width, lot spacing, plate and ridge heights, materials) and was checked by an independent reviewer against an acceptance list. AI-generated concept imagery — not photographs.&lt;/p&gt;&lt;div class=&quot;sub-grid&quot;&gt;{rg}&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;&#x27;)
+
+# documents
+if docs:
+    dl = &#x27;&#x27;.join(f&#x27;&lt;li class=&quot;doc-item&quot;&gt;&lt;a href=&quot;docs/{d[&quot;slug&quot;]}.html&quot;&gt;&lt;span class=&quot;doc-num&quot;&gt;{d[&quot;name&quot;][:2]}&lt;/span&gt;&lt;span class=&quot;doc-title&quot;&gt;{html.escape(d[&quot;title&quot;])}&lt;/span&gt;&lt;span class=&quot;doc-meta&quot;&gt;{d[&quot;words&quot;]:,} words&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;&#x27; for d in docs)
+    sections.append(f&#x27;&lt;section class=&quot;section section-alt&quot; id=&quot;documents&quot;&gt;&lt;div class=&quot;wrap&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Items 1–7, 10 and supporting studies&lt;/p&gt;&lt;h2 class=&quot;section-title&quot;&gt;The written package.&lt;/h2&gt;&lt;p class=&quot;muted&quot;&gt;Application data sheet, development summary with the Table 4.1 compliance matrix, letter of intent with voluntary conditions, the six §1003-7 criteria, GIS-derived legal description (draft), adjoining owners, disclosures, technical memoranda (traffic, sewer, water, stormwater, fire, schools, environmental), site-context brief, outline specifications, and the submittal checklist with costs and calendar.&lt;/p&gt;&lt;ul class=&quot;doc-list&quot;&gt;{dl}&lt;/ul&gt;&lt;/div&gt;&lt;/section&gt;&#x27;)
+
+# verification
+if verify:
+    rows = &#x27;&#x27;.join(f&#x27;&lt;tr&gt;&lt;td&gt;{html.escape(str(v.get(&quot;artifact&quot;,&quot;&quot;)))}&lt;/td&gt;&lt;td&gt;{html.escape(str(v.get(&quot;lens&quot;,&quot;&quot;)))}&lt;/td&gt;&lt;td&gt;{v.get(&quot;findings&quot;,&quot;&quot;)}&lt;/td&gt;&lt;td&gt;{v.get(&quot;fixed&quot;,&quot;&quot;)}&lt;/td&gt;&lt;td&gt;{html.escape(str(v.get(&quot;verdict&quot;,&quot;&quot;)))}&lt;/td&gt;&lt;/tr&gt;&#x27; for v in verify.get(&#x27;rows&#x27;, []))
+    sections.append(f&#x27;&lt;section class=&quot;section&quot; id=&quot;verification&quot;&gt;&lt;div class=&quot;wrap&quot;&gt;&lt;p class=&quot;eyebrow&quot;&gt;Independent review&lt;/p&gt;&lt;h2 class=&quot;section-title&quot;&gt;How the work was checked.&lt;/h2&gt;&lt;p class=&quot;muted&quot;&gt;{html.escape(verify.get(&quot;summary&quot;,&quot;&quot;))}&lt;/p&gt;&lt;div class=&quot;tbl-wrap&quot;&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Artifact&lt;/th&gt;&lt;th&gt;Lens&lt;/th&gt;&lt;th&gt;Findings&lt;/th&gt;&lt;th&gt;Fixed&lt;/th&gt;&lt;th&gt;Verdict&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;{rows}&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/div&gt;&lt;/section&gt;&#x27;)
+
+page = f&#x27;&#x27;&#x27;&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot; /&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, viewport-fit=cover&quot; /&gt;
+  &lt;meta name=&quot;theme-color&quot; content=&quot;#2F5D3A&quot; /&gt;
+  &lt;meta name=&quot;color-scheme&quot; content=&quot;light&quot; /&gt;
+  &lt;title&gt;Arcado Springs — Cottages R-2 Submission Package (draft)&lt;/title&gt;
+  &lt;meta name=&quot;description&quot; content=&quot;Working draft of the R-2 rezoning submission package for The Cottages at Arcado Springs, Lilburn GA — site plan, floor plans, elevations, renderings and documents.&quot; /&gt;
+  &lt;meta name=&quot;robots&quot; content=&quot;noindex, nofollow&quot; /&gt;
+  &lt;link rel=&quot;icon&quot; href=&quot;data:image/svg+xml,%3Csvg%20xmlns=&#x27;http://www.w3.org/2000/svg&#x27;%20viewBox=&#x27;0%200%2032%2032&#x27;%3E%3Crect%20width=&#x27;32&#x27;%20height=&#x27;32&#x27;%20rx=&#x27;7&#x27;%20fill=&#x27;%232F5D3A&#x27;/%3E%3Cpath%20d=&#x27;M16%206l8%2020H8z&#x27;%20fill=&#x27;none&#x27;%20stroke=&#x27;%23C9B896&#x27;%20stroke-width=&#x27;2.4&#x27;%20stroke-linejoin=&#x27;round&#x27;/%3E%3C/svg%3E&quot; /&gt;
+  &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot; /&gt;&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin /&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&amp;family=Inter:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap&quot; /&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;../../styles.css&quot; /&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;submission.css&quot; /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;a class=&quot;skip-link&quot; href=&quot;#main&quot;&gt;Skip to content&lt;/a&gt;
+  &lt;header class=&quot;nav&quot; id=&quot;nav&quot; data-nav&gt;&lt;div class=&quot;wrap nav-inner&quot;&gt;
+    &lt;a class=&quot;brand&quot; href=&quot;/&quot; aria-label=&quot;Arcado Springs home&quot;&gt;&lt;span class=&quot;brand-mark&quot;&gt;Arcado &lt;span class=&quot;brand-accent&quot;&gt;Springs&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;badge-mono&quot; aria-hidden=&quot;true&quot;&gt;SUBMISSION DRAFT&lt;/span&gt;&lt;/a&gt;
+    &lt;nav class=&quot;nav-links&quot; id=&quot;nav-links&quot; aria-label=&quot;Primary&quot;&gt;&lt;a href=&quot;#siteplan&quot;&gt;Site plan&lt;/a&gt;&lt;a href=&quot;#plans&quot;&gt;Floor plans&lt;/a&gt;&lt;a href=&quot;#elevations&quot;&gt;Elevations&lt;/a&gt;&lt;a href=&quot;#renderings&quot;&gt;Renderings&lt;/a&gt;&lt;a href=&quot;#documents&quot;&gt;Documents&lt;/a&gt;&lt;a class=&quot;nav-feedback&quot; href=&quot;/cottages.html&quot;&gt;&amp;larr; Concept study&lt;/a&gt;&lt;/nav&gt;
+    &lt;button class=&quot;nav-toggle&quot; id=&quot;nav-toggle&quot; type=&quot;button&quot; aria-expanded=&quot;false&quot; aria-controls=&quot;nav-links&quot; aria-label=&quot;Open menu&quot;&gt;&lt;span class=&quot;nav-toggle-bar&quot;&gt;&lt;/span&gt;&lt;span class=&quot;nav-toggle-bar&quot;&gt;&lt;/span&gt;&lt;span class=&quot;nav-toggle-bar&quot;&gt;&lt;/span&gt;&lt;/button&gt;
+  &lt;/div&gt;&lt;/header&gt;
+  &lt;main id=&quot;main&quot;&gt;&lt;span id=&quot;top&quot; class=&quot;anchor-top&quot;&gt;&lt;/span&gt;
+  &lt;div class=&quot;trust-bar&quot; role=&quot;note&quot;&gt;&lt;div class=&quot;wrap trust-bar-inner&quot;&gt;&lt;span&gt;Working draft for pre-application review&lt;/span&gt;&lt;span aria-hidden=&quot;true&quot;&gt;·&lt;/span&gt;&lt;span&gt;Generated {TODAY}&lt;/span&gt;&lt;span aria-hidden=&quot;true&quot;&gt;·&lt;/span&gt;&lt;span&gt;Not sealed · not filed · not an approval&lt;/span&gt;&lt;span aria-hidden=&quot;true&quot;&gt;·&lt;/span&gt;&lt;span&gt;Renderings are AI-generated&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+  {&#x27;&#x27;.join(sections)}
+  &lt;/main&gt;
+  &lt;footer class=&quot;footer&quot;&gt;&lt;div class=&quot;wrap footer-inner&quot;&gt;&lt;div class=&quot;footer-brand&quot;&gt;&lt;span class=&quot;brand-mark&quot;&gt;Arcado &lt;span class=&quot;brand-accent&quot;&gt;Springs&lt;/span&gt;&lt;/span&gt;&lt;p class=&quot;footer-tag&quot;&gt;Submission package — owner working draft.&lt;/p&gt;&lt;/div&gt;&lt;div class=&quot;footer-meta&quot;&gt;&lt;p&gt;Generated {TODAY}&lt;/p&gt;&lt;p class=&quot;footer-disclaimer&quot;&gt;This is an AI-assisted preliminary planning package. All findings must be verified by licensed professionals (Georgia RLS, PE, architect, attorney) before use in design, permitting, or regulatory submissions. Boundary geometry is from the Gwinnett County GIS parcel fabric, not a survey.&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;/cottages.html&quot;&gt;&amp;larr; Cottages concept study&lt;/a&gt; · &lt;a href=&quot;/&quot;&gt;Overview&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/footer&gt;
+  &lt;div class=&quot;lightbox&quot; id=&quot;lightbox&quot; hidden aria-hidden=&quot;true&quot;&gt;&lt;div class=&quot;lightbox-backdrop&quot; data-lightbox-close&gt;&lt;/div&gt;&lt;figure class=&quot;lightbox-figure&quot; role=&quot;dialog&quot; aria-modal=&quot;true&quot; aria-label=&quot;Enlarged image&quot;&gt;&lt;button class=&quot;lightbox-close&quot; type=&quot;button&quot; data-lightbox-close aria-label=&quot;Close&quot;&gt;&amp;times;&lt;/button&gt;&lt;img class=&quot;lightbox-img&quot; id=&quot;lightbox-img&quot; src=&quot;&quot; alt=&quot;&quot; /&gt;&lt;figcaption class=&quot;lightbox-caption&quot; id=&quot;lightbox-caption&quot;&gt;&lt;/figcaption&gt;&lt;/figure&gt;&lt;/div&gt;
+  &lt;script src=&quot;../../main.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;&#x27;&#x27;&#x27;
+(OUT / &#x27;index.html&#x27;).write_text(page, encoding=&#x27;utf-8&#x27;)
+(OUT / &#x27;submission.css&#x27;).write_text(&#x27;&#x27;&#x27;
+.sub-grid{display:grid;gap:26px;margin-top:26px}
+@media(min-width:900px){.sub-grid{grid-template-columns:1fr 1fr}.sub-fig--wide{grid-column:1/-1}}
+.sub-fig{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+.sub-fig .gallery-trigger{display:block;width:100%;border:0;padding:0;background:#fff;cursor:zoom-in;position:relative}
+.sub-fig img{width:100%;height:auto;display:block}
+.sub-fig figcaption{padding:12px 16px;color:var(--muted);font-size:.9rem}
+.doc-list{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:10px}
+.doc-item a{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:14px 18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);text-decoration:none;color:var(--text)}
+.doc-item a:hover{border-color:var(--accent)}
+.doc-num{font-family:var(--font-mono);font-size:.8rem;color:var(--accent2-ink)}
+.doc-title{font-weight:600}.doc-meta{font-family:var(--font-mono);font-size:.7rem;color:var(--muted)}
+.tbl-wrap{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem;background:var(--surface)}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--bg);font-family:var(--font-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.doc-body{padding:40px 0 80px;max-width:900px}
+.doc-body h2{font-size:1.9rem;margin-top:1.2em}.doc-body h3{font-size:1.35rem;margin-top:1.4em}.doc-body h4{font-size:1.1rem}
+.doc-body blockquote{border-left:4px solid var(--accent2);margin:1.2em 0;padding:8px 16px;background:var(--surface);color:var(--muted)}
+.doc-body pre{overflow-x:auto;background:#fff;border:1px solid var(--line);padding:12px;border-radius:8px;font-size:.82rem}
+.doc-body code{font-family:var(--font-mono);font-size:.85em}
+.doc-body img{max-width:100%}
+&#x27;&#x27;&#x27;, encoding=&#x27;utf-8&#x27;)
+print(f&#x27;built {OUT/&quot;index.html&quot;}: {len(page)//1024} KB; drawings {len(drawings)}; renderings {len(renders)}; docs {len(docs)}; verify {&quot;yes&quot; if verify else &quot;no&quot;}&#x27;)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/build_site.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Sheet C-7.0 landscape, buffer and tree-protection concept — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Sheet C-7.0 landscape, buffer and tree-protection concept</h1><p class="src-note">Python · 1,608 lines · <a href="/data-room/src/submission/tools/landscape.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Sheet C-7.0 &quot;LANDSCAPE, BUFFER AND TREE PROTECTION CONCEPT&quot; — The Cottages at Arcado Springs.
+
+    python3 tools/landscape.py     -&gt;  drawings/landscape-buffer.svg + .png
+
+ARCH D 36 x 24 in at 1&quot; = 60&#x27; with two enlargements at 1&quot; = 20&#x27;, drawn on tools/sitebase.py in
+the site-local (u, v) system so that the sheet overlays Sheet C-0 (existing conditions),
+Sheet C-2.0 (master concept plan), Sheet C-3.0 (grading) and Sheet C-4.0 (utility) exactly.
+
+WHY THIS SHEET EXISTS
+The 2026 Lilburn &quot;Application Instructions&quot; item (8) names &quot;landscaping&quot; as a required site-plan
+element and Lilburn Zoning Ordinance 2023-603 section 1003-4.6 names &quot;areas of existing vegetation
+or parts of the site to be landscaped&quot;.  The 2026-09-03 drawing-standards audit records the whole
+of it as WEAK (item 8-n: &quot;No plant material, no street trees, no buffer supplement, no
+landscape-strip planting, no parking-lot trees, no plant schedule, no tree-protection limits&quot;) and
+completeness item M9 sets the content of this sheet.  Every requirement below is answered
+graphically and arithmetically, with the clause number of the City of Lilburn Site Development
+Plan Review Checklist printed beside it:
+
+  section 6.a  Registered Landscape Architect / forester / arborist seal        (status block + banner)
+  section 6.b  buffer boundary AND dimensions, labelled &quot;undisturbed&quot;, abutting residential
+  section 6.c  25 ft of additional buffer where the required buffer lies within an easement
+  section 6.f  buffer encroachments as near perpendicular as possible, 50 ft maximum width
+  section 6.g  tree-protection areas delineated, standard detail, fence before land disturbance
+  section 6.h  supplemental buffer planting: 6 ft minimum at planting, 20 ft at maturity
+  section 6.i  TDU calculations NOT required of an SFR subdivision; planting data in tabular form
+  section 6.j  10-ft landscape strip: 1 tree + 1 shrub per 25 lf of frontage; no landscaping
+               3 ft to 15 ft in height within 20 ft of a right-of-way intersection
+  section 6.k  parking-lot planting: 1 tree per 7 spaces, every space within 60 ft of a trunk
+  section 6.l  5-ft landscape strip around accessory structures and ground-level HVAC
+  section 6.m  certificate-of-occupancy and 12-month warranty note
+  section 6.n  overhead-utility species check (Georgia Power right-tree/right-place)
+
+WHAT IS READ AND WHAT IS COMPUTED
+Read, never re-derived: the boundary, the lots, the lane, the amenity block, the open-space
+tracts, the ponds, the stream reaches and the 237.62-ft Arcado Rd frontage all come from
+data/layout.json AS IT STANDS AT RUN TIME (it was regenerated 2026-09-03 — 41 lots, resized
+basins; numbers quoted in older documents are stale).  The species palette and the supplemental
+planting rate are the Division 32 93 00 outline specification (docs/12).  Computed here, and only
+here: the 20-ft buffer band as a true mitred offset of the boundary, the plantable length of the
+frontage strip after the drive opening and the two sight triangles are removed, every plant
+location, the plant schedule quantities and percentages (counted from the symbols actually
+drawn — the schedule cannot disagree with the plan), and the 60-ft parking-lot trunk-distance
+test, whose worst measured distance is printed on the sheet.
+
+CONCEPT — to be sealed by a Registered Landscape Architect, forester or arborist
+(City of Lilburn Site Development Plan Review Checklist section 6.a).  DRAFT — NOT SEALED.
+No tree survey has been performed; the existing-vegetation limits are approximate.
+&quot;&quot;&quot;
+import json
+import math
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import sitebase as sb                                      # noqa: E402
+
+# =========================================================================== sheet geometry
+SCALE20 = 72.0 / 20.0                       # 1&quot; = 20&#x27;  -&gt; 3.6 pt/ft (both enlargements)
+WIN = (-150.0, 1840.0, -258.0, 28.0)        # tighter v window than Sheet C-0: the buffer sheet
+                                            # needs a tall band for the 1&quot; = 20&#x27; frontage plan
+PLAN_X0, PLAN_Y0 = 102.0, 52.0
+PLAN_W = (WIN[1] - WIN[0]) * sb.SCALE60
+PLAN_H = (WIN[3] - WIN[2]) * sb.SCALE60     # 396 pt
+BAND_Y0 = PLAN_Y0 + PLAN_H + 30             # 425
+BAND_Y1 = sb.BAND_Y1                        # 1530
+
+L = sb.LAYOUT
+MET = L[&#x27;metrics&#x27;]
+AM = L[&#x27;amenity&#x27;]
+
+# data/plans.json is READ (never written) so that the typical buffer section stays in step with
+# the architectural set: it was regenerated on 2026-09-03 and Plan A&#x27;s patio edge now stands
+# 20.50 ft from the rear lot line, not the 20.17 ft recorded in audit-2026-09-03.
+with open(os.path.join(sb.DATA, &#x27;plans.json&#x27;)) as _fh:
+    PLANS = json.load(_fh)
+PA = PLANS[&#x27;plans&#x27;][&#x27;A&#x27;]
+PA_SIT = PA[&#x27;lot_siting&#x27;]
+PA_PATIO = float(PA_SIT[&#x27;patio_edge_from_rear_line_ft&#x27;])
+PA_REAR_WALL = float(PA_SIT[&#x27;rear_wall_from_rear_line_ft&#x27;])
+PA_BODY = float(PA[&#x27;overall_body_dims&#x27;][&#x27;depth_ft&#x27;])
+PA_RIDGE = float(PA[&#x27;roof&#x27;][&#x27;max_ridge_ft&#x27;])
+PA_BUFFER_CLEAR = PA_PATIO - 20.0
+
+# =========================================================================== authoritative inputs
+BUF_FT = float(L[&#x27;buffers&#x27;][&#x27;perimeter_buffer_ft&#x27;])          # 20.0
+ADDL_BUF_FT = 25.0                                           # checklist section 6.c
+STRIP_FT = 10.0                                              # checklist section 6.j
+FRONTAGE_FT = float(MET[&#x27;frontage_arcado_along_rw_ft&#x27;])      # 237.62 ft along the R/W
+STRIP_RATE_FT = 25.0                                         # 1 tree + 1 shrub per 25 lf
+STREET_TREE_OC = 40.0
+PARK_RATE = 7.0                                              # 1 tree per 7 spaces
+PARK_RADIUS = 60.0
+GUEST_SPACES = int(AM[&#x27;guest_spaces&#x27;])
+KIOSK_SPACES = int(AM[&#x27;kiosk_spaces&#x27;])
+AMENITY_SPACES = GUEST_SPACES + KIOSK_SPACES                 # 12
+SIGHT_TRI_FT = 20.0                                          # section 6.j R/W-intersection triangle
+ISD_FT = 390.0                                               # FACTS section 2b (VERIFY by PE)
+
+STRIP_TREES_REQ = int(math.ceil(FRONTAGE_FT / STRIP_RATE_FT))
+STRIP_SHRUBS_REQ = STRIP_TREES_REQ
+PARK_TREES_REQ = int(math.ceil(AMENITY_SPACES / PARK_RATE))
+
+# =========================================================================== palette
+CG = {&#x27;buf&#x27;: &#x27;#7a9b5a&#x27;, &#x27;buf_dark&#x27;: &#x27;#33691e&#x27;, &#x27;addl&#x27;: &#x27;#2e7d32&#x27;, &#x27;strip&#x27;: &#x27;#1b5e20&#x27;,
+      &#x27;canopy&#x27;: &#x27;#4d8b3a&#x27;, &#x27;canopy_f&#x27;: &#x27;#dcecd0&#x27;, &#x27;under&#x27;: &#x27;#a15a9e&#x27;, &#x27;under_f&#x27;: &#x27;#f2e2f1&#x27;,
+      &#x27;ever&#x27;: &#x27;#1b6b46&#x27;, &#x27;ever_f&#x27;: &#x27;#cfe4d8&#x27;, &#x27;shrub&#x27;: &#x27;#6f8f4a&#x27;, &#x27;shrub_f&#x27;: &#x27;#e7efd8&#x27;,
+      &#x27;tpf&#x27;: &#x27;#e65100&#x27;, &#x27;sight&#x27;: &#x27;#c62828&#x27;, &#x27;park&#x27;: &#x27;#00695c&#x27;, &#x27;ctx&#x27;: &#x27;#9e9e9e&#x27;,
+      &#x27;accy&#x27;: &#x27;#00838f&#x27;, &#x27;suppl&#x27;: &#x27;#8d6e00&#x27;}
+
+DEFS_EXTRA = &#x27;&#x27;&#x27;&lt;defs&gt;
+&lt;pattern id=&quot;supplhatch&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;7&quot; height=&quot;7&quot; patternTransform=&quot;rotate(30)&quot;&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;7&quot; stroke=&quot;#b58900&quot; stroke-width=&quot;0.7&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;addlbuf&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;9&quot; height=&quot;9&quot; patternTransform=&quot;rotate(-30)&quot;&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;9&quot; stroke=&quot;#2e7d32&quot; stroke-width=&quot;0.55&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;striphatch&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;6&quot; height=&quot;6&quot;&gt;&lt;rect width=&quot;6&quot; height=&quot;6&quot; fill=&quot;#eef6e6&quot;/&gt;&lt;line x1=&quot;0&quot; y1=&quot;6&quot; x2=&quot;6&quot; y2=&quot;0&quot; stroke=&quot;#7cb342&quot; stroke-width=&quot;0.5&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;sighthatch&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;7&quot; height=&quot;7&quot; patternTransform=&quot;rotate(45)&quot;&gt;&lt;rect width=&quot;7&quot; height=&quot;7&quot; fill=&quot;#fdeaea&quot;/&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;7&quot; stroke=&quot;#c62828&quot; stroke-width=&quot;0.6&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;accystrip&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;5&quot; height=&quot;5&quot; patternTransform=&quot;rotate(-45)&quot;&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;5&quot; stroke=&quot;#00838f&quot; stroke-width=&quot;0.55&quot;/&gt;&lt;/pattern&gt;
+&lt;/defs&gt;&#x27;&#x27;&#x27;
+
+
+# =========================================================================== geometry helpers
+def _unit(a, b):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = math.hypot(dx, dy) or 1.0
+    return dx / n, dy / n
+
+
+def offset_left(path, d):
+    &quot;&quot;&quot;Offset an open polyline `d` feet to its LEFT (mitred).  The site boundary ring is
+    counter-clockwise, so for the perimeter polyline (SW corner -&gt; rear -&gt; NE corner) the left
+    side is the interior: this is the inner line of the 20-ft undisturbed buffer.&quot;&quot;&quot;
+    segs = []
+    for i in range(len(path) - 1):
+        ux, uy = _unit(path[i], path[i + 1])
+        nx, ny = -uy, ux
+        segs.append(((path[i][0] + nx * d, path[i][1] + ny * d),
+                     (path[i + 1][0] + nx * d, path[i + 1][1] + ny * d)))
+    out = [segs[0][0]]
+    for i in range(len(segs) - 1):
+        p = _line_x(segs[i], segs[i + 1])
+        out.append(p if p else segs[i][1])
+    out.append(segs[-1][1])
+    return out
+
+
+def _line_x(s1, s2):
+    (x1, y1), (x2, y2) = s1
+    (x3, y3), (x4, y4) = s2
+    d = (x2 - x1) * (y4 - y3) - (y2 - y1) * (x4 - x3)
+    if abs(d) &lt; 1e-9:
+        return None
+    t = ((x3 - x1) * (y4 - y3) - (y3 - y1) * (x4 - x3)) / d
+    if abs(t) &gt; 40:                       # runaway mitre at a near-reversal — fall back
+        return None
+    return (x1 + t * (x2 - x1), y1 + t * (y2 - y1))
+
+
+PERIM = [tuple(p) for p in sb.BOUNDARY[6:49]]     # SW front corner -&gt; rear -&gt; NE front corner
+PERIM_LEN = sum(sb.dist(PERIM[i], PERIM[i + 1]) for i in range(len(PERIM) - 1))
+BUF_INNER = offset_left(PERIM, BUF_FT)
+BUF_BAND = PERIM + BUF_INNER[::-1]
+BUF_SF = abs(sb.poly_area(BUF_BAND))
+
+
+def poly_len(path):
+    return sum(sb.dist(path[i], path[i + 1]) for i in range(len(path) - 1))
+
+
+def walk(path, s):
+    &quot;&quot;&quot;Point and unit tangent at arc length s along a polyline.&quot;&quot;&quot;
+    acc = 0.0
+    for i in range(len(path) - 1):
+        seg = sb.dist(path[i], path[i + 1])
+        if acc + seg &gt;= s or i == len(path) - 2:
+            t = (s - acc) / (seg or 1.0)
+            ux, uy = _unit(path[i], path[i + 1])
+            return (path[i][0] + (path[i + 1][0] - path[i][0]) * t,
+                    path[i][1] + (path[i + 1][1] - path[i][1]) * t), (ux, uy)
+        acc += seg
+    return path[-1], _unit(path[-2], path[-1])
+
+
+def seg_dist(p, a, b):
+    return sb._seg_pt(p, a, b)
+
+
+def path_dist(p, path):
+    return min(seg_dist(p, path[i], path[i + 1]) for i in range(len(path) - 1))
+
+
+STREAMS = [[tuple(q) for q in s[&#x27;stream&#x27;]] for s in L[&#x27;stream_setbacks&#x27;]]
+
+
+def stream_clear(p):
+    return min(path_dist(p, s) for s in STREAMS)
+
+
+# --------------------------------------------------------------------------- frontage line
+# The frontage chain in ring order: sitebase.FRONT_LINE picks up one point of the SW line as
+# well (v = -234.70 at u = -26.0), which would lengthen the frontage by 10 ft, so the chain is
+# taken from the boundary ring directly: the 13 courses flagged frontage=True in
+# data/layout.json &#x27;bearings&#x27; run ring[48]..ring[54] then ring[0]..ring[6].
+FRONT = [tuple(p) for p in sb.BOUNDARY[48:55]] + [tuple(p) for p in sb.BOUNDARY[0:7]]
+FRONT_LEN = poly_len(FRONT)
+STRIP_INNER = offset_left(FRONT, STRIP_FT)      # 10 ft inside the R/W (the frontage runs SW, so
+STRIP_BAND = FRONT + STRIP_INNER[::-1]          #  its left side is the interior of the site)
+STRIP_SF = abs(sb.poly_area(STRIP_BAND))
+
+# --------------------------------------------------------------------------- entrance geometry
+ENT = L[&#x27;lane&#x27;][&#x27;entrance&#x27;]
+ENT_V = float(ENT[&#x27;v_rw&#x27;])                      # -190.0
+DRIVE_W = float(ENT[&#x27;drive_width_ft&#x27;])          # 24.0
+R_NE = float(ENT[&#x27;curb_return_radius_ne_ft&#x27;])   # 25.0
+R_SW = float(ENT[&#x27;curb_return_radius_sw_ft&#x27;])   # 15.0
+# stations along the frontage, measured from the NE front corner (0, 0)
+S_OF_V = {}
+_acc = 0.0
+for _i in range(len(FRONT) - 1):
+    S_OF_V[FRONT[_i][1]] = _acc
+    _acc += sb.dist(FRONT[_i], FRONT[_i + 1])
+S_OF_V[FRONT[-1][1]] = _acc
+
+
+def s_of_v(v):
+    &quot;&quot;&quot;Arc length from the NE front corner to the point on the frontage at ordinate v.&quot;&quot;&quot;
+    vs = sorted(S_OF_V.keys(), reverse=True)
+    if v &gt;= vs[0]:
+        return 0.0
+    for i in range(len(vs) - 1):
+        if vs[i] &gt;= v &gt;= vs[i + 1]:
+            f = (vs[i] - v) / (vs[i] - vs[i + 1])
+            return S_OF_V[vs[i]] + f * (S_OF_V[vs[i + 1]] - S_OF_V[vs[i]])
+    return S_OF_V[vs[-1]]
+
+
+S_DRIVE_NE = s_of_v(ENT_V + DRIVE_W / 2.0 + R_NE)     # start of the NE curb return
+S_DRIVE_SW = s_of_v(ENT_V - DRIVE_W / 2.0 - R_SW)     # end of the SW curb return
+OPENING_FT = S_DRIVE_SW - S_DRIVE_NE                  # drive opening incl. both returns
+SIGHT_NE = (S_DRIVE_NE - SIGHT_TRI_FT, S_DRIVE_NE)    # 20-ft no-3-to-15-ft zone, NE side
+SIGHT_SW = (S_DRIVE_SW, min(S_DRIVE_SW + SIGHT_TRI_FT, FRONT_LEN))
+PLANTABLE_RUNS = [(0.0, SIGHT_NE[0]), (SIGHT_SW[1], FRONT_LEN)]
+PLANTABLE_FT = sum(b - a for a, b in PLANTABLE_RUNS if b - a &gt; 1.0)
+SHRUB_RUNS = [(0.0, S_DRIVE_NE), (S_DRIVE_SW, FRONT_LEN)]
+SHRUB_FT = sum(b - a for a, b in SHRUB_RUNS if b - a &gt; 1.0)
+
+# --------------------------------------------------------------------------- existing sewer in the buffer
+# FACTS section 2: the existing 8-in Arcado Road Townhomes outfall runs 7-13 ft inside the SW
+# line from u ~ -42 to u ~ 272 — i.e. inside the required 20-ft undisturbed buffer.  That is the
+# checklist section 6.c condition, and it is also why the buffer screen is thin there.
+SSE_U0, SSE_U1 = -36.0, 272.0
+SSE_LEN = SSE_U1 - SSE_U0
+ADDL_U0, ADDL_U1 = 60.0, 230.0          # where the amenity tract can carry the extra 25 ft
+ADDL_LEN = ADDL_U1 - ADDL_U0
+LOT1_SSE_LEN = SSE_U1 - 230.0           # the reach across the rear of lot 1
+
+# supplemental-planting zone: the mown yard at 4541 (sitebase CLEARINGS &#x27;yard-4541&#x27;,
+# u 120-272) plus the maintained sewer corridor — one continuous gap on the SW line.
+SUPPL_U0, SUPPL_U1 = SSE_U0, SSE_U1
+SUPPL_LEN = SUPPL_U1 - SUPPL_U0
+SUPPL_EVER_OC = 8.0                     # docs/12 section 32 93 00 2.03: 1 evergreen per 8-10 lf
+SUPPL_CANOPY_OC = 35.0                  # ... plus 1 canopy tree per 30-40 lf
+# The 25-ft additional buffer of checklist section 6.c can only be carried where the front
+# amenity tract is clear of built work.  The two pickleball pads stand 22.0 ft from the SW
+# property line (v = -212.7 against SW = -234.7), so the extra width is available from u = 60
+# to u = 157 only; the balance is reported as an open item, not claimed.
+ADDL_U0, ADDL_U1 = 60.0, 157.0
+ADDL_LEN = ADDL_U1 - ADDL_U0
+COURT_V_SW = min(q[1] for pad in AM[&#x27;pickleball&#x27;] for q in pad)
+COURT_OFFSET_FT = COURT_V_SW - sb.SW(187.0)
+
+# =========================================================================== species palette
+# docs/12-outline-specifications.md Section 32 93 00 2.02 (Georgia Piedmont natives and proven
+# adapted cultivars; GA-EPPC Category 1 species prohibited).  Sizes are ANSI Z60.1.
+SPECIES = {
+    # key: (common, botanical, caliper, height at planting, mature height, root, class, use)
+    &#x27;QP&#x27;: (&#x27;Willow Oak&#x27;, &#x27;Quercus phellos&#x27;, &#x27;3 in cal.&#x27;, &#x27;12–14 ft&#x27;, &#x27;60–75 ft&#x27;, &#x27;B&amp;B&#x27;,
+           &#x27;canopy&#x27;, &#x27;Lane street tree&#x27;),
+    &#x27;QS&#x27;: (&#x27;Shumard Oak&#x27;, &#x27;Quercus shumardii&#x27;, &#x27;3 in cal.&#x27;, &#x27;12–14 ft&#x27;, &#x27;55–80 ft&#x27;, &#x27;B&amp;B&#x27;,
+           &#x27;canopy&#x27;, &#x27;Lane street tree&#x27;),
+    &#x27;UP&#x27;: (&quot;Lacebark Elm &#x27;Allee&#x27;&quot;, &#x27;Ulmus parvifolia&#x27;, &#x27;3 in cal.&#x27;, &#x27;12–14 ft&#x27;, &#x27;40–50 ft&#x27;, &#x27;B&amp;B&#x27;,
+           &#x27;canopy&#x27;, &#x27;Lane street tree&#x27;),
+    &#x27;NS&#x27;: (&#x27;Black Gum&#x27;, &#x27;Nyssa sylvatica&#x27;, &#x27;3 in cal.&#x27;, &#x27;12–14 ft&#x27;, &#x27;30–50 ft&#x27;, &#x27;B&amp;B&#x27;,
+           &#x27;canopy&#x27;, &#x27;Lane street tree / parking island&#x27;),
+    &#x27;QL&#x27;: (&#x27;Overcup Oak&#x27;, &#x27;Quercus lyrata&#x27;, &#x27;4 in cal.&#x27;, &#x27;14–16 ft&#x27;, &#x27;35–45 ft&#x27;, &#x27;B&amp;B&#x27;,
+           &#x27;canopy&#x27;, &#x27;Arcado Rd strip — relocated behind the strip&#x27;),
+    &#x27;QA&#x27;: (&#x27;White Oak&#x27;, &#x27;Quercus alba&#x27;, &#x27;2.5–3 in cal.&#x27;, &#x27;10–12 ft&#x27;, &#x27;50–80 ft&#x27;, &#x27;B&amp;B&#x27;,
+           &#x27;canopy&#x27;, &#x27;Buffer supplement&#x27;),
+    &#x27;CC&#x27;: (&#x27;Eastern Redbud&#x27;, &#x27;Cercis canadensis&#x27;, &#x27;1.5–2 in cal.&#x27;, &#x27;6–8 ft&#x27;, &#x27;20–30 ft&#x27;, &#x27;B&amp;B&#x27;,
+           &#x27;under&#x27;, &#x27;Arcado Rd landscape strip&#x27;),
+    &#x27;AA&#x27;: (&#x27;Downy Serviceberry&#x27;, &#x27;Amelanchier arborea&#x27;, &#x27;1.5–2 in cal.&#x27;, &#x27;6–8 ft&#x27;, &#x27;15–25 ft&#x27;, &#x27;B&amp;B&#x27;,
+           &#x27;under&#x27;, &#x27;Arcado Rd landscape strip&#x27;),
+    &#x27;IO&#x27;: (&#x27;American Holly&#x27;, &#x27;Ilex opaca&#x27;, &#x27;n/a — single leader&#x27;, &#x27;6–8 ft&#x27;, &#x27;15–30 ft&#x27;, &#x27;B&amp;B&#x27;,
+           &#x27;ever&#x27;, &#x27;Buffer supplement screen&#x27;),
+    &#x27;JV&#x27;: (&#x27;Eastern Red Cedar&#x27;, &#x27;Juniperus virginiana&#x27;, &#x27;n/a&#x27;, &#x27;6–8 ft&#x27;, &#x27;30–40 ft&#x27;, &#x27;B&amp;B&#x27;,
+           &#x27;ever&#x27;, &#x27;Buffer supplement screen&#x27;),
+    &#x27;IG&#x27;: (&quot;Inkberry &#x27;Shamrock&#x27;&quot;, &#x27;Ilex glabra&#x27;, &#x27;n/a — 7 gal.&#x27;, &#x27;24–30 in&#x27;, &#x27;4–6 ft&#x27;, &#x27;Container&#x27;,
+           &#x27;shrub&#x27;, &#x27;Arcado Rd strip; accessory-structure strip&#x27;),
+    &#x27;IV&#x27;: (&quot;Sweetspire &#x27;Little Henry&#x27;&quot;, &#x27;Itea virginica&#x27;, &#x27;n/a — 3 gal.&#x27;, &#x27;18–24 in&#x27;, &#x27;2–3 ft&#x27;, &#x27;Container&#x27;,
+           &#x27;shrub&#x27;, &#x27;Strip within the sight triangle — 30 in max. maintained&#x27;),
+    &#x27;MC&#x27;: (&#x27;Wax Myrtle&#x27;, &#x27;Morella cerifera&#x27;, &#x27;n/a — 7 gal.&#x27;, &#x27;36–42 in&#x27;, &#x27;10–15 ft&#x27;, &#x27;Container&#x27;,
+           &#x27;shrub&#x27;, &#x27;Screen at the pickleball court pads&#x27;),
+}
+CLASS_OC = {&#x27;canopy&#x27;: &quot;40&#x27;-0\&quot; o.c. avg.&quot;, &#x27;under&#x27;: &quot;16&#x27;-11\&quot; o.c. avg.&quot;,
+            &#x27;ever&#x27;: &quot;8&#x27;-0\&quot; o.c., double staggered&quot;, &#x27;shrub&#x27;: &quot;as shown&quot;}
+
+PLANTS = []                 # every symbol drawn on the plan, so the schedule cannot disagree
+
+
+def plant(key, u, v, zone, oc=None):
+    PLANTS.append({&#x27;key&#x27;: key, &#x27;u&#x27;: u, &#x27;v&#x27;: v, &#x27;zone&#x27;: zone, &#x27;cls&#x27;: SPECIES[key][6],
+                   &#x27;oc&#x27;: oc or CLASS_OC[SPECIES[key][6]]})
+    return PLANTS[-1]
+
+
+def by_zone(zone):
+    return [p for p in PLANTS if p[&#x27;zone&#x27;] == zone]
+
+
+# =========================================================================== placement
+def _hit(p, polys, grow=0.0):
+    for poly in polys:
+        us = [q[0] for q in poly]
+        vs = [q[1] for q in poly]
+        if min(us) - grow &lt;= p[0] &lt;= max(us) + grow and min(vs) - grow &lt;= p[1] &lt;= max(vs) + grow:
+            return True
+    return False
+
+
+# Detention-basin top of bank, grown 8 ft: nothing is planted on a basin embankment, so the
+# street-tree row is interrupted where the lane passes Pond 1 and Pond 2 (see note 8).
+POND_TOB = [sb.rect(min(q[0] for q in p[&#x27;polygon&#x27;]) - 8.0, max(q[0] for q in p[&#x27;polygon&#x27;]) + 8.0,
+                    min(q[1] for q in p[&#x27;polygon&#x27;]) - 8.0, max(q[1] for q in p[&#x27;polygon&#x27;]) + 8.0)
+            for p in L[&#x27;ponds&#x27;]]
+NOPLANT = (POND_TOB
+           + [[tuple(q) for q in lot[&#x27;driveway_rect&#x27;]] for lot in L[&#x27;lots&#x27;]]
+           + [[tuple(q) for q in leg] for h in L[&#x27;hammerheads&#x27;] for leg in h[&#x27;legs&#x27;]]
+           + [[tuple(q) for q in AM[&#x27;parking_bay&#x27;]], [tuple(q) for q in AM[&#x27;kiosk_bay&#x27;]],
+              [tuple(q) for q in AM[&#x27;clubhouse&#x27;]], [tuple(q) for q in AM[&#x27;mail_kiosk&#x27;]]]
+           + [[tuple(q) for q in pad] for pad in AM[&#x27;pickleball&#x27;]])
+
+
+def place_street_trees():
+    &quot;&quot;&quot;Lane street trees at 40 ft on centre, both sides, 6 ft behind the front lot line.
+    A station that falls on a driveway apron, a hammerhead leg or a parking bay is shifted
+    along the lane in 6-ft steps; a station inside the 50-ft undisturbed stream buffer is
+    dropped (nothing is planted in an undisturbed buffer).&quot;&quot;&quot;
+    order = [&#x27;QP&#x27;, &#x27;QS&#x27;, &#x27;UP&#x27;, &#x27;NS&#x27;]
+    n = 0
+    u0, u1 = 200.0, 1690.0
+    stations = [u0 + i * STREET_TREE_OC for i in range(int((u1 - u0) / STREET_TREE_OC) + 1)]
+    for side in (&#x27;SW&#x27;, &#x27;NE&#x27;):
+        for st in stations:
+            got = None
+            for d in (0, 6, -6, 12, -12, 18, -18):
+                u = st + d
+                v = sb.SW(u) + 94.0 if side == &#x27;SW&#x27; else sb.NE(u) - 94.0
+                if not (200.0 &lt;= u &lt;= 1700.0):
+                    continue
+                if _hit((u, v), NOPLANT, grow=5.0):
+                    continue
+                if stream_clear((u, v)) &lt; 55.0:
+                    got = &#x27;stream&#x27;
+                    break
+                got = (u, v)
+                break
+            if got and got != &#x27;stream&#x27;:
+                plant(order[n % 4], got[0], got[1], &#x27;street&#x27;)
+                n += 1
+    return n
+
+
+def place_frontage():
+    &quot;&quot;&quot;Checklist section 6.j — 1 tree and 1 shrub per 25 lineal feet of frontage.&quot;&quot;&quot;
+    run = PLANTABLE_RUNS[0]
+    n_strip = 8
+    oc = (run[1] - run[0]) / n_strip
+    for i in range(n_strip):
+        s = run[0] + (i + 0.5) * oc
+        p, t = walk(FRONT, s)
+        nx, ny = -t[1], t[0]
+        q = (p[0] + nx * (STRIP_FT * 0.52), p[1] + ny * (STRIP_FT * 0.52))
+        plant(&#x27;CC&#x27; if i % 2 == 0 else &#x27;AA&#x27;, q[0], q[1], &#x27;strip&#x27;, oc=&quot;%s o.c.&quot; % _arch(oc))
+    for q in ((22.0, -30.0), (22.0, -95.0)):
+        plant(&#x27;QL&#x27;, q[0], q[1], &#x27;strip-relocated&#x27;, oc=&#x27;as shown&#x27;)
+    # shrubs: allowed inside the sight triangle only if maintained at 30 in or less
+    tot = SHRUB_FT
+    counts = [max(1, int(round(STRIP_SHRUBS_REQ * (b - a) / tot))) for a, b in SHRUB_RUNS]
+    while sum(counts) &gt; STRIP_SHRUBS_REQ:
+        counts[counts.index(max(counts))] -= 1
+    while sum(counts) &lt; STRIP_SHRUBS_REQ:
+        counts[counts.index(max(counts))] += 1
+    for (a, b), k in zip(SHRUB_RUNS, counts):
+        for i in range(k):
+            s = a + (i + 0.5) * (b - a) / k
+            p, t = walk(FRONT, s)
+            nx, ny = -t[1], t[0]
+            q = (p[0] + nx * (STRIP_FT * 0.86), p[1] + ny * (STRIP_FT * 0.86))
+            inside = (SIGHT_NE[0] &lt;= s &lt;= SIGHT_NE[1]) or (SIGHT_SW[0] &lt;= s &lt;= SIGHT_SW[1])
+            plant(&#x27;IV&#x27; if inside else &#x27;IG&#x27;, q[0], q[1], &#x27;strip-shrub&#x27;,
+                  oc=&quot;%s o.c. avg.&quot; % _arch(tot / STRIP_SHRUBS_REQ))
+    return oc
+
+
+def place_buffer_supplement():
+    &quot;&quot;&quot;Checklist section 6.h — supplemental planting only where the existing vegetation does
+    not screen.  One mapped gap: the mown yard at 4541 and the maintained sanitary-sewer
+    corridor on the SW line, u -36 to 272 (both from Sheet C-0).&quot;&quot;&quot;
+    n_ev = int(math.ceil(SUPPL_LEN / SUPPL_EVER_OC))
+    for i in range(n_ev):
+        u = SUPPL_U0 + (i + 0.5) * SUPPL_LEN / n_ev
+        v = sb.SW(u) + (16.0 if i % 2 == 0 else 19.0)      # clear of the 8-in sewer at 7-13 ft
+        plant(&#x27;IO&#x27; if i % 2 == 0 else &#x27;JV&#x27;, u, v, &#x27;buffer-ever&#x27;)
+    n_ca = int(math.ceil(SUPPL_LEN / SUPPL_CANOPY_OC))
+    for i in range(n_ca):
+        u = SUPPL_U0 + (i + 0.5) * SUPPL_LEN / n_ca
+        v = sb.SW(u) + (30.0 if ADDL_U0 &lt;= u &lt;= ADDL_U1 else 17.0)
+        plant(&#x27;QA&#x27;, u, v, &#x27;buffer-canopy&#x27;, oc=&quot;%s o.c.&quot; % _arch(SUPPL_LEN / n_ca))
+    return n_ev, n_ca
+
+
+def pond_clearance_ft(pond):
+    &quot;&quot;&quot;Minimum distance from the basin top of bank to the SW property line, measured at every
+    10 ft of the basin&#x27;s length (not at a single station).&quot;&quot;&quot;
+    poly = [tuple(q) for q in pond[&#x27;polygon&#x27;]]
+    u0, u1 = min(q[0] for q in poly), max(q[0] for q in poly)
+    out = []
+    for u in _rng2(u0, u1, 10.0):
+        vs = [q[1] for q in poly]
+        out.append(min(vs) - sb.SW(u))
+    return min(out)
+
+
+def _rng2(a, b, step):
+    n = max(2, int(abs(b - a) / step) + 1)
+    return [a + (b - a) * i / (n - 1.0) for i in range(n)]
+
+
+PARK_ISLANDS = [sb.rect(160.0, 180.0, -127.0, -117.0), sb.rect(193.0, 213.0, -127.0, -117.0)]
+PARK_TRUNKS = [(170.0, -122.0), (203.0, -122.0)]
+ACCY = [(&#x27;MAIL KIOSK (CBU)&#x27;, [tuple(q) for q in AM[&#x27;mail_kiosk&#x27;]]),
+        (&#x27;PICKLEBALL PAD 1&#x27;, [tuple(q) for q in AM[&#x27;pickleball&#x27;][0]]),
+        (&#x27;PICKLEBALL PAD 2&#x27;, [tuple(q) for q in AM[&#x27;pickleball&#x27;][1]]),
+        (&#x27;CLUBHOUSE GROUND HVAC (CONCEPT)&#x27;, sb.rect(112.0, 124.0, -84.0, -78.0))]
+
+
+def place_parking_and_accessory():
+    for t in PARK_TRUNKS:
+        plant(&#x27;NS&#x27;, t[0], t[1], &#x27;parking&#x27;, oc=&#x27;1 per 7 spaces&#x27;)
+    for name, poly in ACCY:
+        us = [q[0] for q in poly]
+        vs = [q[1] for q in poly]
+        per = 2 * ((max(us) - min(us) + 5.0) + (max(vs) - min(vs) + 5.0))
+        k = max(4, int(per / 14.0))
+        sp = &#x27;MC&#x27; if &#x27;PICKLEBALL&#x27; in name else &#x27;IG&#x27;
+        for i in range(k):
+            s = (i + 0.5) / k * per
+            q = _perim_point(min(us) - 2.5, max(us) + 2.5, min(vs) - 2.5, max(vs) + 2.5, s / per)
+            plant(sp, q[0], q[1], &#x27;accessory&#x27;, oc=&quot;%s o.c. avg.&quot; % _arch(per / k))
+
+
+def _perim_point(u0, u1, v0, v1, f):
+    w, h = u1 - u0, v1 - v0
+    per = 2 * (w + h)
+    s = f * per
+    if s &lt; w:
+        return (u0 + s, v0)
+    s -= w
+    if s &lt; h:
+        return (u1, v0 + s)
+    s -= h
+    if s &lt; w:
+        return (u1 - s, v1)
+    s -= w
+    return (u0, v1 - s)
+
+
+def _arch(ft):
+    &quot;&quot;&quot;Architectural notation for a decimal foot value: 16.92 -&gt; 16&#x27;-11\&quot;.&quot;&quot;&quot;
+    sign = &#x27;-&#x27; if ft &lt; 0 else &#x27;&#x27;
+    ft = abs(ft)
+    f = int(ft)
+    inch = int(round((ft - f) * 12))
+    if inch == 12:
+        f, inch = f + 1, 0
+    return &quot;%s%d&#x27;-%d\&quot;&quot; % (sign, f, inch)
+
+
+N_STREET = place_street_trees()
+STRIP_OC = place_frontage()
+N_EVER, N_CANOPY = place_buffer_supplement()
+place_parking_and_accessory()
+
+PARK_MAXD = 0.0
+for st in AM[&#x27;stalls&#x27;] + AM[&#x27;kiosk_stalls&#x27;] + [AM[&#x27;accessible_stall&#x27;]]:
+    for q in [tuple(x) for x in st]:
+        PARK_MAXD = max(PARK_MAXD, min(sb.dist(q, t) for t in PARK_TRUNKS))
+
+TOTAL_PLANTS = len(PLANTS)
+COUNTS = {}
+for p in PLANTS:
+    COUNTS[p[&#x27;key&#x27;]] = COUNTS.get(p[&#x27;key&#x27;], 0) + 1
+MAX_PCT = max(100.0 * c / TOTAL_PLANTS for c in COUNTS.values())
+
+
+# =========================================================================== plant symbols
+def _trunk(c, p, r=1.4):
+    c.circle(p, max(0.9, r * c.s), fill=&#x27;#3e2723&#x27;, stroke=&#x27;none&#x27;)
+
+
+def sym_canopy(c, p, r=13.0, col=None):
+    col = col or CG[&#x27;canopy&#x27;]
+    c.circle(p, r * c.s, fill=CG[&#x27;canopy_f&#x27;], fill_opacity=&#x27;0.75&#x27;, stroke=col, stroke_width=0.8)
+    c.circle(p, r * 0.62 * c.s, fill=&#x27;none&#x27;, stroke=col, stroke_width=0.35, stroke_dasharray=&#x27;2 2&#x27;)
+    _trunk(c, p, 1.5)
+
+
+def sym_under(c, p, r=7.5):
+    c.circle(p, r * c.s, fill=CG[&#x27;under_f&#x27;], fill_opacity=&#x27;0.8&#x27;, stroke=CG[&#x27;under&#x27;],
+             stroke_width=0.7, stroke_dasharray=&#x27;3 1.6&#x27;)
+    _trunk(c, p, 1.2)
+
+
+def sym_ever(c, p, r=7.5):
+    pts = []
+    for k in range(16):
+        a = math.pi * 2 * k / 16.0
+        rr = r if k % 2 == 0 else r * 0.52
+        pts.append((p[0] + rr * math.cos(a), p[1] + rr * math.sin(a)))
+    c.poly(pts, fill=CG[&#x27;ever_f&#x27;], fill_opacity=&#x27;0.9&#x27;, stroke=CG[&#x27;ever&#x27;], stroke_width=0.6)
+    _trunk(c, p, 1.1)
+
+
+def sym_shrub(c, p, r=4.0):
+    c.circle(p, max(1.4, r * c.s), fill=CG[&#x27;shrub_f&#x27;], stroke=CG[&#x27;shrub&#x27;], stroke_width=0.7)
+
+
+SYM = {&#x27;canopy&#x27;: sym_canopy, &#x27;under&#x27;: sym_under, &#x27;ever&#x27;: sym_ever, &#x27;shrub&#x27;: sym_shrub}
+
+
+def planting(c, zones=None, keys=True):
+    c.add(&#x27;&lt;g id=&quot;planting&quot;&gt;&#x27;)
+    for p in PLANTS:
+        if zones and p[&#x27;zone&#x27;] not in zones:
+            continue
+        SYM[p[&#x27;cls&#x27;]](c, (p[&#x27;u&#x27;], p[&#x27;v&#x27;]))
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not keys or c.s &lt; sb.SCALE30:
+        return
+    for p in PLANTS:
+        if zones and p[&#x27;zone&#x27;] not in zones:
+            continue
+        if p[&#x27;cls&#x27;] == &#x27;shrub&#x27;:
+            continue
+        c.text(p[&#x27;u&#x27;], p[&#x27;v&#x27;] + 1.7, p[&#x27;key&#x27;], size=6.4, bold=True, fill=&#x27;#1b3a12&#x27;)
+
+
+# =========================================================================== dimension helper
+def dim(c, a, b, off=0.0, text=None, size=6.0, col=&#x27;#000&#x27;, witness=6.0, side=1):
+    &quot;&quot;&quot;A dimensioned length between two plan points, offset `off` feet to one side.&quot;&quot;&quot;
+    ux, uy = _unit(a, b)
+    nx, ny = -uy * side, ux * side
+    a2 = (a[0] + nx * off, a[1] + ny * off)
+    b2 = (b[0] + nx * off, b[1] + ny * off)
+    for p, q in ((a, a2), (b, b2)):
+        if off:
+            c.line(p, (q[0] + nx * witness * 0.35, q[1] + ny * witness * 0.35),
+                   stroke=col, stroke_width=0.35)
+    c.line(a2, b2, stroke=col, stroke_width=0.5)
+    t = 2.6
+    for p, s in ((a2, 1), (b2, -1)):
+        c.line((p[0] - (ux - nx) * t * s, p[1] - (uy - ny) * t * s),
+               (p[0] + (ux + nx) * t * s, p[1] + (uy + ny) * t * s), stroke=col, stroke_width=0.5)
+    if text:
+        m = ((a2[0] + b2[0]) / 2.0, (a2[1] + b2[1]) / 2.0)
+        c.text(m[0] + nx * 3.4, m[1] + ny * 3.4, text, size=size, bold=True, fill=col,
+               rot=c.rot_of(a, b), halo=True, dy=1.6)
+
+
+def leader(c, frm, to, text, size=6.0, col=&#x27;#111&#x27;, anchor=&#x27;start&#x27;, lines=None):
+    c.line(frm, to, stroke=col, stroke_width=0.4)
+    c.circle(frm, 1.1, fill=col, stroke=&#x27;none&#x27;)
+    if lines:
+        c.textlines(to[0], to[1], lines, size=size, gap=1.2, fill=col, halo=True, anchor=anchor,
+                    bold_first=True)
+    else:
+        c.text(to[0], to[1], text, size=size, bold=True, fill=col, halo=True, anchor=anchor)
+
+
+# =========================================================================== layers
+def context(c, screen=True):
+    &quot;&quot;&quot;The approved concept plan, screened back: it is the base this sheet annotates.&quot;&quot;&quot;
+    op = &#x27;0.55&#x27; if screen else &#x27;1&#x27;
+    c.add(&#x27;&lt;g id=&quot;context&quot; opacity=&quot;%s&quot;&gt;&#x27; % op)
+    for g in L[&#x27;greens&#x27;]:
+        for p in g[&#x27;polygons&#x27;]:
+            c.poly([tuple(q) for q in p], fill=sb.C[&#x27;green&#x27;], stroke=sb.C[&#x27;green_line&#x27;], stroke_width=0.4)
+    for p in L[&#x27;ponds&#x27;]:
+        c.poly([tuple(q) for q in p[&#x27;tract_polygon&#x27;]], fill=&#x27;#e4efdc&#x27;, stroke=sb.C[&#x27;green_line&#x27;],
+               stroke_width=0.4)
+        c.poly([tuple(q) for q in p[&#x27;polygon&#x27;]], fill=sb.C[&#x27;pond&#x27;], stroke=sb.C[&#x27;buf_line&#x27;],
+               stroke_width=0.7, stroke_dasharray=&#x27;5 2&#x27;)
+    for p in AM[&#x27;tract_polygons&#x27;]:
+        c.poly([tuple(q) for q in p], fill=&#x27;#eef4e6&#x27;, stroke=sb.C[&#x27;green_line&#x27;], stroke_width=0.4)
+    c.poly([tuple(p) for p in AM[&#x27;village_green&#x27;]], fill=&#x27;#cfe8bd&#x27;, stroke=sb.C[&#x27;green_line&#x27;],
+           stroke_width=0.4)
+    ln = L[&#x27;lane&#x27;]
+    c.poly([tuple(p) for p in ln[&#x27;tract_polygon&#x27;]], fill=sb.C[&#x27;tract&#x27;], stroke=&#x27;#8a8a8a&#x27;,
+           stroke_width=0.4, stroke_dasharray=&#x27;4 2&#x27;)
+    c.poly([tuple(p) for p in ln[&#x27;entry_drive&#x27;][&#x27;tract_polygon&#x27;]], fill=sb.C[&#x27;tract&#x27;],
+           stroke=&#x27;#8a8a8a&#x27;, stroke_width=0.4, stroke_dasharray=&#x27;4 2&#x27;)
+    for poly in (ln[&#x27;entry_drive&#x27;][&#x27;pavement_polygon&#x27;], ln[&#x27;pavement_polygon&#x27;]):
+        c.poly([tuple(p) for p in poly], fill=sb.C[&#x27;pave&#x27;], stroke=&#x27;#555&#x27;, stroke_width=0.5)
+    for h in L[&#x27;hammerheads&#x27;]:
+        for leg in h[&#x27;legs&#x27;]:
+            c.poly([tuple(p) for p in leg], fill=sb.C[&#x27;pave&#x27;], stroke=&#x27;#555&#x27;, stroke_width=0.5)
+    for s in ln[&#x27;sidewalks&#x27;]:
+        c.poly([tuple(p) for p in s[&#x27;polygon&#x27;]], fill=&#x27;#f7f7f7&#x27;, stroke=&#x27;#999&#x27;, stroke_width=0.3)
+    for lot in L[&#x27;lots&#x27;]:
+        c.poly([tuple(p) for p in lot[&#x27;polygon&#x27;]], fill=&#x27;#fff&#x27;, stroke=&#x27;#666&#x27;, stroke_width=0.5)
+        c.poly([tuple(p) for p in lot[&#x27;driveway_rect&#x27;]], fill=sb.C[&#x27;pave&#x27;], stroke=&#x27;#8a8a8a&#x27;, stroke_width=0.3)
+        c.poly([tuple(p) for p in lot[&#x27;house_rect&#x27;]], fill=sb.C[&#x27;house&#x27;], stroke=&#x27;#555&#x27;, stroke_width=0.45)
+        c.poly([tuple(p) for p in lot[&#x27;garage_rect&#x27;]], fill=&#x27;#efd2ad&#x27;, stroke=&#x27;#555&#x27;, stroke_width=0.35)
+        for k in (&#x27;porch_rect&#x27;, &#x27;rear_rect&#x27;):
+            c.poly([tuple(p) for p in lot[k]], fill=&#x27;#fdf3e4&#x27;, stroke=&#x27;#555&#x27;, stroke_width=0.3)
+    c.poly([tuple(p) for p in AM[&#x27;clubhouse&#x27;]], fill=&#x27;#f2c58a&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.7)
+    for pad, court in zip(AM[&#x27;pickleball&#x27;], AM[&#x27;courts&#x27;]):
+        c.poly([tuple(p) for p in pad], fill=&#x27;#e9e2d0&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.5)
+        c.poly([tuple(p) for p in court], fill=&#x27;#bcd7c2&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.35)
+    for k in (&#x27;parking_bay&#x27;, &#x27;kiosk_bay&#x27;):
+        c.poly([tuple(p) for p in AM[k]], fill=sb.C[&#x27;pave&#x27;], stroke=&#x27;#555&#x27;, stroke_width=0.45)
+    for st in AM[&#x27;stalls&#x27;] + AM[&#x27;kiosk_stalls&#x27;] + [AM[&#x27;accessible_stall&#x27;], AM[&#x27;accessible_aisle&#x27;]]:
+        c.poly([tuple(p) for p in st], fill=&#x27;none&#x27;, stroke=&#x27;#777&#x27;, stroke_width=0.3)
+    c.poly([tuple(p) for p in AM[&#x27;mail_kiosk&#x27;]], fill=&#x27;#f2c58a&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.5)
+    c.poly([tuple(p) for p in AM[&#x27;entry_sign&#x27;]], fill=&#x27;#444&#x27;, stroke=&#x27;none&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def buffer_layer(c, labels=True, dims=True):
+    &quot;&quot;&quot;Checklist 6.b/6.c/6.f/6.h — the 20-ft undisturbed buffer, the 25-ft additional buffer
+    where the required buffer lies within the existing sanitary-sewer easement, and the
+    supplemental-planting zone.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;buffer&quot;&gt;&#x27;)
+    c.poly(BUF_BAND, fill=&#x27;url(#woods)&#x27;, stroke=&#x27;none&#x27;)
+    c.poly(BUF_BAND, fill=&#x27;url(#bufhatch)&#x27;, stroke=&#x27;none&#x27;)
+    c.pline(PERIM, fill=&#x27;none&#x27;, stroke=CG[&#x27;buf_dark&#x27;], stroke_width=1.0)
+    c.pline(BUF_INNER, fill=&#x27;none&#x27;, stroke=CG[&#x27;buf_dark&#x27;], stroke_width=1.0, stroke_dasharray=&#x27;9 3 2 3&#x27;)
+    # 25-ft additional buffer (section 6.c) inside the front amenity tract
+    addl = ([(u, sb.SW(u) + BUF_FT) for u in _rng(ADDL_U0, ADDL_U1)]
+            + [(u, sb.SW(u) + BUF_FT + ADDL_BUF_FT) for u in _rng(ADDL_U1, ADDL_U0)])
+    c.poly(addl, fill=&#x27;url(#addlbuf)&#x27;, stroke=CG[&#x27;addl&#x27;], stroke_width=0.7, stroke_dasharray=&#x27;7 3&#x27;)
+    # supplemental-planting zone (section 6.h) on the SW line
+    sup = ([(u, sb.SW(u)) for u in _rng(SUPPL_U0, SUPPL_U1)]
+           + [(u, sb.SW(u) + BUF_FT) for u in _rng(SUPPL_U1, SUPPL_U0)])
+    c.poly(sup, fill=&#x27;url(#supplhatch)&#x27;, stroke=CG[&#x27;suppl&#x27;], stroke_width=0.8, stroke_dasharray=&#x27;5 2.5&#x27;)
+    # existing 20-ft sanitary sewer easement inside the buffer (the section 6.c condition)
+    sse = ([(u, sb.SW(u) + 3.0) for u in _rng(SSE_U0, SSE_U1)]
+           + [(u, sb.SW(u) + 17.0) for u in _rng(SSE_U1, SSE_U0)])
+    c.poly(sse, fill=&#x27;none&#x27;, stroke=sb.C[&#x27;sewer&#x27;], stroke_width=0.6, stroke_dasharray=&#x27;6 2 1.5 2&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if dims:
+        for u, side in ((470.0, -1), (1330.0, -1), (900.0, 1), (1560.0, 1)):
+            if side &lt; 0:
+                a, b = (u, sb.SW(u)), (u, sb.SW(u) + BUF_FT)
+            else:
+                a, b = (u, sb.NE(u)), (u, sb.NE(u) - BUF_FT)
+            dim(c, a, b, 0.0, &quot;20&#x27;-0\&quot;&quot;, size=6.8, col=CG[&#x27;buf_dark&#x27;], side=1)
+        ur = 1721.0
+        dim(c, (ur, -100.0), (ur - BUF_FT, -100.0), 0.0, &quot;20&#x27;-0\&quot;&quot;, size=6.8, col=CG[&#x27;buf_dark&#x27;])
+    if not labels:
+        return
+    for u, v, rot in ((760.0, 0, 0), (1450.0, 0, 0)):
+        c.text(u, sb.NE(u) - BUF_FT / 2.0, &quot;20&#x27;-0\&quot; UNDISTURBED BUFFER — RECORDED BUFFER EASEMENT&quot;,
+               size=6.9, bold=True, fill=CG[&#x27;buf_dark&#x27;], halo=True, dy=2.2)
+    c.text(600.0, sb.SW(600.0) + BUF_FT / 2.0,
+           &quot;20&#x27;-0\&quot; UNDISTURBED BUFFER — RECORDED BUFFER EASEMENT&quot;, size=6.9, bold=True,
+           fill=CG[&#x27;buf_dark&#x27;], halo=True, dy=2.2)
+    c.text(1520.0, sb.SW(1520.0) + BUF_FT / 2.0,
+           &quot;20&#x27;-0\&quot; UNDISTURBED BUFFER (TYP. ALL LINES EXCEPT ARCADO RD)&quot;, size=6.9, bold=True,
+           fill=CG[&#x27;buf_dark&#x27;], halo=True, dy=2.2)
+    c.text(1721.0 - BUF_FT / 2.0, -60.0, &quot;20&#x27;-0\&quot; UNDISTURBED BUFFER&quot;, size=6.9, rot=-90,
+           bold=True, fill=CG[&#x27;buf_dark&#x27;], halo=True)
+
+
+def _rng(a, b, step=10.0):
+    n = max(2, int(abs(b - a) / step) + 1)
+    return [a + (b - a) * i / (n - 1.0) for i in range(n)]
+
+
+def strip_layer(c, labels=True, dims=True):
+    &quot;&quot;&quot;Checklist 6.j — the 10-ft landscape strip and the two 20-ft sight triangles.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;strip&quot;&gt;&#x27;)
+    c.poly(STRIP_BAND, fill=&#x27;url(#striphatch)&#x27;, stroke=CG[&#x27;strip&#x27;], stroke_width=0.9)
+    for a, b in ((SIGHT_NE[0], SIGHT_NE[1]), (SIGHT_SW[0], SIGHT_SW[1])):
+        p0, t0 = walk(FRONT, a)
+        p1, t1 = walk(FRONT, b)
+        nx, ny = -t1[1], t1[0]
+        apex = (p1[0] + nx * SIGHT_TRI_FT, p1[1] + ny * SIGHT_TRI_FT)
+        c.poly([p0, p1, apex], fill=&#x27;url(#sighthatch)&#x27;, stroke=CG[&#x27;sight&#x27;], stroke_width=0.8)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if dims:
+        p0, t0 = walk(FRONT, 40.0)
+        nx, ny = -t0[1], t0[0]
+        dim(c, p0, (p0[0] + nx * STRIP_FT, p0[1] + ny * STRIP_FT), 0.0, &quot;10&#x27;-0\&quot;&quot;,
+            size=6.8, col=CG[&#x27;strip&#x27;])
+    if not labels:
+        return
+    c.text(-14.0, -60.0, &quot;10&#x27;-0\&quot; LANDSCAPE STRIP ALONG THE ARCADO RD R/W (CHECKLIST §6.j)&quot;,
+           size=6.9, rot=-81, bold=True, fill=CG[&#x27;strip&#x27;], halo=True)
+
+
+def parking_layer(c, labels=True):
+    &quot;&quot;&quot;Checklist 6.k — 1 tree per 7 spaces and the 60-ft trunk-distance demonstration.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;parkplant&quot;&gt;&#x27;)
+    for t in PARK_TRUNKS:
+        c.circle(t, PARK_RADIUS * c.s, fill=&#x27;none&#x27;, stroke=CG[&#x27;park&#x27;], stroke_width=0.8,
+                 stroke_dasharray=&#x27;7 4&#x27;)
+    for isl in PARK_ISLANDS:
+        c.poly(isl, fill=&#x27;#dcedc8&#x27;, stroke=CG[&#x27;park&#x27;], stroke_width=0.7)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    for t in PARK_TRUNKS:
+        c.line(t, (t[0], t[1] + PARK_RADIUS), stroke=CG[&#x27;park&#x27;], stroke_width=0.5,
+               stroke_dasharray=&#x27;4 2&#x27;)
+    c.text(PARK_TRUNKS[0][0], PARK_TRUNKS[0][1] + PARK_RADIUS / 2.0, &quot;R 60&#x27;-0\&quot;&quot;, size=6.8,
+           bold=True, fill=CG[&#x27;park&#x27;], halo=True, rot=-90)
+
+
+def accessory_layer(c, labels=True):
+    &quot;&quot;&quot;Checklist 6.l — a 5-ft landscape strip around accessory structures and ground HVAC.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;accessory&quot;&gt;&#x27;)
+    for name, poly in ACCY:
+        us = [q[0] for q in poly]
+        vs = [q[1] for q in poly]
+        outer = sb.rect(min(us) - 5.0, max(us) + 5.0, min(vs) - 5.0, max(vs) + 5.0)
+        inner = sb.rect(min(us), max(us), min(vs), max(vs))
+        c.poly(outer + [outer[0]] + inner[::-1] + [inner[-1]], fill=&#x27;url(#accystrip)&#x27;,
+               stroke=CG[&#x27;accy&#x27;], stroke_width=0.6, stroke_dasharray=&#x27;4 2&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+TPF_LINES = []
+
+
+def tree_protection(c, labels=True):
+    &quot;&quot;&quot;Checklist 6.g — tree-protection fence at the limit of disturbance around every area to
+    be preserved: the 20-ft buffer, the creek-woods tract and the stream buffers.&quot;&quot;&quot;
+    global TPF_LINES
+    TPF_LINES = [BUF_INNER]
+    for s in L[&#x27;stream_setbacks&#x27;]:
+        for ln in s[&#x27;offsets&#x27;][&#x27;50&#x27;]:
+            pts = [tuple(p) for p in ln if sb.point_in_poly(tuple(p), sb.BOUNDARY)]
+            if len(pts) &gt; 1:
+                TPF_LINES.append(pts)
+    c.add(&#x27;&lt;g id=&quot;tpf&quot;&gt;&#x27;)
+    for ln in TPF_LINES:
+        c.pline(ln, fill=&#x27;none&#x27;, stroke=CG[&#x27;tpf&#x27;], stroke_width=1.4, stroke_dasharray=&#x27;1 4&#x27;)
+        for i in range(0, len(ln) - 1):
+            a, b = ln[i], ln[i + 1]
+            n = max(1, int(sb.dist(a, b) / 26.0))
+            for k in range(n):
+                f = (k + 0.5) / n
+                p = (a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f)
+                c.circle(p, 1.5, fill=&#x27;none&#x27;, stroke=CG[&#x27;tpf&#x27;], stroke_width=0.9)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if labels:
+        c.text(1150.0, sb.NE(1150.0) - BUF_FT - 9.0,
+               &#x27;TREE PROTECTION FENCE — INSTALL BEFORE ANY LAND DISTURBANCE (§6.g); SEE DETAIL 1&#x27;,
+               size=6.9, bold=True, fill=CG[&#x27;tpf&#x27;], halo=True)
+
+
+# =========================================================================== typical buffer section
+def buffer_section(x, y):
+    &quot;&quot;&quot;ENLARGEMENT B — typical buffer section at 1&quot; = 20&#x27;, drawn in a section coordinate system:
+    horizontal = feet from the adjoining property line into the site, vertical = feet above the
+    rear lot line grade.  Dimensions come from data/layout.json and data/plans.json as reported
+    in audit-2026-09-03/site-geometry.md section 4 (Plan A rear setback 20.17 ft, body 51&#x27;-10&quot;,
+    ridge 17&#x27;-10&quot;).  Callouts are keyed so the section itself stays readable.&quot;&quot;&quot;
+    S = sb.Drawing(SCALE20, x, y, fs=1.0, win=(-30.0, 135.0, -6.0, 52.0))
+    S.tag = &#x27;B&#x27;
+    S.clip_open(fill=&#x27;#fff&#x27;)
+
+    def g(xx):                                    # existing ground (falls toward the buffer)
+        return 2.4 if xx &lt; 0 else 2.4 - 0.02 * xx
+
+    ground = [(xx, g(xx)) for xx in range(-30, 136, 5)]
+    S.poly(ground + [(135.0, -6.0), (-30.0, -6.0)], fill=&#x27;#efe7dc&#x27;, stroke=&#x27;none&#x27;)
+    S.pline(ground, fill=&#x27;none&#x27;, stroke=&#x27;#5d4037&#x27;, stroke_width=1.3)
+    S.poly([(0.0, -6.0), (20.0, -6.0), (20.0, 52.0), (0.0, 52.0)], fill=&#x27;url(#bufhatch)&#x27;, stroke=&#x27;none&#x27;)
+    S.line((20.0, -6.0), (20.0, 52.0), stroke=CG[&#x27;buf_dark&#x27;], stroke_width=0.9,
+           stroke_dasharray=&#x27;9 3 2 3&#x27;)
+    for xx, col in ((0.0, &#x27;#000&#x27;), (100.0, &#x27;#666&#x27;)):
+        S.line((xx, -6.0), (xx, 52.0), stroke=col, stroke_width=1.2)
+    for xx, h, sp in ((4.5, 38.0, 14.0), (14.5, 31.0, 12.0)):
+        S.line((xx, g(xx)), (xx, h), stroke=&#x27;#5d4037&#x27;, stroke_width=1.8)
+        S.circle((xx, h - sp * 0.44), sp * 0.66 * S.s, fill=CG[&#x27;canopy_f&#x27;], fill_opacity=&#x27;0.7&#x27;,
+                 stroke=CG[&#x27;canopy&#x27;], stroke_width=1.0)
+    for xx in (9.0, 17.5):
+        S.poly([(xx - 6.0, g(xx)), (xx, g(xx) + 20.0), (xx + 6.0, g(xx))], fill=&#x27;none&#x27;,
+               stroke=CG[&#x27;ever&#x27;], stroke_width=0.7, stroke_dasharray=&#x27;4 2.5&#x27;)
+        S.poly([(xx, g(xx)), (xx - 2.4, g(xx) + 2.0), (xx - 1.5, g(xx) + 2.0), (xx - 2.9, g(xx) + 4.2),
+                (xx - 1.4, g(xx) + 4.2), (xx, g(xx) + 6.2), (xx + 1.4, g(xx) + 4.2),
+                (xx + 2.9, g(xx) + 4.2), (xx + 1.5, g(xx) + 2.0), (xx + 2.4, g(xx) + 2.0)],
+               fill=CG[&#x27;ever_f&#x27;], stroke=CG[&#x27;ever&#x27;], stroke_width=0.9)
+    S.line((20.0, g(20.0)), (20.0, g(20.0) + 4.0), stroke=CG[&#x27;tpf&#x27;], stroke_width=2.2)
+    for k in range(5):
+        S.line((18.8, g(20.0) + 0.7 + k * 0.85), (21.2, g(20.0) + 0.7 + k * 0.85),
+               stroke=CG[&#x27;tpf&#x27;], stroke_width=0.7)
+    # Plan A is sited from data/plans.json &#x27;lot_siting&#x27; as it stands at run time; x in this
+    # section is measured from the REAR lot line, so the patio edge is PA_BUFFER_CLEAR feet
+    # clear of the buffer easement line — the tightest clearance on the plan.
+    patio0, body0 = PA_PATIO, PA_REAR_WALL
+    body1, porch1 = PA_REAR_WALL + PA_BODY, PA_REAR_WALL + PA_BODY + 6.0
+    plate, ridge = 9.0, PA_RIDGE
+    gb = g(body0)
+    S.poly([(body0, gb), (body0, gb + plate), ((body0 + body1) / 2.0, gb + ridge),
+            (body1, gb + plate), (body1, gb)], fill=&#x27;#fdf1e0&#x27;, stroke=&#x27;#333&#x27;, stroke_width=1.1)
+    S.poly([(body1, gb), (body1, gb + plate), (porch1, gb + plate - 1.6), (porch1, gb)],
+           fill=&#x27;#fdf7ee&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.9)
+    S.poly([(patio0, g(patio0)), (patio0, g(patio0) + 0.7), (body0, gb + 0.7), (body0, gb)],
+           fill=&#x27;#e0e0e0&#x27;, stroke=&#x27;#666&#x27;, stroke_width=0.6)
+    S.poly([(100.0, g(100.0)), (105.0, g(100.0)), (105.0, g(100.0) + 0.4), (100.0, g(100.0) + 0.4)],
+           fill=&#x27;#f7f7f7&#x27;, stroke=&#x27;#777&#x27;, stroke_width=0.5)
+    S.poly([(107.0, g(100.0)), (129.0, g(100.0) - 0.9), (129.0, g(100.0) - 1.4), (107.0, g(100.0) - 0.5)],
+           fill=sb.C[&#x27;pave&#x27;], stroke=&#x27;#555&#x27;, stroke_width=0.6)
+    S.line((94.0, g(94.0)), (94.0, g(94.0) + 22.0), stroke=&#x27;#5d4037&#x27;, stroke_width=1.6)
+    S.circle((94.0, g(94.0) + 26.0), 8.0 * S.s, fill=CG[&#x27;canopy_f&#x27;], fill_opacity=&#x27;0.7&#x27;,
+             stroke=CG[&#x27;canopy&#x27;], stroke_width=1.0)
+    S.poly([(-27.0, g(-27.0)), (-27.0, g(-27.0) + 10.0), (-19.0, g(-27.0) + 16.0),
+            (-11.0, g(-27.0) + 10.0), (-11.0, g(-27.0))], fill=&#x27;#f5f5f5&#x27;, stroke=&#x27;#999&#x27;,
+           stroke_width=0.8, stroke_dasharray=&#x27;5 3&#x27;)
+    # dimensions
+    dim(S, (0.0, 46.0), (20.0, 46.0), 0.0, &quot;20&#x27;-0\&quot; UNDISTURBED BUFFER&quot;, size=7.0, col=CG[&#x27;buf_dark&#x27;])
+    dim(S, (0.0, 30.0), (100.0, 30.0), 0.0, &quot;100&#x27;-0\&quot; LOT DEPTH&quot;, size=7.0, col=&#x27;#444&#x27;)
+    dim(S, (0.0, 24.0), (patio0, 24.0), 0.0, _arch(patio0), size=7.0, col=&#x27;#7b1fa2&#x27;)
+    # keyed callouts
+    flags = [(1, (4.5, 24.0)), (2, (9.0, 13.0)), (3, (16.0, 41.0)), (4, (20.0, 9.4)),
+             (5, (53.0, 12.0)), (6, (23.6, 5.6)), (7, (118.0, 5.0)), (8, (94.0, 12.0))]
+    for n, (fx, fz) in flags:
+        S.circle((fx, fz), 5.6, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.9)
+        S.text(fx, fz + 1.2, str(n), size=7.8, bold=True)
+    S.text(-17.5, 26.0, &#x27;ADJOINING R-1&#x27;, size=7.0, bold=True, fill=&#x27;#555&#x27;, halo=True)
+    S.text(-17.5, 22.0, &#x27;SINGLE-FAMILY LOT&#x27;, size=7.0, bold=True, fill=&#x27;#555&#x27;, halo=True)
+    S.text(0.0, -0.9, &#x27;PROPERTY LINE&#x27;, size=7.0, bold=True, halo=True)
+    S.text(100.0, 6.0, &#x27;FRONT LOT LINE&#x27;, size=7.0, bold=True, fill=&#x27;#555&#x27;, halo=True)
+    S.text(120.0, -4.0, &#x27;PRIVATE LANE&#x27;, size=7.0, bold=True, fill=&#x27;#555&#x27;, halo=True)
+    S.text(53.0, 24.0, &#x27;PLAN A COTTAGE&#x27;, size=7.4, bold=True, halo=True)
+    S.text(53.0, 20.4, &#x27;RIDGE %s ABOVE FFE&#x27; % _arch(PA_RIDGE), size=6.8, halo=True)
+    S.clip_close()
+    return S
+
+
+SECTION_KEY = [
+    (1, &#x27;Existing canopy retained. No clearing, grading, filling, paving, storage or mowing &#x27;
+        &#x27;occurs inside the buffer; dead, diseased or hazardous material is removed by hand &#x27;
+        &#x27;under an arborist.&#x27;),
+    (2, &quot;Supplemental evergreen where the existing screen is thin — 6&#x27;-0\&quot; minimum height at &quot;
+        &quot;planting, 20&#x27;-0\&quot; minimum at maturity (Checklist §6.h). Dashed outline = mature form.&quot;),
+    (3, &quot;20&#x27;-0\&quot; undisturbed buffer = the rear 20 ft of the lot, held in a RECORDED BUFFER &quot;
+        &#x27;EASEMENT (Ord. 2023-603 §313(1)) shown on the final plat — see note 3.&#x27;),
+    (4, &#x27;Tree protection fence at the limit of disturbance — DETAIL 1. Install before any land &#x27;
+        &#x27;disturbing activity (§6.g).&#x27;),
+    (5, &#x27;Plan A cottage, 1 story, ridge %s above FFE; rear wall %s and front porch face %s from &#x27;
+        &#x27;the rear lot line (data/plans.json, read at run time).&#x27;
+        % (_arch(PA_RIDGE), _arch(PA_REAR_WALL), _arch(PA_REAR_WALL + PA_BODY + 6.0))),
+    (6, &#x27;%s rear patio. Its edge is %s from the rear lot line — %s clear of the buffer easement &#x27;
+        &#x27;line, the tightest clearance between built work and the buffer on the plan.&#x27;
+        % (_arch(PA_REAR_WALL - PA_PATIO), _arch(PA_PATIO), _arch(PA_BUFFER_CLEAR))),
+    (7, &quot;5&#x27;-0\&quot; sidewalk, 2&#x27;-0\&quot; strip and 22&#x27;-0\&quot; private lane pavement in the HOA lane tract.&quot;),
+    (8, &quot;Lane street tree at 40&#x27;-0\&quot; o.c., set 6&#x27;-0\&quot; behind the front lot line in a street-tree &quot;
+        &quot;easement; where the tract widens to 36&#x27;-0\&quot; the tree may stand in a 6&#x27;-0\&quot; strip between &quot;
+        &#x27;curb and walk (Checklist §319 sidewalk note).&#x27;),
+]
+
+
+# =========================================================================== tree-protection detail
+def tpf_detail(D, x, y, sc=21.0):
+    &quot;&quot;&quot;DETAIL 1 — tree protection fence.  The box is drawn to the left and the dimensions and
+    the short note sit beside and below it; the binding wording is general note 14.&quot;&quot;&quot;
+    D.stext(x, y - 6, &#x27;DETAIL 1 — TREE PROTECTION FENCE   (SCALE 3/8&quot; = 1\&#x27;-0&quot;)&#x27;, size=8.5, bold=True)
+    w, h = 12.0 * sc, 8.0 * sc
+    gy = y + 5.6 * sc
+    D.srect(x, y, w, h, fill=&#x27;#fbfbf7&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.9)
+    D.sline(x, gy, x + w, gy, stroke=&#x27;#5d4037&#x27;, stroke_width=1.5)
+    for k in range(16):
+        xx = x + 6 + k * (w - 12) / 15.0
+        D.sline(xx, gy, xx + 5, gy + 6, stroke=&#x27;#5d4037&#x27;, stroke_width=0.4)
+    for px in (x + 1.4 * sc, x + 5.4 * sc, x + 9.4 * sc):
+        D.srect(px - 0.10 * sc, gy - 4.6 * sc, 0.20 * sc, 4.6 * sc, fill=&#x27;#455a64&#x27;, stroke=&#x27;#000&#x27;,
+                stroke_width=0.5)
+        D.srect(px - 0.10 * sc, gy, 0.20 * sc, 2.0 * sc, fill=&#x27;#90a4ae&#x27;, stroke=&#x27;#000&#x27;,
+                stroke_width=0.4, stroke_dasharray=&#x27;3 2&#x27;)
+    D.srect(x + 1.4 * sc, gy - 4.0 * sc, 8.0 * sc, 4.0 * sc, fill=&#x27;none&#x27;, stroke=CG[&#x27;tpf&#x27;],
+            stroke_width=1.5)
+    for k in range(17):
+        xx = x + 1.4 * sc + k * (8.0 * sc) / 16.0
+        D.sline(xx, gy - 4.0 * sc, xx, gy, stroke=CG[&#x27;tpf&#x27;], stroke_width=0.7)
+    for k in range(5):
+        yy = gy - 4.0 * sc + k * sc
+        D.sline(x + 1.4 * sc, yy, x + 9.4 * sc, yy, stroke=CG[&#x27;tpf&#x27;], stroke_width=0.7)
+    D.srect(x + 1.9 * sc, gy - 3.3 * sc, 3.0 * sc, 1.2 * sc, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.6)
+    D.stext(x + 3.4 * sc, gy - 2.85 * sc, &#x27;TREE PROTECTION AREA&#x27;, size=6.6, anchor=&#x27;middle&#x27;, bold=True)
+    D.stext(x + 3.4 * sc, gy - 2.35 * sc, &#x27;DO NOT ENTER&#x27;, size=6.6, anchor=&#x27;middle&#x27;, bold=True)
+    D.sline(x + 1.4 * sc, gy - 5.0 * sc, x + 5.4 * sc, gy - 5.0 * sc, stroke=&#x27;#000&#x27;, stroke_width=0.5)
+    for px in (x + 1.4 * sc, x + 5.4 * sc):
+        D.sline(px, gy - 5.2 * sc, px, gy - 4.7 * sc, stroke=&#x27;#000&#x27;, stroke_width=0.5)
+    D.stext(x + 3.4 * sc, gy - 5.25 * sc, &quot;8&#x27;-0\&quot; MAX. O.C.&quot;, size=6.8, anchor=&#x27;middle&#x27;, bold=True)
+    D.sline(x + 10.2 * sc, gy - 4.0 * sc, x + 10.2 * sc, gy, stroke=&#x27;#000&#x27;, stroke_width=0.5)
+    D.stext(x + 10.4 * sc, gy - 2.0 * sc, &quot;4&#x27;-0\&quot;&quot;, size=6.8, bold=True)
+    D.stext(x + 10.4 * sc, gy + 1.1 * sc, &quot;2&#x27;-0\&quot; MIN.&quot;, size=6.8, bold=True)
+    D.stext(x + 10.4 * sc, gy + 1.75 * sc, &#x27;EMBEDMENT&#x27;, size=6.8)
+    yy = y + h + 10
+    for ln in [&quot;4&#x27;-0\&quot; high orange high-visibility polyethylene fence on 6&#x27;-0\&quot; steel T-posts at 8&#x27;-0\&quot; o.c. &quot;
+               &#x27;maximum, driven&#x27;,
+               &quot;2&#x27;-0\&quot; minimum, with two tension wires. Set at the limit of disturbance: the buffer inner line, &quot;
+               &#x27;the outer&#x27;,
+               &#x27;edge of the 50-ft undisturbed stream buffer, and the drip line of every retained tree. Signage &#x27;
+               &#x27;every 50 ft,&#x27;,
+               &#x27;both faces. TREE PROTECTION FENCE MUST BE INSTALLED PRIOR TO COMMENCING LAND DISTURBING &#x27;
+               &#x27;ACTIVITIES&#x27;,
+               &#x27;(Checklist §6.g) — see note 14. Inspected by the City before the pre-construction meeting; &#x27;
+               &#x27;maintain until final&#x27;,
+               &#x27;stabilisation. No storage, parking, washout, burning, trenching or grade change inside the fence.&#x27;]:
+        D.stext(x, yy, ln, size=6.6)
+        yy += 8.2
+    return yy
+
+
+# =========================================================================== tables
+def req_rows():
+    p1 = pond_clearance_ft(L[&#x27;ponds&#x27;][0])
+    p2 = pond_clearance_ft(L[&#x27;ponds&#x27;][1])
+    return [
+        [&#x27;§6.a&#x27;, &#x27;Tree protection / buffer / landscape plan sealed by a Registered Landscape &#x27;
+                 &#x27;Architect, forester or arborist&#x27;,
+         &#x27;Checklist §6.a — a seal, not a calculation&#x27;,
+         &#x27;CONCEPT, NOT SEALED — this sheet is the owner\&#x27;s pre-application concept; the sealed &#x27;
+         &#x27;plan is submitted with the Land Disturbance Permit&#x27;, &#x27;open — LDP&#x27;],
+        [&#x27;§6.b&#x27;, &#x27;Show and label the boundary AND dimensions of buffers; label undisturbed; &#x27;
+                 &#x27;confirm buffers abutting residential property&#x27;,
+         &quot;Table 4.1 buffer abutting R-1 = 20&#x27;-0\&quot;; perimeter (all lines except the Arcado Rd &quot;
+         &quot;frontage) = %s lf&quot; % format(round(PERIM_LEN), &#x27;,&#x27;),
+         &quot;20&#x27;-0\&quot; band drawn, dimensioned in 5 places and labelled UNDISTURBED; %s SF. All 3 &quot;
+         &#x27;buffered lines abut R-1 (Lilburn) single-family property&#x27; % format(round(BUF_SF), &#x27;,&#x27;),
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.c&#x27;, &#x27;If a portion of the required buffer is within an easement, provide 25 ft of &#x27;
+                 &#x27;additional buffer outside the easement&#x27;,
+         &#x27;The existing 8-in Gwinnett DWR sewer lies 7–13 ft inside the SW line from u −36 to &#x27;
+         &#x27;u 272 = %d lf of the required buffer&#x27; % round(SSE_LEN),
+         &quot;25&#x27;-0\&quot; additional buffer carried over %d lf (u 60–157) inside the amenity tract = &quot;
+         &#x27;%s SF; the remaining %d lf is an open item — see note 4&#x27;
+         % (ADDL_LEN, format(round(ADDL_LEN * ADDL_BUF_FT), &#x27;,&#x27;), round(SSE_LEN - ADDL_LEN)),
+         &#x27;PARTIAL — determination requested&#x27;],
+        [&#x27;§6.f&#x27;, &#x27;Buffer encroachments (swales, stormwater facilities, sanitary sewer, &#x27;
+                 &#x27;easements) as near perpendicular as possible, 50 ft maximum width&#x27;,
+         &#x27;Measured from the SW property line to the top of bank of each basin and to the &#x27;
+         &#x27;entrance curb return&#x27;,
+         &quot;Pond 1 top of bank %s clear of the property line; Pond 2 %s — neither enters the &quot;
+         &quot;buffer. Only encroachment: the SW curb return, %s wide (%s SF) — under the 50-ft &quot;
+         &quot;maximum. No ZBA variance requested&quot;
+         % (_arch(p1), _arch(p2), _arch(float(MET[&#x27;sw_curb_return_buffer_encroachment_ft&#x27;])),
+            MET[&#x27;sw_curb_return_buffer_encroachment_sf&#x27;]),
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.g&#x27;, &#x27;Delineate tree-protection areas; preserve specimen trees and trees over 5-in &#x27;
+                 &#x27;caliper in buffers, strips and islands; add the detail and the note&#x27;,
+         &#x27;Limit of disturbance = the buffer inner line + the outer line of the 50-ft &#x27;
+         &#x27;undisturbed stream buffer&#x27;,
+         &#x27;Fence line drawn (%s lf), DETAIL 1 provided, and the required note printed verbatim &#x27;
+         &#x27;in note 14&#x27; % format(round(sum(poly_len(x) for x in TPF_LINES)), &#x27;,&#x27;),
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.h&#x27;, &#x27;Supplemental buffer planting where screening is required: trees 6 ft minimum &#x27;
+                 &#x27;at planting, to reach 20 ft minimum at maturity&#x27;,
+         &#x27;One mapped screen gap: the mown yard at 4541 and the maintained sewer corridor, SW &#x27;
+         &#x27;line u −36 to 272 = %d lf. Rate (docs/12 §32 93 00 2.03): 1 evergreen per 8–10 lf + &#x27;
+         &#x27;1 canopy per 30–40 lf&#x27; % round(SUPPL_LEN),
+         &#x27;%d lf ÷ 8 = %.1f → %d evergreens at 8\&#x27;-0&quot; o.c. double staggered; %d ÷ 35 = %.1f → &#x27;
+         &#x27;%d canopy trees at %s o.c. All 6\&#x27;-0&quot;–8\&#x27;-0&quot; at planting; mature 15\&#x27;-0&quot;–40\&#x27;-0&quot;&#x27;
+         % (round(SUPPL_LEN), SUPPL_LEN / SUPPL_EVER_OC, N_EVER, round(SUPPL_LEN),
+            SUPPL_LEN / SUPPL_CANOPY_OC, N_CANOPY, _arch(SUPPL_LEN / N_CANOPY)),
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.i&#x27;, &#x27;Minimum 16 Tree Density Units per acre — &quot;unless SFR subdivision&quot;&#x27;,
+         &#x27;41 detached single-family cottage lots; §602 use &quot;Single-family (cluster-cottage, &#x27;
+         &#x27;creative lot configuration)&quot;, P in R-2&#x27;,
+         &#x27;NOT REQUIRED AND NOT PROVIDED — this is a single-family-residential subdivision. &#x27;
+         &#x27;No TDU credit is claimed for any tree on this sheet&#x27;, &#x27;not applicable&#x27;],
+        [&#x27;§6.i&#x27;, &#x27;Landscaping data in tabular form: common and botanical names, quantities, &#x27;
+                 &#x27;spacing, percentage of each (not to exceed 33 %), size, height, diameter &#x27;
+                 &#x27;and condition&#x27;,
+         &#x27;Every symbol drawn on this sheet is counted; the schedule is generated from the plan&#x27;,
+         &#x27;PLANT SCHEDULE: %d species, %d plants. Largest single species %.1f %% (%s) — under &#x27;
+         &#x27;the 33 %% maximum&#x27; % (len(COUNTS), TOTAL_PLANTS, MAX_PCT,
+                                max(COUNTS, key=lambda k: COUNTS[k])),
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.j&#x27;, &#x27;10-ft landscape strip adjacent to all rights-of-way: 1 tree and 1 shrub per &#x27;
+                 &#x27;25 linear feet of frontage&#x27;,
+         &#x27;Arcado Rd frontage %s lf (data/layout.json metrics.frontage_arcado_along_rw_ft) ÷ 25 &#x27;
+         &#x27;= %.2f → %d trees and %d shrubs&#x27; % (FRONTAGE_FT, FRONTAGE_FT / STRIP_RATE_FT,
+                                              STRIP_TREES_REQ, STRIP_SHRUBS_REQ),
+         &#x27;%d trees (8 in the strip at %s o.c. + 2 relocated immediately behind the strip — see &#x27;
+         &#x27;note 7) and %d shrubs. Strip area %s SF&#x27;
+         % (STRIP_TREES_REQ, _arch(STRIP_OC), STRIP_SHRUBS_REQ, format(round(STRIP_SF), &#x27;,&#x27;)),
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.j&#x27;, &#x27;Woody native plant, single trunk, planted 6 ft minimum height to reach 20 ft &#x27;
+                 &#x27;minimum; or a flowering tree 6 ft minimum height&#x27;,
+         &#x27;Overhead distribution on the Arcado Rd frontage is UNVERIFIED — see note 13&#x27;,
+         &quot;Strip row: Cercis canadensis and Amelanchier arborea, 6&#x27;-0\&quot;–8&#x27;-0\&quot; at planting, &quot;
+         &quot;15&#x27;-0\&quot;–30&#x27;-0\&quot; at maturity (the flowering-tree option). Relocated pair: Quercus &quot;
+         &#x27;lyrata, 4-in caliper&#x27;, &#x27;appears consistent with&#x27;],
+        [&#x27;§6.j&#x27;, &#x27;No landscaping 3 ft to 15 ft in height within 20 ft of a right-of-way &#x27;
+                 &#x27;intersection&#x27;,
+         &#x27;Two 20 ft × 20 ft triangles at the entrance, one each side of the drive, measured &#x27;
+         &#x27;from the ends of the curb returns along the Arcado Rd R/W and along the drive edge&#x27;,
+         &#x27;Triangles drawn and hatched; NO TREE is placed in either. The 2 shrubs inside them &#x27;
+         &quot;are Itea virginica &#x27;Little Henry&#x27;, 18–24 in at planting, maintained at 30 in maximum&quot;,
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.k&#x27;, &#x27;Parking-lot planting where more than 5 spaces: 1 tree for each 7 parking spaces&#x27;,
+         &#x27;%d guest spaces + %d mail-kiosk spaces = %d ÷ 7 = %.2f → %d trees&#x27;
+         % (GUEST_SPACES, KIOSK_SPACES, AMENITY_SPACES, AMENITY_SPACES / PARK_RATE, PARK_TREES_REQ),
+         &#x27;%d canopy trees (Nyssa sylvatica) in two dedicated islands between the guest bay and &#x27;
+         &#x27;the kiosk bay. No buffer or landscape-strip tree is counted here&#x27; % PARK_TREES_REQ,
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.k&#x27;, &#x27;Demonstrate visually that every parking space is within 60 ft of the trunk of &#x27;
+                 &#x27;a tree&#x27;,
+         &quot;60&#x27;-0\&quot; radii drawn about both trunks on the plan and on Enlargement A; every stall &quot;
+         &#x27;corner tested against both trunks&#x27;,
+         &#x27;Worst measured distance from any stall corner to the nearer trunk = %s. All %d &#x27;
+         &#x27;spaces are inside both radii&#x27; % (_arch(PARK_MAXD), AMENITY_SPACES),
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.k.a&#x27;, &#x27;Canopy tree minimum planting area 200 SF&#x27;,
+         &quot;Two islands 20&#x27;-0\&quot; × 10&#x27;-0\&quot;&quot;, &#x27;200 SF each, one tree per island, no sharing&#x27;,
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.l&#x27;, &#x27;Five-foot landscape strip around all accessory structures, including utility &#x27;
+                 &#x27;maintenance structures, ground-level HVAC, storage buildings and loading&#x27;,
+         &#x27;Accessory structures on the plan: mail kiosk (CBU), two pickleball court pads, and &#x27;
+         &#x27;the clubhouse ground-mounted HVAC pad&#x27;,
+         &quot;4 strips drawn at 5&#x27;-0\&quot; and planted with %d shrubs. Where the strip at the SW court &quot;
+         &#x27;pad overlaps the 20-ft buffer by 3\&#x27;-0&quot; it is satisfied by the buffer planting; no &#x27;
+         &#x27;grading occurs in the buffer&#x27; % len(by_zone(&#x27;accessory&#x27;)),
+         &#x27;appears consistent with&#x27;],
+        [&#x27;§6.m&#x27;, &#x27;Certificate-of-occupancy and 12-month warranty note&#x27;,
+         &#x27;Prescribed wording&#x27;, &#x27;Printed verbatim as note 12&#x27;, &#x27;appears consistent with&#x27;],
+        [&#x27;§6.n&#x27;, &#x27;Check for utility lines — provide alternate low / slow-growing trees or &#x27;
+                 &#x27;setbacks for trees from overhead power&#x27;,
+         &#x27;Georgia Power &quot;Tree planting near utility lines&quot; right-tree/right-place zones&#x27;,
+         &#x27;Frontage row held to 25 ft mature height pending a Georgia Power / Georgia 811 field &#x27;
+         &#x27;locate; no canopy tree within 20 ft of a conductor — see note 13&#x27;,
+         &#x27;VERIFY — field locate required&#x27;],
+    ]
+
+
+def schedule_rows():
+    rows = []
+    order = [&#x27;QP&#x27;, &#x27;QS&#x27;, &#x27;UP&#x27;, &#x27;NS&#x27;, &#x27;QL&#x27;, &#x27;QA&#x27;, &#x27;CC&#x27;, &#x27;AA&#x27;, &#x27;IO&#x27;, &#x27;JV&#x27;, &#x27;IG&#x27;, &#x27;IV&#x27;, &#x27;MC&#x27;]
+    for k in order:
+        if k not in COUNTS:
+            continue
+        common, bot, cal, ht, mature, root, cls, use = SPECIES[k]
+        ocs = sorted({p[&#x27;oc&#x27;] for p in PLANTS if p[&#x27;key&#x27;] == k})
+        rows.append([k, common, bot, str(COUNTS[k]), &#x27;; &#x27;.join(ocs)[:46],
+                     &#x27;%.1f %%&#x27; % (100.0 * COUNTS[k] / TOTAL_PLANTS), cal, ht, mature, root, use])
+    rows.append([&#x27;&#x27;, &#x27;TOTAL — 13 species&#x27;, &#x27;&#x27;, str(TOTAL_PLANTS), &#x27;&#x27;, &#x27;100.0 %&#x27;, &#x27;&#x27;, &#x27;&#x27;,
+                 &#x27;largest species %.1f %% ≤ 33 %%&#x27; % MAX_PCT, &#x27;&#x27;, &#x27;&#x27;])
+    return rows
+
+
+LEGEND = [
+    (&#x27;line&#x27;, sb.C[&#x27;bnd&#x27;], 1.8, &#x27;&#x27;, &#x27;Assemblage boundary (Gwinnett GIS — DRAFT)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;adj_fill&#x27;], 0, &#x27;&#x27;, &#x27;Adjoining tax parcel — all zoned R-1, City of Lilburn&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;rw&#x27;], 0.9, &#x27;&#x27;, &#x27;Arcado Rd right-of-way line (R/W width varies)&#x27;),
+    (&#x27;line&#x27;, &#x27;#333&#x27;, 0.6, &#x27;14 3 3 3&#x27;, &#x27;Existing road centreline&#x27;),
+    (&#x27;bufsw&#x27;, &#x27;url(#bufhatch)&#x27;, 0, &#x27;&#x27;, &quot;20&#x27;-0\&quot; undisturbed buffer — existing woodland retained&quot;),
+    (&#x27;line&#x27;, CG[&#x27;buf_dark&#x27;], 1.0, &#x27;9 3 2 3&#x27;, &#x27;Buffer inner line = limit of disturbance&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#addlbuf)&#x27;, 0, &#x27;&#x27;, &quot;25&#x27;-0\&quot; additional buffer (checklist §6.c)&quot;),
+    (&#x27;rect&#x27;, &#x27;url(#supplhatch)&#x27;, 0, &#x27;&#x27;, &#x27;Supplemental buffer planting zone (§6.h)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;sewer&#x27;], 0.6, &#x27;6 2 1.5 2&#x27;, &quot;Existing 20&#x27; sanitary sewer easement in the buffer&quot;),
+    (&#x27;rect&#x27;, &#x27;url(#striphatch)&#x27;, 0, &#x27;&#x27;, &quot;10&#x27;-0\&quot; landscape strip along the Arcado Rd R/W (§6.j)&quot;),
+    (&#x27;rect&#x27;, &#x27;url(#sighthatch)&#x27;, 0, &#x27;&#x27;, &quot;Sight triangle — no landscaping 3&#x27;-0\&quot;–15&#x27;-0\&quot; (§6.j)&quot;),
+    (&#x27;rect&#x27;, &#x27;#dcedc8&#x27;, 0, &#x27;&#x27;, &#x27;Parking-lot planting island, 200 SF min. (§6.k.a)&#x27;),
+    (&#x27;line&#x27;, CG[&#x27;park&#x27;], 0.8, &#x27;7 4&#x27;, &quot;60&#x27;-0\&quot; radius from a parking-lot tree trunk (§6.k)&quot;),
+    (&#x27;rect&#x27;, &#x27;url(#accystrip)&#x27;, 0, &#x27;&#x27;, &quot;5&#x27;-0\&quot; strip at accessory structures / ground HVAC (§6.l)&quot;),
+    (&#x27;tpf&#x27;, CG[&#x27;tpf&#x27;], 1.4, &#x27;1 4&#x27;, &#x27;Tree protection fence — install before land disturbance&#x27;),
+    (&#x27;canopy&#x27;, &#x27;&#x27;, 0, &#x27;&#x27;, &#x27;Proposed canopy / street tree (see PLANT SCHEDULE)&#x27;),
+    (&#x27;under&#x27;, &#x27;&#x27;, 0, &#x27;&#x27;, &#x27;Proposed understory / flowering tree&#x27;),
+    (&#x27;ever&#x27;, &#x27;&#x27;, 0, &#x27;&#x27;, &#x27;Proposed evergreen screen tree&#x27;),
+    (&#x27;shrub&#x27;, &#x27;&#x27;, 0, &#x27;&#x27;, &#x27;Proposed shrub&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;stream&#x27;], 1.6, &#x27;&#x27;, &#x27;Stream — state waters (top of bank approximate)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.5, &#x27;3 2&#x27;, &quot;25&#x27; state (GA EPD) stream buffer&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.8, &#x27;6 2&#x27;, &quot;50&#x27; undisturbed stream buffer (Lilburn)&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.8, &#x27;8 2 2 2&#x27;, &quot;75&#x27; impervious setback&quot;),
+    (&#x27;buf2&#x27;, sb.C[&#x27;green&#x27;], 0, &#x27;&#x27;, &#x27;Open-space, amenity, village-green and pond tract (context)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;pond&#x27;], 0, &#x27;&#x27;, &#x27;Detention / water-quality basin (context — Sheet C-3.0)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#fff&#x27;, 0, &#x27;&#x27;, &#x27;Proposed lot (context — Sheet C-2.0)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;house&#x27;], 0, &#x27;&#x27;, &#x27;Proposed cottage, garage and porch (context)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;pave&#x27;], 0, &#x27;&#x27;, &#x27;Private lane, entry drive, driveway and parking pavement&#x27;),
+    (&#x27;rect&#x27;, &#x27;#f7f7f7&#x27;, 0, &#x27;&#x27;, &#x27;Sidewalk (context)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#f2c58a&#x27;, 0, &#x27;&#x27;, &#x27;Clubhouse, mail kiosk, court pad and monument sign (context)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;match&#x27;], 1.1, &#x27;16 5 3 5&#x27;, &#x27;Match line — enlargement at 1&quot; = 20\&#x27;&#x27;),
+]
+
+
+# =========================================================================== general notes
+def notes():
+    return [
+        &#x27;STATUS AND SEAL. A CONCEPT landscape, buffer and tree-protection plan prepared by the owner for &#x27;
+        &#x27;pre-application review of a rezoning from R-1 to R-2. Checklist §6.a requires this plan to be SEALED BY A &#x27;
+        &#x27;REGISTERED LANDSCAPE ARCHITECT, FORESTER OR ARBORIST; this sheet is DRAFT — NOT SEALED and is superseded by &#x27;
+        &#x27;that sealed plan at the Land Disturbance Permit. Every statement of conformity reads &quot;appears consistent &#x27;
+        &#x27;with&quot; and none is a compliance certification.&#x27;,
+
+        &#x27;TREE DENSITY UNITS ARE NOT REQUIRED. Checklist §6.i requires 16 Tree Density Units per acre &quot;unless SFR &#x27;
+        &#x27;subdivision&quot;. This is a single-family-residential subdivision — %d detached fee-simple cottage lots, &#x27;
+        &#x27;Ord. 2023-603 §602 use &quot;Single-family (cluster-cottage, creative lot configuration)&quot;, permitted in R-2 &#x27;
+        &#x27;without a special-use permit. NO TDU CALCULATION IS REQUIRED AND NONE IS PROVIDED, and no TDU credit is &#x27;
+        &#x27;claimed for any plant here, so the clause\&#x27;s bar on counting trees inside required buffers does not arise. &#x27;
+        &#x27;The planting data §6.i also requires is in the PLANT SCHEDULE.&#x27; % len(L[&#x27;lots&#x27;]),
+
+        &#x27;BUFFER — WIDTH, LABEL AND RECORDING (§6.b). A 20\&#x27;-0&quot; UNDISTURBED buffer is provided along every property &#x27;
+        &#x27;line except the Arcado Rd frontage: %s lineal feet, %s SF, computed as a mitred offset of the boundary ring &#x27;
+        &#x27;in data/layout.json. Width is from Ord. 2023-603 Table 4.1, &quot;buffer abutting R-1: 0 ft for detached &#x27;
+        &#x27;single-family dwellings in R-2, 20 ft for all other allowed dwelling types&quot; — cottage homes are listed &#x27;
+        &#x27;separately from detached single-family there, so this plan designs to the 20-ft buffer and asks the Director &#x27;
+        &#x27;to confirm the reading. BUFFER-EASEMENT RECORDING NOTE: within a lot the buffer occupies the rear 20 ft and &#x27;
+        &#x27;is held in a RECORDED BUFFER EASEMENT under §313(1) (&quot;buffer requirements ... supersede these minimum &#x27;
+        &#x27;required yards&quot;). The easement is granted to the HOA and to the City, shown and dimensioned on the final &#x27;
+        &#x27;plat, and RECORDED IN THE GWINNETT COUNTY RECORDS BEFORE THE FIRST CERTIFICATE OF OCCUPANCY; it prohibits &#x27;
+        &#x27;clearing, grading, filling, structures, paving, storage, mowing and removal of any living tree except dead, &#x27;
+        &#x27;diseased or hazardous material taken by hand under an arborist. Buffer area on lots %s SF (%d × 50 × 20 ft), &#x27;
+        &#x27;reported separately from common open space. Every buffered line abuts R-1 residential property (§6.b).&#x27;,
+
+        &#x27;BUFFER WITHIN AN EASEMENT — AN OPEN ITEM (§6.c). Checklist §6.c reads &quot;If a portion of required buffer is &#x27;
+        &#x27;within an easement, provide 25\&#x27; additional buffer outside easement.&quot; The existing 8-in Gwinnett DWR gravity &#x27;
+        &#x27;sewer (Arcado Road Townhomes outfall) runs 7–13 ft inside the SW property line from u ≈ −36 to u ≈ 272, so &#x27;
+        &#x27;%d lineal feet of the required 20-ft buffer lies within that existing sanitary-sewer easement. This plan &#x27;
+        &#x27;carries 25\&#x27;-0&quot; of additional buffer over the %d lf (u 60–157) where the front amenity tract is clear — %s SF &#x27;
+        &#x27;— and states plainly that it CANNOT carry it over the remaining %d lf: the two pickleball court pads stand &#x27;
+        &#x27;%s from the SW line (u 157–218) and the balance crosses the rear of lot 1 (u 230–272), where an extra 25 ft &#x27;
+        &#x27;would leave 55 ft of buildable depth against a 51\&#x27;-10&quot; body plus a 15-ft front setback. THREE QUESTIONS ARE &#x27;
+        &#x27;PUT TO STAFF AT THE PRE-APPLICATION CONFERENCE: (a) does §6.c apply to a pre-existing utility easement the &#x27;
+        &#x27;applicant did not create; (b) does the recorded BUFFER easement of §313(1) itself trigger §6.c, which would &#x27;
+        &#x27;make the clause self-defeating; and (c) if §6.c applies in full, the applicant will relocate the pads, &#x27;
+        &#x27;re-plat lots 1–2, or apply to the Zoning Board of Appeals. No credit is claimed for the %d lf until staff &#x27;
+        &#x27;answers.&#x27;,
+
+        &#x27;BUFFER ENCROACHMENTS (§6.f). &quot;Swales, ditches, stormwater facilities/detention ponds, sanitary sewer &#x27;
+        &#x27;conveyance facilities, and easements may encroach as near perpendicular as possible, up to max 50\&#x27; width.&quot; &#x27;
+        &#x27;As laid out on Sheet C-3.0 NEITHER DETENTION BASIN ENTERS THE BUFFER — Pond 1 top of bank is %s and Pond 2 &#x27;
+        &#x27;%s clear of the SW property line against the 20-ft buffer. The only encroachment on this sheet is the SW &#x27;
+        &#x27;curb return at the Arcado Rd entrance, %s wide over %s SF, perpendicular to the line and far under the 50-ft &#x27;
+        &#x27;maximum. No Zoning Board of Appeals buffer variance is requested by this sheet.&#x27;,
+
+        &#x27;SUPPLEMENTAL BUFFER PLANTING (§6.h). Supplemental planting is shown only where the existing vegetation does &#x27;
+        &#x27;not screen. ONE GAP IS MAPPED — the SW line from u −36 to u 272 (%d lf), where Sheet C-0 shows the mown yard &#x27;
+        &#x27;at 4541 Arcado Rd and the maintained sanitary-sewer corridor. Rate from docs/12 §32 93 00 2.03: one evergreen &#x27;
+        &#x27;per 8–10 lineal feet of gap plus one canopy tree per 30–40 feet. Provided: %d evergreens at 8\&#x27;-0&quot; o.c. in a &#x27;
+        &#x27;double staggered row and %d canopy trees at %s o.c. ALL SUPPLEMENTAL TREES ARE A MINIMUM 6\&#x27;-0&quot; IN HEIGHT AT &#x27;
+        &#x27;THE TIME OF PLANTING AND REACH A MINIMUM 20\&#x27;-0&quot; AT MATURITY, as §6.h requires; species and mature heights &#x27;
+        &#x27;are tabulated in the PLANT SCHEDULE. Plants are held clear of the 8-in sewer, whose horizontal position must &#x27;
+        &#x27;be confirmed by survey and by Georgia 811 before layout. NO TREE SURVEY HAS BEEN PERFORMED: the arborist\&#x27;s &#x27;
+        &#x27;buffer inventory (every existing tree over 5-in caliper, and the canopy gaps) governs the final quantity, and &#x27;
+        &#x27;a contingency allowance for 25 %% of the remaining %s lf of buffer is carried in the estimate but is not &#x27;
+        &#x27;drawn. Existing and proposed trees are not labelled for TDU credit because no credit is claimed (§6.h, §6.i).&#x27;,
+
+        &#x27;ARCADO ROAD LANDSCAPE STRIP (§6.j) — THE ARITHMETIC. &quot;For each 10-foot LS strip install 1 tree and 1 shrub &#x27;
+        &#x27;per 25 linear feet of frontage.&quot; Frontage on Arcado Rd = %s lineal feet measured along the right-of-way line &#x27;
+        &#x27;(data/layout.json metrics.frontage_arcado_along_rw_ft; the chord is %s ft). %s ÷ 25 = %.2f → %d TREES AND &#x27;
+        &#x27;%d SHRUBS REQUIRED. The 10\&#x27;-0&quot; strip is drawn as a %s-SF band inside the R/W. The drive opening with its &#x27;
+        &#x27;25-ft and 15-ft curb returns removes %s of frontage and the two 20-ft sight triangles remove a further &#x27;
+        &#x27;%s, leaving %s of plantable strip, so 8 of the 10 required trees are set in the strip at %s on centre and &#x27;
+        &#x27;THE REMAINING 2 ARE RELOCATED IMMEDIATELY BEHIND THE STRIP inside the amenity tract, clear of both sight &#x27;
+        &#x27;triangles. Approval of that relocation is requested; the alternative is 13\&#x27;-6&quot; on centre in the strip, &#x27;
+        &#x27;which is too close for the mature spread. All %d shrubs are in the strip.&#x27;,
+
+        &#x27;LANE STREET TREES. Street trees stand at %s on centre along both sides of the private lane, %s behind the &#x27;
+        &#x27;front lot line in an HOA street-tree easement — or, where the lane tract widens from u = %d, in a 6-ft strip &#x27;
+        &#x27;between curb and walk (Ord. 2023-603 §319 sidewalk note). %d TREES ARE SHOWN. A station falling on a driveway &#x27;
+        &#x27;apron, a hammerhead leg or a parking bay is shifted along the lane in 6-ft steps; a station falling on a &#x27;
+        &#x27;detention-basin embankment (Pond 1, u 780-980; Pond 2, u 1,480-1,680) or within 55 ft of a digitised stream &#x27;
+        &#x27;reach is omitted, because nothing is planted on an embankment or inside an undisturbed stream buffer. Species &#x27;
+        &#x27;alternate so that no two adjacent cottages face the same tree. Street trees are NOT counted toward the &#x27;
+        &#x27;landscape-strip or the parking-lot requirement.&#x27;,
+
+        &#x27;SIGHT TRIANGLES (§6.j). &quot;No landscaping 3-15\&#x27; feet in height within 20 feet of right-of-way intersection.&quot; &#x27;
+        &#x27;Two 20\&#x27;-0&quot; × 20\&#x27;-0&quot; triangles are drawn at the entrance, one each side of the drive, measured from the end &#x27;
+        &#x27;of each curb return along the Arcado Rd right-of-way and along the edge of the drive. NO TREE IS PLACED IN &#x27;
+        &#x27;EITHER TRIANGLE. The two shrubs that fall inside them are Itea virginica \&#x27;Little Henry\&#x27;, 18–24 in at &#x27;
+        &#x27;planting and maintained by the HOA at 30 in maximum, so nothing between 3\&#x27;-0&quot; and 15\&#x27;-0&quot; in height stands &#x27;
+        &#x27;in either triangle. SEPARATELY, the Gwinnett County DOT intersection sight distance for a 35-mph collector &#x27;
+        &#x27;is approximately %d ft in each direction from the driveway (FACTS §2b — VERIFY); those sight lines run far &#x27;
+        &#x27;beyond this sheet, are shown by direction only on Enlargement A, and must be certified by a Georgia PE with &#x27;
+        &#x27;the driveway permit (Checklist §7.j). The monument entry sign is set outside both triangles.&#x27;,
+
+        &#x27;PARKING-LOT PLANTING (§6.k). &quot;If more than 5 parking spaces: provide 1 tree for each 7 parking spaces. &#x27;
+        &#x27;Demonstrate visually that every parking space is within 60 feet of the trunk of a tree. Landscape strip and &#x27;
+        &#x27;buffer trees do not count toward this requirement.&quot; The amenity block has %d guest spaces (including one &#x27;
+        &#x27;van-accessible space and its aisle) and %d mail-kiosk spaces = %d spaces; %d ÷ 7 = %.2f → %d TREES REQUIRED. &#x27;
+        &#x27;Two canopy trees are provided in two dedicated 200-SF islands between the guest bay and the kiosk bay, and &#x27;
+        &#x27;neither is counted anywhere else on this sheet. The 60\&#x27;-0&quot; radii are drawn about both trunks on the plan &#x27;
+        &#x27;and on Enlargement A; the worst measured distance from any stall corner to the nearer trunk is %s. Island &#x27;
+        &#x27;area satisfies §6.k.a (canopy tree, 200 SF minimum, not shared).&#x27;,
+
+        &#x27;ACCESSORY STRUCTURES AND GROUND-MOUNTED EQUIPMENT (§6.l). A 5\&#x27;-0&quot; landscape strip is drawn around the mail &#x27;
+        &#x27;kiosk (cluster box unit), both pickleball court pads and the clubhouse ground-mounted HVAC pad, planted with &#x27;
+        &#x27;%d evergreen shrubs. Per-cottage ground-mounted condensers are screened by HOA-maintained foundation &#x27;
+        &#x27;planting under the same rule; those plants are not tabulated here and are specified in docs/12 §32 93 00. &#x27;
+        &#x27;Where the strip at the SW court pad overlaps the 20-ft undisturbed buffer by 3\&#x27;-0&quot;, it is satisfied by the &#x27;
+        &#x27;buffer and its supplemental planting and NO GRADING OCCURS IN THE BUFFER.&#x27;,
+
+        &#x27;CERTIFICATE OF OCCUPANCY AND WARRANTY (§6.m) — VERBATIM: &quot;No Certificate of Occupancy shall be issued until &#x27;
+        &#x27;all requirements of the tree planting have been satisfactorily completed. Plant material shall be warranted &#x27;
+        &#x27;by owner or contractor for 12 months from date of CO, or a maintenance bond shall be provided prior to CO or &#x27;
+        &#x27;final plat.&quot;&#x27;,
+
+        &#x27;OVERHEAD UTILITY LINES (§6.n). Checklist §6.n requires a check for utility lines and alternate low or &#x27;
+        &#x27;slow-growing trees, or setbacks from overhead power. OVERHEAD DISTRIBUTION ALONG THE ARCADO ROAD FRONTAGE IS &#x27;
+        &#x27;NOT RESOLVED IN ANY PUBLIC LAYER USED FOR THIS PACKAGE AND MUST BE FIELD-LOCATED (Georgia 811 and Georgia &#x27;
+        &#x27;Power) BEFORE THE STRIP IS LAID OUT. Pending that locate the frontage row is specified as flowering trees of &#x27;
+        &#x27;15\&#x27;-0&quot;–30\&#x27;-0&quot; mature height, which sit in the Georgia Power right-tree/right-place low zone, and no canopy &#x27;
+        &#x27;tree is placed within 20 ft of the presumed conductor line. Note the tension the sheet does not hide: §6.j &#x27;
+        &#x27;asks for a mature height of at least 20 ft while the utility guide asks for no more than about 25 ft under a &#x27;
+        &#x27;conductor, so the species must land in that window — or §6.n\&#x27;s utility-hardship variance is requested. If &#x27;
+        &#x27;the field locate finds no conductor, the Landscape Architect may substitute 4-in-caliper Willow, Overcup, &#x27;
+        &#x27;Nuttall, Pin or Shumard Oak, Lacebark Elm or Japanese Zelkova from the City\&#x27;s street-tree list.&#x27;,
+
+        &#x27;TREE PROTECTION (§6.g) — REQUIRED NOTE, VERBATIM: &quot;TREE PROTECTION FENCE MUST BE INSTALLED PRIOR TO &#x27;
+        &#x27;COMMENCING LAND DISTURBING ACTIVITIES.&quot; The fence line is drawn at the limit of disturbance — the buffer &#x27;
+        &#x27;inner line and the outer line of the 50-ft undisturbed stream buffer — %s lineal feet, and DETAIL 1 gives &#x27;
+        &#x27;the standard section. The fence is to be installed, inspected by the City and photographed before the &#x27;
+        &#x27;pre-construction meeting and maintained until final stabilisation. A reasonable effort will be made to &#x27;
+        &#x27;preserve specimen trees and every tree over 5 in in caliper standing in a buffer, landscape strip or parking &#x27;
+        &#x27;island; those trees are identified by the tree survey, which has not yet been performed.&#x27;,
+
+        &#x27;STREAM BUFFERS — REQUIRED NOTES, VERBATIM (Checklist §9 Buffered State Waters e and f): &quot;STREAM BUFFERS ARE &#x27;
+        &#x27;TO REMAIN IN A NATURAL AND UNDISTURBED CONDITION.&quot; &quot;STREAM BUFFER SHALL BE STAKED AND PROTECTED PRIOR TO &#x27;
+        &#x27;LAND DISTURBANCE.&quot; The unnamed order-0 headwater of Jackson Creek (GAR030701030315, Georgia 2024 §303(d) &#x27;
+        &#x27;list) and its 25-ft state, 50-ft undisturbed and 75-ft impervious lines are shown from Sheet C-0. TOP OF &#x27;
+        &#x27;BANK IS APPROXIMATE — a field delineation by a qualified professional is required and governs, and no plant &#x27;
+        &#x27;is placed inside the 50-ft undisturbed buffer. Street-tree stations that fell within 55 ft of a digitised &#x27;
+        &#x27;reach were dropped for that reason.&#x27;,
+
+        &#x27;SPECIES, STANDARDS AND MAINTENANCE. Palette from docs/12 §32 93 00 2.02: Georgia Piedmont natives and &#x27;
+        &#x27;proven adapted cultivars (UGA Extension &quot;Native Plants for Georgia&quot; I–IV). Nursery stock ANSI Z60.1; &#x27;
+        &#x27;planting ANSI A300 Part 6 and ISA BMPs; Georgia Department of Agriculture nursery certification. &#x27;
+        &#x27;PROHIBITED: every GA-EPPC Category 1 species — Ligustrum, Nandina, Pyrus calleryana, Elaeagnus, Lonicera &#x27;
+        &#x27;japonica, Hedera helix, Wisteria sinensis, Vinca. Mulch 3 in, held 3 in clear of every trunk; root barriers &#x27;
+        &#x27;at street trees within 5 ft of a walk. All landscape is maintained in perpetuity by the HOA under the &#x27;
+        &#x27;recorded covenants: 90-day establishment, 12-month warranty with one replacement, then a professional &#x27;
+        &#x27;landscape contract. Temporary establishment irrigation only; none in the buffer.&#x27;,
+
+        &#x27;WHAT IS NOT ON THIS SHEET. Per-cottage foundation and porch planting, sod and seeding limits, pond-bank &#x27;
+        &#x27;seeding, the tree survey and arborist\&#x27;s buffer inventory, irrigation, landscape lighting, erosion-control &#x27;
+        &#x27;matting and the planting estimate — all part of the sealed landscape plan and the LDP submittal. &#x27;
+        &#x27;Existing-vegetation limits (Sheet C-0) are approximate, digitised from aerial imagery 2026-09-03.&#x27;,
+    ]
+
+
+def notes_filled():
+    p1 = _arch(pond_clearance_ft(L[&#x27;ponds&#x27;][0]))
+    p2 = _arch(pond_clearance_ft(L[&#x27;ponds&#x27;][1]))
+    n = notes()
+    n[2] = n[2] % (format(round(PERIM_LEN), &#x27;,&#x27;), format(round(BUF_SF), &#x27;,&#x27;),
+                   format(len(L[&#x27;lots&#x27;]) * 1000, &#x27;,&#x27;), len(L[&#x27;lots&#x27;]))
+    n[3] = n[3] % (round(SSE_LEN), round(ADDL_LEN), format(round(ADDL_LEN * ADDL_BUF_FT), &#x27;,&#x27;),
+                   round(SSE_LEN - ADDL_LEN), _arch(COURT_OFFSET_FT), round(SSE_LEN - ADDL_LEN))
+    n[4] = n[4] % (p1, p2, _arch(float(MET[&#x27;sw_curb_return_buffer_encroachment_ft&#x27;])),
+                   MET[&#x27;sw_curb_return_buffer_encroachment_sf&#x27;])
+    n[5] = n[5] % (round(SUPPL_LEN), N_EVER, N_CANOPY, _arch(SUPPL_LEN / N_CANOPY),
+                   format(round(PERIM_LEN - SUPPL_LEN), &#x27;,&#x27;))
+    n[6] = n[6] % (FRONTAGE_FT, MET[&#x27;frontage_arcado_chord_ft&#x27;], FRONTAGE_FT,
+                   FRONTAGE_FT / STRIP_RATE_FT, STRIP_TREES_REQ, STRIP_SHRUBS_REQ,
+                   format(round(STRIP_SF), &#x27;,&#x27;), _arch(OPENING_FT), _arch(2 * SIGHT_TRI_FT),
+                   _arch(PLANTABLE_FT), _arch(STRIP_OC), STRIP_SHRUBS_REQ)
+    n[7] = n[7] % (_arch(STREET_TREE_OC), _arch(6.0),
+                   int(L[&#x27;lane&#x27;][&#x27;widen_both_sidewalks_from_u&#x27;]), N_STREET)
+    n[8] = n[8] % round(ISD_FT)
+    n[9] = n[9] % (GUEST_SPACES, KIOSK_SPACES, AMENITY_SPACES, AMENITY_SPACES,
+                   AMENITY_SPACES / PARK_RATE, PARK_TREES_REQ, _arch(PARK_MAXD))
+    n[10] = n[10] % len(by_zone(&#x27;accessory&#x27;))
+    n[13] = n[13] % format(round(sum(poly_len(x) for x in TPF_LINES)), &#x27;,&#x27;)
+    return n
+
+
+SOURCES = [
+    &#x27;City of Lilburn Site Development Plan Review Checklist, section 6 &quot;Zoning Buffers/Landscape Plan Comments &#x27;
+    &#x27;(see Chapter 109 — Environment)&quot;, clauses a–n — the clause numbers cited on this sheet &#x27;
+    &#x27;(data/site-dev-plan-review-checklist.txt).&#x27;,
+    &#x27;Lilburn Zoning Ordinance, Ord. 2023-603 — Table 4.1 (20-ft buffer abutting R-1 for dwelling types other than &#x27;
+    &#x27;detached single-family), §313(1) (buffer requirements supersede required yards), §602 Use Table.&#x27;,
+    &#x27;data/layout.json, regenerated 2026-09-03 — boundary ring, %d lots, lane, amenity block, open-space tracts, &#x27;
+    &#x27;detention basins, stream reaches, and metrics.frontage_arcado_along_rw_ft = %s ft. Every quantity on this &#x27;
+    &#x27;sheet is computed from that file at run time.&#x27; % (len(L[&#x27;lots&#x27;]), FRONTAGE_FT),
+    &#x27;docs/12-outline-specifications.md Section 32 93 00 &quot;Plants&quot; — species palette, supplemental-buffer rate &#x27;
+    &#x27;(1 evergreen per 8–10 lf plus 1 canopy tree per 30–40 lf), prohibited GA-EPPC Category 1 species, street-tree &#x27;
+    &#x27;list and 4-in caliper standard along a public right-of-way.&#x27;,
+    &#x27;data/plans.json (read at run time, never written) — Plan A body depth, ridge height and lot siting for the &#x27;
+    &#x27;typical buffer section. It was regenerated on 2026-09-03, so the patio edge now stands %s from the rear lot &#x27;
+    &#x27;line and the audit\&#x27;s 20.17 ft is stale.&#x27; % _arch(PA_PATIO),
+    &#x27;audit-2026-09-03/drawing-standards.md §3.1 (the C-7.0 row) and §3.2 (legend discipline); &#x27;
+    &#x27;audit-2026-09-03/completeness.md item M9; audit-2026-09-03/site-geometry.md §4.&#x27;,
+    &#x27;Sheet C-0 EXISTING CONDITIONS — existing wooded area and mown-yard limits (approximate, aerial imagery &#x27;
+    &#x27;2026-09-03), the existing 8-in sanitary sewer and its easement, and the stream and its buffers.&#x27;,
+    &#x27;Georgia Power &quot;Tree planting near utility lines&quot; right-tree/right-place guide (cited by Checklist §6.n); &#x27;
+    &#x27;ANSI Z60.1-2014 nursery stock; ANSI A300 Part 6; UGA Extension &quot;Native Plants for Georgia&quot; Parts I–IV.&#x27;,
+]
+
+
+# =========================================================================== enlargements
+ENL_A = (-50.0, 230.0, -245.0, 15.0, &#x27;A&#x27;)
+sb.ENLARGEMENTS.append(ENL_A)
+
+
+def enlargement_a(x, y):
+    S = sb.enlargement(ENL_A[0], ENL_A[1], ENL_A[2], ENL_A[3], x, y, scale=SCALE20, tag=&#x27;A&#x27;)
+    S.clip_open(fill=&#x27;#fff&#x27;)
+    sb.adjoiners(S, labels=False, zoning=False)
+    sb.arcado_row(S, labels=False)
+    context(S, screen=True)
+    buffer_layer(S, labels=False, dims=False)
+    strip_layer(S, labels=False, dims=False)
+    accessory_layer(S)
+    parking_layer(S, labels=False)
+    tree_protection(S, labels=False)
+    planting(S, keys=True)
+    sb.boundary(S, bearings=False, label=False)
+
+    # --- dimensions
+    p0, t0 = walk(FRONT, 30.0)
+    nx, ny = -t0[1], t0[0]
+    dim(S, p0, (p0[0] + nx * STRIP_FT, p0[1] + ny * STRIP_FT), 0.0, &quot;10&#x27;-0\&quot;&quot;, size=7.0,
+        col=CG[&#x27;strip&#x27;])
+    a, _ = walk(FRONT, PLANTABLE_RUNS[0][0] + 0.5 * STRIP_OC)
+    b, _ = walk(FRONT, PLANTABLE_RUNS[0][0] + 1.5 * STRIP_OC)
+    an = (a[0] + nx * STRIP_FT * 0.5, a[1] + ny * STRIP_FT * 0.5)
+    bn = (b[0] + nx * STRIP_FT * 0.5, b[1] + ny * STRIP_FT * 0.5)
+    dim(S, an, bn, 16.0, &quot;%s O.C. (TYP.)&quot; % _arch(STRIP_OC), size=6.6, col=CG[&#x27;strip&#x27;], side=1)
+    dim(S, (100.0, sb.SW(100.0)), (100.0, sb.SW(100.0) + BUF_FT), 0.0, &quot;20&#x27;-0\&quot;&quot;, size=7.0,
+        col=CG[&#x27;buf_dark&#x27;])
+    dim(S, (128.0, sb.SW(128.0) + BUF_FT), (128.0, sb.SW(128.0) + BUF_FT + ADDL_BUF_FT), 0.0,
+        &quot;25&#x27;-0\&quot;&quot;, size=7.0, col=CG[&#x27;addl&#x27;])
+    dim(S, (208.0, sb.NE(208.0)), (208.0, sb.NE(208.0) - BUF_FT), 0.0, &quot;20&#x27;-0\&quot;&quot;, size=7.0,
+        col=CG[&#x27;buf_dark&#x27;])
+    for tgt in ((-44.0, -234.0), (-40.0, -34.0)):
+        S.line((-34.0, -190.0), tgt, stroke=CG[&#x27;sight&#x27;], stroke_width=0.8, stroke_dasharray=&#x27;11 4&#x27;)
+        ux, uy = _unit((-34.0, -190.0), tgt)
+        S.poly([tgt, (tgt[0] - 7 * ux + 2.6 * uy, tgt[1] - 7 * uy - 2.6 * ux),
+                (tgt[0] - 7 * ux - 2.6 * uy, tgt[1] - 7 * uy + 2.6 * ux)], fill=CG[&#x27;sight&#x27;],
+               stroke=&#x27;none&#x27;)
+    ps, _ = walk(FRONT, SIGHT_NE[0])
+    pe, _ = walk(FRONT, SIGHT_NE[1])
+    dim(S, ps, pe, -13.0, &quot;20&#x27;-0\&quot;&quot;, size=6.6, col=CG[&#x27;sight&#x27;], side=1)
+    mk = [tuple(q) for q in AM[&#x27;mail_kiosk&#x27;]]
+    dim(S, (min(q[0] for q in mk) - 5.0, max(q[1] for q in mk) + 2.0),
+        (min(q[0] for q in mk), max(q[1] for q in mk) + 2.0), 0.0, &quot;5&#x27;-0\&quot;&quot;, size=6.8,
+        col=CG[&#x27;accy&#x27;])
+    dim(S, PARK_TRUNKS[0], (PARK_TRUNKS[0][0], PARK_TRUNKS[0][1] + PARK_RADIUS), 0.0,
+        &quot;R 60&#x27;-0\&quot;&quot;, size=6.6, col=CG[&#x27;park&#x27;])
+
+    # --- annotation (kept short; the reasoning is in the general notes)
+    S.text(-43.0, -120.0, &#x27;ARCADO ROAD — R/W WIDTH VARIES (GWINNETT COUNTY MINOR COLLECTOR)&#x27;,
+           size=7.0, rot=-81, bold=True, halo=True)
+    S.text(170.0, 9.0, &#x27;ADJOINING — 4531 ARCADO RD SW, ZONED R-1 (CITY OF LILBURN)&#x27;, size=6.8,
+           bold=True, fill=&#x27;#555&#x27;, halo=True)
+    S.text(120.0, -241.0, &#x27;ADJOINING — LEGENDS AT PARKVIEW, ZONED R-1 (CITY OF LILBURN)&#x27;, size=6.8,
+           bold=True, fill=&#x27;#555&#x27;, halo=True)
+    leader(S, (6.0, -46.0), (58.0, -28.0), &#x27;&#x27;, size=7.0, col=CG[&#x27;strip&#x27;], anchor=&#x27;middle&#x27;, lines=[
+        &quot;10&#x27;-0\&quot; LANDSCAPE STRIP ALONG THE ARCADO RD R/W (CHECKLIST §6.j)&quot;,
+        &quot;%s FRONTAGE ÷ 25 = %.2f → %d TREES + %d SHRUBS; 8 IN THE STRIP AT %s O.C. + 2 BEHIND IT&quot;
+        % (_arch(FRONTAGE_FT), FRONTAGE_FT / STRIP_RATE_FT, STRIP_TREES_REQ, STRIP_SHRUBS_REQ,
+           _arch(STRIP_OC))])
+    leader(S, (-16.0, -145.0), (58.0, -58.0), &#x27;&#x27;, size=7.0, col=CG[&#x27;sight&#x27;], anchor=&#x27;middle&#x27;, lines=[
+        &quot;SIGHT TRIANGLE 20&#x27;-0\&quot; × 20&#x27;-0\&quot; EACH SIDE OF THE DRIVE (CHECKLIST §6.j) —&quot;,
+        &quot;NO LANDSCAPING 3&#x27;-0\&quot; TO 15&#x27;-0\&quot; IN HEIGHT; SHRUBS WITHIN MAINTAINED AT 30 in&quot;])
+    S.text(58.0, -80.0, &#x27;GWINNETT DOT INTERSECTION SIGHT DISTANCE ≈ %d ft EACH WAY (VERIFY) — &#x27;
+           &#x27;PE CERTIFICATE REQUIRED (§7.j)&#x27; % round(ISD_FT), size=7.0, bold=True, fill=CG[&#x27;sight&#x27;],
+           halo=True)
+    leader(S, (-6.0, -168.0), (58.0, -99.0), &#x27;MONUMENT ENTRY SIGN — OUTSIDE BOTH SIGHT TRIANGLES; &#x27;
+           &#x27;BED MAINTAINED AT 30 in MAX.&#x27;, size=7.0, col=&#x27;#444&#x27;, anchor=&#x27;middle&#x27;)
+    leader(S, (30.0, sb.SW(30.0) + 17.0), (58.0, -120.0), &#x27;SUPPLEMENTAL BUFFER PLANTING ZONE &#x27;
+           &#x27;(CHECKLIST §6.h) — SEE NOTE 6&#x27;, size=7.0, col=CG[&#x27;suppl&#x27;], anchor=&#x27;middle&#x27;)
+    leader(S, (110.0, sb.SW(110.0) + 32.0), (100.0, -202.0), &quot;25&#x27;-0\&quot; ADDITIONAL BUFFER &quot;
+           &#x27;(CHECKLIST §6.c) — SEE NOTE 4&#x27;, size=7.0, col=CG[&#x27;addl&#x27;], anchor=&#x27;middle&#x27;)
+    leader(S, (170.0, -122.0), (226.0, -28.0), &#x27;&#x27;, size=7.0, col=CG[&#x27;park&#x27;], anchor=&#x27;end&#x27;, lines=[
+        &#x27;PARKING-LOT PLANTING (§6.k) — %d SPACES ÷ 7 = %.2f → %d TREES&#x27;
+        % (AMENITY_SPACES, AMENITY_SPACES / PARK_RATE, PARK_TREES_REQ),
+        &quot;IN 200-SF ISLANDS; EVERY SPACE WITHIN 60&#x27;-0\&quot; OF A TRUNK (WORST %s)&quot; % _arch(PARK_MAXD)])
+    leader(S, (219.0, -80.0), (226.0, -50.0), &quot;5&#x27;-0\&quot; LANDSCAPE STRIP AT ACCESSORY STRUCTURES AND &quot;
+           &#x27;GROUND HVAC (§6.l)&#x27;, size=7.0, col=CG[&#x27;accy&#x27;], anchor=&#x27;end&#x27;)
+    leader(S, (187.0, -212.7), (140.0, -196.0), &#x27;&#x27;, size=6.8, col=CG[&#x27;accy&#x27;], anchor=&#x27;middle&#x27;, lines=[
+        &quot;PICKLEBALL PADS STAND %s FROM THE SW LINE — THE 5&#x27;-0\&quot; STRIP&quot; % _arch(COURT_OFFSET_FT),
+        &quot;OVERLAPS THE BUFFER BY 3&#x27;-0\&quot;; NO GRADING IN THE BUFFER (NOTE 11)&quot;])
+    S.text(44.0, sb.SW(44.0) + 8.0, &quot;EX. 20&#x27; SANITARY SEWER EASEMENT WITHIN THE REQUIRED BUFFER (§6.c)&quot;,
+           size=6.8, bold=True, fill=sb.C[&#x27;sewer_txt&#x27;], halo=True)
+    S.text(140.0, -100.0, &#x27;CLUBHOUSE&#x27;, size=7.4, bold=True, halo=True)
+    S.text(140.0, -107.0, &quot;2,400 SF (40&#x27;-0\&quot; × 60&#x27;-0\&quot;)&quot;, size=6.8, halo=True)
+    S.text(20.0, -160.0, &#x27;VILLAGE GREEN&#x27;, size=7.4, bold=True, fill=&#x27;#2e5e1e&#x27;, halo=True)
+    S.clip_close()
+    return S
+
+
+# =========================================================================== sheet
+def legend_block(D, x, y, w, entries, cols=2):
+    D.stext(x, y, &#x27;LEGEND — every symbol drawn on this sheet appears here, and no unused entry &#x27;
+                  &#x27;appears (audit-2026-09-03/drawing-standards.md §3.2)&#x27;, size=8.5, bold=True)
+    per = int(math.ceil(len(entries) / float(cols)))
+    cw = w / cols
+    for i, (kind, col, wd, dash, txt) in enumerate(entries):
+        cx = x + (i // per) * cw
+        yy = y + 15 + (i % per) * 12.6
+        if kind == &#x27;line&#x27;:
+            D.sline(cx, yy - 3, cx + 30, yy - 3, stroke=col, stroke_width=wd, stroke_dasharray=dash)
+        elif kind == &#x27;tpf&#x27;:
+            D.sline(cx, yy - 3, cx + 30, yy - 3, stroke=col, stroke_width=wd, stroke_dasharray=dash)
+            for k in range(3):
+                D.scircle(cx + 7 + k * 8, yy - 3, 1.5, fill=&#x27;none&#x27;, stroke=col, stroke_width=0.9)
+        elif kind == &#x27;bufsw&#x27;:
+            D.srect(cx, yy - 9.5, 30, 12, fill=&#x27;url(#woods)&#x27;, stroke=&#x27;none&#x27;)
+            D.srect(cx, yy - 9.5, 30, 12, fill=&#x27;url(#bufhatch)&#x27;, stroke=&#x27;#555&#x27;, stroke_width=0.4)
+        elif kind == &#x27;buf2&#x27;:
+            D.srect(cx, yy - 9.5, 15, 12, fill=sb.C[&#x27;green&#x27;], stroke=&#x27;#555&#x27;, stroke_width=0.4)
+            D.srect(cx + 15, yy - 9.5, 15, 12, fill=&#x27;#cfe8bd&#x27;, stroke=&#x27;#555&#x27;, stroke_width=0.4)
+        elif kind in (&#x27;canopy&#x27;, &#x27;under&#x27;, &#x27;ever&#x27;, &#x27;shrub&#x27;):
+            sub = sb.Drawing(1.0, 0, 0, win=(0, 1, 0, 1))
+            SYM[kind](sub, (0, 0), *( [7.0] if kind != &#x27;shrub&#x27; else [3.0]))
+            for el in sub.out:
+                D.add(el.replace(&#x27;cx=&quot;%.2f&quot;&#x27; % sub.X(0), &#x27;cx=&quot;%.2f&quot;&#x27; % (cx + 15))
+                        .replace(&#x27;cy=&quot;%.2f&quot;&#x27; % sub.Y(0), &#x27;cy=&quot;%.2f&quot;&#x27; % (yy - 3.5))
+                      if el.startswith(&#x27;&lt;circle&#x27;) else _shift(el, cx + 15 - sub.X(0),
+                                                              yy - 3.5 - sub.Y(0)))
+        else:
+            D.srect(cx, yy - 9.5, 30, 12, fill=col, stroke=&#x27;#555&#x27;, stroke_width=0.4)
+        D.stext(cx + 36, yy, txt, size=6.7)
+    return y + 15 + per * 12.6
+
+
+def _shift(el, dx, dy):
+    import re
+
+    def f(m):
+        return &#x27;%s=&quot;%.2f&quot;&#x27; % (m.group(1), float(m.group(2)) + (dx if m.group(1) in (&#x27;x&#x27;, &#x27;x1&#x27;, &#x27;x2&#x27;, &#x27;cx&#x27;) else dy))
+    el = re.sub(r&#x27;\b(x|y|x1|y1|x2|y2|cx|cy)=&quot;(-?[\d.]+)&quot;&#x27;, f, el)
+
+    def g(m):
+        pts = []
+        for pair in m.group(1).split():
+            a, b = pair.split(&#x27;,&#x27;)
+            pts.append(&#x27;%.2f,%.2f&#x27; % (float(a) + dx, float(b) + dy))
+        return &#x27;points=&quot;%s&quot;&#x27; % &#x27; &#x27;.join(pts)
+    return re.sub(r&#x27;points=&quot;([^&quot;]+)&quot;&#x27;, g, el)
+
+
+def build():
+    scale_note = &#x27;Scale 1&quot; = 60\&#x27; (ARCH D 36 × 24 in); enlargements 1&quot; = 20\&#x27;&#x27;
+    D, F = sb.sheet(
+        &#x27;LANDSCAPE, BUFFER AND TREE PROTECTION CONCEPT&#x27;, &#x27;C-7.0&#x27;,
+        &#x27;Lilburn Zoning Ordinance 2023-603 §1003-4.6, Table 4.1 and §313(1); City of Lilburn Site &#x27;
+        &#x27;Development Plan Review Checklist §6.a–§6.n&#x27;,
+        scale_note, generator=&#x27;tools/sitebase.py + tools/landscape.py&#x27;,
+        win=WIN, x0=PLAN_X0, y0=PLAN_Y0,
+        north_at=(PLAN_X0 + PLAN_W - 62.0, PLAN_Y0 + 74.0),
+        scale_at=(PLAN_X0 + 1626.0, PLAN_Y0 + PLAN_H - 17.0),
+        status_lines=[
+            &#x27;CONCEPT — to be sealed by a Registered Landscape Architect,&#x27;,
+            &#x27;forester or arborist (Site Development Plan Review Checklist §6.a).&#x27;,
+            &#x27;No tree survey has been performed; existing-vegetation limits are&#x27;,
+            &#x27;approximate. Quantities are concept quantities for review only.&#x27;])
+    assert len(D.late) == 4, &#x27;sitebase.sheet() queued layers changed — check the indices below&#x27;
+    px, py, pw, ph = F[&#x27;plan&#x27;]
+    D.late[1] = lambda: D.add(
+        &#x27;&lt;text x=&quot;%.1f&quot; y=&quot;%.1f&quot; font-size=&quot;28&quot; fill=&quot;#c00&quot; fill-opacity=&quot;0.09&quot; font-weight=&quot;bold&quot; &#x27;
+        &#x27;text-anchor=&quot;middle&quot;&gt;CONCEPT — NOT SEALED — LANDSCAPE ARCHITECT SEAL REQUIRED&lt;/text&gt;&#x27;
+        % (px + pw / 2, py + ph * 0.46))
+    D.late[3] = lambda: (D.srect(PLAN_X0 + 1596.0, PLAN_Y0 + PLAN_H - 28.0, 344, 27, fill=&#x27;#fff&#x27;,
+                                 fill_opacity=&#x27;0.94&#x27;, stroke=&#x27;#999&#x27;, stroke_width=0.4),
+                         sb.scalebar(D, PLAN_X0 + 1626.0, PLAN_Y0 + PLAN_H - 17.0,
+                                     scale=sb.SCALE60, step_ft=60, steps=4))
+    D.add(DEFS_EXTRA)
+
+    # ---------------------------------------------------------------- plan, 1&quot; = 60&#x27;
+    D.clip_open(fill=&#x27;#fff&#x27;)
+    sb.adjoiners(D, labels=False, zoning=False)
+    sb.arcado_row(D, labels=False)
+    context(D, screen=True)
+    buffer_layer(D, labels=True, dims=True)
+    strip_layer(D, labels=True, dims=False)
+    accessory_layer(D)
+    parking_layer(D, labels=True)
+    sb.streams_and_buffers(D, labels=False)
+    tree_protection(D, labels=True)
+    planting(D, keys=False)
+    sb.boundary(D, bearings=False, label=False)
+    D.poly(sb.rect(ENL_A[0], ENL_A[1], ENL_A[2], ENL_A[3]), fill=&#x27;none&#x27;, stroke=sb.C[&#x27;match&#x27;],
+           stroke_width=1.2, stroke_dasharray=&#x27;16 5 3 5&#x27;)
+    D.text((ENL_A[0] + ENL_A[1]) / 2.0, ENL_A[3] + 5.0,
+           &#x27;MATCH LINE — SEE ENLARGEMENT A (1&quot; = 20\&#x27;)&#x27;, size=7.2, bold=True, fill=sb.C[&#x27;match&#x27;],
+           halo=True)
+
+    D.text(950.0, 16.0, &#x27;KING DAVID MANOR — ZONED R-1 (CITY OF LILBURN): THE 20-FT UNDISTURBED BUFFER &#x27;
+                        &#x27;ABUTS RESIDENTIAL PROPERTY ON THIS LINE (CHECKLIST §6.b)&#x27;, size=7.4, bold=True,
+           fill=&#x27;#555&#x27;)
+    D.text(1560.0, -246.0, &#x27;LEGENDS AT PARKVIEW — ZONED R-1 (CITY OF LILBURN): THE 20-FT UNDISTURBED &#x27;
+                          &#x27;BUFFER ABUTS RESIDENTIAL PROPERTY ON THIS LINE (CHECKLIST §6.b)&#x27;, size=7.4,
+           bold=True, fill=&#x27;#555&#x27;)
+    D.text(1786.0, -170.0, &#x27;NANTUCKET — ZONED R-1&#x27;, size=7.2, rot=-90, bold=True, fill=&#x27;#555&#x27;)
+    D.text(430.0, sb.NE(430.0) - 46.0, &#x27;LANE STREET TREES AT %s ON CENTRE, BOTH SIDES — %d TREES &#x27;
+           &#x27;(SEE PLANT SCHEDULE)&#x27; % (_arch(STREET_TREE_OC), N_STREET), size=7.0, bold=True,
+           fill=CG[&#x27;canopy&#x27;], halo=True)
+    D.text(1300.0, sb.SW(1300.0) + 42.0, &#x27;NO PLANTING WITHIN THE 50-FT UNDISTURBED STREAM BUFFER — &#x27;
+           &#x27;STREAM BUFFERS ARE TO REMAIN IN A NATURAL AND UNDISTURBED CONDITION&#x27;, size=6.6,
+           bold=True, fill=sb.C[&#x27;stream&#x27;], halo=True)
+    D.text(120.0, -250.0, &#x27;SEE ENLARGEMENT A FOR THE ARCADO RD FRONTAGE STRIP, THE SIGHT TRIANGLES &#x27;
+           &#x27;AND THE AMENITY-BLOCK PLANTING&#x27;, size=6.8, bold=True, fill=sb.C[&#x27;match&#x27;], halo=True)
+    D.clip_close()
+    D.stext(px + pw, py - 8, &#x27;CONCEPT — TO BE SEALED BY A REGISTERED LANDSCAPE ARCHITECT, FORESTER OR &#x27;
+                             &#x27;ARBORIST (CHECKLIST §6.a)&#x27;, size=11, bold=True, fill=&#x27;#c00&#x27;, anchor=&#x27;end&#x27;)
+
+    # ---------------------------------------------------------------- band column A
+    xa, wa = F[&#x27;inner_l&#x27;] + 10, 900.0
+    y = sb.table(D, xa, BAND_Y0, [&#x27;CLAUSE&#x27;, &#x27;REQUIREMENT (CHECKLIST §6)&#x27;, &#x27;BASIS AND ARITHMETIC&#x27;,
+                                  &#x27;PROVIDED ON THIS SHEET&#x27;, &#x27;STATUS&#x27;],
+                 req_rows(), size=6.6, widths=[38, 214, 258, 302, 88],
+                 title=&#x27;LANDSCAPE, BUFFER AND TREE-PROTECTION REQUIREMENTS — REQUIRED vs. PROVIDED&#x27;)
+    y = sb.table(D, xa, y + 18, [&#x27;KEY&#x27;, &#x27;COMMON NAME&#x27;, &#x27;BOTANICAL NAME&#x27;, &#x27;QTY&#x27;, &#x27;SPACING / ON CENTRE&#x27;,
+                                 &#x27;% OF TOTAL&#x27;, &#x27;CALIPER / SIZE&#x27;, &#x27;HT. AT PLANTING&#x27;, &#x27;MATURE HT.&#x27;,
+                                 &#x27;ROOT COND.&#x27;, &#x27;USE ON THIS SHEET&#x27;],
+                 schedule_rows(), size=6.6, widths=[24, 122, 120, 26, 98, 42, 64, 64, 58, 48, 234],
+                 title=&#x27;PLANT SCHEDULE — Checklist §6.i: common and botanical names, quantity, spacing, &#x27;
+                       &#x27;percentage of total, size, height, caliper and root condition&#x27;)
+    D.stext(xa, y + 11, &#x27;Quantities are counted from the symbols actually drawn on this sheet, so the schedule &#x27;
+                        &#x27;cannot disagree with the plan. Percentages are of the %d-plant total; the largest single &#x27;
+                        &#x27;species is %.1f %%, under the 33 %% maximum of Checklist §6.i. B&amp;B = balled and burlapped; &#x27;
+                        &#x27;nursery stock to ANSI Z60.1-2014.&#x27; % (TOTAL_PLANTS, MAX_PCT), size=6.6, fill=&#x27;#333&#x27;)
+    D.stext(xa, y + 20.5, &#x27;Per-cottage foundation and porch planting is HOA-installed and is not tabulated &#x27;
+                          &#x27;(note 11). Final species selection is the Landscape Architect\&#x27;s.&#x27;, size=6.6, fill=&#x27;#333&#x27;)
+    yl = legend_block(D, xa, y + 36, wa, LEGEND, cols=3)
+    sec = buffer_section(xa, yl + 40)
+    ysec = sb.place(D, sec, title=&#x27;ENLARGEMENT B — TYPICAL BUFFER SECTION, PERIMETER LOT    &#x27;
+                                  &#x27;(SCALE 1&quot; = 20\&#x27;)&#x27;,
+                    note=&#x27;Looking along the SW property line; horizontal and vertical scales are equal &#x27;
+                         &#x27;(no exaggeration).&#x27;)
+    kx = xa + 165.0 * SCALE20 + 16
+    D.stext(kx, yl + 40 + 10, &#x27;KEY TO ENLARGEMENT B&#x27;, size=8, bold=True)
+    ky = yl + 40 + 22
+    for n, txt in SECTION_KEY:
+        D.scircle(kx + 5, ky - 2.4, 5.2, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.8)
+        D.stext(kx + 5, ky, str(n), size=7.0, anchor=&#x27;middle&#x27;, bold=True)
+        ky = D.stextblock(kx + 15, ky, txt, size=6.6, chars=76, lead=7.6)
+        ky += 1.6
+    sb.scalebar(D, kx + 8, min(ky + 16, BAND_Y1 - 16), scale=SCALE20, step_ft=20, steps=3)
+
+    # ---------------------------------------------------------------- band column B — enlargement A
+    xb = xa + wa + 22
+    sub = enlargement_a(xb, BAND_Y0 + 26)
+    ybot = sb.place(D, sub, title=&#x27;ENLARGEMENT A — ARCADO ROAD FRONTAGE LANDSCAPE STRIP, ENTRANCE SIGHT &#x27;
+                                  &#x27;TRIANGLES AND AMENITY-BLOCK PLANTING    (SCALE 1&quot; = 20\&#x27;)&#x27;,
+                    note=&#x27;Same data and the same site-local coordinates as the plan above; u %.0f to %.0f, &#x27;
+                         &#x27;v %.0f to %.0f. The 60-ft parking radii run past the right-hand match line and are &#x27;
+                         &#x27;shown complete on the plan.&#x27; % ENL_A[:4])
+    sb.scalebar(D, xb + 8, ybot + 24, scale=SCALE20, step_ft=20, steps=5)
+    D.stext(xb + 420, ybot + 16, &#x27;FRONTAGE ARITHMETIC (§6.j): %s ÷ 25 = %.2f → %d trees + %d shrubs. &#x27;
+                                 &#x27;Drive opening and curb returns %s; two 20-ft sight triangles %s; plantable &#x27;
+                                 &#x27;strip %s.&#x27;
+            % (_arch(FRONTAGE_FT), FRONTAGE_FT / STRIP_RATE_FT, STRIP_TREES_REQ, STRIP_SHRUBS_REQ,
+               _arch(OPENING_FT), _arch(2 * SIGHT_TRI_FT), _arch(PLANTABLE_FT)), size=6.8, fill=&#x27;#111&#x27;)
+    D.stext(xb + 420, ybot + 27, &#x27;PARKING ARITHMETIC (§6.k): %d spaces ÷ 7 = %.2f → %d trees; worst measured &#x27;
+                                 &#x27;trunk distance %s against the 60\&#x27;-0&quot; maximum. Tree Density Units are NOT &#x27;
+                                 &#x27;required of an SFR subdivision (§6.i) — note 2.&#x27;
+            % (AMENITY_SPACES, AMENITY_SPACES / PARK_RATE, PARK_TREES_REQ, _arch(PARK_MAXD)),
+            size=6.8, fill=&#x27;#111&#x27;)
+    ys = ybot + 46
+    D.stext(xb, ys, &#x27;SOURCES&#x27;, size=8.5, bold=True)
+    ys += 11
+    half = int(math.ceil(len(SOURCES) / 2.0))
+    for i, srcline in enumerate(SOURCES, 1):
+        col = 0 if i &lt;= half else 1
+        yy0 = ys + ((i - 1) % half if col == 0 else (i - 1 - half)) * 0
+        _ = yy0
+    ycol = [ys, ys]
+    for i, srcline in enumerate(SOURCES, 1):
+        col = 0 if i &lt;= half else 1
+        ycol[col] = D.stextblock(xb + col * 508, ycol[col], &#x27;%d. %s&#x27; % (i, srcline), size=6.6,
+                                 chars=132, lead=7.9, indent=9, fill=&#x27;#333&#x27;)
+        ycol[col] += 1.6
+
+    # ---------------------------------------------------------------- band column C — notes + section
+    xc = xb + 1008 + 14
+    D.stext(xc, BAND_Y0, &#x27;GENERAL NOTES — LANDSCAPE, BUFFER AND TREE PROTECTION&#x27;, size=9, bold=True)
+    yy = BAND_Y0 + 13
+    for i, n in enumerate(notes_filled(), 1):
+        yy = D.stextblock(xc, yy, &#x27;%d. %s&#x27; % (i, n), size=6.6, chars=140, lead=7.66, indent=9)
+        yy += 2.6
+    ydet = tpf_detail(D, xc, max(yy + 22.0, BAND_Y1 - 206.0), sc=18.0)
+    return D, (yl, ydet, yy, ysec, max(ycol))
+
+
+if __name__ == &#x27;__main__&#x27;:
+    D, marks = build()
+    svg, png = sb.save(D, &#x27;landscape-buffer&#x27;, dpi=150)
+    print(&#x27;wrote %s\n      %s&#x27; % (svg, png))
+    print(&#x27;  buffer   : %.0f lf, %.0f SF (mitred 20-ft offset); layout raster figure %s SF&#x27;
+          % (PERIM_LEN, BUF_SF, format(L[&#x27;stormwater&#x27;][&#x27;disturbed_area&#x27;][&#x27;buffer_bands_sf&#x27;], &#x27;,&#x27;)))
+    print(&#x27;  frontage : %.2f lf; opening %.1f; sight triangles %.0f; plantable %.1f; strip %.0f SF&#x27;
+          % (FRONTAGE_FT, OPENING_FT, 2 * SIGHT_TRI_FT, PLANTABLE_FT, STRIP_SF))
+    print(&#x27;  plants   : %d total, %d species, max species %.1f%%; street %d, strip %d+%d, &#x27;
+          &#x27;buffer %d+%d, parking %d, accessory %d&#x27;
+          % (TOTAL_PLANTS, len(COUNTS), MAX_PCT, N_STREET, 10, 10, N_EVER, N_CANOPY,
+             len(by_zone(&#x27;parking&#x27;)), len(by_zone(&#x27;accessory&#x27;))))
+    print(&#x27;  parking  : worst stall-to-trunk distance %.1f ft against the 60-ft test&#x27; % PARK_MAXD)
+    print(&#x27;  band ends: legend %.0f, detail %.0f, notes %.0f, section %.0f, sources %.0f &#x27;
+          &#x27;(band bottom %d)&#x27; % (marks + (BAND_Y1,)))
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/landscape.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

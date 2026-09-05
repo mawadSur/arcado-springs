@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Adjoining property owner list generator (application item 10) — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Adjoining property owner list generator (application item 10)</h1><p class="src-note">Python · 131 lines · <a href="/data-room/src/submission/tools/adjoiners.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;adjoiners.py — adjoining-owner list (Lilburn application item 10), ordered by side and by
+position along the site (front → rear), from
+  data/owners-found.json          Gwinnett Tax Assessor 2026 ownership file (retrieved 2026-08-28)
+  data/site-context-local.json    adjoining parcel rings in site-local (u, v) feet
+Prints a markdown table per side plus the corner adjoiners (used by docs/05 and docs/06).
+&quot;&quot;&quot;
+import json, os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+OWN = json.load(open(os.path.join(ROOT, &quot;data&quot;, &quot;owners-found.json&quot;)))
+CTX = json.load(open(os.path.join(ROOT, &quot;data&quot;, &quot;site-context-local.json&quot;)))
+SITE = {&quot;6123 033&quot;, &quot;6123 015&quot;, &quot;6123 014&quot;, &quot;6123 162&quot;}
+
+STREET_NAMES = {&quot;ARCADO RD&quot;: &quot;Arcado Rd SW&quot;, &quot;KING DAVID DR&quot;: &quot;King David Dr SW&quot;, &quot;NANTUCKET DR&quot;: &quot;Nantucket Dr SW&quot;,
+                &quot;VILLAGE GREEN CT&quot;: &quot;Village Green Ct SW&quot;, &quot;FIELDHOUSE CIR&quot;: &quot;Fieldhouse Cir SW&quot;}
+
+
+def side_of(ring):
+    &quot;&quot;&quot;Classify by where the ring sits relative to the strip: NE (v&gt;0), SW (v&lt;-230), NW (u&gt;1700).&quot;&quot;&quot;
+    us = [p[0] for p in ring]
+    vs = [p[1] for p in ring]
+    if min(vs) &gt; -50:
+        return &quot;NE&quot;
+    if max(vs) &lt; -150 and max(us) &lt; 1760:
+        return &quot;SW&quot;
+    return &quot;NW&quot;
+
+
+def touch_extent(ring, side):
+    &quot;&quot;&quot;u-range (or v-range for the NW end) of the vertices lying on/near the common line.&quot;&quot;&quot;
+    if side == &quot;NE&quot;:
+        pts = [p for p in ring if -15 &lt; p[1] &lt; 25]
+        key = 0
+    elif side == &quot;SW&quot;:
+        pts = [p for p in ring if -255 &lt; p[1] &lt; -220]
+        key = 0
+    else:
+        pts = [p for p in ring if p[0] &gt; 1705]
+        key = 1
+    if not pts:
+        pts = ring
+    vals = sorted(p[key] for p in pts)
+    return vals[0], vals[-1]
+
+
+def title(s):
+    return &quot; &quot;.join(w.capitalize() if w.isalpha() else w for w in s.split()) if s else &quot;&quot;
+
+
+def owner_line(rec):
+    names = [rec[&quot;OWNERNAME1&quot;]]
+    if rec.get(&quot;OWNERNAME2&quot;):
+        names.append(rec[&quot;OWNERNAME2&quot;])
+    return &quot; &amp; &quot;.join(names)
+
+
+def mailing(rec):
+    return f&quot;{rec[&#x27;OWNERADDRESS1&#x27;]}, {rec[&#x27;OWNERCITY&#x27;]}, {rec[&#x27;OWNERSTATE&#x27;]} {rec[&#x27;OWNERZIP&#x27;]}&quot;
+
+
+def prop_address(rec):
+    st = rec[&quot;PROPERTYSTREET&quot;]
+    num, _, name = st.partition(&quot; &quot;)
+    return f&quot;{num} {STREET_NAMES.get(name, title(name))}, Lilburn, GA {rec[&#x27;PROPERTYZip&#x27;]}&quot;
+
+
+def build():
+    rows = []
+    for ap in CTX[&quot;adjoining_parcels&quot;]:
+        pin = ap[&quot;PIN&quot;]
+        if pin == &quot;R/W&quot; or pin in SITE:
+            continue
+        ring = ap[&quot;ring_local&quot;]
+        side = side_of(ring)
+        lo, hi = touch_extent(ring, side)
+        rec = OWN[pin][0]
+        rows.append({&quot;pin&quot;: pin, &quot;side&quot;: side, &quot;lo&quot;: lo, &quot;hi&quot;: hi, &quot;rec&quot;: rec,
+                     &quot;address&quot;: prop_address(rec), &quot;owner&quot;: owner_line(rec), &quot;mail&quot;: mailing(rec),
+                     &quot;legal&quot;: rec[&quot;LEGAL1&quot;], &quot;ac&quot;: rec[&quot;LEGALAC&quot;], &quot;zoning&quot;: rec[&quot;ZONEDESC&quot;]})
+    # NE and SW ordered front → rear by u; NW ordered SW → NE by v
+    rows.sort(key=lambda r: ({&quot;NE&quot;: 0, &quot;NW&quot;: 1, &quot;SW&quot;: 2}[r[&quot;side&quot;]], r[&quot;lo&quot;]))
+    return rows
+
+
+def report(rows):
+    out = []
+    n = 0
+    for side, label in ((&quot;NE&quot;, &quot;Northeasterly line (King David Manor side), front → rear&quot;),
+                        (&quot;NW&quot;, &quot;Northwesterly end (Nantucket), SW → NE&quot;),
+                        (&quot;SW&quot;, &quot;Southwesterly line (Legends at Parkview side), front → rear&quot;)):
+        out.append(f&quot;### {label}&quot;)
+        out.append(&quot;&quot;)
+        out.append(&quot;| # | PIN | Property address | Owner(s) of record | Mailing address | Frontage on site (local ft) | Digest ac |&quot;)
+        out.append(&quot;|---:|---|---|---|---|---|---:|&quot;)
+        for r in rows:
+            if r[&quot;side&quot;] != side:
+                continue
+            n += 1
+            lo, hi = (0.0 if abs(r[&#x27;lo&#x27;]) &lt; 0.5 else r[&#x27;lo&#x27;]), (0.0 if abs(r[&#x27;hi&#x27;]) &lt; 0.5 else r[&#x27;hi&#x27;])
+            ext = (f&quot;u {lo:.0f} to {hi:.0f}&quot; if side != &quot;NW&quot; else f&quot;v {lo:.0f} to {hi:.0f}&quot;)
+            out.append(f&quot;| {n} | R{r[&#x27;pin&#x27;]} | {r[&#x27;address&#x27;]} | {r[&#x27;owner&#x27;]} | {r[&#x27;mail&#x27;]} | {ext} | {r[&#x27;ac&#x27;]} |&quot;)
+        out.append(&quot;&quot;)
+    out.append(f&quot;Adjoining parcels listed: {n}&quot;)
+    zon = {r[&quot;zoning&quot;] for r in rows}
+    out.append(f&quot;Zoning of all adjoiners (2026 digest ZONEDESC): {&#x27;, &#x27;.join(sorted(zon))}&quot;)
+    return &quot;\n&quot;.join(out)
+
+
+def corners(rows):
+    ne = [r for r in rows if r[&quot;side&quot;] == &quot;NE&quot;]
+    sw = [r for r in rows if r[&quot;side&quot;] == &quot;SW&quot;]
+    nw = [r for r in rows if r[&quot;side&quot;] == &quot;NW&quot;]
+    return {
+        &quot;NE_front&quot;: ne[0], &quot;NE_rear&quot;: ne[-1],
+        &quot;SW_front&quot;: sw[0], &quot;SW_rear&quot;: sw[-1],
+        &quot;NW_sw&quot;: nw[0], &quot;NW_ne&quot;: nw[-1],
+    }
+
+
+if __name__ == &quot;__main__&quot;:
+    rows = build()
+    print(report(rows))
+    print()
+    print(&quot;CORNERS&quot;)
+    for k, r in corners(rows).items():
+        print(f&quot; - {k}: R{r[&#x27;pin&#x27;]} {r[&#x27;address&#x27;]} ({r[&#x27;legal&#x27;]}) {r[&#x27;owner&#x27;]}&quot;)
+    assert len(rows) == 31, len(rows)   # 31 parcels + the Arcado Rd R/W = 32 adjoiners
+    missing = [r[&quot;pin&quot;] for r in rows if not r[&quot;owner&quot;] or r[&quot;owner&quot;] == &quot;NOT AVAILABLE&quot;]
+    print(&quot;Owner name NOT AVAILABLE in digest:&quot;, missing)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/adjoiners.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

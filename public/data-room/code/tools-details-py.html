@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Sheet C-8.0 civil details — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Sheet C-8.0 civil details</h1><p class="src-note">Python · 1,567 lines · <a href="/data-room/src/submission/tools/details.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Sheet C-8.0 &quot;CIVIL DETAILS&quot; — The Cottages at Arcado Springs (R-1 -&gt; R-2, Lilburn GA).
+
+    python3 tools/details.py     -&gt;  drawings/civil-details.svg + .png
+
+ARCH D 36 x 24 in, scales as noted per detail. Ten details:
+
+    1  TYPICAL LOT ........................................ 1&quot; = 10&#x27;
+    2  TYPICAL PRIVATE LANE SECTION (walk one side) ....... 1/2&quot; = 1&#x27;-0&quot;
+    3  WIDENED PRIVATE LANE SECTION (walks both sides) .... 1/2&quot; = 1&#x27;-0&quot;
+    4  HAMMERHEAD TURNAROUND PLAN ......................... 1&quot; = 20&#x27;
+    5  PAVEMENT STRUCTURES — LANE / DRIVEWAY / PARKING .... 1-1/2&quot; = 1&#x27;-0&quot;
+    6  ACCESSIBLE SPACE, ACCESS AISLE AND SIGN ............ plan 3/16&quot; = 1&#x27;-0&quot;; sign 3/8&quot; = 1&#x27;-0&quot;
+    7  MONUMENT ENTRY SIGN — PLAN AND ELEVATION ........... 1/2&quot; = 1&#x27;-0&quot;
+    8  MAIL KIOSK / CLUSTER BOX UNIT ...................... 3/16&quot; = 1&#x27;-0&quot;
+    9  TREE-PROTECTION FENCE .............................. 3/8&quot; = 1&#x27;-0&quot;
+   10  TYPICAL BUFFER SECTION ............................. 1&quot; = 10&#x27;
+
+WHY THIS SHEET EXISTS
+The City of Lilburn Site Development Plan Review Checklist section 4.s says &quot;All components of
+private streets and alleys must meet minimum standards for public street&quot;, section 7.i asks for a
+&quot;typical paving section for parking areas and drives&quot;, section 4.t for driveway and parking
+materials with standard details, section 4.r for a mail-delivery accessory structure &quot;with
+protection from the elements&quot;, section 4.x for the accessible space &quot;with details&quot;, section 4.q for
+the sign location, and section 6.g for the tree-protection fence detail and its note. Nothing in the
+package answered any of those with a drawn, dimensioned detail. This sheet does, and it is also the
+one picture that explains the section 313(1) design basis: the 20-ft undisturbed buffer held inside
+the rear of every lot under a recorded easement (detail 10).
+
+WHERE THE GEOMETRY COMES FROM — nothing on this sheet is a hand-drawn coordinate
+    data/layout.json   lots 21 and 22 (Block A lots 17 and 18, the NE side of the lane at
+                       u 580-680 ft, Phase 1) drive detail 1 in full: lot polygons, buffer
+                       easements, setback envelopes, house / garage / porch / rear-element and
+                       driveway rectangles.  The lane tract, pavement, centreline and sidewalk
+                       polygons drive details 1, 2 and 3 at stations u = 300 and u = 700.  The
+                       hammerhead legs drive detail 4.  amenity.accessible_stall / accessible_aisle
+                       / kiosk_stalls drive detail 6, amenity.entry_sign detail 7 and
+                       amenity.mail_kiosk detail 8.
+    data/plans.json    Plan A &quot;The Springbrook&quot; and Plan B &quot;The Laurel&quot; body dimensions, footprint
+                       polygons, garage / porch / patio rectangles, areas and lot_siting — the
+                       reason detail 1 is drawn at the TRUE body depths of 38&#x27;-0&quot; x 51&#x27;-10&quot; and
+                       38&#x27;-0&quot; x 57&#x27;-6&quot; and not at the 38 x 38 / 40 x 40 nominal program figures.
+    docs/12-outline-specifications.md sections 32 12 16, 32 16 13, 10 14 00 — pavement structures,
+                       curb, sidewalk and monument-sign materials.
+    docs/08-technical-memoranda.md Memo E — the fire-access position.
+
+sitebase.py is imported for the palette, the drawing primitives, the disclaimer text and the marker,
+and for render/save; the ARCH D title block is rebuilt here rather than taken from sitebase.sheet()
+because a details sheet has no single plan window, no single scale and no plan-window watermark.
+The block&#x27;s cell grid, wording and type sizes are copied from sitebase.sheet() so C-8.0 sits in the
+same set as C-0 and C-1.
+
+DRAFT — NOT SEALED. Concept details for a rezoning application. Not construction documents. Every
+structural section, pavement section, footing and slope shown must be designed and sealed by a
+Georgia registered professional engineer (and, for the tree-protection and buffer details, a
+registered landscape architect, forester or certified arborist) before any permit.
+&quot;&quot;&quot;
+import math
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+import sitebase as sb                                       # noqa: E402
+
+LAYOUT = sb.LAYOUT
+MET = LAYOUT[&#x27;metrics&#x27;]
+LANE = LAYOUT[&#x27;lane&#x27;]
+AMEN = LAYOUT[&#x27;amenity&#x27;]
+PLANS = sb._load(&#x27;plans.json&#x27;)[&#x27;plans&#x27;]
+LOTS = {L[&#x27;id&#x27;]: L for L in LAYOUT[&#x27;lots&#x27;]}
+
+SHEET_NO = &#x27;C-8.0&#x27;
+SHEET_TITLE = &#x27;CIVIL DETAILS&#x27;
+GEN = &#x27;tools/sitebase.py + tools/details.py&#x27;
+
+# ============================================================================ lettering
+# House rule (FACTS.md section 6): minimum lettering 1/8 in at full size so the 11 x 17 reduction
+# still reads.  Every string on this sheet is set at 9.0 pt or larger: 9.0 pt Liberation Sans is
+# 0.125 in from ascender to descender and 0.089 in of cap height at full size, and 0.058 in of cap
+# height at the 46.4 % reduction to 11 x 17.  The basis is stated in general note 12.
+TXT = 9.0            # minimum body / annotation lettering
+DIM = 9.0            # dimension lettering
+LBL = 10.0           # emphasised callout
+DTL = 14.0           # detail title
+SUB = 9.5            # detail sub-title / scale note
+
+C = dict(sb.C)
+C.update({
+    &#x27;dim&#x27;: &#x27;#b0121a&#x27;, &#x27;note&#x27;: &#x27;#111&#x27;, &#x27;lot&#x27;: &#x27;#111&#x27;, &#x27;setb&#x27;: &#x27;#8a8a8a&#x27;, &#x27;walkf&#x27;: &#x27;#e9e9e6&#x27;,
+    &#x27;asph_s&#x27;: &#x27;#4a4a4a&#x27;, &#x27;asph_i&#x27;: &#x27;#6f6f6f&#x27;, &#x27;gab&#x27;: &#x27;#cbc2ab&#x27;, &#x27;sub&#x27;: &#x27;#a89b80&#x27;,
+    &#x27;conc&#x27;: &#x27;#e6e6e2&#x27;, &#x27;mas&#x27;: &#x27;#c8ac8a&#x27;, &#x27;grass&#x27;: &#x27;#dfeed3&#x27;, &#x27;tree&#x27;: &#x27;#3f7a37&#x27;,
+    &#x27;wood&#x27;: &#x27;#7a5230&#x27;, &#x27;blue&#x27;: &#x27;#1565c0&#x27;, &#x27;fire&#x27;: &#x27;#b00020&#x27;, &#x27;code&#x27;: &#x27;#1b5e20&#x27;,
+})
+
+DEFS2 = &#x27;&#x27;&#x27;&lt;defs&gt;
+&lt;pattern id=&quot;d_conc&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;9&quot; height=&quot;9&quot;&gt;&lt;rect width=&quot;9&quot; height=&quot;9&quot; fill=&quot;#eeeeea&quot;/&gt;&lt;circle cx=&quot;2&quot; cy=&quot;3&quot; r=&quot;0.5&quot; fill=&quot;#a9a9a2&quot;/&gt;&lt;circle cx=&quot;6.5&quot; cy=&quot;6&quot; r=&quot;0.6&quot; fill=&quot;#a9a9a2&quot;/&gt;&lt;circle cx=&quot;7.5&quot; cy=&quot;1.5&quot; r=&quot;0.4&quot; fill=&quot;#b8b8b0&quot;/&gt;&lt;circle cx=&quot;3.5&quot; cy=&quot;7.5&quot; r=&quot;0.4&quot; fill=&quot;#b8b8b0&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;d_gab&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;8&quot; height=&quot;8&quot;&gt;&lt;rect width=&quot;8&quot; height=&quot;8&quot; fill=&quot;#ded4bb&quot;/&gt;&lt;circle cx=&quot;2&quot; cy=&quot;2&quot; r=&quot;1.15&quot; fill=&quot;none&quot; stroke=&quot;#8f8straight&quot; stroke-width=&quot;0.4&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;d_gab2&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;9&quot; height=&quot;9&quot;&gt;&lt;rect width=&quot;9&quot; height=&quot;9&quot; fill=&quot;#ded4bb&quot;/&gt;&lt;path d=&quot;M1 3 l2 -2 l2 2 z&quot; fill=&quot;none&quot; stroke=&quot;#8d8261&quot; stroke-width=&quot;0.45&quot;/&gt;&lt;path d=&quot;M5 8 l2 -2 l1.6 2 z&quot; fill=&quot;none&quot; stroke=&quot;#8d8261&quot; stroke-width=&quot;0.45&quot;/&gt;&lt;circle cx=&quot;7.2&quot; cy=&quot;2.2&quot; r=&quot;0.9&quot; fill=&quot;none&quot; stroke=&quot;#8d8261&quot; stroke-width=&quot;0.45&quot;/&gt;&lt;circle cx=&quot;2.2&quot; cy=&quot;6.6&quot; r=&quot;0.7&quot; fill=&quot;none&quot; stroke=&quot;#8d8261&quot; stroke-width=&quot;0.45&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;d_sub&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;10&quot; height=&quot;10&quot; patternTransform=&quot;rotate(45)&quot;&gt;&lt;rect width=&quot;10&quot; height=&quot;10&quot; fill=&quot;#efe9dc&quot;/&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;10&quot; stroke=&quot;#b3a급&quot; stroke-width=&quot;0.4&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;d_earth&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;11&quot; height=&quot;11&quot; patternTransform=&quot;rotate(45)&quot;&gt;&lt;rect width=&quot;11&quot; height=&quot;11&quot; fill=&quot;#fbfaf6&quot;/&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;11&quot; stroke=&quot;#b2a488&quot; stroke-width=&quot;0.45&quot;/&gt;&lt;line x1=&quot;5.5&quot; y1=&quot;0&quot; x2=&quot;5.5&quot; y2=&quot;5&quot; stroke=&quot;#c6bba4&quot; stroke-width=&quot;0.35&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;d_mas&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;16&quot; height=&quot;9&quot;&gt;&lt;rect width=&quot;16&quot; height=&quot;9&quot; fill=&quot;#e8d8bf&quot;/&gt;&lt;line x1=&quot;0&quot; y1=&quot;4.5&quot; x2=&quot;16&quot; y2=&quot;4.5&quot; stroke=&quot;#b09166&quot; stroke-width=&quot;0.5&quot;/&gt;&lt;line x1=&quot;0&quot; y1=&quot;9&quot; x2=&quot;16&quot; y2=&quot;9&quot; stroke=&quot;#b09166&quot; stroke-width=&quot;0.5&quot;/&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;4.5&quot; stroke=&quot;#b09166&quot; stroke-width=&quot;0.5&quot;/&gt;&lt;line x1=&quot;8&quot; y1=&quot;4.5&quot; x2=&quot;8&quot; y2=&quot;9&quot; stroke=&quot;#b09166&quot; stroke-width=&quot;0.5&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;d_grass&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;14&quot; height=&quot;14&quot;&gt;&lt;rect width=&quot;14&quot; height=&quot;14&quot; fill=&quot;#e8f3de&quot;/&gt;&lt;path d=&quot;M3 12 l1 -4 M4 12 l0 -4.5 M5 12 l1 -4&quot; fill=&quot;none&quot; stroke=&quot;#8fb37c&quot; stroke-width=&quot;0.4&quot;/&gt;&lt;path d=&quot;M10 13 l0.8 -3.5 M11 13 l0 -4&quot; fill=&quot;none&quot; stroke=&quot;#8fb37c&quot; stroke-width=&quot;0.4&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;d_mulch&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;10&quot; height=&quot;6&quot;&gt;&lt;rect width=&quot;10&quot; height=&quot;6&quot; fill=&quot;#e3d6c4&quot;/&gt;&lt;line x1=&quot;0.5&quot; y1=&quot;2&quot; x2=&quot;4&quot; y2=&quot;2&quot; stroke=&quot;#9c8465&quot; stroke-width=&quot;0.5&quot;/&gt;&lt;line x1=&quot;5&quot; y1=&quot;4.5&quot; x2=&quot;8.5&quot; y2=&quot;4.5&quot; stroke=&quot;#9c8465&quot; stroke-width=&quot;0.5&quot;/&gt;&lt;/pattern&gt;
+&lt;/defs&gt;&#x27;&#x27;&#x27;
+DEFS2 = DEFS2.replace(&#x27;#8f8straight&#x27;, &#x27;#8d8261&#x27;).replace(&#x27;#b3a급&#x27;, &#x27;#b3a68c&#x27;)
+
+
+# ============================================================================ small helpers
+FRAC = {0: &#x27;&#x27;, 1: &#x27;⅛&#x27;, 2: &#x27;¼&#x27;, 3: &#x27;⅜&#x27;, 4: &#x27;½&#x27;, 5: &#x27;⅝&#x27;, 6: &#x27;¾&#x27;, 7: &#x27;⅞&#x27;}
+
+
+def fti(v, base=2):
+    &quot;&quot;&quot;Feet (decimal) -&gt; architectural string, e.g. 26.67 -&gt; 26&#x27;-8\&quot;.  Rounds to 1/base inch.&quot;&quot;&quot;
+    neg = v &lt; 0
+    v = abs(v)
+    n = int(round(v * 12.0 * base))
+    ft, rem = divmod(n, 12 * base)
+    inch, fr = divmod(rem, base)
+    s = &quot;%d&#x27;-%d%s\&quot;&quot; % (ft, inch, FRAC.get(fr * (8 // base), &#x27;&#x27;))
+    return (&#x27;-&#x27; + s) if neg else s
+
+
+def inch(v_in):
+    &quot;&quot;&quot;Inches (decimal) -&gt; string, e.g. 1.25 -&gt; 1¼ in.&quot;&quot;&quot;
+    n = int(round(v_in * 8))
+    whole, fr = divmod(n, 8)
+    return &#x27;%d%s in&#x27; % (whole, FRAC.get(fr, &#x27;&#x27;))
+
+
+def sf(v):
+    return format(int(round(v)), &#x27;,&#x27;) + &#x27; SF&#x27;
+
+
+def interp(path, u):
+    pts = sorted(path)
+    if u &lt;= pts[0][0]:
+        return pts[0][1]
+    for i in range(len(pts) - 1):
+        if pts[i][0] &lt;= u &lt;= pts[i + 1][0] and pts[i + 1][0] &gt; pts[i][0]:
+            t = (u - pts[i][0]) / (pts[i + 1][0] - pts[i][0])
+            return pts[i][1] + t * (pts[i + 1][1] - pts[i][1])
+    return pts[-1][1]
+
+
+def halves(poly):
+    n = len(poly) // 2
+    return poly[:n], poly[n:]
+
+
+_TR_SW, _TR_NE = halves(LANE[&#x27;tract_polygon&#x27;])
+_PV_SW, _PV_NE = halves(LANE[&#x27;pavement_polygon&#x27;])
+_SWK = {s[&#x27;side&#x27;]: halves(s[&#x27;polygon&#x27;]) for s in LANE[&#x27;sidewalks&#x27;]}
+
+
+def station(u):
+    &quot;&quot;&quot;Every cross-section dimension of the lane at station u, straight from layout.json.&quot;&quot;&quot;
+    cl = interp(LANE[&#x27;centerline&#x27;], u)
+    a, b = interp(_TR_SW, u), interp(_TR_NE, u)
+    pa, pb = interp(_PV_SW, u), interp(_PV_NE, u)
+    d = {&#x27;u&#x27;: u, &#x27;cl&#x27;: cl, &#x27;tr_sw&#x27;: min(a, b), &#x27;tr_ne&#x27;: max(a, b),
+         &#x27;pv_sw&#x27;: min(pa, pb), &#x27;pv_ne&#x27;: max(pa, pb)}
+    d[&#x27;tract_w&#x27;] = d[&#x27;tr_ne&#x27;] - d[&#x27;tr_sw&#x27;]
+    d[&#x27;pave_w&#x27;] = d[&#x27;pv_ne&#x27;] - d[&#x27;pv_sw&#x27;]
+    for side, key in ((&#x27;NE&#x27;, &#x27;ne&#x27;), (&#x27;SW&#x27;, &#x27;sw&#x27;)):
+        h = _SWK.get(side)
+        if not h:
+            continue
+        us = [p[0] for p in h[0]]
+        if not (min(us) - 0.01 &lt;= u &lt;= max(us) + 0.01):
+            continue                       # the SW walk starts at u = 530 ft; do not extrapolate
+        lo, hi = interp(h[0], u), interp(h[1], u)
+        d[&#x27;w_%s&#x27; % key] = (min(lo, hi), max(lo, hi))
+    return d
+
+
+ST_TYP = station(300.0)          # detail 2 — sidewalk on the NE side only
+ST_WID = station(700.0)          # detail 3 — sidewalks both sides
+
+
+# ============================================================================ detail window
+HEAD = 46.0          # points reserved above every detail box for title + two-line sub-title
+
+
+class Det:
+    &quot;&quot;&quot;One detail window on the sheet.
+
+    Model units are feet with y UP.  (ox, oy) is the model point that lands on the box&#x27;s
+    bottom-left corner, so a detail is positioned by naming the model coordinate of its
+    lower-left corner and its scale in points per foot.
+    &quot;&quot;&quot;
+
+    def __init__(self, D, x, y, w, h, scale, ox, oy, num=None, title=None, scale_note=None,
+                 sub=None, box=True):
+        self.D, self.s = D, scale
+        self.x, self.w = x, w
+        self.y, self.h = (y + HEAD, h - HEAD) if title else (y, h)
+        self.ox, self.oy = ox, oy
+        self.num, self.title = num, title
+        if title:
+            self._head(y, scale_note, sub)
+        if box:
+            D.srect(self.x, self.y, self.w, self.h, fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.9)
+
+    # -- transforms ---------------------------------------------------------
+    def X(self, u):
+        return self.x + (u - self.ox) * self.s
+
+    def Y(self, v):
+        return self.y + self.h - (v - self.oy) * self.s
+
+    def P(self, p):
+        return &#x27;%.2f,%.2f&#x27; % (self.X(p[0]), self.Y(p[1]))
+
+    # -- title --------------------------------------------------------------
+    def _head(self, ytop, scale_note, sub):
+        D = self.D
+        cy = ytop + 15
+        D.scircle(self.x + 11, cy - 4, 10.5, fill=&#x27;#111&#x27;, stroke=&#x27;none&#x27;)
+        D.stext(self.x + 11, cy, str(self.num), size=12.5, bold=True, fill=&#x27;#fff&#x27;, anchor=&#x27;middle&#x27;)
+        D.stext(self.x + 26, cy, self.title, size=DTL, bold=True)
+        D.stext(self.x + self.w - 4, cy, &#x27;SCALE %s&#x27; % scale_note, size=SUB, fill=&#x27;#444&#x27;,
+                anchor=&#x27;end&#x27;)
+        if sub:
+            chars = max(int((self.w - 30) / (0.545 * TXT)), 20)
+            for i, ln in enumerate(sb.wrap(sub, chars)[:2]):
+                D.stext(self.x + 4, ytop + 27 + i * 10.5, ln, size=TXT, fill=&#x27;#444&#x27;)
+
+    # -- model primitives ---------------------------------------------------
+    def poly(self, pts, **kw):
+        self.D.add(&#x27;&lt;polygon points=&quot;%s&quot; %s/&gt;&#x27; % (&#x27; &#x27;.join(self.P(p) for p in pts), sb.attrs(kw)))
+
+    def pline(self, pts, **kw):
+        self.D.add(&#x27;&lt;polyline points=&quot;%s&quot; %s/&gt;&#x27; % (&#x27; &#x27;.join(self.P(p) for p in pts), sb.attrs(kw)))
+
+    def line(self, a, b, **kw):
+        self.D.sline(self.X(a[0]), self.Y(a[1]), self.X(b[0]), self.Y(b[1]), **kw)
+
+    def rect(self, x0, y0, x1, y1, **kw):
+        self.poly([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], **kw)
+
+    def circ(self, c, r_ft, **kw):
+        self.D.scircle(self.X(c[0]), self.Y(c[1]), r_ft * self.s, **kw)
+
+    def arc(self, c, r, a0, a1, **kw):
+        &quot;&quot;&quot;Circular arc, angles in degrees measured CCW from +x in model space.&quot;&quot;&quot;
+        pts = [(c[0] + r * math.cos(math.radians(a)), c[1] + r * math.sin(math.radians(a)))
+               for a in [a0 + (a1 - a0) * i / 24.0 for i in range(25)]]
+        self.pline(pts, fill=&#x27;none&#x27;, **kw)
+
+    def txt(self, u, v, t, size=TXT, anchor=&#x27;middle&#x27;, dx=0, dy=0, **kw):
+        self.D.stext(self.X(u) + dx, self.Y(v) + dy, t, size=size, anchor=anchor, **kw)
+
+    def txts(self, u, v, lines, size=TXT, anchor=&#x27;middle&#x27;, dx=0, dy=0, lead=None, bold_first=False,
+             **kw):
+        lead = lead or size * 1.22
+        for i, ln in enumerate(lines):
+            self.D.stext(self.X(u) + dx, self.Y(v) + dy + i * lead, ln, size=size, anchor=anchor,
+                         bold=(bold_first and i == 0), **kw)
+        return self.Y(v) + dy + len(lines) * lead
+
+    # -- leaders and annotation --------------------------------------------
+    def leader(self, u, v, tx, ty, lines, size=TXT, anchor=&#x27;start&#x27;, col=&#x27;#111&#x27;, bold_first=False,
+               lead=None, dot=True):
+        &quot;&quot;&quot;Leader from model point (u, v) to a text block whose first line sits at (tx, ty) in
+        SHEET points relative to the detail box origin.&quot;&quot;&quot;
+        x1, y1 = self.x + tx, self.y + ty
+        self.D.sline(self.X(u), self.Y(v), x1 - (5 if anchor == &#x27;start&#x27; else -5), y1 - 2.5,
+                     stroke=col, stroke_width=0.55)
+        if dot:
+            self.D.scircle(self.X(u), self.Y(v), 1.5, fill=col, stroke=&#x27;none&#x27;)
+        lead = lead or size * 1.2
+        for i, ln in enumerate(lines):
+            self.D.stext(x1, y1 + i * lead, ln, size=size, anchor=anchor, fill=col,
+                         bold=(bold_first and i == 0))
+        return y1 + len(lines) * lead
+
+    # -- dimensions ---------------------------------------------------------
+    def _tick(self, x, y, vertical=False):
+        r = 4.0
+        if vertical:
+            self.D.sline(x - r * 0.7, y + r * 0.7, x + r * 0.7, y - r * 0.7,
+                         stroke=C[&#x27;dim&#x27;], stroke_width=0.9)
+        else:
+            self.D.sline(x - r * 0.7, y + r * 0.7, x + r * 0.7, y - r * 0.7,
+                         stroke=C[&#x27;dim&#x27;], stroke_width=0.9)
+
+    def dimh(self, u0, u1, v, txt=None, off=16, size=DIM, ext=True, force_out=False):
+        &quot;&quot;&quot;Horizontal dimension between u0 and u1, dimension line `off` points BELOW model line v
+        (negative off = above).&quot;&quot;&quot;
+        D = self.D
+        x0, x1 = self.X(u0), self.X(u1)
+        yv, yd = self.Y(v), self.Y(v) + off
+        t = txt if txt is not None else fti(abs(u1 - u0))
+        if ext:
+            s = 1 if off &gt; 0 else -1
+            for x in (x0, x1):
+                D.sline(x, yv + s * 2.0, x, yd + s * 3.0, stroke=C[&#x27;dim&#x27;], stroke_width=0.4)
+        tw = 0.58 * size * len(t)
+        span = abs(x1 - x0)
+        if span &gt; tw + 10 and not force_out:
+            g = tw / 2.0 + 3
+            xm = (x0 + x1) / 2.0
+            D.sline(x0, yd, xm - g, yd, stroke=C[&#x27;dim&#x27;], stroke_width=0.7)
+            D.sline(xm + g, yd, x1, yd, stroke=C[&#x27;dim&#x27;], stroke_width=0.7)
+            D.srect(xm - tw / 2.0 - 1.5, yd - size * 0.68, tw + 3, size * 1.05, fill=&#x27;#fff&#x27;,
+                    fill_opacity=&#x27;0.9&#x27;, stroke=&#x27;none&#x27;)
+            D.stext(xm, yd + size * 0.36, t, size=size, anchor=&#x27;middle&#x27;, fill=C[&#x27;dim&#x27;], bold=True)
+        else:
+            D.sline(x0, yd, x1, yd, stroke=C[&#x27;dim&#x27;], stroke_width=0.7)
+            D.sline(max(x0, x1), yd, max(x0, x1) + 9, yd, stroke=C[&#x27;dim&#x27;], stroke_width=0.7)
+            D.srect(max(x0, x1) + 10.5, yd - size * 0.68, tw + 3, size * 1.05, fill=&#x27;#fff&#x27;,
+                    fill_opacity=&#x27;0.9&#x27;, stroke=&#x27;none&#x27;)
+            D.stext(max(x0, x1) + 12, yd + size * 0.36, t, size=size, anchor=&#x27;start&#x27;,
+                    fill=C[&#x27;dim&#x27;], bold=True)
+        self._tick(x0, yd)
+        self._tick(x1, yd)
+        return yd
+
+    def dimv(self, v0, v1, u, txt=None, off=-16, size=DIM, ext=True, force_out=False):
+        &quot;&quot;&quot;Vertical dimension between v0 and v1, dimension line `off` points RIGHT of model line u
+        (negative off = left).&quot;&quot;&quot;
+        D = self.D
+        y0, y1 = self.Y(v0), self.Y(v1)
+        xv, xd = self.X(u), self.X(u) + off
+        t = txt if txt is not None else fti(abs(v1 - v0))
+        if ext:
+            s = 1 if off &gt; 0 else -1
+            for y in (y0, y1):
+                D.sline(xv + s * 2.0, y, xd + s * 3.0, y, stroke=C[&#x27;dim&#x27;], stroke_width=0.4)
+        tw = 0.58 * size * len(t)
+        span = abs(y1 - y0)
+        if span &gt; tw + 10 and not force_out:
+            g = tw / 2.0 + 3
+            ym = (y0 + y1) / 2.0
+            D.sline(xd, y0, xd, ym - g if y0 &lt; y1 else ym + g, stroke=C[&#x27;dim&#x27;], stroke_width=0.7)
+            D.sline(xd, ym + g if y0 &lt; y1 else ym - g, xd, y1, stroke=C[&#x27;dim&#x27;], stroke_width=0.7)
+            D.srect(xd - size * 0.68, ym - tw / 2.0 - 1.5, size * 1.05, tw + 3, fill=&#x27;#fff&#x27;,
+                    fill_opacity=&#x27;0.9&#x27;, stroke=&#x27;none&#x27;)
+            D.stext(xd + size * 0.36, ym, t, size=size, anchor=&#x27;middle&#x27;, fill=C[&#x27;dim&#x27;], bold=True,
+                    rot=-90)
+        else:
+            D.sline(xd, y0, xd, y1, stroke=C[&#x27;dim&#x27;], stroke_width=0.7)
+            ye = min(y0, y1)
+            D.sline(xd, ye, xd, ye - 9, stroke=C[&#x27;dim&#x27;], stroke_width=0.7)
+            D.stext(xd + size * 0.36, ye - 12, t, size=size, anchor=&#x27;end&#x27;, fill=C[&#x27;dim&#x27;],
+                    bold=True, rot=-90)
+        self._tick(xd, y0, True)
+        self._tick(xd, y1, True)
+        return xd
+
+    def chain_h(self, stops, v, off=16, size=DIM, labels=None):
+        for i in range(len(stops) - 1):
+            t = labels[i] if labels else None
+            self.dimh(stops[i], stops[i + 1], v, txt=t, off=off, size=size)
+
+    def chain_v(self, stops, u, off=-16, size=DIM, labels=None):
+        for i in range(len(stops) - 1):
+            t = labels[i] if labels else None
+            self.dimv(stops[i], stops[i + 1], u, txt=t, off=off, size=size)
+
+    # -- graphic scale ------------------------------------------------------
+    def gscale(self, dx, dy, step_ft, steps, unit=&#x27;ft&#x27;, anchor_right=False):
+        &quot;&quot;&quot;Small graphic scale bar inside the box, positioned in sheet points from the box origin.&quot;&quot;&quot;
+        D = self.D
+        w = step_ft * self.s * steps
+        x = self.x + (self.w - dx - w if anchor_right else dx)
+        y = self.y + dy
+        D.srect(x - 16, y - 12, w + 34, 22, fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.92&#x27;, stroke=&#x27;none&#x27;)
+        for k in range(steps):
+            D.srect(x + step_ft * self.s * k, y, step_ft * self.s, 5.0,
+                    fill=&#x27;#000&#x27; if k % 2 == 0 else &#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.5)
+        for k in (0, steps):
+            D.stext(x + step_ft * self.s * k, y - 2.5, (&#x27;%g&#x27; % (step_ft * k)) + (
+                &#x27;&#x27; if k == 0 else &#x27; &#x27; + unit), size=TXT, anchor=&#x27;middle&#x27;)
+        return y
+
+
+# ============================================================================ north arrow
+def north(D, x, y, flip=False, r=26.0, caption=&#x27;GRID NORTH (SR 2240 GA WEST)&#x27;,
+          sub=&quot;= 28°43&#x27; ABOVE THE +u AXIS&quot;):
+    &quot;&quot;&quot;Grid-north arrow. `flip` draws it for a frame rotated 180 degrees (detail 1).&quot;&quot;&quot;
+    a = math.radians(sb.NORTH_DEG)
+    dx, dy = math.cos(a), -math.sin(a)
+    if flip:
+        dx, dy = -dx, -dy
+    px, py = -dy, dx
+    D.scircle(x, y, r, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.8)
+    tip = (x + dx * r * 0.86, y + dy * r * 0.86)
+    tail = (x - dx * r * 0.78, y - dy * r * 0.78)
+    D.sline(tail[0], tail[1], tip[0], tip[1], stroke=&#x27;#000&#x27;, stroke_width=2.0)
+    D.spoly([tip, (tip[0] - 14 * dx + 5.2 * px, tip[1] - 14 * dy + 5.2 * py),
+             (tip[0] - 14 * dx - 5.2 * px, tip[1] - 14 * dy - 5.2 * py)], fill=&#x27;#000&#x27;)
+    D.stext(tip[0] + 9 * dx, tip[1] + 9 * dy + 3.5, &#x27;N&#x27;, size=12, bold=True, anchor=&#x27;middle&#x27;)
+    cw = 0.56 * TXT * max(len(caption), len(sub)) + 10
+    D.srect(x - cw / 2.0, y + r + 2, cw, 23, fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.92&#x27;, stroke=&#x27;none&#x27;)
+    D.stext(x, y + r + 12, caption, size=TXT, anchor=&#x27;middle&#x27;)
+    D.stext(x, y + r + 22, sub, size=TXT, anchor=&#x27;middle&#x27;)
+
+
+# ============================================================================ sheet frame
+def sheet_frame(status_lines, scale_note):
+    &quot;&quot;&quot;ARCH D 36 x 24 frame + title block + disclaimer strip, on the Sheet C-0 / C-1 grid.&quot;&quot;&quot;
+    W, H, M, IN_ = sb.SHEET_W, sb.SHEET_H, sb.MARGIN, sb.INNER
+    D = sb.Drawing(1.0, 0.0, 0.0, win=(0.0, 1.0, 0.0, 1.0))
+    D.add(&#x27;&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;36in&quot; height=&quot;24in&quot; &#x27;
+          &#x27;viewBox=&quot;0 0 %d %d&quot; font-family=&quot;%s&quot;&gt;&#x27; % (W, H, sb.FONT))
+    D.add(&#x27;&lt;title&gt;%s&lt;/title&gt;&#x27; % sb.esc(&#x27;%s — %s — Sheet %s&#x27;
+                                       % (sb.PROJECT.title(), SHEET_TITLE, SHEET_NO)))
+    D.add(sb.DEFS)
+    D.add(DEFS2)
+    D.srect(0, 0, W, H, fill=&#x27;#fff&#x27;)
+    D.srect(M, M, W - 2 * M, H - 2 * M, fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=2)
+    D.srect(M + IN_, M + IN_, W - 2 * M - 2 * IN_, H - 2 * M - 2 * IN_,
+            fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.6)
+
+    tb_y, tb_h = sb.TB_Y, sb.TB_H - 6
+    D.srect(M + IN_, tb_y, W - 2 * M - 2 * IN_, tb_h, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1.2)
+    cells = [0, 820, 1330, 1780, 2180, W - 2 * M - 2 * IN_]
+    for cx in cells[1:-1]:
+        D.sline(M + IN_ + cx, tb_y, M + IN_ + cx, tb_y + tb_h, stroke=&#x27;#000&#x27;, stroke_width=0.8)
+    bx = M + 8
+    D.stext(bx, tb_y + 30, sb.PROJECT, size=22, bold=True)
+    D.stext(bx, tb_y + 52, &#x27;%s — Rezoning R-1 → R-2 (City of Lilburn, Georgia)&#x27; % SHEET_TITLE,
+            size=13, bold=True)
+    D.stext(bx, tb_y + 70, &#x27;%s — %s&#x27; % (sb.ADDRESSES, sb.LEGAL), size=9)
+    D.stext(bx, tb_y + 86, &#x27;Typical lot, private-lane sections, hammerhead turnaround, paving, &#x27;
+                           &#x27;accessible space, monument sign, mail kiosk, tree protection and the &#x27;
+                           &#x27;20-ft buffer&#x27;, size=9)
+    bx = M + IN_ + cells[1] + 8
+    D.stext(bx, tb_y + 18, &#x27;APPLICANT / OWNER&#x27;, size=9, fill=&#x27;#555&#x27;)
+    D.stext(bx, tb_y + 34, sb.APPLICANT, size=11, bold=True)
+    D.stext(bx, tb_y + 48, &#x27;4541 Arcado Rd SW, Lilburn GA 30047-3968 (parcels 033, 015); &#x27;
+                           &#x27;Mendez / Roblero de Leon&#x27;, size=9)
+    D.stext(bx, tb_y + 60, &#x27;(parcels 014, 162) — co-applicants, owner signatures required&#x27;, size=9)
+    D.stext(bx, tb_y + 76, &#x27;PREPARED FOR&#x27;, size=9, fill=&#x27;#555&#x27;)
+    D.stext(bx, tb_y + 90, &#x27;Pre-application conference, City of Lilburn Planning &amp; Zoning &#x27;
+                           &#x27;(340 Main St) —&#x27;, size=9)
+    D.stext(bx, tb_y + 101, &#x27;rezoning application per Ord. 2023-603 §1003 (2026 Application &#x27;
+                            &#x27;Instructions)&#x27;, size=9)
+    bx = M + IN_ + cells[2] + 8
+    D.stext(bx, tb_y + 18, &#x27;STATUS&#x27;, size=9, fill=&#x27;#555&#x27;)
+    D.stext(bx, tb_y + 38, &#x27;DRAFT — NOT SEALED&#x27;, size=14, bold=True, fill=&#x27;#c00&#x27;)
+    for k, ln in enumerate(status_lines):
+        D.stext(bx, tb_y + 54 + k * 11, ln, size=9)
+    D.stext(bx, tb_y + 101, &#x27;Generator: %s&#x27; % GEN, size=9)
+    bx = M + IN_ + cells[3] + 8
+    for k, (a, b) in enumerate([(&#x27;DATE&#x27;, sb.DATE), (&#x27;SCALE&#x27;, scale_note),
+                                (&#x27;DATUM&#x27;, &#x27;SR 2240 GA West US-ft; NAVD88&#x27;),
+                                (&#x27;DRAWN&#x27;, &#x27;owner-prepared (AI-assisted)&#x27;),
+                                (&#x27;CHECKED&#x27;, &#x27;PE / RLS / LA — pending&#x27;)]):
+        D.stext(bx, tb_y + 16 + k * 18, a, size=9, fill=&#x27;#555&#x27;)
+        D.stext(bx + 58, tb_y + 16 + k * 18, b, size=9)
+    bx = M + IN_ + cells[4] + 8
+    D.stext(bx, tb_y + 18, &#x27;SHEET&#x27;, size=9, fill=&#x27;#555&#x27;)
+    D.stext(bx + 150, tb_y + 72, SHEET_NO, size=48, bold=True, anchor=&#x27;middle&#x27;)
+    D.stext(bx + 150, tb_y + 92, SHEET_TITLE, size=9, anchor=&#x27;middle&#x27;)
+
+    dy = sb.TB_Y - 46
+    D.srect(M + IN_, dy, W - 2 * M - 2 * IN_, 40, fill=&#x27;#fff8e1&#x27;, stroke=&#x27;#b00&#x27;, stroke_width=0.8)
+    D.stext(M + IN_ + 8, dy + 15, &#x27;Disclaimer: &#x27; + sb.DISCLAIMER.split(&#x27;Disclaimer: &#x27;)[-1],
+            size=9.5, bold=True, fill=&#x27;#7a0000&#x27;)
+    D.stext(M + IN_ + 8, dy + 30,
+            &#x27;Label: DRAFT / NOT SEALED — every detail on this sheet is a concept that must be &#x27;
+            &#x27;designed and sealed by a Georgia PE, RLS, architect or landscape architect. Statements &#x27;
+            &#x27;of conformity read &quot;appears consistent with&quot;; nothing here is a compliance &#x27;
+            &#x27;certification.&#x27;, size=9, fill=&#x27;#7a0000&#x27;)
+    D.add(&#x27;&lt;!-- %s --&gt;&#x27; % sb.MARKER)
+    return D
+
+
+# ============================================================================ sheet layout (points)
+S10, S20 = 72.0 / 10.0, 72.0 / 20.0            # 1&quot; = 10&#x27; ; 1&quot; = 20&#x27;
+S12, S38, S316, S32 = 36.0, 27.0, 13.5, 108.0  # 1/2&quot;, 3/8&quot;, 3/16&quot;, 1-1/2&quot; = 1&#x27;-0&quot;
+
+BOX = {
+    &#x27;d1&#x27;:  (52, 54, 956, 954),
+    &#x27;d4&#x27;:  (1020, 54, 576, 601),
+    &#x27;d10&#x27;: (1020, 667, 576, 341),
+    &#x27;d7&#x27;:  (1608, 54, 500, 502),
+    &#x27;d6&#x27;:  (1608, 568, 500, 440),
+    &#x27;d8&#x27;:  (2120, 54, 426, 310),
+    &#x27;d9&#x27;:  (2120, 376, 426, 274),
+    &#x27;d5&#x27;:  (2120, 662, 426, 346),
+    &#x27;d2&#x27;:  (52, 1014, 1448, 178),
+    &#x27;d3&#x27;:  (52, 1196, 1448, 178),
+    &#x27;leg&#x27;: (52, 1378, 1448, 150),
+    &#x27;not&#x27;: (1512, 1014, 1034, 514),
+}
+
+
+def band(lo, hi, u0, u1, n=16):
+    &quot;&quot;&quot;Closed polygon between two v = f(u) functions over [u0, u1].&quot;&quot;&quot;
+    us = [u0 + (u1 - u0) * i / float(n) for i in range(n + 1)]
+    return [(u, lo(u)) for u in us] + [(u, hi(u)) for u in reversed(us)]
+
+
+# ============================================================================ 1 — TYPICAL LOT
+# Lots 7 and 8 — Block A lots 7 and 8, the SOUTH-WEST side of the lane at u 580-680 ft, Phase 1.
+# They are used rather than a north-east pair because the south-west lots are exactly rectangular
+# in the site-local system (front line v = -134.60, rear v = -234.60 for their whole 50-ft width),
+# so every setback prints as one exact number instead of a range.  The detail is drawn in a frame
+# rotated 180 degrees about the middle of the pair, R(u, v) = (1260 - u, -v - 134.60), so that the
+# lane reads at the bottom of the detail and the rear lot line at the top.  A 180-degree rotation
+# is rigid and preserves handedness: left and right of each dwelling are as built.
+L7, L8 = LOTS[7], LOTS[8]
+PA, PB = PLANS[&#x27;A&#x27;], PLANS[&#x27;B&#x27;]
+U_SUM, V_OFF = 1260.0, 134.60
+
+
+def R(p):
+    return (U_SUM - p[0], -p[1] - V_OFF)
+
+
+def RP(poly):
+    return [R(p) for p in poly]
+
+
+def _lot_stats(L, P):
+    &quot;&quot;&quot;Every dimension detail 1 prints, re-derived from the lot and plan records in the R frame.&quot;&quot;&quot;
+    poly = RP(L[&#x27;polygon&#x27;])
+    body = RP(L[&#x27;house_rect&#x27;])
+    gar = RP(L[&#x27;garage_rect&#x27;])
+    por = RP(L[&#x27;porch_rect&#x27;])
+    rr = RP(L[&#x27;rear_rect&#x27;])
+    dr = RP(L[&#x27;driveway_rect&#x27;])
+    env = RP(L[&#x27;setback_envelope&#x27;])
+    buf = RP(L[&#x27;buffer_easement&#x27;])
+    return {
+        &#x27;poly&#x27;: poly, &#x27;body&#x27;: body, &#x27;gar&#x27;: gar, &#x27;por&#x27;: por, &#x27;rear&#x27;: rr, &#x27;drv&#x27;: dr,
+        &#x27;env&#x27;: env, &#x27;buf&#x27;: buf,
+        &#x27;u0&#x27;: min(p[0] for p in poly), &#x27;u1&#x27;: max(p[0] for p in poly),
+        &#x27;uc&#x27;: sum(p[0] for p in poly) / 4.0,
+        &#x27;fv&#x27;: min(p[1] for p in poly), &#x27;rv&#x27;: max(p[1] for p in poly),
+        &#x27;porch_face&#x27;: min(p[1] for p in por), &#x27;body_front&#x27;: min(p[1] for p in body),
+        &#x27;body_rear&#x27;: max(p[1] for p in body), &#x27;gar_face&#x27;: min(p[1] for p in gar),
+        &#x27;rear_el&#x27;: max(p[1] for p in rr), &#x27;buf_v&#x27;: min(p[1] for p in buf),
+        &#x27;setb_f&#x27;: min(p[1] for p in env), &#x27;setb_r&#x27;: max(p[1] for p in env),
+        &#x27;bu0&#x27;: min(p[0] for p in body), &#x27;bu1&#x27;: max(p[0] for p in body),
+        &#x27;gu0&#x27;: min(p[0] for p in gar), &#x27;gu1&#x27;: max(p[0] for p in gar),
+        &#x27;pu0&#x27;: min(p[0] for p in por), &#x27;pu1&#x27;: max(p[0] for p in por),
+        &#x27;du0&#x27;: min(p[0] for p in dr), &#x27;du1&#x27;: max(p[0] for p in dr),
+        &#x27;dv0&#x27;: min(p[1] for p in dr), &#x27;dv1&#x27;: max(p[1] for p in dr),
+        &#x27;ru0&#x27;: min(p[0] for p in rr), &#x27;ru1&#x27;: max(p[0] for p in rr),
+        &#x27;body_depth&#x27;: P[&#x27;overall_body_dims&#x27;][&#x27;depth_ft&#x27;],
+        &#x27;label&#x27;: P[&#x27;overall_body_dims&#x27;][&#x27;label&#x27;],
+        &#x27;imp&#x27;: L[&#x27;impervious&#x27;], &#x27;plan&#x27;: P,
+    }
+
+
+A = _lot_stats(L7, PA)          # Plan A &quot;The Springbrook&quot; — the right-hand lot in the R frame
+B = _lot_stats(L8, PB)          # Plan B &quot;The Laurel&quot; — the left-hand lot
+
+
+def d1(D):
+    x, y, w, h = BOX[&#x27;d1&#x27;]
+    TAB = 58.0                       # bottom strip inside the box frame, for the tabulation
+    d = Det(D, x, y, w, h - TAB, S10, 558.0, -12.5, 1, &#x27;TYPICAL LOT&#x27;, &#x27;1&quot; = 10\&#x27;&#x27;,
+            &#x27;Regenerated from data/layout.json lots 7 and 8 (Block A, south-west side of the lane, &#x27;
+            &#x27;u 580–680 ft, Phase 1) and the true body geometry of data/plans.json — NOT from the &#x27;
+            &#x27;nominal program dimensions. Drawn rotated 180° so the lane reads at the bottom.&#x27;)
+    u0, u1 = 558.0, 691.0
+    pv = lambda u: -interp(_PV_SW, U_SUM - u) - V_OFF                                # noqa: E731
+    tr = lambda u: -interp(_TR_SW, U_SUM - u) - V_OFF                                # noqa: E731
+    wlo = lambda u: -interp(_SWK[&#x27;SW&#x27;][0], U_SUM - u) - V_OFF                        # noqa: E731
+    whi = lambda u: -interp(_SWK[&#x27;SW&#x27;][1], U_SUM - u) - V_OFF                        # noqa: E731
+
+    # ---- lane: pavement, 18-in gutter pan, 6-in curb, verge, 5-ft walk, verge to the lot line
+    d.poly(band(lambda u: -13.0, pv, u0, u1), fill=C[&#x27;asph_s&#x27;], stroke=&#x27;none&#x27;)
+    d.poly(band(lambda u: pv(u) - 1.5, pv, u0, u1), fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#8a8a8a&#x27;,
+           stroke_width=0.4)
+    d.poly(band(pv, lambda u: pv(u) + 0.5, u0, u1), fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#555&#x27;,
+           stroke_width=0.5)
+    d.poly(band(lambda u: pv(u) + 0.5, wlo, u0, u1), fill=&#x27;url(#d_grass)&#x27;, stroke=&#x27;none&#x27;)
+    d.poly(band(wlo, whi, u0, u1), fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#8a8a8a&#x27;, stroke_width=0.5)
+    d.poly(band(whi, tr, u0, u1), fill=&#x27;url(#d_grass)&#x27;, stroke=&#x27;none&#x27;)
+    d.pline([(u, pv(u)) for u in (u0, u1)], fill=&#x27;none&#x27;, stroke=&#x27;#222&#x27;, stroke_width=1.2)
+
+    # ---- the two lots
+    for s in (B, A):
+        d.poly(s[&#x27;poly&#x27;], fill=&#x27;#fff&#x27;, stroke=&#x27;none&#x27;)
+        d.poly(s[&#x27;buf&#x27;], fill=&#x27;url(#bufhatch)&#x27;, stroke=C[&#x27;green_line&#x27;], stroke_width=0.8)
+        d.poly(s[&#x27;env&#x27;], fill=&#x27;none&#x27;, stroke=C[&#x27;setb&#x27;], stroke_width=0.8,
+               stroke_dasharray=&#x27;7 3 2 3&#x27;)
+        d.poly(s[&#x27;drv&#x27;], fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#7a7a7a&#x27;, stroke_width=0.6)
+        wu = (s[&#x27;pu0&#x27;] + s[&#x27;pu1&#x27;]) / 2.0
+        d.rect(wu - 2.0, s[&#x27;porch_face&#x27;], wu + 2.0, whi(wu), fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#7a7a7a&#x27;,
+               stroke_width=0.5)
+        d.poly(s[&#x27;body&#x27;], fill=C[&#x27;house&#x27;], stroke=&#x27;#111&#x27;, stroke_width=1.5)
+        d.poly(s[&#x27;gar&#x27;], fill=&#x27;#efd2ad&#x27;, stroke=&#x27;#111&#x27;, stroke_width=0.9)
+        d.poly(s[&#x27;por&#x27;], fill=&#x27;#fdf3e4&#x27;, stroke=&#x27;#111&#x27;, stroke_width=0.9)
+        d.poly(s[&#x27;rear&#x27;], fill=&#x27;#fdf3e4&#x27; if s is B else &#x27;#f0efe6&#x27;, stroke=&#x27;#111&#x27;, stroke_width=0.9)
+        d.poly(s[&#x27;poly&#x27;], fill=&#x27;none&#x27;, stroke=C[&#x27;lot&#x27;], stroke_width=1.7)
+
+    # ---- labels inside the lots
+    for s, nm, blk in ((A, &#x27;A&#x27;, 7), (B, &#x27;B&#x27;, 8)):
+        P = s[&#x27;plan&#x27;]
+        d.txts(s[&#x27;uc&#x27;], 64.0, [&#x27;BLOCK A, LOT %d&#x27; % blk,
+                               &#x27;PLAN %s &quot;%s&quot;&#x27; % (nm, P[&#x27;name&#x27;].title()),
+                               &#x27;BODY %s&#x27; % s[&#x27;label&#x27;],
+                               &#x27;%s CONDITIONED&#x27; % sf(P[&#x27;areas&#x27;][&#x27;conditioned_sf&#x27;]),
+                               &#x27;%s UNDER ROOF&#x27; % sf(P[&#x27;areas&#x27;][&#x27;total_under_roof_sf&#x27;]),
+                               &quot;LOT 50&#x27;-0\&quot; × 100&#x27;-0\&quot; = 5,000 SF&quot;],
+               size=TXT, bold_first=True)
+        d.txt((s[&#x27;gu0&#x27;] + s[&#x27;gu1&#x27;]) / 2.0, 38.0, &#x27;2-CAR GARAGE&#x27;, size=TXT)
+        d.txt((s[&#x27;gu0&#x27;] + s[&#x27;gu1&#x27;]) / 2.0, 35.6, &quot;21&#x27;-0\&quot; × 21&#x27;-10\&quot;&quot;, size=TXT)
+        d.txt((s[&#x27;pu0&#x27;] + s[&#x27;pu1&#x27;]) / 2.0, 20.0, &#x27;COVERED&#x27;, size=TXT)
+        d.txt((s[&#x27;pu0&#x27;] + s[&#x27;pu1&#x27;]) / 2.0, 17.8, &#x27;PORCH&#x27;, size=TXT)
+        d.txt((s[&#x27;du0&#x27;] + s[&#x27;du1&#x27;]) / 2.0, 23.0, &#x27;DRIVEWAY&#x27;, size=TXT)
+        d.txt((s[&#x27;du0&#x27;] + s[&#x27;du1&#x27;]) / 2.0, 20.8, &#x27;2 CARS&#x27;, size=TXT)
+        d.txt(s[&#x27;uc&#x27;], 91.0, &quot;20&#x27;-0\&quot; BUFFER EASEMENT — UNDISTURBED&quot;, size=TXT, fill=&#x27;#2e5e1e&#x27;)
+        d.txt(s[&#x27;uc&#x27;], 88.6, &#x27;(SEE 10/C-8.0)&#x27;, size=TXT, fill=&#x27;#2e5e1e&#x27;)
+    d.txt((A[&#x27;ru0&#x27;] + A[&#x27;ru1&#x27;]) / 2.0, 76.4, &#x27;UNCOVERED&#x27;, size=TXT)
+    d.txt((A[&#x27;ru0&#x27;] + A[&#x27;ru1&#x27;]) / 2.0, 74.2, &quot;PATIO 12&#x27; × 6&#x27;&quot;, size=TXT)
+    d.txt((B[&#x27;ru0&#x27;] + B[&#x27;ru1&#x27;]) / 2.0, 76.4, &#x27;COVERED REAR PORCH&#x27;, size=TXT)
+    d.txt((B[&#x27;ru0&#x27;] + B[&#x27;ru1&#x27;]) / 2.0, 74.2, &quot;14&#x27; × 6&#x27; (RECESSED)&quot;, size=TXT)
+
+    # ---- vertical chains, left of lot 8 (Plan B)
+    d.chain_v([B[&#x27;fv&#x27;], B[&#x27;setb_f&#x27;]], 580.0, off=-22, labels=[&quot;15&#x27;-0\&quot;&quot;])
+    d.chain_v([B[&#x27;setb_r&#x27;], B[&#x27;rv&#x27;]], 580.0, off=-22, labels=[&quot;20&#x27;-0\&quot;&quot;])
+    d.chain_v([B[&#x27;fv&#x27;], B[&#x27;porch_face&#x27;], B[&#x27;body_front&#x27;], B[&#x27;body_rear&#x27;], B[&#x27;rv&#x27;]], 580.0, off=-52,
+              labels=[fti(B[&#x27;porch_face&#x27;] - B[&#x27;fv&#x27;]), &quot;6&#x27;-0\&quot;&quot;, fti(B[&#x27;body_depth&#x27;]),
+                      fti(B[&#x27;rv&#x27;] - B[&#x27;body_rear&#x27;])])
+    d.dimv(B[&#x27;fv&#x27;], B[&#x27;rv&#x27;], 580.0, txt=&quot;100&#x27;-0\&quot; LOT DEPTH&quot;, off=-88)
+
+    # ---- vertical chains, right of lot 7 (Plan A)
+    d.chain_v([A[&#x27;fv&#x27;], A[&#x27;setb_f&#x27;]], 680.0, off=20, labels=[&quot;15&#x27;-0\&quot;&quot;])
+    d.chain_v([A[&#x27;setb_r&#x27;], A[&#x27;rv&#x27;]], 680.0, off=20, labels=[&quot;20&#x27;-0\&quot;&quot;])
+    d.chain_v([A[&#x27;fv&#x27;], A[&#x27;porch_face&#x27;], A[&#x27;body_front&#x27;], A[&#x27;body_rear&#x27;], A[&#x27;rear_el&#x27;],
+               A[&#x27;rv&#x27;]], 680.0, off=48,
+              labels=[fti(A[&#x27;porch_face&#x27;] - A[&#x27;fv&#x27;]), &quot;6&#x27;-0\&quot;&quot;, fti(A[&#x27;body_depth&#x27;]), &quot;6&#x27;-0\&quot;&quot;,
+                      fti(A[&#x27;rv&#x27;] - A[&#x27;rear_el&#x27;])])
+    d.dimv(B[&#x27;body_front&#x27;], B[&#x27;gar_face&#x27;], B[&#x27;gu0&#x27;], txt=&quot;5&#x27;-0\&quot; RECESS&quot;, off=-14)
+
+    # ---- driveway chain on the shared lot line, clear of both dwellings
+    ud = 630.0
+    d.D.sline(d.X(A[&#x27;gu0&#x27;] - 8.0), d.Y(A[&#x27;gar_face&#x27;]), d.X(A[&#x27;gu0&#x27;]), d.Y(A[&#x27;gar_face&#x27;]),
+              stroke=C[&#x27;dim&#x27;], stroke_width=0.4, stroke_dasharray=&#x27;4 2&#x27;)
+    d.chain_v([A[&#x27;gar_face&#x27;], tr(ud), whi(ud), wlo(ud), pv(ud)], ud, off=16,
+              labels=[fti(A[&#x27;gar_face&#x27;] - tr(ud)), None, &quot;5&#x27;-0\&quot;&quot;, &quot;2&#x27;-0\&quot;&quot;])
+    d.dimv(A[&#x27;gar_face&#x27;], pv(ud), ud, off=54,
+           txt=&#x27;%s GARAGE DOOR TO FACE OF CURB&#x27; % fti(A[&#x27;gar_face&#x27;] - pv(ud)))
+
+    # ---- horizontal chains
+    d.chain_h([B[&#x27;u0&#x27;], B[&#x27;u1&#x27;], A[&#x27;u1&#x27;]], A[&#x27;rv&#x27;], off=-22, labels=[&quot;50&#x27;-0\&quot;&quot;, &quot;50&#x27;-0\&quot;&quot;])
+    d.txt(615.0, 96.4, &#x27;REAR LOT LINE = ASSEMBLAGE BOUNDARY — ADJOINING R-1 SINGLE-FAMILY &#x27;
+          &#x27;LOT BEYOND (SEE 10/C-8.0)&#x27;, size=TXT, fill=&#x27;#2e5e1e&#x27;)
+    for s in (B, A):
+        d.chain_h([s[&#x27;u0&#x27;], s[&#x27;bu0&#x27;], s[&#x27;bu1&#x27;], s[&#x27;u1&#x27;]], s[&#x27;porch_face&#x27;], off=22,
+                  labels=[&quot;6&#x27;-0\&quot;&quot;, &quot;38&#x27;-0\&quot; BODY&quot;, &quot;6&#x27;-0\&quot;&quot;])
+        d.dimh(s[&#x27;du0&#x27;], s[&#x27;du1&#x27;], s[&#x27;porch_face&#x27;], txt=&quot;20&#x27;-0\&quot; DRIVEWAY&quot;, off=46)
+        d.dimh(s[&#x27;gu0&#x27;], s[&#x27;gu1&#x27;], s[&#x27;porch_face&#x27;], txt=&quot;21&#x27;-0\&quot; GARAGE&quot;, off=68)
+
+    # ---- lane annotation
+    d.txt(561.0, -9.3, &quot;PRIVATE LANE — 22&#x27;-0\&quot; PAVEMENT FACE TO FACE, NO ON-LANE PARKING; &quot;
+          &quot;HOA TRACT 35&#x27;-11\&quot; TO 46&#x27;-1\&quot; WIDE&quot;, size=TXT, anchor=&#x27;start&#x27;, fill=&#x27;#fff&#x27;)
+    d.txt(561.0, -11.6, &#x27;SEE SECTIONS 2/C-8.0 AND 3/C-8.0 FOR THE TRACT, CURB, WALK AND PAVEMENT &#x27;
+          &#x27;STRUCTURE&#x27;, size=TXT, anchor=&#x27;start&#x27;, fill=&#x27;#fff&#x27;)
+    d.txt(566.0, (wlo(566.0) + whi(566.0)) / 2.0 - 0.55, &quot;5&#x27;-0\&quot; WALK&quot;, size=TXT, anchor=&#x27;start&#x27;)
+    d.txt(566.0, tr(566.0) + 1.2, &#x27;LANE TRACT LINE = FRONT LOT LINE&#x27;, size=TXT, anchor=&#x27;start&#x27;)
+
+    # ---- tabulation strip below the drawing frame
+    lines = [&#x27;REAR 20 FT OF EVERY PERIMETER LOT = THE REQUIRED 20-ft REAR YARD AND THE 20-ft &#x27;
+             &#x27;UNDISTURBED BUFFER, COINCIDENT, IN A RECORDED BUFFER EASEMENT — Ord. 2023-603 &#x27;
+             &#x27;§313(1) with Table 4.1. SEE 10/C-8.0.&#x27;]
+    for s2 in (A, B):
+        im = s2[&#x27;imp&#x27;]
+        nm = &#x27;A&#x27; if s2 is A else &#x27;B&#x27;
+        lines.append(&#x27;PLAN %s — under roof %s · %s · driveway %s · walk %s · TOTAL IMPERVIOUS %s &#x27;
+                     &#x27;(%.1f %% of the lot) · coverage %.1f %% · rearmost element %s from the rear &#x27;
+                     &#x27;line, %s clear of the buffer&#x27;
+                     % (nm, sf(im[&#x27;under_roof_sf&#x27;]),
+                        (&#x27;patio &#x27; + sf(im[&#x27;patio_sf&#x27;])) if im[&#x27;patio_sf&#x27;] else &#x27;rear porch in roof&#x27;,
+                        sf(im[&#x27;driveway_sf&#x27;]), sf(im[&#x27;entry_walk_sf&#x27;]), sf(im[&#x27;total_sf&#x27;]),
+                        100.0 * im[&#x27;total_sf&#x27;] / 5000.0,
+                        s2[&#x27;plan&#x27;][&#x27;lot_siting&#x27;][&#x27;building_coverage_pct&#x27;],
+                        fti(s2[&#x27;rv&#x27;] - s2[&#x27;rear_el&#x27;]), fti(s2[&#x27;buf_v&#x27;] - s2[&#x27;rear_el&#x27;])))
+    lines.append(&#x27;Table 4.1 (R-2) minima: front 15\&#x27;-0&quot;, side 5\&#x27;-0&quot; (6\&#x27;-0&quot; provided), rear 20\&#x27;-0&quot;; &#x27;
+                 &#x27;garage door 26\&#x27;-8&quot; from the front lot line, recessed 5\&#x27;-0&quot; (Table 4.2); 50\&#x27;-0&quot; of &#x27;
+                 &#x27;frontage on the private street (§319 requires 30 ft). APPEARS CONSISTENT WITH.&#x27;)
+    for i, t in enumerate(lines):
+        D.stext(x + 8, y + h - TAB + 12 + i * 11, t, size=TXT, fill=&#x27;#333&#x27;)
+
+    north(D, d.x + 62, d.y + 58, flip=True, sub=&#x27;DETAIL ROTATED 180° — SEE 4/C-8.0&#x27;)
+    d.gscale(16, d.h - 16, 10, 4, anchor_right=True)
+
+
+# ============================================================================ 2 / 3 — LANE SECTIONS
+# Pavement structure — docs/12-outline-specifications.md 32 12 16 2.03, taking Gwinnett County
+# UDO 900-70.4.A as the presumptive public-street standard because the Lilburn Development
+# Regulations (Code Appendix B) are not retrievable online.
+LANE_STRUCT = [(&#x27;SURFACE COURSE&#x27;, 1.25, C[&#x27;asph_s&#x27;], &#x27;1¼ in — 9.5 mm Superpave Type II (GDOT 828)&#x27;),
+               (&#x27;INTERMEDIATE COURSE&#x27;, 2.00, C[&#x27;asph_i&#x27;], &#x27;2 in — 19 mm Superpave (GDOT 828)&#x27;),
+               (&#x27;GRADED AGGREGATE BASE&#x27;, 8.00, &#x27;url(#d_gab2)&#x27;, &#x27;8 in — GAB, GDOT 815, 100 % ASTM D698&#x27;)]
+DRIVE_STRUCT = [(&#x27;CONCRETE&#x27;, 6.00, &#x27;url(#d_conc)&#x27;, &#x27;6 in — GDOT Class A, 3,500 psi, broom finish&#x27;),
+                (&#x27;GRADED AGGREGATE BASE&#x27;, 4.00, &#x27;url(#d_gab2)&#x27;, &#x27;4 in — GAB (checklist §7.i minimum)&#x27;)]
+BAY_STRUCT = [(&#x27;SURFACE COURSE&#x27;, 2.00, C[&#x27;asph_s&#x27;], &#x27;2 in — 9.5 mm Superpave Type II&#x27;),
+              (&#x27;GRADED AGGREGATE BASE&#x27;, 6.00, &#x27;url(#d_gab2)&#x27;, &#x27;6 in — GAB&#x27;)]
+CURB_W, CURB_H, PAN_W, PAN_T = 0.5, 0.5, 1.5, 0.5     # 24-in curb and gutter, 6-in vertical face
+XSLOPE = 0.02
+
+
+def _pav_y(x):
+    return -XSLOPE * abs(x)
+
+
+def lane_section(D, key, st, num, title, sub, walk_sw):
+    x, y, w, h = BOX[key]
+    STRIP = 12.0                      # one-line strip under the drawing frame
+    half = (w - 20) / (2.0 * S12)
+    d = Det(D, x, y, w, h - STRIP, S12, -half, -1.60, num, title, &#x27;1/2&quot; = 1\&#x27;-0&quot;&#x27;, sub)
+    cl = st[&#x27;cl&#x27;]
+    tsw, tne = st[&#x27;tr_sw&#x27;] - cl, st[&#x27;tr_ne&#x27;] - cl
+    pne, psw = 11.0, -11.0
+    wne = (st[&#x27;w_ne&#x27;][0] - cl, st[&#x27;w_ne&#x27;][1] - cl)
+    wsw = (st[&#x27;w_sw&#x27;][0] - cl, st[&#x27;w_sw&#x27;][1] - cl) if walk_sw else None
+    gab = sum(t for _, t, _, _ in LANE_STRUCT) / 12.0
+
+    # ---- subgrade
+    d.poly([(tsw, _pav_y(psw) - gab), (tne, _pav_y(pne) - gab), (tne, -1.56), (tsw, -1.56)],
+           fill=&#x27;url(#d_earth)&#x27;, stroke=&#x27;none&#x27;)
+    d.pline([(tsw, _pav_y(psw) - gab), (psw, _pav_y(psw) - gab), (pne, _pav_y(pne) - gab),
+             (tne, _pav_y(pne) - gab)], fill=&#x27;none&#x27;, stroke=&#x27;#8a7a5c&#x27;, stroke_width=1.2)
+    # ---- pavement structure
+    top = 0.0
+    for nm, t, col, _ in LANE_STRUCT:
+        bot = top - t / 12.0
+        d.poly([(psw, _pav_y(psw) + top), (0.0, top), (pne, _pav_y(pne) + top),
+                (pne, _pav_y(pne) + bot), (0.0, bot), (psw, _pav_y(psw) + bot)],
+               fill=col, stroke=&#x27;#222&#x27;, stroke_width=0.4)
+        top = bot
+    # ---- 24-in curb and gutter both sides (18-in pan + 6-in vertical face)
+    for sgn in (-1, 1):
+        e = sgn * 11.0
+        p0, p1 = e - sgn * PAN_W, e
+        d.poly([(p0, _pav_y(p0)), (p1, _pav_y(p1)), (p1 + sgn * CURB_W, _pav_y(p1) + CURB_H),
+                (p1 + sgn * CURB_W, _pav_y(p1) - PAN_T), (p0, _pav_y(p0) - PAN_T)],
+               fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.9)
+    # ---- verge, sidewalks and ground line out to the tract lines
+    y_curb = _pav_y(11.0) + CURB_H
+    for sgn, wk, tl in ((1, wne, tne), (-1, wsw, tsw)):
+        pts = [(sgn * 11.5, y_curb)]
+        pts += ([(wk[0], y_curb + 0.02), (wk[1], y_curb + 0.12), (tl, y_curb + 0.20)] if wk
+                else [(tl, y_curb + 0.26)])
+        d.poly(pts + [(tl, y_curb - 0.55), (sgn * 11.5, y_curb - 0.55)], fill=&#x27;url(#d_grass)&#x27;,
+               stroke=&#x27;none&#x27;)
+        d.pline(pts, fill=&#x27;none&#x27;, stroke=&#x27;#4b6b3a&#x27;, stroke_width=1.1)
+    for wk, sgn in ((wne, 1), (wsw, -1)):
+        if not wk:
+            continue
+        w0, w1 = min(wk), max(wk)
+        d.poly([(w0, y_curb + 0.02), (w1, y_curb + 0.12), (w1, y_curb + 0.12 - 0.333),
+                (w0, y_curb + 0.02 - 0.333)], fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.9)
+        d.txt((w0 + w1) / 2.0, y_curb + 0.30, &#x27;5\&#x27;-0&quot; WALK, 4 in&#x27;, size=TXT)
+    # ---- centreline, tract lines
+    d.D.sline(d.X(0), d.Y(1.55), d.X(0), d.Y(-1.5), stroke=&#x27;#444&#x27;, stroke_width=0.7,
+              stroke_dasharray=&#x27;16 3 3 3&#x27;)
+    d.txt(0, 0.50, &#x27;C/L LANE&#x27;, size=TXT, bold=True)
+    for tl, sgn in ((tsw, 1), (tne, -1)):
+        d.D.sline(d.X(tl), d.Y(1.60), d.X(tl), d.Y(-1.56), stroke=&#x27;#111&#x27;, stroke_width=1.6)
+        d.txt(tl + sgn * 0.25, 1.53, &#x27;HOA LANE TRACT LINE = FRONT LOT LINE&#x27;, size=TXT,
+              anchor=&#x27;start&#x27; if sgn &gt; 0 else &#x27;end&#x27;, bold=True)
+    d.txt(-6.0, 0.10, &#x27;2 % CROWN&#x27;, size=TXT, fill=&#x27;#fff&#x27;)
+    d.txt(6.0, 0.10, &#x27;2 % CROWN&#x27;, size=TXT, fill=&#x27;#fff&#x27;)
+
+    # ---- dimensions
+    if walk_sw:
+        stops = [tsw, wsw[0], wsw[1], psw, pne, wne[0], wne[1], tne]
+        labs = [fti(wsw[0] - tsw), &#x27;5\&#x27;-0&quot;&#x27;, &#x27;2\&#x27;-0&quot;&#x27;,
+                &#x27;22\&#x27;-0&quot; PAVEMENT, FACE OF CURB TO FACE OF CURB&#x27;, &#x27;2\&#x27;-0&quot;&#x27;, &#x27;5\&#x27;-0&quot;&#x27;,
+                fti(tne - wne[1])]
+    else:
+        stops = [tsw, psw, pne, wne[0], wne[1], tne]
+        labs = [fti(psw - tsw), &#x27;22\&#x27;-0&quot; PAVEMENT, FACE OF CURB TO FACE OF CURB&#x27;, &#x27;2\&#x27;-0&quot;&#x27;,
+                &#x27;5\&#x27;-0&quot;&#x27;, fti(tne - wne[1])]
+    d.chain_h(stops, 0.45, off=-14, labels=labs)
+    d.dimh(tsw, tne, 0.45, off=-36,
+           txt=&#x27;HOA LANE TRACT %s AT STATION u = %d FT — TRACT WIDTH VARIES 35\&#x27;-11&quot; TO 46\&#x27;-1&quot;&#x27;
+               % (fti(st[&#x27;tract_w&#x27;]), int(st[&#x27;u&#x27;])))
+    d.gscale(12, d.h - 14, 2, 6)
+
+    # ---- text strip under the frame
+    yy = y + h - STRIP + 11
+    D.stext(x + 8, y + h - STRIP + 9,
+            &#x27;PAVEMENT STRUCTURE 1¼ in 9.5 mm Superpave Type II · 2 in 19 mm Superpave · 8 in GAB · &#x27;
+            &#x27;subgrade 95 % — SEE 5/C-8.0.   PRIVATE STREET: &quot;All components of private streets and &#x27;
+            &#x27;alleys must meet minimum standards for public street&quot; (Checklist §4.s); 15 mph, no &#x27;
+            &#x27;on-lane parking, D103.6 fire-lane signs.   SEE GENERAL NOTES 2, 3 AND 4.&#x27;,
+            size=TXT, fill=&#x27;#333&#x27;)
+    return d
+
+
+def d2(D):
+    return lane_section(D, &#x27;d2&#x27;, ST_TYP, 2, &#x27;TYPICAL PRIVATE LANE SECTION&#x27;,
+                        &#x27;Station u = 300 ft — sidewalk on the north-east side only; typical of the &#x27;
+                        &#x27;lane from the amenity block (u = 149.5 ft) to u = 530 ft&#x27;, False)
+
+
+def d3(D):
+    return lane_section(D, &#x27;d3&#x27;, ST_WID, 3, &#x27;WIDENED PRIVATE LANE SECTION — SIDEWALKS BOTH SIDES&#x27;,
+                        &#x27;Station u = 700 ft — typical of the lane from u = 530 ft &#x27;
+                        &#x27;(data/layout.json lane.widen_both_sidewalks_from_u) to the terminus at &#x27;
+                        &#x27;u = 1,701 ft&#x27;, True)
+
+
+# ============================================================================ 5 — PAVEMENT SECTIONS
+def d5(D):
+    x, y, w, h = BOX[&#x27;d5&#x27;]
+    NOTE = 56.0
+    d = Det(D, x, y, w, h - NOTE, S32, -0.20, -1.42, 5, &#x27;PAVEMENT STRUCTURES&#x27;, &#x27;1½&quot; = 1\&#x27;-0&quot;&#x27;,
+            &#x27;Private lane and turnarounds · residential driveway · guest and mail-kiosk parking bay&#x27;)
+    cols = [([&#x27;PRIVATE LANE, TURNAROUNDS&#x27;, &#x27;AND THE ENTRANCE APRON&#x27;], LANE_STRUCT,
+             [&#x27;1¼ in 9.5 mm SP II&#x27;, &#x27;2 in 19 mm SP&#x27;, &#x27;8 in GAB&#x27;]),
+            ([&#x27;RESIDENTIAL DRIVEWAY&#x27;, &#x27;(asphalt option 2 in on 4 in)&#x27;], DRIVE_STRUCT,
+             [&#x27;6 in CONCRETE&#x27;, &#x27;4 in GAB&#x27;]),
+            ([&#x27;GUEST / MAIL-KIOSK BAY&#x27;, &#x27;(pervious pavers an option)&#x27;], BAY_STRUCT,
+             [&#x27;2 in 9.5 mm SP II&#x27;, &#x27;6 in GAB&#x27;])]
+    pitch, cw = 1.24, 1.10
+    for k, (title, struct, labs) in enumerate(cols):
+        x0 = k * pitch
+        d.txt(x0 + cw / 2.0, 0.28, title[0], size=TXT, bold=True)
+        d.txt(x0 + cw / 2.0, 0.185, title[1], size=TXT)
+        top = 0.0
+        for (nm, t, col, _), lab in zip(struct, labs):
+            bot = top - t / 12.0
+            d.rect(x0, top, x0 + cw, bot, fill=col, stroke=&#x27;#222&#x27;, stroke_width=0.7)
+            d.txt(x0 + cw / 2.0, (top + bot) / 2.0 - 0.026, lab, size=TXT,
+                  fill=&#x27;#fff&#x27; if t &lt;= 2.0 else &#x27;#111&#x27;)
+            if t &gt;= 4.0:
+                d.dimv(top, bot, x0, txt=inch(t), off=-11, size=TXT)
+            top = bot
+        d.rect(x0, top, x0 + cw, top - 0.17, fill=&#x27;url(#d_earth)&#x27;, stroke=&#x27;none&#x27;)
+        d.pline([(x0, top), (x0 + cw, top)], fill=&#x27;none&#x27;, stroke=&#x27;#8a7a5c&#x27;, stroke_width=1.3)
+        d.txt(x0 + cw / 2.0, top - 0.115, &#x27;COMPACTED SUBGRADE&#x27;, size=TXT)
+    d.txt(1.79, -1.24, &#x27;SP = Superpave (GDOT 828) · GAB = graded aggregate base (GDOT 815, &#x27;
+          &#x27;100 % ASTM D698)&#x27;, size=TXT)
+    d.txt(1.79, -1.32, &#x27;concrete = GDOT Class A, 3,500 psi, broom finish · subgrade 95 % &#x27;
+          &#x27;(top 12 in 100 %) of max. dry density&#x27;, size=TXT)
+    d.gscale(8, 12, 0.5, 2, unit=&#x27;ft&#x27;, anchor_right=True)
+    D.stextblock(x + 8, y + h - NOTE + 11,
+                 &#x27;BASIS: Checklist §7.i (minimum 4 in GAB and 2 in Type E or F) and §4.t; Gwinnett &#x27;
+                 &#x27;County UDO §900-70.4.A taken as the presumptive public-street standard under §4.s; &#x27;
+                 &#x27;GDOT Standard Specifications 2021 §310, §400, §815, §828. The Lilburn Development &#x27;
+                 &#x27;Regulations are not retrievable online — VERIFY the required section. The lane &#x27;
+                 &#x27;shall carry a 75,000-lb apparatus (IFC 2024 (GA) D102.1); a geotechnical pavement &#x27;
+                 &#x27;design by the PE governs.&#x27;, size=TXT, chars=86, lead=10.4, fill=&#x27;#333&#x27;)
+
+
+# ============================================================================ 6 — ACCESSIBLE SPACE
+ACC_W = max(p[0] for p in AMEN[&#x27;accessible_stall&#x27;]) - min(p[0] for p in AMEN[&#x27;accessible_stall&#x27;])
+AIS_W = max(p[0] for p in AMEN[&#x27;accessible_aisle&#x27;]) - min(p[0] for p in AMEN[&#x27;accessible_aisle&#x27;])
+ACC_D = max(p[1] for p in AMEN[&#x27;accessible_stall&#x27;]) - min(p[1] for p in AMEN[&#x27;accessible_stall&#x27;])
+STD_W = (max(p[0] for p in AMEN[&#x27;kiosk_stalls&#x27;][0])
+         - min(p[0] for p in AMEN[&#x27;kiosk_stalls&#x27;][0]))
+
+
+def _isa(d, cx, cy, s, col=&#x27;#fff&#x27;):
+    &quot;&quot;&quot;Painted International Symbol of Accessibility, s = overall height in feet.&quot;&quot;&quot;
+    d.circ((cx, cy + s * 0.40), s * 0.10, fill=col, stroke=&#x27;none&#x27;)
+    d.poly([(cx - s * 0.09, cy + s * 0.30), (cx + s * 0.05, cy + s * 0.30),
+            (cx + s * 0.22, cy + s * 0.14), (cx + s * 0.15, cy + s * 0.05),
+            (cx + s * 0.03, cy + s * 0.16), (cx + s * 0.03, cy - s * 0.02),
+            (cx - s * 0.09, cy - s * 0.02)], fill=col, stroke=&#x27;none&#x27;)
+    d.arc((cx - s * 0.02, cy - s * 0.16), s * 0.20, 200, 20, stroke=col, stroke_width=2.0)
+    d.poly([(cx + s * 0.16, cy - s * 0.10), (cx + s * 0.26, cy - s * 0.24),
+            (cx + s * 0.18, cy - s * 0.29), (cx + s * 0.09, cy - s * 0.15)], fill=col,
+           stroke=&#x27;none&#x27;)
+
+
+def _stripes(d, x0, x1, y0, y1, n=9, col=&#x27;#fff&#x27;):
+    &quot;&quot;&quot;45-degree hatching clipped to the rectangle — the ADA 502.3.3 aisle marking.&quot;&quot;&quot;
+    span = (x1 - x0) + (y1 - y0)
+    for i in range(1, n + 1):
+        c = x0 - (y1 - y0) + span * i / float(n + 1)
+        pts = []
+        for xx, yy in ((c, y0), (c + (y1 - y0), y1)):
+            pts.append((xx, yy))
+        (ax, ay), (bx, by) = pts
+        if bx &lt;= x0 or ax &gt;= x1:
+            continue
+        if ax &lt; x0:
+            ay += (x0 - ax)
+            ax = x0
+        if bx &gt; x1:
+            by -= (bx - x1)
+            bx = x1
+        d.line((ax, ay), (bx, by), stroke=col, stroke_width=1.1)
+
+
+def d6(D):
+    x, y, w, h = BOX[&#x27;d6&#x27;]
+    NOTE = 84.0
+    Det(D, x, y, w, h, 1.0, 0, 0, 6, &#x27;ACCESSIBLE SPACE AND SIGN&#x27;,
+        &#x27;plan 3/16&quot; = 1\&#x27;-0&quot;; sign 3/8&quot; = 1\&#x27;-0&quot;&#x27;,
+        &#x27;One van-accessible space and its 8\&#x27;-0&quot; aisle in the mail-kiosk bay — data/layout.json &#x27;
+        &#x27;amenity.accessible_stall / accessible_aisle&#x27;)
+    ph = h - HEAD - NOTE - 8
+    p = Det(D, x + 6, y + HEAD + 4, 336, ph, S316, -1.5, -2.3, box=False)
+    dep = ACC_D
+    p.rect(-1.5, -2.3, 22.6, 20.0, fill=&#x27;#fff&#x27;, stroke=&#x27;none&#x27;)
+    p.rect(-1.5, -2.3, 22.6, dep, fill=C[&#x27;asph_s&#x27;], stroke=&#x27;none&#x27;)
+    p.rect(-1.5, dep, 22.6, dep + 0.4, fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.8)
+    p.rect(-1.5, dep + 0.4, 22.6, dep + 1.7, fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.8)
+    p.txt(9.5, dep + 0.85, &#x27;5\&#x27;-0&quot; WALK — ACCESSIBLE ROUTE TO THE MAIL KIOSK (§208.3.1)&#x27;,
+          size=TXT)
+    p.rect(0.0, 0.0, ACC_W, dep, fill=C[&#x27;asph_s&#x27;], stroke=&#x27;#fff&#x27;, stroke_width=1.8)
+    p.rect(ACC_W, 0.0, ACC_W + AIS_W, dep, fill=&#x27;#2f4a66&#x27;, stroke=&#x27;#fff&#x27;, stroke_width=1.8)
+    p.rect(ACC_W + AIS_W, 0.0, ACC_W + AIS_W + 5.0, dep, fill=C[&#x27;asph_s&#x27;], stroke=&#x27;#fff&#x27;,
+           stroke_width=1.8)
+    _stripes(p, ACC_W + 0.35, ACC_W + AIS_W - 0.35, 0.35, dep - 0.35, n=8)
+    _isa(p, ACC_W / 2.0, dep / 2.0 + 1.8, 7.5)
+    p.txt(ACC_W / 2.0, 1.4, &#x27;VAN&#x27;, size=TXT, fill=&#x27;#fff&#x27;, bold=True)
+    p.txt(ACC_W + AIS_W / 2.0, dep / 2.0 + 0.6, &#x27;NO&#x27;, size=TXT, fill=&#x27;#fff&#x27;, bold=True)
+    p.txt(ACC_W + AIS_W / 2.0, dep / 2.0 - 0.9, &#x27;PARKING&#x27;, size=TXT, fill=&#x27;#fff&#x27;, bold=True)
+    p.txt(ACC_W + AIS_W + 2.5, dep / 2.0 + 0.6, &#x27;STANDARD&#x27;, size=TXT, fill=&#x27;#fff&#x27;)
+    p.txt(ACC_W + AIS_W + 2.5, dep / 2.0 - 0.9, &#x27;9\&#x27;-0&quot; × 18\&#x27;-0&quot;&#x27;, size=TXT, fill=&#x27;#fff&#x27;)
+    p.chain_h([0.0, ACC_W, ACC_W + AIS_W, ACC_W + AIS_W + 5.0], 0.0, off=14,
+              labels=[&#x27;8\&#x27;-0&quot; VAN SPACE&#x27;, &#x27;8\&#x27;-0&quot; AISLE&#x27;, &#x27;9\&#x27;-0&quot;&#x27;])
+    p.dimv(0.0, dep, 0.0, txt=&#x27;18\&#x27;-0&quot;&#x27;, off=-14)
+    p.txt(11.0, -2.2, &#x27;DRIVE AISLE — 22\&#x27;-0&quot; LANE PAVEMENT&#x27;, size=TXT, fill=&#x27;#fff&#x27;)
+    p.txt(-1.4, -2.25, &#x27;PLAN&#x27;, size=11, bold=True, anchor=&#x27;start&#x27;, fill=&#x27;#fff&#x27;)
+
+    e = Det(D, x + 352, y + HEAD + 4, 142, ph, S38, -0.9, -1.6, box=False)
+    e.rect(-0.9, -1.6, 4.4, 0.0, fill=&#x27;url(#d_earth)&#x27;, stroke=&#x27;none&#x27;)
+    e.line((-0.9, 0.0), (4.4, 0.0), stroke=&#x27;#5a4a30&#x27;, stroke_width=1.4)
+    e.rect(1.55, 0.0, 1.95, 7.5, fill=&#x27;#8a8a8a&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.7)
+    e.rect(0.75, 5.0, 2.75, 7.5, fill=&#x27;#1b5fa8&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.0)
+    _isa(e, 1.75, 6.25, 2.1)
+    e.rect(0.75, 3.9, 2.75, 5.0, fill=&#x27;#fff&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.0)
+    e.txt(1.75, 4.30, &#x27;VAN ACCESSIBLE&#x27;, size=TXT, bold=True)
+    e.dimv(0.0, 3.9, 3.3, txt=&#x27;5\&#x27;-0&quot; MIN.&#x27;, off=13)
+    e.dimv(0.0, 7.5, -0.55, txt=&#x27;7\&#x27;-6&quot;&#x27;, off=-12)
+    e.txt(1.75, 8.6, &#x27;SIGN&#x27;, size=11, bold=True)
+    e.txt(1.75, -1.25, &#x27;CONCRETE FOOTING&#x27;, size=TXT)
+
+    yy = y + h - NOTE + 10
+    for t in [&#x27;2010 ADA Standards §208.2 — 1 accessible space where 1 to 25 are provided; 12 guest &#x27;
+              &#x27;and kiosk spaces are provided, so 1 is required and 1 is shown. §502.2 — a 96-in &#x27;
+              &#x27;space with a 96-in aisle IS a van-accessible space (8\&#x27;-0&quot; + 8\&#x27;-0&quot; as drawn). &#x27;
+              &#x27;§502.3 — the aisle runs the full length of the space, marked to discourage parking. &#x27;
+              &#x27;§502.4 — space and aisle ≤ 1:48 in all directions (a PE grading item). §502.6 — sign &#x27;
+              &#x27;with the ISA and a &quot;VAN ACCESSIBLE&quot; designation, bottom ≥ 60 in above the &#x27;
+              &#x27;surface; O.C.G.A. §40-6-226 requires it. Checklist §4.x: the count is &quot;calculated by &#x27;
+              &#x27;Gwinnett Fire Marshal&quot; — VERIFY. §4.w — standard spaces &#x27;
+              &#x27;9\&#x27;-0&quot; × 18\&#x27;-0&quot;.&#x27;]:
+        yy = D.stextblock(x + 8, yy, t, size=TXT, chars=101, lead=10.4, fill=&#x27;#333&#x27;)
+
+
+# ============================================================================ 7 — MONUMENT SIGN
+SG_LEN, SG_W = 8.0, 4.0                 # amenity.entry_sign footprint, data/layout.json
+SG_H, SG_CAP, SG_TH, SG_WING, SG_FTG = 3.75, 0.33, 1.33, 1.33, 1.5
+SG_PANEL = (6.0, 1.75)
+SG_FACE_SF = SG_LEN * SG_H
+SG_PANEL_SF = SG_PANEL[0] * SG_PANEL[1]
+SG_MAX_SF, SG_MAX_H = 32.0, 6.0
+
+
+def d7(D):
+    x, y, w, h = BOX[&#x27;d7&#x27;]
+    NOTE = 66.0
+    Det(D, x, y, w, h, 1.0, 0, 0, 7, &#x27;MONUMENT ENTRY SIGN&#x27;, &#x27;1/2&quot; = 1\&#x27;-0&quot;&#x27;,
+        &#x27;The only sign proposed in the development — footprint from data/layout.json &#x27;
+        &#x27;amenity.entry_sign. NO WALL SIGNS ARE PROPOSED ON ANY STRUCTURE.&#x27;)
+    e = Det(D, x + 6, y + HEAD + 4, 344, 210, S12, -0.75, -1.85, box=False)
+    e.rect(-0.75, -1.85, 8.85, 0.0, fill=&#x27;url(#d_earth)&#x27;, stroke=&#x27;none&#x27;)
+    e.line((-0.75, 0.0), (8.85, 0.0), stroke=&#x27;#5a4a30&#x27;, stroke_width=1.5)
+    e.rect(0.0, -SG_FTG, SG_LEN, -0.1, fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.8)
+    e.rect(0.0, 0.0, SG_LEN, SG_H - SG_CAP, fill=&#x27;url(#d_mas)&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.2)
+    e.rect(-0.2, SG_H - SG_CAP, SG_LEN + 0.2, SG_H, fill=&#x27;#ded3c2&#x27;, stroke=&#x27;#111&#x27;,
+           stroke_width=1.2)
+    px0 = (SG_LEN - SG_PANEL[0]) / 2.0
+    e.rect(px0, 0.85, px0 + SG_PANEL[0], 0.85 + SG_PANEL[1], fill=&#x27;#ded3c2&#x27;, stroke=&#x27;#111&#x27;,
+           stroke_width=1.0)
+    e.txt(SG_LEN / 2.0, 1.90, &#x27;THE COTTAGES&#x27;, size=11.5, bold=True)
+    e.txt(SG_LEN / 2.0, 1.20, &#x27;AT ARCADO SPRINGS&#x27;, size=9.5, bold=True)
+    e.dimh(0.0, SG_LEN, SG_H, txt=&#x27;8\&#x27;-0&quot;&#x27;, off=-11)
+    e.dimv(0.0, SG_H, SG_LEN, txt=&#x27;3\&#x27;-9&quot;&#x27;, off=16)
+    e.dimv(-SG_FTG, 0.0, 0.0, txt=&#x27;1\&#x27;-6&quot;&#x27;, off=-13)
+    e.dimh(px0, px0 + SG_PANEL[0], 0.85, txt=&#x27;6\&#x27;-0&quot;&#x27;, off=17)
+    e.dimv(0.85, 0.85 + SG_PANEL[1], px0, txt=&#x27;1\&#x27;-9&quot;&#x27;, off=-13)
+    e.txt(SG_LEN / 2.0, -0.95, &#x27;CONCRETE FOOTING — PE DESIGN&#x27;, size=TXT)
+    e.txt(-0.70, -1.72, &#x27;ELEVATION&#x27;, size=11, bold=True, anchor=&#x27;start&#x27;)
+    e.gscale(6, 190, 2, 3, anchor_right=True)
+
+    p = Det(D, x + 6, y + HEAD + 220, 344, 169, S12, -0.75, -0.86, box=False)
+    p.rect(-0.75, -0.86, 8.85, 3.95, fill=&#x27;url(#d_grass)&#x27;, stroke=&#x27;none&#x27;)
+    p.rect(0.0, (SG_W - SG_TH) / 2.0, SG_LEN, (SG_W + SG_TH) / 2.0, fill=&#x27;url(#d_mas)&#x27;,
+           stroke=&#x27;#111&#x27;, stroke_width=1.2)
+    for xx in (0.0, SG_LEN - SG_TH):
+        p.rect(xx, 0.0, xx + SG_TH, SG_W, fill=&#x27;url(#d_mas)&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.2)
+    p.dimh(0.0, SG_LEN, 0.0, txt=&#x27;8\&#x27;-0&quot;&#x27;, off=14)
+    p.dimv(0.0, SG_W, SG_LEN, txt=&#x27;4\&#x27;-0&quot;&#x27;, off=15)
+    p.dimv((SG_W - SG_TH) / 2.0, (SG_W + SG_TH) / 2.0, 2.4, txt=&#x27;1\&#x27;-4&quot;&#x27;, off=-12)
+    p.txt(SG_LEN / 2.0, -0.76, &#x27;PLAN — SIGN FACE ON BOTH SIDES OF THE WALL&#x27;, size=11,
+          bold=True)
+
+    D.stext(x + 8, y + h - NOTE + 10, &#x27;AREA COMPUTATION&#x27;, size=10.5, bold=True)
+    D.stextblock(x + 8, y + h - NOTE + 21,
+                 &#x27;WHOLE STRUCTURE FACE (most conservative): 8\&#x27;-0&quot; × 3\&#x27;-9&quot; = %.1f SF ≤ %.0f SF · &#x27;
+                 &#x27;SIGN PANEL ONLY 6\&#x27;-0&quot; × 1\&#x27;-9&quot; = %.1f SF · OVERALL HEIGHT 3\&#x27;-9&quot; ≤ 6\&#x27;-0&quot; · 19.0 ft &#x27;
+                 &#x27;from the Arcado Rd R/W, outside the 390-ft sight triangle (C-2.3). The 32-SF and &#x27;
+                 &#x27;6-ft limits are the applicant\&#x27;s voluntary condition, not a cited ordinance limit &#x27;
+                 &#x27;— the Lilburn sign article is not in data/ordinance-excerpts.md; VERIFY. See &#x27;
+                 &#x27;general note 8.&#x27; % (SG_FACE_SF, SG_MAX_SF, SG_PANEL_SF),
+                 size=TXT, chars=101, lead=10.4, fill=&#x27;#333&#x27;)
+
+
+# ============================================================================ 8 — MAIL KIOSK
+K_L = max(p[0] for p in AMEN[&#x27;mail_kiosk&#x27;]) - min(p[0] for p in AMEN[&#x27;mail_kiosk&#x27;])   # 16&#x27;-0&quot;
+K_W = max(p[1] for p in AMEN[&#x27;mail_kiosk&#x27;]) - min(p[1] for p in AMEN[&#x27;mail_kiosk&#x27;])   # 10&#x27;-0&quot;
+K_CBU, K_COMP, K_PARCEL = 3, 16, 2
+K_PLATE, K_HEEL, K_OH, K_SLAB = 8.83, 0.42, 1.0, 0.33
+K_RIDGE = K_SLAB + K_PLATE + K_HEEL + ((K_W + 2 * K_OH) / 2.0) * 4.0 / 12.0
+
+
+S18 = 9.0                                     # 1/8&quot; = 1&#x27;-0&quot;
+
+
+def d8(D):
+    x, y, w, h = BOX[&#x27;d8&#x27;]
+    Det(D, x, y, w, h, 1.0, 0, 0, 8, &#x27;MAIL KIOSK — CLUSTER BOX UNITS&#x27;, &#x27;1/8&quot; = 1\&#x27;-0&quot;&#x27;,
+        &#x27;Footprint from data/layout.json amenity.mail_kiosk — %s × %s; weather protection per &#x27;
+        &#x27;Checklist §4.r&#x27; % (fti(K_L), fti(K_W)))
+    p = Det(D, x + 6, y + HEAD + 4, 160, 116, S18, -0.9, -1.9, box=False)
+    p.rect(-0.9, -1.9, 17.0, 11.6, fill=&#x27;#fff&#x27;, stroke=&#x27;none&#x27;)
+    p.rect(-0.8, -0.8, K_L + 0.9, K_W + 1.0, fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;none&#x27;)
+    p.rect(-K_OH, -K_OH, K_L + K_OH, K_W + K_OH, fill=&#x27;none&#x27;, stroke=&#x27;#777&#x27;, stroke_width=0.7,
+           stroke_dasharray=&#x27;7 3&#x27;)
+    p.rect(0.0, 0.0, K_L, K_W, fill=&#x27;#fdf3e4&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.5)
+    p.rect(0.0, K_W - 0.67, K_L, K_W, fill=&#x27;url(#d_mas)&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.0)
+    for i2 in range(K_CBU):
+        x0 = 2.4 + i2 * 3.9
+        p.rect(x0, K_W - 2.4, x0 + 2.5, K_W - 0.67, fill=&#x27;#cfd6dc&#x27;, stroke=&#x27;#111&#x27;,
+               stroke_width=0.9)
+    for xx in (0.0, K_L - 0.9):
+        for yy2 in (0.0, K_W - 0.9):
+            p.rect(xx, yy2, xx + 0.9, yy2 + 0.9, fill=&#x27;url(#d_mas)&#x27;, stroke=&#x27;#111&#x27;,
+                   stroke_width=0.9)
+    p.dimh(0.0, K_L, 0.0, txt=fti(K_L), off=14)
+    p.dimv(0.0, K_W, K_L, txt=fti(K_W), off=13)
+    p.txt(K_L / 2.0, 3.2, &#x27;5\&#x27;-0&quot; CLEAR APPROACH&#x27;, size=TXT)
+    p.txt(K_L / 2.0, 1.5, &#x27;OPEN TO THE LANE&#x27;, size=TXT)
+    p.txt(0.0, -1.7, &#x27;PLAN (ROOF DASHED)&#x27;, size=10.5, bold=True, anchor=&#x27;start&#x27;)
+    p.gscale(4, 6, 4, 4, anchor_right=True)
+
+    e = Det(D, x + 6, y + HEAD + 126, 160, 134, S18, -0.9, -2.0, box=False)
+    e.rect(-0.9, -2.0, 17.0, 0.0, fill=&#x27;url(#d_earth)&#x27;, stroke=&#x27;none&#x27;)
+    e.line((-0.9, 0.0), (K_L + 0.9, 0.0), stroke=&#x27;#5a4a30&#x27;, stroke_width=1.5)
+    e.rect(-0.4, 0.0, K_L + 0.4, K_SLAB, fill=&#x27;url(#d_conc)&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.9)
+    ep = K_SLAB + K_PLATE
+    e.poly([(-K_OH, ep + K_HEEL), (K_L / 2.0, K_RIDGE), (K_L + K_OH, ep + K_HEEL),
+            (K_L + K_OH, ep), (-K_OH, ep)], fill=&#x27;#8d7f6c&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.2)
+    for xx in (0.6, K_L - 1.4):
+        e.rect(xx, K_SLAB, xx + 0.8, ep, fill=&#x27;url(#d_mas)&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.1)
+    for i2 in range(K_CBU):
+        x0 = 2.4 + i2 * 3.9
+        e.rect(x0, K_SLAB + 1.25, x0 + 2.5, K_SLAB + 5.0, fill=&#x27;#cfd6dc&#x27;, stroke=&#x27;#111&#x27;,
+               stroke_width=1.1)
+    e.dimv(0.0, K_RIDGE, -0.5, txt=fti(K_RIDGE), off=-12)
+    e.txt(K_L / 2.0, ep + 1.5, &#x27;4:12 HIP ROOF&#x27;, size=TXT)
+    e.txt(0.0, -1.75, &#x27;FRONT (SOUTH-WEST) ELEVATION&#x27;, size=10.5, bold=True, anchor=&#x27;start&#x27;)
+
+    yy = y + HEAD + 8
+    for t in [&#x27;%d USPS-approved cluster box units = %d tenant&#x27; % (K_CBU, K_CBU * K_COMP),
+              &#x27;compartments + %d parcel lockers (VERIFY the&#x27; % (K_CBU * K_PARCEL),
+              &#x27;approved model with USPS)&#x27;, &#x27;&#x27;,
+              &#x27;Roofed, three-sided shelter open to the lane;&#x27;,
+              &#x27;masonry piers and water table matching the&#x27;,
+              &#x27;cottages; ridge %s above finished grade&#x27; % fti(K_RIDGE), &#x27;&#x27;,
+              &#x27;6-in concrete pad, 5\&#x27;-0&quot; clear approach,&#x27;, &#x27;flush with the walk (no step)&#x27;, &#x27;&#x27;,
+              &#x27;Four 9\&#x27;-0&quot; × 18\&#x27;-0&quot; short-term stalls in the&#x27;,
+              &#x27;kiosk bay, plus the van-accessible space&#x27;,
+              &#x27;of 6/C-8.0 on the accessible route&#x27;, &#x27;&#x27;,
+              &#x27;Operable parts of every CBU between 15 in&#x27;,
+              &#x27;and 48 in above the slab; 36-in clear route&#x27;,
+              &#x27;and a 5-ft turning space (ICC A117.1-2017)&#x27;, &#x27;&#x27;,
+              &#x27;MAIL DELIVERY — SEE GENERAL NOTE 9&#x27;,
+              &#x27;(Checklist §4.r: contact the Lilburn Post&#x27;,
+              &#x27;Office Growth Manager; &quot;provide accessory&#x27;,
+              &#x27;structure details with protection from the&#x27;,
+              &#x27;elements&quot;)&#x27;]:
+        D.stext(x + 176, yy, t, size=TXT, fill=&#x27;#333&#x27;)
+        yy += 10.4
+
+
+# ============================================================================ 9 — TREE PROTECTION
+def d9(D):
+    x, y, w, h = BOX[&#x27;d9&#x27;]
+    NOTE = 46.0
+    d = Det(D, x, y, w, h - NOTE, 18.0, -1.4, -2.7, 9, &#x27;TREE-PROTECTION FENCE&#x27;, &#x27;1/4&quot; = 1\&#x27;-0&quot;&#x27;,
+            &#x27;At the limits of disturbance, the buffer line and the drip line of every retained tree&#x27;)
+    d.rect(-1.4, -2.7, 24.0, 0.0, fill=&#x27;url(#d_earth)&#x27;, stroke=&#x27;none&#x27;)
+    d.line((-1.4, 0.0), (24.0, 0.0), stroke=&#x27;#5a4a30&#x27;, stroke_width=1.6)
+    for px in (1.0, 9.0):
+        d.rect(px - 0.16, -2.0, px + 0.16, 6.0, fill=&#x27;#8a8a8a&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.6)
+    d.rect(1.0, 0.0, 9.0, 4.0, fill=&#x27;#d2691e&#x27;, fill_opacity=&#x27;0.28&#x27;, stroke=&#x27;#d2691e&#x27;,
+           stroke_width=1.2)
+    for i2 in range(9):
+        d.line((1.0 + i2, 0.0), (1.0 + i2, 4.0), stroke=&#x27;#d2691e&#x27;, stroke_width=0.7)
+    for j2 in range(5):
+        d.line((1.0, j2), (9.0, j2), stroke=&#x27;#d2691e&#x27;, stroke_width=0.7)
+    d.rect(2.9, 4.4, 7.1, 5.7, fill=&#x27;#fff&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.0)
+    d.txt(5.0, 5.15, &#x27;TREE PROTECTION AREA&#x27;, size=TXT, bold=True)
+    d.txt(5.0, 4.62, &#x27;DO NOT ENTER&#x27;, size=TXT, bold=True)
+    d.rect(9.6, 0.0, 12.6, 0.33, fill=&#x27;url(#d_mulch)&#x27;, stroke=&#x27;#9c8465&#x27;, stroke_width=0.5)
+    _tree(d, 14.8, 0.0, 6.4, 5.6)
+    d.line((11.9, 0.0), (11.9, 6.4), stroke=&#x27;#3f7a37&#x27;, stroke_width=0.8, stroke_dasharray=&#x27;5 3&#x27;)
+    d.dimh(9.0, 11.9, 0.0, txt=&#x27;AT THE DRIP LINE&#x27;, off=15)
+    d.dimv(0.0, 6.0, 0.5, txt=&#x27;6\&#x27;-0&quot; POST&#x27;, off=-12)
+    d.dimv(0.0, 4.0, 9.1, txt=&#x27;4\&#x27;-0&quot;&#x27;, off=12)
+    d.dimv(-2.0, 0.0, 1.0, txt=&#x27;2\&#x27;-0&quot;&#x27;, off=-12)
+    d.dimh(1.0, 9.0, 6.0, txt=&#x27;8\&#x27;-0&quot; O.C. MAX.&#x27;, off=-13)
+    d.txt(19.2, 5.8, &#x27;RETAINED TREE&#x27;, size=TXT)
+    d.txt(12.9, 0.95, &#x27;4-in MULCH&#x27;, size=TXT, anchor=&#x27;start&#x27;)
+    d.txt(19.2, 3.9, &#x27;NO STORAGE, PARKING,&#x27;, size=TXT)
+    d.txt(19.2, 2.9, &#x27;GRADE CHANGE,&#x27;, size=TXT)
+    d.txt(19.2, 1.9, &#x27;TRENCHING OR&#x27;, size=TXT)
+    d.txt(0.0, 7.1, &#x27;4\&#x27;-0&quot; ORANGE SAFETY FENCE ON 6-ft STEEL T-POSTS&#x27;, size=TXT,
+          anchor=&#x27;start&#x27;)
+    d.txt(19.2, 0.9, &#x27;SPOIL INSIDE THE FENCE&#x27;, size=TXT)
+    D.stextblock(x + 8, y + h - NOTE + 11,
+                 &#x27;REQUIRED NOTE (Checklist §6.g, verbatim): &quot;Tree Protection fence must be &#x27;
+                 &#x27;installed prior to commencing land disturbing activities.&quot; A reasonable effort &#x27;
+                 &#x27;must be made to preserve specimen trees and trees over 5-in caliper in buffers, &#x27;
+                 &#x27;landscape strips and parking islands. The tree-protection, buffer and landscape &#x27;
+                 &#x27;plan must be sealed by a registered landscape architect, forester or arborist &#x27;
+                 &#x27;(§6.a) — Sheet C-7.0.&#x27;, size=TXT, chars=86, lead=10.4, fill=&#x27;#333&#x27;)
+
+
+# ============================================================================ 4 — HAMMERHEAD
+HH = LAYOUT[&#x27;hammerheads&#x27;][1]                 # u = 1,110 ft — the middle turnaround, typical of 3
+HH_STA = [594.5, 1164.5, 1744.5]              # stations along the travelled way (docs/08 Memo E)
+RET_R = 25.0                                  # curb-return radius at the turnaround legs
+
+
+def fillet(d, px, py, cx, cy, r, **kw):
+    &quot;&quot;&quot;Curb-return wedge: the square corner at (px, py) less the quarter circle of radius r.&quot;&quot;&quot;
+    a_h = 90.0 if py &gt; cy else 270.0
+    a_v = 0.0 if px &gt; cx else 180.0
+    if a_v - a_h &gt; 180.0:
+        a_v -= 360.0
+    elif a_v - a_h &lt; -180.0:
+        a_v += 360.0
+    n = 18
+    arc = [(cx + r * math.cos(math.radians(a_h + (a_v - a_h) * i / n)),
+            cy + r * math.sin(math.radians(a_h + (a_v - a_h) * i / n))) for i in range(n + 1)]
+    d.poly([(px, py), (cx, py)] + arc + [(px, cy)], **kw)
+    d.pline(arc, fill=&#x27;none&#x27;, stroke=&#x27;#222&#x27;, stroke_width=1.1)
+
+
+def d4(D):
+    x, y, w, h = BOX[&#x27;d4&#x27;]
+    d = Det(D, x, y, w, h, S20, 1030.0, -191.0, 4, &#x27;HAMMERHEAD TURNAROUND&#x27;, &#x27;1&quot; = 20\&#x27;&#x27;,
+            &#x27;Turnaround at u = 1,110 ft (station 1,164.5 ft on the travelled way) — typical of the &#x27;
+            &#x27;three; legs and pavement from data/layout.json hammerheads[1]&#x27;)
+    u0, u1 = 1030.0, 1190.0
+    psw = lambda u: interp(_PV_SW, u)                                                # noqa: E731
+    pne = lambda u: interp(_PV_NE, u)                                                # noqa: E731
+    tsw = lambda u: interp(_TR_SW, u)                                                # noqa: E731
+    tne = lambda u: interp(_TR_NE, u)                                                # noqa: E731
+    lg0, lg1 = HH[&#x27;legs&#x27;][0], HH[&#x27;legs&#x27;][1]
+    a0, a1 = min(p[0] for p in lg0), max(p[0] for p in lg0)
+    sw_end = min(p[1] for p in lg0)
+    ne_end = max(p[1] for p in lg1)
+
+    d.poly(band(tsw, tne, u0, u1), fill=&#x27;none&#x27;, stroke=C[&#x27;lot&#x27;], stroke_width=1.4)
+    d.poly(band(psw, pne, u0, u1), fill=C[&#x27;asph_s&#x27;], stroke=&#x27;none&#x27;)
+    for lg in (lg0, lg1):
+        d.poly(lg, fill=C[&#x27;asph_s&#x27;], stroke=&#x27;none&#x27;)
+    for (px, py, cx, cy) in ((a0, psw(a0), a0 - RET_R, psw(a0) - RET_R),
+                             (a1, psw(a1), a1 + RET_R, psw(a1) - RET_R),
+                             (a0, pne(a0), a0 - RET_R, pne(a0) + RET_R),
+                             (a1, pne(a1), a1 + RET_R, pne(a1) + RET_R)):
+        fillet(d, px, py, cx, cy, RET_R, fill=C[&#x27;asph_s&#x27;], stroke=&#x27;none&#x27;)
+    for f in (psw, pne):
+        d.pline([(u, f(u)) for u in (u0, a0 - RET_R)], fill=&#x27;none&#x27;, stroke=&#x27;#222&#x27;,
+                stroke_width=1.2)
+        d.pline([(u, f(u)) for u in (a1 + RET_R, u1)], fill=&#x27;none&#x27;, stroke=&#x27;#222&#x27;,
+                stroke_width=1.2)
+    for lg, f in ((lg0, psw), (lg1, pne)):
+        far = min(p[1] for p in lg) if f is psw else max(p[1] for p in lg)
+        d.pline([(a0, f(a0)), (a0, far), (a1, far), (a1, f(a1))], fill=&#x27;none&#x27;, stroke=&#x27;#222&#x27;,
+                stroke_width=1.2)
+    d.pline([(u0, (psw(u0) + pne(u0)) / 2.0), (u1, (psw(u1) + pne(u1)) / 2.0)], fill=&#x27;none&#x27;,
+            stroke=&#x27;#eee&#x27;, stroke_width=0.9, stroke_dasharray=&#x27;14 8&#x27;)
+
+    d.dimv(sw_end, psw(a0), a0, txt=&quot;60&#x27;-0\&quot;&quot;, off=-20)
+    d.dimv(pne(a0), ne_end, a0, txt=&quot;60&#x27;-0\&quot;&quot;, off=-20)
+    d.dimv(sw_end, ne_end, a0, txt=&quot;142&#x27;-0\&quot; OVERALL&quot;, off=-48, force_out=True)
+    d.dimh(a0, a1, ne_end, txt=&quot;20&#x27;-0\&quot;&quot;, off=-18)
+    for (px, py, sx, sy) in ((a0, psw(a0), -1, -1), (a1, pne(a1), 1, 1)):
+        d.txt(px + sx * 21, py + sy * 11, &quot;R = 25&#x27;-0\&quot;&quot;, size=TXT, fill=C[&#x27;dim&#x27;], bold=True)
+    d.txt(a0 - 36, psw(a0) - 34, &#x27;CURB RETURN (TYP. 4)&#x27;, size=TXT, fill=C[&#x27;dim&#x27;])
+
+    d.txt(1152.0, -110.0, &#x27;HAMMERHEAD (T) TURNAROUND — TYPICAL OF THREE&#x27;, size=TXT, bold=True,
+          fill=&#x27;#fff&#x27;)
+    d.txt(1152.0, -119.0, &quot;22&#x27;-0\&quot; PRIVATE LANE — NO ON-LANE PARKING&quot;, size=TXT, fill=&#x27;#fff&#x27;)
+    d.txts(1128.0, -46.0, [&#x27;HYDRANT AT THE TURNAROUND LEG: the lane is&#x27;,
+                           &#x27;locally 142 ft wide here, so the 26-ft width&#x27;,
+                           &#x27;that Appendix D103.1 asks for where a hydrant&#x27;,
+                           &#x27;stands on the access road is met at the hydrant&#x27;],
+           size=TXT, anchor=&#x27;start&#x27;)
+    d.circ((1112.0, -66.0), 1.8, fill=C[&#x27;fire&#x27;], stroke=&#x27;#fff&#x27;, stroke_width=0.7)
+    d.line((1113.5, -66.0), (1126.0, -66.0), stroke=&#x27;#333&#x27;, stroke_width=0.6)
+    d.txt(1128.0, -67.0, &#x27;PROPOSED HYDRANT&#x27;, size=TXT, anchor=&#x27;start&#x27;)
+    d.txts(1128.0, -150.0, [&#x27;&quot;NO PARKING — FIRE LANE&quot; SIGNS BOTH SIDES&#x27;,
+                            &#x27;of the lane and both legs (Appendix D103.6),&#x27;,
+                            &#x27;with an HOA covenant prohibiting on-lane&#x27;,
+                            &#x27;parking; 4 spaces are provided on every lot&#x27;,
+                            &#x27;and 12 in the guest and mail-kiosk bays&#x27;],
+           size=TXT, anchor=&#x27;start&#x27;)
+    d.txt(1170.0, tne(1170.0) + 4.5, &#x27;HOA LANE TRACT&#x27;, size=TXT, anchor=&#x27;middle&#x27;)
+    d.txt(1048.0, tsw(1048.0) - 5.5, &#x27;HOA LANE TRACT&#x27;, size=TXT, anchor=&#x27;middle&#x27;)
+    d.txt(1036.0, -166.0, &#x27;DEAD END 1,754 ft → SPECIAL APPROVAL&#x27;, size=TXT, anchor=&#x27;start&#x27;,
+          bold=True)
+    d.txt(1036.0, -170.5, &#x27;REQUIRED, Table D103.4 (IFC 2024 as&#x27;, size=TXT, anchor=&#x27;start&#x27;)
+    d.txt(1036.0, -175.0, &#x27;modified by 120-3-3-.04) — SEE NOTE 6&#x27;, size=TXT, anchor=&#x27;start&#x27;)
+    north(D, d.x + 92, d.y + 54, r=21)
+    d.gscale(14, d.h - 16, 20, 4)
+    return d
+
+
+# ============================================================================ 10 — BUFFER SECTION
+def _tree(d, x, g, hgt, spread, col=C[&#x27;tree&#x27;], trunk=&#x27;#6b4c2a&#x27;, ever=False):
+    d.line((x, g), (x, g + hgt * 0.42), stroke=trunk, stroke_width=1.7)
+    if ever:
+        for i in range(4):
+            f = 1.0 - i * 0.22
+            yb = g + hgt * (0.20 + 0.19 * i)
+            d.poly([(x, yb + hgt * 0.32 * f), (x - spread / 2.0 * f, yb),
+                    (x + spread / 2.0 * f, yb)], fill=col, fill_opacity=&#x27;0.50&#x27;, stroke=col,
+                   stroke_width=0.6)
+    else:
+        d.circ((x, g + hgt * 0.70), spread / 2.0, fill=col, fill_opacity=&#x27;0.28&#x27;, stroke=col,
+               stroke_width=0.9)
+
+
+def d10(D):
+    x, y, w, h = BOX[&#x27;d10&#x27;]
+    NOTE = 46.0
+    d = Det(D, x, y, w, h - NOTE, S10, 0.0, -5.6, 10, &#x27;TYPICAL BUFFER SECTION&#x27;,
+            &#x27;1&quot; = 10\&#x27; (no exaggeration)&#x27;,
+            &#x27;The §313(1) design basis in one picture — the 20-ft undisturbed buffer held inside the &#x27;
+            &#x27;rear of the lot under a recorded easement&#x27;)
+    RL, BF = 15.0, 35.0
+    rear_el, body_r = BF + 0.5, BF + 6.5
+    g = 0.0
+    d.rect(0.0, g, 79.0, -5.6, fill=&#x27;url(#d_earth)&#x27;, stroke=&#x27;none&#x27;)
+    d.rect(0.0, g, 79.0, g + 0.55, fill=&#x27;url(#d_grass)&#x27;, stroke=&#x27;none&#x27;)
+    d.rect(RL, g, BF, g + 26.0, fill=&#x27;url(#bufhatch)&#x27;, fill_opacity=&#x27;0.75&#x27;, stroke=&#x27;none&#x27;)
+    d.line((0.0, g), (79.0, g), stroke=&#x27;#5a4a30&#x27;, stroke_width=1.7)
+
+    d.poly([(0.0, g), (0.0, g + 17.5), (5.0, g + 21.0), (10.0, g + 17.5), (10.0, g)],
+           fill=&#x27;#efe7dc&#x27;, stroke=&#x27;#7a6a55&#x27;, stroke_width=1.1)
+    d.txt(5.2, g + 10.5, &#x27;ADJOINING&#x27;, size=TXT)
+    d.txt(5.2, g + 8.3, &#x27;R-1 DWELLING&#x27;, size=TXT)
+
+    for xx, hgt, sp in ((17.5, 21.0, 12.0), (26.0, 23.5, 14.0), (33.0, 19.5, 11.0)):
+        _tree(d, xx, g, hgt, sp)
+    for xx in (20.5, 23.5, 30.0):
+        _tree(d, xx, g, 10.0, 6.0, col=&#x27;#2f6b46&#x27;, ever=True)
+    _tree(d, 6.5, g, 16.5, 9.5)
+
+    ffe = g + 0.67
+    d.rect(rear_el, ffe, body_r, ffe + 9.5, fill=&#x27;#fdf3e4&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.0)
+    d.poly([(body_r, ffe), (body_r, ffe + 9.5), (73.0, ffe + 9.5), (73.0, ffe)],
+           fill=C[&#x27;house&#x27;], stroke=&#x27;#111&#x27;, stroke_width=1.4)
+    d.poly([(rear_el - 1.0, ffe + 9.2), (54.0, ffe + 17.83), (73.0, ffe + 9.2)],
+           fill=&#x27;#8d7f6c&#x27;, stroke=&#x27;#111&#x27;, stroke_width=1.2)
+    d.pline([(72.0, ffe + 12.0), (73.4, ffe + 10.6), (72.0, ffe + 9.2), (73.4, ffe + 7.8),
+             (72.0, ffe + 6.4), (73.4, ffe + 5.0), (72.0, ffe + 3.6), (73.4, ffe + 2.2),
+             (72.0, ffe + 0.8), (73.0, ffe - 0.2)], fill=&#x27;none&#x27;, stroke=&#x27;#777&#x27;, stroke_width=1.1)
+    d.txt((rear_el + body_r) / 2.0, ffe + 5.0, &#x27;REAR&#x27;, size=TXT)
+    d.txt((rear_el + body_r) / 2.0, ffe + 2.8, &#x27;PORCH&#x27;, size=TXT)
+    d.txt(57.0, ffe + 6.2, &#x27;ONE-STORY COTTAGE&#x27;, size=TXT)
+    d.txt(57.0, ffe + 4.0, &#x27;RIDGE 17\&#x27;-10&quot; (PLAN A) /&#x27;, size=TXT)
+    d.txt(57.0, ffe + 1.8, &#x27;19\&#x27;-0&quot; (PLAN B) ABOVE FFE&#x27;, size=TXT)
+
+    d.line((RL, -5.2), (RL, g + 25.0), stroke=&#x27;#111&#x27;, stroke_width=1.6)
+    d.line((BF, -5.2), (BF, g + 25.0), stroke=&#x27;#2e5e1e&#x27;, stroke_width=1.6)
+    d.txt(RL, g + 27.4, &#x27;REAR LOT LINE = ASSEMBLAGE BOUNDARY&#x27;, size=TXT)
+    d.txt(RL, g + 25.4, &#x27;= R-2 / R-1 ZONING LINE&#x27;, size=TXT)
+    d.txt(BF + 1.5, g + 27.4, &#x27;BUFFER EASEMENT LINE =&#x27;, size=TXT, anchor=&#x27;start&#x27;, fill=&#x27;#2e5e1e&#x27;)
+    d.txt(BF + 1.5, g + 25.4, &#x27;20-ft REAR BUILDING SETBACK&#x27;, size=TXT, anchor=&#x27;start&#x27;,
+          fill=&#x27;#2e5e1e&#x27;)
+    d.dimh(RL, BF, -0.7, txt=&#x27;20\&#x27;-0&quot; UNDISTURBED BUFFER&#x27;, off=15)
+    d.dimh(RL, rear_el, -0.7, txt=&#x27;20\&#x27;-6&quot; TO THE NEAREST STRUCTURE&#x27;, off=32)
+    d.dimh(0.0, RL, -0.7, txt=&#x27;ADJOINING R-1 LOT&#x27;, off=15)
+    D.srect(d.X(15.6), d.Y(2.5), d.X(34.4) - d.X(15.6), 12.0, fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.85&#x27;,
+            stroke=&#x27;none&#x27;)
+    d.txt(25.0, g + 1.6, &#x27;NO CLEARING · NO GRADING · NO STRUCTURES · NO STORAGE&#x27;, size=TXT,
+          fill=&#x27;#2e5e1e&#x27;, bold=True)
+    d.gscale(12, 12, 10, 2, anchor_right=True)
+
+    D.stextblock(x + 8, y + h - NOTE + 11,
+                 &#x27;Cottage homes are listed separately from detached single-family in Table 4.1, &#x27;
+                 &#x27;so the plan designs to the 20-ft buffer. §313(1): &quot;Buffer requirements … &#x27;
+                 &#x27;supersede these minimum required yards&quot; — %s SF of buffer easement over %d lots, &#x27;
+                 &#x27;reported separately from the %s SF of common open space. 100\&#x27;-0&quot; + 35\&#x27;-11&quot; of &#x27;
+                 &#x27;tract + 100\&#x27;-0&quot; = 235\&#x27;-11&quot; against 235\&#x27;-11&quot; available at u = 230 ft.&#x27;
+                 % (format(MET[&#x27;buffer_easement_on_lots_sf&#x27;], &#x27;,&#x27;), MET[&#x27;lots&#x27;],
+                    format(MET[&#x27;open_space_sf&#x27;], &#x27;,&#x27;)),
+                 size=TXT, chars=131, lead=10.4, fill=&#x27;#333&#x27;)
+    return d
+
+
+# ============================================================================ legend
+# Legend discipline (audit-2026-09-03/drawing-standards.md §3.2): every symbol drawn on this sheet
+# appears below, and no entry below is unused.  build() asserts the fills against the SVG.
+LEGEND = [
+    (&#x27;line&#x27;, C[&#x27;lot&#x27;], 1.6, &#x27;&#x27;, &#x27;Property / lot line; HOA lane tract line&#x27;),
+    (&#x27;line&#x27;, C[&#x27;setb&#x27;], 0.7, &#x27;7 3 2 3&#x27;, &#x27;Building setback line (15 / 5 / 20 ft)&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#bufhatch)&#x27;, 0, &#x27;&#x27;, &quot;20&#x27;-0\&quot; undisturbed buffer easement, on the lot&quot;),
+    (&#x27;rect&#x27;, C[&#x27;house&#x27;], 0, &#x27;&#x27;, &#x27;Dwelling — conditioned body&#x27;),
+    (&#x27;rect&#x27;, &#x27;#efd2ad&#x27;, 0, &#x27;&#x27;, &quot;Garage, recessed 5&#x27;-0\&quot; behind the front wall&quot;),
+    (&#x27;rect&#x27;, &#x27;#fdf3e4&#x27;, 0, &#x27;&#x27;, &#x27;Covered porch; roofed open shelter&#x27;),
+    (&#x27;rect&#x27;, &#x27;#f0efe6&#x27;, 0, &#x27;&#x27;, &#x27;Uncovered patio&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#d_conc)&#x27;, 0, &#x27;&#x27;, &#x27;Concrete — walk, drive, curb, pad, footing&#x27;),
+    (&#x27;rect&#x27;, C[&#x27;asph_s&#x27;], 0, &#x27;&#x27;, &#x27;Asphalt surface course / pavement in plan&#x27;),
+    (&#x27;rect&#x27;, C[&#x27;asph_i&#x27;], 0, &#x27;&#x27;, &#x27;Asphalt intermediate course&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#d_gab2)&#x27;, 0, &#x27;&#x27;, &#x27;Graded aggregate base (GAB)&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#d_earth)&#x27;, 0, &#x27;&#x27;, &#x27;Compacted subgrade / undisturbed earth&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#d_grass)&#x27;, 0, &#x27;&#x27;, &#x27;Grass verge, lawn, landscape area&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#d_mas)&#x27;, 0, &#x27;&#x27;, &#x27;Masonry — sign base, piers, water table&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#d_mulch)&#x27;, 0, &#x27;&#x27;, &#x27;Mulch inside the tree-protection zone&#x27;),
+    (&#x27;rect&#x27;, &#x27;#8d7f6c&#x27;, 0, &#x27;&#x27;, &#x27;Roof, seen in section or elevation&#x27;),
+    (&#x27;rect&#x27;, &#x27;#ded3c2&#x27;, 0, &#x27;&#x27;, &#x27;Cast-stone sign panel and cap&#x27;),
+    (&#x27;rect&#x27;, &#x27;#efe7dc&#x27;, 0, &#x27;&#x27;, &#x27;Adjoining R-1 dwelling (section, for scale)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#cfd6dc&#x27;, 0, &#x27;&#x27;, &#x27;USPS cluster box unit&#x27;),
+    (&#x27;rect&#x27;, &#x27;#2f4a66&#x27;, 0, &#x27;&#x27;, &#x27;Painted access aisle — no parking&#x27;),
+    (&#x27;rect&#x27;, &#x27;#8a8a8a&#x27;, 0, &#x27;&#x27;, &#x27;Steel post — sign post, fence post&#x27;),
+    (&#x27;rect&#x27;, &#x27;#1b5fa8&#x27;, 0, &#x27;&#x27;, &#x27;Accessible parking sign (R7-8 + van plaque)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#d2691e&#x27;, 0, &#x27;&#x27;, &quot;Tree-protection fence, 4&#x27;-0\&quot;, on steel posts&quot;),
+    (&#x27;tree&#x27;, C[&#x27;tree&#x27;], 0, &#x27;&#x27;, &#x27;Tree retained or supplemental canopy planting&#x27;),
+    (&#x27;tree&#x27;, &#x27;#2f6b46&#x27;, 0, &#x27;&#x27;, &#x27;Supplemental evergreen screen planting&#x27;),
+    (&#x27;dot&#x27;, C[&#x27;fire&#x27;], 0, &#x27;&#x27;, &#x27;Proposed fire hydrant&#x27;),
+    (&#x27;line&#x27;, &#x27;#444&#x27;, 0.7, &#x27;16 3 3 3&#x27;, &#x27;Centreline&#x27;),
+    (&#x27;line&#x27;, C[&#x27;dim&#x27;], 0.7, &#x27;&#x27;, &#x27;Dimension line (US survey feet and inches)&#x27;),
+]
+
+SOURCES = [
+    &#x27;GEOMETRY: data/layout.json and data/plans.json, regenerated 2026-09-03. Detail 1 is lots 7 and &#x27;
+    &#x27;8 (Block A, south-west side); details 2 and 3 are lane stations u = 300 and u = 700 ft; detail &#x27;
+    &#x27;4 is hammerheads[1] at u = 1,110 ft; details 6, 7 and 8 are the amenity records.&#x27;,
+    &#x27;SPECIFICATIONS: docs/12-outline-specifications.md §32 12 16, §32 16 13, §10 14 00. FIRE: &#x27;
+    &#x27;docs/08-technical-memoranda.md Memo E.&#x27;,
+    &#x27;CODE: Lilburn Zoning Ordinance 2023-603; Lilburn Site Development Plan Review Checklist; IFC &#x27;
+    &#x27;2024 as modified by Ga. Comp. R. &amp; Regs. R. 120-3-3-.04; Gwinnett County UDO §900-70; GDOT &#x27;
+    &#x27;Standard Specifications 2021; 2010 ADA Standards.&#x27;,
+]
+
+
+def legend(D):
+    x, y, w, h = BOX[&#x27;leg&#x27;]
+    D.srect(x, y, w, h, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.9)
+    D.stext(x + 8, y + 16, &#x27;LEGEND&#x27;, size=13, bold=True)
+    D.stext(x + 74, y + 16, &#x27;— every symbol drawn on this sheet appears below, and no entry below &#x27;
+            &#x27;is unused (audit-2026-09-03/drawing-standards.md §3.2)&#x27;, size=TXT, fill=&#x27;#555&#x27;)
+    rows = 10
+    cw = (w - 16) / 3.0
+    for k, (kind, col, wd, dash, txt) in enumerate(LEGEND):
+        cx = x + 8 + (k // rows) * cw
+        yy = y + 32 + (k % rows) * 11.7
+        if kind == &#x27;line&#x27;:
+            D.sline(cx, yy - 3, cx + 32, yy - 3, stroke=col, stroke_width=wd,
+                    stroke_dasharray=dash)
+        elif kind == &#x27;dot&#x27;:
+            D.scircle(cx + 16, yy - 3, 3.0, fill=col, stroke=&#x27;#fff&#x27;, stroke_width=0.6)
+        elif kind == &#x27;tree&#x27;:
+            D.scircle(cx + 16, yy - 4, 6.0, fill=col, fill_opacity=&#x27;0.28&#x27;, stroke=col,
+                      stroke_width=0.8)
+        else:
+            D.srect(cx, yy - 10, 32, 12, fill=col, stroke=&#x27;#555&#x27;, stroke_width=0.4)
+        D.stext(cx + 38, yy, txt, size=TXT)
+
+
+# ============================================================================ general notes
+NOTES = [
+    &#x27;STATUS AND SCOPE. CONCEPT DETAILS prepared by the owner for a rezoning application under &#x27;
+    &#x27;Lilburn Zoning Ordinance 2023-603 §1003. NOT construction documents and NOT SEALED. Every &#x27;
+    &#x27;pavement section, curb, footing, slope and structural element must be designed and sealed by a &#x27;
+    &#x27;Georgia PE, and the tree-protection and buffer details by a registered landscape architect, &#x27;
+    &#x27;forester or arborist, before any permit. Every statement of conformity reads &quot;appears &#x27;
+    &#x27;consistent with&quot;; none is a certification.&#x27;,
+
+    &#x27;PRIVATE STREET STANDARD. The lane is a private street in an HOA tract. Checklist §4.s: &quot;Label &#x27;
+    &#x27;new streets as \&#x27;Private\&#x27; unless previously approved by Gwinnett and City of Lilburn. All &#x27;
+    &#x27;components of private streets and alleys must meet minimum standards for public street.&quot; &#x27;
+    &#x27;Details 2 and 3 are drawn to Gwinnett County UDO §900-70.4.A as the PRESUMPTIVE public-street &#x27;
+    &#x27;standard because the Lilburn Development Regulations (Code Appendix B) are not retrievable &#x27;
+    &#x27;online. VERIFY the required section, curb profile, sidewalk thickness and horizontal-curve &#x27;
+    &#x27;standard at the pre-application conference.&#x27;,
+
+    &#x27;PAVING. Checklist §7.i requires a typical paving section for parking areas and drives at a &#x27;
+    &#x27;minimum of 4 in GAB and 2 in Type E or F; §4.t requires the materials to be labelled with &#x27;
+    &#x27;standard details. Detail 5 gives three: lane, turnarounds and entrance apron at 8 in GAB + 2 &#x27;
+    &#x27;in 19 mm Superpave + 1¼ in 9.5 mm Superpave Type II; driveways at 6 in concrete on 4 in GAB &#x27;
+    &#x27;(asphalt option 2 in on 4 in, the §7.i minimum); guest and kiosk bays at 2 in on 6 in GAB, &#x27;
+    &#x27;pervious pavers an owner option (Table 4.2). GDOT Standard Specifications 2021.&#x27;,
+
+    &#x27;SIDEWALKS — ONE OPEN QUESTION, STATED. A 5\&#x27;-0&quot; walk is carried on the north-east side of the &#x27;
+    &#x27;whole lane and the entry drive, and on the south-west side from u = 530 ft to the terminus &#x27;
+    &#x27;(detail 3). As drawn the walk sits 2\&#x27;-0&quot; from the FACE of curb, i.e. 1\&#x27;-6&quot; behind the back of &#x27;
+    &#x27;a 6-in curb; the checklist asks for 2 ft off the BACK of curb, which needs 2\&#x27;-6&quot; from the &#x27;
+    &#x27;face. The north-east half-section is 18\&#x27;-9&quot; at its narrowest (u = 149.5 ft) against the 18\&#x27;-0&quot; &#x27;
+    &#x27;used, so the shift fits there; the south-west half-section is 18\&#x27;-4&quot; at u = 530 ft, so it does &#x27;
+    &#x27;not without taking 2 in from the lot depth. Over u = 230–530 ft the south-west half-width is &#x27;
+    &#x27;16\&#x27;-11&quot; to 18\&#x27;-4&quot; and a second walk does not fit at all. The question is put to staff rather &#x27;
+    &#x27;than drawn away.&#x27;,
+
+    &#x27;GRADES. Street grades shall not exceed 12 %. REQUIRED NOTE (Checklist §7.k, verbatim): &quot;12% to &#x27;
+    &#x27;15% street grades require an \&#x27;As Graded\&#x27; survey before installation of the curb.&quot; IFC 2024 &#x27;
+    &#x27;(GA) Appendix D103.2 limits the fire apparatus access road to 10 % unless approved. The &#x27;
+    &#x27;steepest EXISTING ground grade on the lane centreline is {G} at u ≈ {U} ft (3DEP, approx.). &#x27;
+    &#x27;The FINISHED profile is not designed here — see Sheet C-5.0.&#x27;,
+
+    &#x27;FIRE ACCESS. IFC 2024, as adopted and modified by Ga. Comp. R. &amp; Regs. R. 120-3-3-.04. Table &#x27;
+    &#x27;D103.4: 0–150 ft, 20 ft wide, no turnaround; 151–500 ft, 20 ft + a 120-ft hammerhead; 501–750 &#x27;
+    &#x27;ft, 26 ft + turnaround; over 750 ft, &quot;Special approval required&quot;. The travelled way is 1,754 ft &#x27;
+    &#x27;from the Arcado Rd right-of-way, so SPECIAL APPROVAL IS REQUESTED and must be obtained in &#x27;
+    &#x27;writing from the Gwinnett County Fire Marshal before the Planning Commission hearing. Three &#x27;
+    &#x27;hammerhead turnarounds (detail 4), each two 20\&#x27;-0&quot; × 60\&#x27;-0&quot; legs = 142\&#x27;-0&quot; overall, exceed &#x27;
+    &#x27;Figure D103.1\&#x27;s 120-ft hammerhead; runs between intersections are 594.5 / 570.0 / 580.0 ft. &#x27;
+    &#x27;D107.1 as replaced by 120-3-3-.04 requires two access roads only above 120 dwelling units, so &#x27;
+    &#x27;at 41 units it is NOT triggered and NFPA 13D sprinklers are a VOLUNTARY offer. &quot;NO PARKING — &#x27;
+    &#x27;FIRE LANE&quot; signs both sides (D103.6). The 22-ft width against Table D103.4\&#x27;s 26 ft is the &#x27;
+    &#x27;relief item; 26\&#x27;-0&quot; of pavement is offered from u ≈ 1,010 ft where the tract reaches 40\&#x27;-0&quot;.&#x27;,
+
+    &#x27;SETBACKS AND BUFFER. Table 4.1 (R-2): lot area 3,000 SF min (5,000 provided), width 50 ft &#x27;
+    &#x27;(50), depth 100 ft (100), front 15 ft from the right-of-way, side 5 ft (6 provided), rear 20 &#x27;
+    &#x27;ft; buffer abutting R-1 is 0 ft for detached single-family and 20 ft for all other allowed &#x27;
+    &#x27;dwelling types. Cottage homes are listed separately from detached single-family, so the plan &#x27;
+    &#x27;designs to the 20-ft buffer and states the interpretation. §313(1): &quot;Buffer requirements … &#x27;
+    &#x27;supersede these minimum required yards&quot; — the buffer is held inside the rear 20 ft of the lot, &#x27;
+    &#x27;coincident with the rear yard, in a recorded easement (details 1 and 10). Table 4.2 requires &#x27;
+    &#x27;front-loaded garages recessed ≥ 5 ft behind the front wall; 5\&#x27;-0&quot; is provided. THE &#x27;
+    &#x27;INTERPRETATION IS TO BE CONFIRMED AT THE PRE-APPLICATION CONFERENCE; the fallback (buffer in a &#x27;
+    &#x27;separate tract, 50 × 82 lots, §1005 variance) is Sheet C-2.4.&#x27;,
+
+    &#x27;SIGNS. One ground-mounted monument entry sign is proposed (detail 7). NO WALL SIGNS ARE &#x27;
+    &#x27;PROPOSED on any dwelling, on the clubhouse or on any accessory structure. REQUIRED NOTE &#x27;
+    &#x27;(Checklist §4.q, verbatim): &quot;All signs shall be permitted separately.&quot; A sign easement may be &#x27;
+    &#x27;required. The 32-SF face and 6\&#x27;-0&quot; height are the applicant\&#x27;s voluntary condition, not a cited &#x27;
+    &#x27;ordinance limit — the Lilburn sign article has not been obtained. VERIFY the article, edition, &#x27;
+    &#x27;measurement method, setback and illumination limits.&#x27;,
+
+    &#x27;MAIL DELIVERY. REQUIRED NOTE (Checklist §4.r): a cluster-box system is proposed for the entire &#x27;
+    &#x27;project and one street name may serve to assign all house numbers. Contact the Lilburn Post &#x27;
+    &#x27;Office Growth Manager for mail delivery and mailbox requirements. The accessory structure and &#x27;
+    &#x27;its protection from the elements are detail 8.&#x27;,
+
+    &#x27;TREE PROTECTION. REQUIRED NOTE (Checklist §6.g, verbatim): &quot;Tree Protection fence must be &#x27;
+    &#x27;installed prior to commencing land disturbing activities.&quot; Fence at the limits of disturbance, &#x27;
+    &#x27;the buffer line and the drip line of retained trees (detail 9). Tree density unit calculations &#x27;
+    &#x27;are not required of an SFR subdivision (§6.i). No tree survey has been performed; one is &#x27;
+    &#x27;required with the Land Disturbance Permit.&#x27;,
+
+    &#x27;ACCESSIBILITY. The 2010 ADA Standards govern the common facilities (§208 parking, §502 space &#x27;
+    &#x27;and aisle, §402–403 routes); PROWAG (2023 final rule, 36 CFR 1190) is applied by policy on the &#x27;
+    &#x27;private lane and is mandatory at the Arcado Rd public sidewalk; ICC A117.1-2017 governs the &#x27;
+    &#x27;reach ranges at the cluster boxes. All 41 cottages are offered with zero-step entries, 36-in &#x27;
+    &#x27;doors and blocking for grab bars as a voluntary condition; §734 applies to attached dwellings &#x27;
+    &#x27;only.&#x27;,
+
+    &#x27;LETTERING, SCALES AND UNITS. Minimum lettering is 9.0 pt — 0.125 in of overall glyph height &#x27;
+    &#x27;and 0.089 in of cap height at full size, 0.058 in at the 46.4 % reduction to 11 × 17. The &#x27;
+    &#x27;scale is stated at every detail and a graphic scale is drawn on details 1, 2, 3, 4, 5, 7, 8 &#x27;
+    &#x27;and 10. Dimensions are US customary in architectural notation; areas are SF with the area type &#x27;
+    &#x27;named. Site-local coordinates (u along the strip from the Arcado Rd right-of-way, v across, &#x27;
+    &#x27;feet) are those of FACTS.md §1; detail 1\&#x27;s north arrow is drawn for that detail\&#x27;s 180°-&#x27;
+    &#x27;rotated frame and detail 4 carries true plan north.&#x27;,
+
+    &#x27;SOURCES. GEOMETRY — data/layout.json and data/plans.json, regenerated 2026-09-03: detail 1 is &#x27;
+    &#x27;lots 7 and 8; details 2 and 3 are lane stations u = 300 and 700 ft; detail 4 is hammerheads[1] &#x27;
+    &#x27;at u = 1,110 ft; details 6, 7 and 8 are the amenity records. Every dimension on this sheet is &#x27;
+    &#x27;regenerated by tools/details.py — none is typed by hand. SPECIFICATIONS — docs/12 §32 12 16, &#x27;
+    &#x27;§32 16 13, §10 14 00. FIRE — docs/08 Memo E. CODE — Lilburn Zoning Ordinance 2023-603; &#x27;
+    &#x27;Lilburn Site Development Plan Review Checklist; IFC 2024 as modified by Ga. Comp. R. &amp; Regs. &#x27;
+    &#x27;R. 120-3-3-.04; Gwinnett County UDO §900-70; GDOT Specs 2021; 2010 ADA Standards.&#x27;,
+]
+
+
+def notes(D):
+    x, y, w, h = BOX[&#x27;not&#x27;]
+    D.srect(x, y, w, h, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.9)
+    D.stext(x + 8, y + 17, &#x27;GENERAL NOTES — CIVIL DETAILS&#x27;, size=13, bold=True)
+    yy = y + 30
+    for i, n in enumerate(NOTES, 1):
+        n = n.replace(&#x27;{G}&#x27;, &#x27;%.1f %%&#x27; % MET[&#x27;max_existing_lane_grade_pct&#x27;])
+        n = n.replace(&#x27;{U}&#x27;, format(int(MET[&#x27;max_existing_lane_grade_at_u_ft&#x27;]), &#x27;,&#x27;))
+        yy = D.stextblock(x + 8, yy, &#x27;%d. %s&#x27; % (i, n), size=TXT, chars=205, lead=10.0,
+                          indent=10)
+        yy += 2.0
+    return yy
+
+
+# ============================================================================ build
+STATUS = [&#x27;Concept civil details for pre-application review. Every section,&#x27;,
+          &#x27;structure, footing and slope shown must be designed and sealed by&#x27;,
+          &#x27;a Georgia PE (and the tree / buffer details by a registered LA,&#x27;,
+          &#x27;forester or arborist). NOT CONSTRUCTION DOCUMENTS.&#x27;]
+
+
+def build():
+    D = sheet_frame(STATUS, &#x27;As noted per detail&#x27;)
+    D.stext(sb.MARGIN + sb.INNER + 12, 46,
+            &#x27;CIVIL DETAILS — SCALES AS NOTED PER DETAIL  (ARCH D 36 × 24 in) — every dimension is &#x27;
+            &#x27;regenerated from data/layout.json and data/plans.json; the sealed survey and the PE &#x27;
+            &#x27;design govern&#x27;, size=12, bold=True)
+    D.add(&#x27;&lt;text x=&quot;%.1f&quot; y=&quot;%.1f&quot; font-size=&quot;34&quot; fill=&quot;#c00&quot; fill-opacity=&quot;0.085&quot; &#x27;
+          &#x27;font-weight=&quot;bold&quot; text-anchor=&quot;middle&quot; transform=&quot;rotate(-7 %.1f %.1f)&quot;&gt;&#x27;
+          &#x27;DRAFT — NOT SEALED — CONCEPT DETAILS, NOT FOR CONSTRUCTION&lt;/text&gt;&#x27;
+          % (1290, 760, 1290, 760))
+    d1(D)
+    d2(D)
+    d3(D)
+    d4(D)
+    d5(D)
+    d6(D)
+    d7(D)
+    d8(D)
+    d9(D)
+    d10(D)
+    legend(D)
+    notes(D)
+    return D
+
+
+def _audit(svg):
+    &quot;&quot;&quot;Legend discipline: every legend swatch must appear in the body, and vice versa.&quot;&quot;&quot;
+    missing = [t for k, col, _, _, t in LEGEND if k in (&#x27;rect&#x27;, &#x27;tree&#x27;, &#x27;dot&#x27;)
+               and (&#x27;fill=&quot;%s&quot;&#x27; % col) not in svg]
+    return missing
+
+
+if __name__ == &#x27;__main__&#x27;:
+    D = build()
+    svg_path, png_path = sb.save(D, &#x27;civil-details&#x27;, dpi=150)
+    svg = open(svg_path).read()
+    print(&#x27;wrote %s\n      %s&#x27; % (svg_path, png_path))
+    print(&#x27;  details   : 10 (typical lot, 2 lane sections, hammerhead, paving, accessible, sign, &#x27;
+          &#x27;kiosk, tree fence, buffer)&#x27;)
+    print(&#x27;  lot 7 (A) : porch face %s · garage door %s · body %s · rear element %s from the rear &#x27;
+          &#x27;line, %s clear of the buffer&#x27;
+          % (fti(A[&#x27;porch_face&#x27;] - A[&#x27;fv&#x27;]), fti(A[&#x27;gar_face&#x27;] - A[&#x27;fv&#x27;]), A[&#x27;label&#x27;],
+             fti(A[&#x27;rv&#x27;] - A[&#x27;rear_el&#x27;]), fti(A[&#x27;buf_v&#x27;] - A[&#x27;rear_el&#x27;])))
+    print(&#x27;  lot 8 (B) : porch face %s · garage door %s · body %s · rear element %s from the rear &#x27;
+          &#x27;line, %s clear of the buffer&#x27;
+          % (fti(B[&#x27;porch_face&#x27;] - B[&#x27;fv&#x27;]), fti(B[&#x27;gar_face&#x27;] - B[&#x27;fv&#x27;]), B[&#x27;label&#x27;],
+             fti(B[&#x27;rv&#x27;] - B[&#x27;rear_el&#x27;]), fti(B[&#x27;buf_v&#x27;] - B[&#x27;rear_el&#x27;])))
+    _tr630 = -interp(_TR_SW, U_SUM - 630.0) - V_OFF
+    _pv630 = -interp(_PV_SW, U_SUM - 630.0) - V_OFF
+    print(&#x27;  driveway  : %s garage door to the lane tract; %s to the face of curb&#x27;
+          % (fti(A[&#x27;gar_face&#x27;] - _tr630), fti(A[&#x27;gar_face&#x27;] - _pv630)))
+    print(&#x27;  section   : u=300 tract %s, pavement %s; u=700 tract %s, walks both sides&#x27;
+          % (fti(ST_TYP[&#x27;tract_w&#x27;]), fti(ST_TYP[&#x27;pave_w&#x27;]), fti(ST_WID[&#x27;tract_w&#x27;])))
+    print(&#x27;  hammerhead: legs %s × %s, %s overall; stations %s ft&#x27;
+          % (fti(HH[&#x27;width_ft&#x27;]), fti(HH[&#x27;leg_ft&#x27;]), fti(2 * HH[&#x27;leg_ft&#x27;] + 22.0),
+             &#x27; / &#x27;.join(&#x27;%.1f&#x27; % s for s in HH_STA)))
+    print(&#x27;  sign      : face %.1f SF ≤ %.0f SF; height %s ≤ %s; panel %.1f SF&#x27;
+          % (SG_FACE_SF, SG_MAX_SF, fti(SG_H), fti(SG_MAX_H), SG_PANEL_SF))
+    print(&#x27;  kiosk     : %s × %s, %d CBUs = %d compartments + %d parcel lockers, ridge %s AFG&#x27;
+          % (fti(K_L), fti(K_W), K_CBU, K_CBU * K_COMP, K_CBU * K_PARCEL, fti(K_RIDGE)))
+    print(&#x27;  legend    : %d entries; unused swatches: %s&#x27;
+          % (len(LEGEND), _audit(svg) or &#x27;none&#x27;))
+    print(&#x27;  marker    : %s ; disclaimer: %s&#x27; % (sb.MARKER in svg, &#x27;Disclaimer:&#x27; in svg))
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/details.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

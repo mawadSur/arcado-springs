@@ -1,0 +1,1334 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36in" height="24in" viewBox="0 0 2592 1728" font-family="'Liberation Sans', Arial, Helvetica, sans-serif">
+<title>The Cottages At Arcado Springs — CIVIL DETAILS — Sheet C-8.0</title>
+<defs>
+<pattern id="bufhatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#7a9b5a" stroke-width="0.6"/></pattern>
+<pattern id="r2hatch" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(-45)"><rect width="8" height="8" fill="#fff3e0"/><line x1="0" y1="0" x2="0" y2="8" stroke="#e0a060" stroke-width="0.6"/></pattern>
+<pattern id="woods" patternUnits="userSpaceOnUse" width="26" height="26"><rect width="26" height="26" fill="#f3f8f0"/><circle cx="6" cy="6" r="3.0" fill="none" stroke="#7ea373" stroke-width="0.45"/><circle cx="19" cy="17" r="3.0" fill="none" stroke="#7ea373" stroke-width="0.45"/><circle cx="19" cy="4" r="1.7" fill="none" stroke="#9dbb95" stroke-width="0.35"/><circle cx="6" cy="20" r="1.7" fill="none" stroke="#9dbb95" stroke-width="0.35"/></pattern>
+<pattern id="exhatch" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)"><rect width="5" height="5" fill="#f0e2d6"/><line x1="0" y1="0" x2="0" y2="5" stroke="#8d3b0f" stroke-width="0.55"/></pattern>
+<pattern id="ssehatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#2e7d32" stroke-width="0.5"/></pattern>
+</defs>
+<defs>
+<pattern id="d_conc" patternUnits="userSpaceOnUse" width="9" height="9"><rect width="9" height="9" fill="#eeeeea"/><circle cx="2" cy="3" r="0.5" fill="#a9a9a2"/><circle cx="6.5" cy="6" r="0.6" fill="#a9a9a2"/><circle cx="7.5" cy="1.5" r="0.4" fill="#b8b8b0"/><circle cx="3.5" cy="7.5" r="0.4" fill="#b8b8b0"/></pattern>
+<pattern id="d_gab" patternUnits="userSpaceOnUse" width="8" height="8"><rect width="8" height="8" fill="#ded4bb"/><circle cx="2" cy="2" r="1.15" fill="none" stroke="#8d8261" stroke-width="0.4"/></pattern>
+<pattern id="d_gab2" patternUnits="userSpaceOnUse" width="9" height="9"><rect width="9" height="9" fill="#ded4bb"/><path d="M1 3 l2 -2 l2 2 z" fill="none" stroke="#8d8261" stroke-width="0.45"/><path d="M5 8 l2 -2 l1.6 2 z" fill="none" stroke="#8d8261" stroke-width="0.45"/><circle cx="7.2" cy="2.2" r="0.9" fill="none" stroke="#8d8261" stroke-width="0.45"/><circle cx="2.2" cy="6.6" r="0.7" fill="none" stroke="#8d8261" stroke-width="0.45"/></pattern>
+<pattern id="d_sub" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)"><rect width="10" height="10" fill="#efe9dc"/><line x1="0" y1="0" x2="0" y2="10" stroke="#b3a68c" stroke-width="0.4"/></pattern>
+<pattern id="d_earth" patternUnits="userSpaceOnUse" width="11" height="11" patternTransform="rotate(45)"><rect width="11" height="11" fill="#fbfaf6"/><line x1="0" y1="0" x2="0" y2="11" stroke="#b2a488" stroke-width="0.45"/><line x1="5.5" y1="0" x2="5.5" y2="5" stroke="#c6bba4" stroke-width="0.35"/></pattern>
+<pattern id="d_mas" patternUnits="userSpaceOnUse" width="16" height="9"><rect width="16" height="9" fill="#e8d8bf"/><line x1="0" y1="4.5" x2="16" y2="4.5" stroke="#b09166" stroke-width="0.5"/><line x1="0" y1="9" x2="16" y2="9" stroke="#b09166" stroke-width="0.5"/><line x1="0" y1="0" x2="0" y2="4.5" stroke="#b09166" stroke-width="0.5"/><line x1="8" y1="4.5" x2="8" y2="9" stroke="#b09166" stroke-width="0.5"/></pattern>
+<pattern id="d_grass" patternUnits="userSpaceOnUse" width="14" height="14"><rect width="14" height="14" fill="#e8f3de"/><path d="M3 12 l1 -4 M4 12 l0 -4.5 M5 12 l1 -4" fill="none" stroke="#8fb37c" stroke-width="0.4"/><path d="M10 13 l0.8 -3.5 M11 13 l0 -4" fill="none" stroke="#8fb37c" stroke-width="0.4"/></pattern>
+<pattern id="d_mulch" patternUnits="userSpaceOnUse" width="10" height="6"><rect width="10" height="6" fill="#e3d6c4"/><line x1="0.5" y1="2" x2="4" y2="2" stroke="#9c8465" stroke-width="0.5"/><line x1="5" y1="4.5" x2="8.5" y2="4.5" stroke="#9c8465" stroke-width="0.5"/></pattern>
+</defs>
+<rect x="0.00" y="0.00" width="2592.00" height="1728.00" fill="#fff"/>
+<rect x="36.00" y="36.00" width="2520.00" height="1656.00" fill="none" stroke="#000" stroke-width="2"/>
+<rect x="42.00" y="42.00" width="2508.00" height="1644.00" fill="none" stroke="#000" stroke-width="0.6"/>
+<rect x="42.00" y="1580.00" width="2508.00" height="106.00" fill="#fff" stroke="#000" stroke-width="1.2"/>
+<line x1="862.00" y1="1580.00" x2="862.00" y2="1686.00" stroke="#000" stroke-width="0.8"/>
+<line x1="1372.00" y1="1580.00" x2="1372.00" y2="1686.00" stroke="#000" stroke-width="0.8"/>
+<line x1="1822.00" y1="1580.00" x2="1822.00" y2="1686.00" stroke="#000" stroke-width="0.8"/>
+<line x1="2222.00" y1="1580.00" x2="2222.00" y2="1686.00" stroke="#000" stroke-width="0.8"/>
+<text x="44.00" y="1610.00" font-size="22.00" text-anchor="start" fill="#111" font-weight="bold">THE COTTAGES AT ARCADO SPRINGS</text>
+<text x="44.00" y="1632.00" font-size="13.00" text-anchor="start" fill="#111" font-weight="bold">CIVIL DETAILS — Rezoning R-1 → R-2 (City of Lilburn, Georgia)</text>
+<text x="44.00" y="1650.00" font-size="9.00" text-anchor="start" fill="#111">4535 / 4537 / 4539 / 4541 Arcado Rd SW, Lilburn, GA 30047 — Land Lot 123, 6th District, Gwinnett County — PINs R6123 033, 015, 014, 162 — 9.44 ac (deeded)</text>
+<text x="44.00" y="1666.00" font-size="9.00" text-anchor="start" fill="#111">Typical lot, private-lane sections, hammerhead turnaround, paving, accessible space, monument sign, mail kiosk, tree protection and the 20-ft buffer</text>
+<text x="870.00" y="1598.00" font-size="9.00" text-anchor="start" fill="#555">APPLICANT / OWNER</text>
+<text x="870.00" y="1614.00" font-size="11.00" text-anchor="start" fill="#111" font-weight="bold">Mohammed Awad</text>
+<text x="870.00" y="1628.00" font-size="9.00" text-anchor="start" fill="#111">4541 Arcado Rd SW, Lilburn GA 30047-3968 (parcels 033, 015); Mendez / Roblero de Leon</text>
+<text x="870.00" y="1640.00" font-size="9.00" text-anchor="start" fill="#111">(parcels 014, 162) — co-applicants, owner signatures required</text>
+<text x="870.00" y="1656.00" font-size="9.00" text-anchor="start" fill="#555">PREPARED FOR</text>
+<text x="870.00" y="1670.00" font-size="9.00" text-anchor="start" fill="#111">Pre-application conference, City of Lilburn Planning &amp; Zoning (340 Main St) —</text>
+<text x="870.00" y="1681.00" font-size="9.00" text-anchor="start" fill="#111">rezoning application per Ord. 2023-603 §1003 (2026 Application Instructions)</text>
+<text x="1380.00" y="1598.00" font-size="9.00" text-anchor="start" fill="#555">STATUS</text>
+<text x="1380.00" y="1618.00" font-size="14.00" text-anchor="start" fill="#c00" font-weight="bold">DRAFT — NOT SEALED</text>
+<text x="1380.00" y="1634.00" font-size="9.00" text-anchor="start" fill="#111">Concept civil details for pre-application review. Every section,</text>
+<text x="1380.00" y="1645.00" font-size="9.00" text-anchor="start" fill="#111">structure, footing and slope shown must be designed and sealed by</text>
+<text x="1380.00" y="1656.00" font-size="9.00" text-anchor="start" fill="#111">a Georgia PE (and the tree / buffer details by a registered LA,</text>
+<text x="1380.00" y="1667.00" font-size="9.00" text-anchor="start" fill="#111">forester or arborist). NOT CONSTRUCTION DOCUMENTS.</text>
+<text x="1380.00" y="1681.00" font-size="9.00" text-anchor="start" fill="#111">Generator: tools/sitebase.py + tools/details.py</text>
+<text x="1830.00" y="1596.00" font-size="9.00" text-anchor="start" fill="#555">DATE</text>
+<text x="1888.00" y="1596.00" font-size="9.00" text-anchor="start" fill="#111">2026-09-03</text>
+<text x="1830.00" y="1614.00" font-size="9.00" text-anchor="start" fill="#555">SCALE</text>
+<text x="1888.00" y="1614.00" font-size="9.00" text-anchor="start" fill="#111">As noted per detail</text>
+<text x="1830.00" y="1632.00" font-size="9.00" text-anchor="start" fill="#555">DATUM</text>
+<text x="1888.00" y="1632.00" font-size="9.00" text-anchor="start" fill="#111">SR 2240 GA West US-ft; NAVD88</text>
+<text x="1830.00" y="1650.00" font-size="9.00" text-anchor="start" fill="#555">DRAWN</text>
+<text x="1888.00" y="1650.00" font-size="9.00" text-anchor="start" fill="#111">owner-prepared (AI-assisted)</text>
+<text x="1830.00" y="1668.00" font-size="9.00" text-anchor="start" fill="#555">CHECKED</text>
+<text x="1888.00" y="1668.00" font-size="9.00" text-anchor="start" fill="#111">PE / RLS / LA — pending</text>
+<text x="2230.00" y="1598.00" font-size="9.00" text-anchor="start" fill="#555">SHEET</text>
+<text x="2380.00" y="1652.00" font-size="48.00" text-anchor="middle" fill="#111" font-weight="bold">C-8.0</text>
+<text x="2380.00" y="1672.00" font-size="9.00" text-anchor="middle" fill="#111">CIVIL DETAILS</text>
+<rect x="42.00" y="1534.00" width="2508.00" height="40.00" fill="#fff8e1" stroke="#b00" stroke-width="0.8"/>
+<text x="50.00" y="1549.00" font-size="9.50" text-anchor="start" fill="#7a0000" font-weight="bold">Disclaimer: This is an AI-generated analysis for preliminary planning purposes. All findings must be verified by a licensed professional before use in design, permitting, or regulatory submissions.</text>
+<text x="50.00" y="1564.00" font-size="9.00" text-anchor="start" fill="#7a0000">Label: DRAFT / NOT SEALED — every detail on this sheet is a concept that must be designed and sealed by a Georgia PE, RLS, architect or landscape architect. Statements of conformity read "appears consistent with"; nothing here is a compliance certification.</text>
+<!-- architecture-studio:requires-disclaimer -->
+<text x="54.00" y="46.00" font-size="12.00" text-anchor="start" fill="#111" font-weight="bold">CIVIL DETAILS — SCALES AS NOTED PER DETAIL  (ARCH D 36 × 24 in) — every dimension is regenerated from data/layout.json and data/plans.json; the sealed survey and the PE design govern</text>
+<text x="1290.0" y="760.0" font-size="34" fill="#c00" fill-opacity="0.085" font-weight="bold" text-anchor="middle" transform="rotate(-7 1290.0 760.0)">DRAFT — NOT SEALED — CONCEPT DETAILS, NOT FOR CONSTRUCTION</text>
+<circle cx="63.00" cy="65.00" r="10.50" fill="#111" stroke="none"/>
+<text x="63.00" y="69.00" font-size="12.50" text-anchor="middle" fill="#fff" font-weight="bold">1</text>
+<text x="78.00" y="69.00" font-size="14.00" text-anchor="start" fill="#111" font-weight="bold">TYPICAL LOT</text>
+<text x="1004.00" y="69.00" font-size="9.50" text-anchor="end" fill="#444">SCALE 1" = 10'</text>
+<text x="56.00" y="81.00" font-size="9.00" text-anchor="start" fill="#444">Regenerated from data/layout.json lots 7 and 8 (Block A, south-west side of the lane, u 580–680 ft, Phase 1) and the true body geometry of data/plans.json — NOT from the nominal program</text>
+<text x="56.00" y="91.50" font-size="9.00" text-anchor="start" fill="#444">dimensions. Drawn rotated 180° so the lane reads at the bottom.</text>
+<rect x="52.00" y="100.00" width="956.00" height="850.00" fill="none" stroke="#000" stroke-width="0.9"/>
+<polygon points="52.00,953.60 111.85,953.60 171.70,953.60 231.55,953.60 291.40,953.60 351.25,953.60 411.10,953.60 470.95,953.60 530.80,953.60 590.65,953.60 650.50,953.60 710.35,953.60 770.20,953.60 830.05,953.60 889.90,953.60 949.75,953.60 1009.60,953.60 1009.60,914.74 949.75,915.21 889.90,915.69 830.05,916.14 770.20,916.50 710.35,916.67 650.50,916.79 590.65,916.96 530.80,917.10 470.95,917.25 411.10,917.41 351.25,917.54 291.40,917.72 231.55,917.85 171.70,917.97 111.85,918.11 52.00,918.28" fill="#4a4a4a" stroke="none"/>
+<polygon points="52.00,929.08 111.85,928.91 171.70,928.77 231.55,928.65 291.40,928.52 351.25,928.34 411.10,928.21 470.95,928.05 530.80,927.90 590.65,927.76 650.50,927.59 710.35,927.47 770.20,927.30 830.05,926.94 889.90,926.49 949.75,926.01 1009.60,925.54 1009.60,914.74 949.75,915.21 889.90,915.69 830.05,916.14 770.20,916.50 710.35,916.67 650.50,916.79 590.65,916.96 530.80,917.10 470.95,917.25 411.10,917.41 351.25,917.54 291.40,917.72 231.55,917.85 171.70,917.97 111.85,918.11 52.00,918.28" fill="url(#d_conc)" stroke="#8a8a8a" stroke-width="0.4"/>
+<polygon points="52.00,918.28 111.85,918.11 171.70,917.97 231.55,917.85 291.40,917.72 351.25,917.54 411.10,917.41 470.95,917.25 530.80,917.10 590.65,916.96 650.50,916.79 710.35,916.67 770.20,916.50 830.05,916.14 889.90,915.69 949.75,915.21 1009.60,914.74 1009.60,911.14 949.75,911.61 889.90,912.09 830.05,912.54 770.20,912.90 710.35,913.07 650.50,913.19 590.65,913.36 530.80,913.50 470.95,913.65 411.10,913.81 351.25,913.94 291.40,914.12 231.55,914.25 171.70,914.37 111.85,914.51 52.00,914.68" fill="url(#d_conc)" stroke="#555" stroke-width="0.5"/>
+<polygon points="52.00,914.68 111.85,914.51 171.70,914.37 231.55,914.25 291.40,914.12 351.25,913.94 411.10,913.81 470.95,913.65 530.80,913.50 590.65,913.36 650.50,913.19 710.35,913.07 770.20,912.90 830.05,912.54 889.90,912.09 949.75,911.61 1009.60,911.14 1009.60,900.34 949.75,900.81 889.90,901.29 830.05,901.74 770.20,902.10 710.35,902.27 650.50,902.39 590.65,902.56 530.80,902.70 470.95,902.85 411.10,903.01 351.25,903.14 291.40,903.32 231.55,903.45 171.70,903.57 111.85,903.71 52.00,903.88" fill="url(#d_grass)" stroke="none"/>
+<polygon points="52.00,903.88 111.85,903.71 171.70,903.57 231.55,903.45 291.40,903.32 351.25,903.14 411.10,903.01 470.95,902.85 530.80,902.70 590.65,902.56 650.50,902.39 710.35,902.27 770.20,902.10 830.05,901.74 889.90,901.29 949.75,900.81 1009.60,900.34 1009.60,864.34 949.75,864.81 889.90,865.29 830.05,865.74 770.20,866.10 710.35,866.27 650.50,866.39 590.65,866.56 530.80,866.70 470.95,866.85 411.10,867.01 351.25,867.14 291.40,867.32 231.55,867.45 171.70,867.57 111.85,867.71 52.00,867.88" fill="url(#d_conc)" stroke="#8a8a8a" stroke-width="0.5"/>
+<polygon points="52.00,867.88 111.85,867.71 171.70,867.57 231.55,867.45 291.40,867.32 351.25,867.14 411.10,867.01 470.95,866.85 530.80,866.70 590.65,866.56 650.50,866.39 710.35,866.27 770.20,866.10 830.05,865.74 889.90,865.29 949.75,864.81 1009.60,864.34 1009.60,860.00 949.75,860.00 889.90,860.00 830.05,860.00 770.20,860.00 710.35,860.00 650.50,860.00 590.65,860.00 530.80,860.00 470.95,860.00 411.10,860.00 351.25,860.00 291.40,860.00 231.55,859.95 171.70,859.89 111.85,859.83 52.00,859.77" fill="url(#d_grass)" stroke="none"/>
+<polyline points="52.00,918.28 1009.60,914.74" fill="none" stroke="#222" stroke-width="1.2"/>
+<polygon points="570.40,140.00 210.40,139.93 210.40,859.93 570.40,860.00" fill="#fff" stroke="none"/>
+<polygon points="570.40,284.00 210.40,283.93 210.40,139.93 570.40,140.00" fill="url(#bufhatch)" stroke="#5a8a4a" stroke-width="0.8"/>
+<polygon points="534.40,752.00 246.40,752.00 246.40,284.00 534.40,284.00" fill="none" stroke="#8a8a8a" stroke-width="0.8" stroke-dasharray="7 3 2 3"/>
+<polygon points="257.20,667.98 401.20,667.98 401.20,917.46 257.20,917.46" fill="url(#d_conc)" stroke="#7a7a7a" stroke-width="0.6"/>
+<polygon points="451.60,747.18 480.40,747.18 480.40,866.87 451.60,866.87" fill="url(#d_conc)" stroke="#7a7a7a" stroke-width="0.5"/>
+<polygon points="253.60,495.18 404.80,495.18 404.80,703.98 527.20,703.98 527.20,333.18 426.40,333.18 426.40,289.98 253.60,289.98" fill="#f9e4c8" stroke="#111" stroke-width="1.5"/>
+<polygon points="253.60,667.98 404.80,667.98 404.80,495.18 253.60,495.18" fill="#efd2ad" stroke="#111" stroke-width="0.9"/>
+<polygon points="404.80,747.18 527.20,747.18 527.20,703.98 404.80,703.98" fill="#fdf3e4" stroke="#111" stroke-width="0.9"/>
+<polygon points="426.40,333.18 527.20,333.18 527.20,289.98 426.40,289.98" fill="#fdf3e4" stroke="#111" stroke-width="0.9"/>
+<polygon points="570.40,140.00 210.40,139.93 210.40,859.93 570.40,860.00" fill="none" stroke="#111" stroke-width="1.7"/>
+<polygon points="930.40,140.00 570.40,140.00 570.40,860.00 930.40,860.00" fill="#fff" stroke="none"/>
+<polygon points="930.40,284.00 570.40,284.00 570.40,140.00 930.40,140.00" fill="url(#bufhatch)" stroke="#5a8a4a" stroke-width="0.8"/>
+<polygon points="894.40,752.00 606.40,752.00 606.40,284.00 894.40,284.00" fill="none" stroke="#8a8a8a" stroke-width="0.8" stroke-dasharray="7 3 2 3"/>
+<polygon points="617.20,667.98 761.20,667.98 761.20,916.52 617.20,916.52" fill="url(#d_conc)" stroke="#7a7a7a" stroke-width="0.6"/>
+<polygon points="811.60,747.18 840.40,747.18 840.40,865.77 811.60,865.77" fill="url(#d_conc)" stroke="#7a7a7a" stroke-width="0.5"/>
+<polygon points="613.60,510.80 764.80,510.80 764.80,703.98 887.20,703.98 887.20,330.80 613.60,330.80" fill="#f9e4c8" stroke="#111" stroke-width="1.5"/>
+<polygon points="613.60,667.98 764.80,667.98 764.80,510.80 613.60,510.80" fill="#efd2ad" stroke="#111" stroke-width="0.9"/>
+<polygon points="764.80,747.18 887.20,747.18 887.20,703.98 764.80,703.98" fill="#fdf3e4" stroke="#111" stroke-width="0.9"/>
+<polygon points="764.80,330.80 851.20,330.80 851.20,287.60 764.80,287.60" fill="#f0efe6" stroke="#111" stroke-width="0.9"/>
+<polygon points="930.40,140.00 570.40,140.00 570.40,860.00 930.40,860.00" fill="none" stroke="#111" stroke-width="1.7"/>
+<text x="750.40" y="399.20" font-size="9.00" text-anchor="middle" fill="#111" font-weight="bold">BLOCK A, LOT 7</text>
+<text x="750.40" y="410.18" font-size="9.00" text-anchor="middle" fill="#111">PLAN A "The Springbrook"</text>
+<text x="750.40" y="421.16" font-size="9.00" text-anchor="middle" fill="#111">BODY 38'-0" × 51'-10"</text>
+<text x="750.40" y="432.14" font-size="9.00" text-anchor="middle" fill="#111">1,406 SF CONDITIONED</text>
+<text x="750.40" y="443.12" font-size="9.00" text-anchor="middle" fill="#111">1,966 SF UNDER ROOF</text>
+<text x="750.40" y="454.10" font-size="9.00" text-anchor="middle" fill="#111">LOT 50'-0" × 100'-0" = 5,000 SF</text>
+<text x="689.20" y="586.40" font-size="9.00" text-anchor="middle" fill="#111">2-CAR GARAGE</text>
+<text x="689.20" y="603.68" font-size="9.00" text-anchor="middle" fill="#111">21'-0" × 21'-10"</text>
+<text x="826.00" y="716.00" font-size="9.00" text-anchor="middle" fill="#111">COVERED</text>
+<text x="826.00" y="731.84" font-size="9.00" text-anchor="middle" fill="#111">PORCH</text>
+<text x="689.20" y="694.40" font-size="9.00" text-anchor="middle" fill="#111">DRIVEWAY</text>
+<text x="689.20" y="710.24" font-size="9.00" text-anchor="middle" fill="#111">2 CARS</text>
+<text x="750.40" y="204.80" font-size="9.00" text-anchor="middle" fill="#2e5e1e">20'-0" BUFFER EASEMENT — UNDISTURBED</text>
+<text x="750.40" y="222.08" font-size="9.00" text-anchor="middle" fill="#2e5e1e">(SEE 10/C-8.0)</text>
+<text x="390.40" y="399.20" font-size="9.00" text-anchor="middle" fill="#111" font-weight="bold">BLOCK A, LOT 8</text>
+<text x="390.40" y="410.18" font-size="9.00" text-anchor="middle" fill="#111">PLAN B "The Laurel"</text>
+<text x="390.40" y="421.16" font-size="9.00" text-anchor="middle" fill="#111">BODY 38'-0" × 57'-6"</text>
+<text x="390.40" y="432.14" font-size="9.00" text-anchor="middle" fill="#111">1,492 SF CONDITIONED</text>
+<text x="390.40" y="443.12" font-size="9.00" text-anchor="middle" fill="#111">2,182 SF UNDER ROOF</text>
+<text x="390.40" y="454.10" font-size="9.00" text-anchor="middle" fill="#111">LOT 50'-0" × 100'-0" = 5,000 SF</text>
+<text x="329.20" y="586.40" font-size="9.00" text-anchor="middle" fill="#111">2-CAR GARAGE</text>
+<text x="329.20" y="603.68" font-size="9.00" text-anchor="middle" fill="#111">21'-0" × 21'-10"</text>
+<text x="466.00" y="716.00" font-size="9.00" text-anchor="middle" fill="#111">COVERED</text>
+<text x="466.00" y="731.84" font-size="9.00" text-anchor="middle" fill="#111">PORCH</text>
+<text x="329.20" y="694.40" font-size="9.00" text-anchor="middle" fill="#111">DRIVEWAY</text>
+<text x="329.20" y="710.24" font-size="9.00" text-anchor="middle" fill="#111">2 CARS</text>
+<text x="390.40" y="204.80" font-size="9.00" text-anchor="middle" fill="#2e5e1e">20'-0" BUFFER EASEMENT — UNDISTURBED</text>
+<text x="390.40" y="222.08" font-size="9.00" text-anchor="middle" fill="#2e5e1e">(SEE 10/C-8.0)</text>
+<text x="808.00" y="309.92" font-size="9.00" text-anchor="middle" fill="#111">UNCOVERED</text>
+<text x="808.00" y="325.76" font-size="9.00" text-anchor="middle" fill="#111">PATIO 12' × 6'</text>
+<text x="476.80" y="309.92" font-size="9.00" text-anchor="middle" fill="#111">COVERED REAR PORCH</text>
+<text x="476.80" y="325.76" font-size="9.00" text-anchor="middle" fill="#111">14' × 6' (RECESSED)</text>
+<line x1="208.40" y1="860.00" x2="185.40" y2="860.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="208.40" y1="752.00" x2="185.40" y2="752.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="188.40" y1="860.00" x2="188.40" y2="824.66" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="188.40" y1="787.34" x2="188.40" y2="752.00" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="182.28" y="788.84" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="191.64" y="806.00" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 191.64 806.00)">15'-0"</text>
+<line x1="185.60" y1="862.80" x2="191.20" y2="857.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="185.60" y1="754.80" x2="191.20" y2="749.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="208.40" y1="284.00" x2="185.40" y2="284.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="208.40" y1="139.93" x2="185.40" y2="139.93" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="188.40" y1="284.00" x2="188.40" y2="230.62" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="188.40" y1="193.30" x2="188.40" y2="139.93" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="182.28" y="194.80" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="191.64" y="211.96" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 191.64 211.96)">20'-0"</text>
+<line x1="185.60" y1="286.80" x2="191.20" y2="281.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="185.60" y1="142.73" x2="191.20" y2="137.13" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="208.40" y1="860.00" x2="155.40" y2="860.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="208.40" y1="747.18" x2="155.40" y2="747.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="158.40" y1="860.00" x2="158.40" y2="822.25" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="158.40" y1="784.93" x2="158.40" y2="747.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="152.28" y="786.43" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="161.64" y="803.59" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 161.64 803.59)">15'-8"</text>
+<line x1="155.60" y1="862.80" x2="161.20" y2="857.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="155.60" y1="749.98" x2="161.20" y2="744.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="208.40" y1="747.18" x2="155.40" y2="747.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="208.40" y1="703.98" x2="155.40" y2="703.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="158.40" y1="747.18" x2="158.40" y2="741.63" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="158.40" y1="709.53" x2="158.40" y2="703.98" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="152.28" y="711.03" width="9.45" height="29.10" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="161.64" y="725.58" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 161.64 725.58)">6'-0"</text>
+<line x1="155.60" y1="749.98" x2="161.20" y2="744.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="155.60" y1="706.78" x2="161.20" y2="701.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="208.40" y1="703.98" x2="155.40" y2="703.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="208.40" y1="289.98" x2="155.40" y2="289.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="158.40" y1="703.98" x2="158.40" y2="515.64" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="158.40" y1="478.32" x2="158.40" y2="289.98" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="152.28" y="479.82" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="161.64" y="496.98" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 161.64 496.98)">57'-6"</text>
+<line x1="155.60" y1="706.78" x2="161.20" y2="701.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="155.60" y1="292.78" x2="161.20" y2="287.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="208.40" y1="289.98" x2="155.40" y2="289.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="208.40" y1="139.93" x2="155.40" y2="139.93" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="158.40" y1="289.98" x2="158.40" y2="236.22" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="158.40" y1="193.68" x2="158.40" y2="139.93" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="152.28" y="195.18" width="9.45" height="39.54" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="161.64" y="214.95" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 161.64 214.95)">20'-10"</text>
+<line x1="155.60" y1="292.78" x2="161.20" y2="287.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="155.60" y1="142.73" x2="161.20" y2="137.13" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="208.40" y1="860.00" x2="119.40" y2="860.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="208.40" y1="139.93" x2="119.40" y2="139.93" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="122.40" y1="860.00" x2="122.40" y2="547.33" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="122.40" y1="452.59" x2="122.40" y2="139.93" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="116.28" y="454.09" width="9.45" height="91.74" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="125.64" y="499.96" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 125.64 499.96)">100'-0" LOT DEPTH</text>
+<line x1="119.60" y1="862.80" x2="125.20" y2="857.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="119.60" y1="142.73" x2="125.20" y2="137.13" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="932.40" y1="860.00" x2="953.40" y2="860.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="932.40" y1="752.00" x2="953.40" y2="752.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="950.40" y1="860.00" x2="950.40" y2="824.66" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="950.40" y1="787.34" x2="950.40" y2="752.00" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="944.28" y="788.84" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="953.64" y="806.00" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 953.64 806.00)">15'-0"</text>
+<line x1="947.60" y1="862.80" x2="953.20" y2="857.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="947.60" y1="754.80" x2="953.20" y2="749.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="932.40" y1="284.00" x2="953.40" y2="284.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="932.40" y1="140.00" x2="953.40" y2="140.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="950.40" y1="284.00" x2="950.40" y2="230.66" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="950.40" y1="193.34" x2="950.40" y2="140.00" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="944.28" y="194.84" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="953.64" y="212.00" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 953.64 212.00)">20'-0"</text>
+<line x1="947.60" y1="286.80" x2="953.20" y2="281.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="947.60" y1="142.80" x2="953.20" y2="137.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="932.40" y1="860.00" x2="981.40" y2="860.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="932.40" y1="747.18" x2="981.40" y2="747.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="978.40" y1="860.00" x2="978.40" y2="822.25" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="978.40" y1="784.93" x2="978.40" y2="747.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="972.28" y="786.43" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="981.64" y="803.59" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 981.64 803.59)">15'-8"</text>
+<line x1="975.60" y1="862.80" x2="981.20" y2="857.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="975.60" y1="749.98" x2="981.20" y2="744.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="932.40" y1="747.18" x2="981.40" y2="747.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="932.40" y1="703.98" x2="981.40" y2="703.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="978.40" y1="747.18" x2="978.40" y2="741.63" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="978.40" y1="709.53" x2="978.40" y2="703.98" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="972.28" y="711.03" width="9.45" height="29.10" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="981.64" y="725.58" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 981.64 725.58)">6'-0"</text>
+<line x1="975.60" y1="749.98" x2="981.20" y2="744.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="975.60" y1="706.78" x2="981.20" y2="701.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="932.40" y1="703.98" x2="981.40" y2="703.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="932.40" y1="330.80" x2="981.40" y2="330.80" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="978.40" y1="703.98" x2="978.40" y2="538.66" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="978.40" y1="496.12" x2="978.40" y2="330.80" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="972.28" y="497.62" width="9.45" height="39.54" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="981.64" y="517.39" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 981.64 517.39)">51'-10"</text>
+<line x1="975.60" y1="706.78" x2="981.20" y2="701.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="975.60" y1="333.60" x2="981.20" y2="328.00" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="932.40" y1="330.80" x2="981.40" y2="330.80" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="932.40" y1="287.60" x2="981.40" y2="287.60" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="978.40" y1="330.80" x2="978.40" y2="325.25" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="978.40" y1="293.15" x2="978.40" y2="287.60" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="972.28" y="294.65" width="9.45" height="29.10" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="981.64" y="309.20" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 981.64 309.20)">6'-0"</text>
+<line x1="975.60" y1="333.60" x2="981.20" y2="328.00" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="975.60" y1="290.40" x2="981.20" y2="284.80" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="932.40" y1="287.60" x2="981.40" y2="287.60" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="932.40" y1="140.00" x2="981.40" y2="140.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="978.40" y1="287.60" x2="978.40" y2="232.46" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="978.40" y1="195.14" x2="978.40" y2="140.00" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="972.28" y="196.64" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="981.64" y="213.80" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 981.64 213.80)">20'-6"</text>
+<line x1="975.60" y1="290.40" x2="981.20" y2="284.80" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="975.60" y1="142.80" x2="981.20" y2="137.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="251.60" y1="703.98" x2="236.60" y2="703.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="251.60" y1="667.98" x2="236.60" y2="667.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="239.60" y1="703.98" x2="239.60" y2="667.98" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="239.60" y1="667.98" x2="239.60" y2="658.98" stroke="#b0121a" stroke-width="0.7"/>
+<text x="242.84" y="655.98" font-size="9.00" text-anchor="end" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 242.84 655.98)">5'-0" RECESS</text>
+<line x1="236.80" y1="706.78" x2="242.40" y2="701.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="236.80" y1="670.78" x2="242.40" y2="665.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="556.00" y1="667.98" x2="613.60" y2="667.98" stroke="#b0121a" stroke-width="0.4" stroke-dasharray="4 2"/>
+<line x1="572.40" y1="667.98" x2="589.40" y2="667.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="572.40" y1="860.00" x2="589.40" y2="860.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="586.40" y1="667.98" x2="586.40" y2="745.33" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="586.40" y1="782.65" x2="586.40" y2="860.00" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="580.28" y="746.83" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="589.64" y="763.99" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 589.64 763.99)">26'-8"</text>
+<line x1="583.60" y1="670.78" x2="589.20" y2="665.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="583.60" y1="862.80" x2="589.20" y2="857.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="572.40" y1="860.00" x2="589.40" y2="860.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="572.40" y1="866.62" x2="589.40" y2="866.62" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="586.40" y1="860.00" x2="586.40" y2="866.62" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="586.40" y1="860.00" x2="586.40" y2="851.00" stroke="#b0121a" stroke-width="0.7"/>
+<text x="589.64" y="848.00" font-size="9.00" text-anchor="end" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 589.64 848.00)">0'-11"</text>
+<line x1="583.60" y1="862.80" x2="589.20" y2="857.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="583.60" y1="869.42" x2="589.20" y2="863.82" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="572.40" y1="866.62" x2="589.40" y2="866.62" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="572.40" y1="902.62" x2="589.40" y2="902.62" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="586.40" y1="866.62" x2="586.40" y2="902.62" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="586.40" y1="866.62" x2="586.40" y2="857.62" stroke="#b0121a" stroke-width="0.7"/>
+<text x="589.64" y="854.62" font-size="9.00" text-anchor="end" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 589.64 854.62)">5'-0"</text>
+<line x1="583.60" y1="869.42" x2="589.20" y2="863.82" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="583.60" y1="905.42" x2="589.20" y2="899.82" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="572.40" y1="902.62" x2="589.40" y2="902.62" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="572.40" y1="917.02" x2="589.40" y2="917.02" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="586.40" y1="902.62" x2="586.40" y2="917.02" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="586.40" y1="902.62" x2="586.40" y2="893.62" stroke="#b0121a" stroke-width="0.7"/>
+<text x="589.64" y="890.62" font-size="9.00" text-anchor="end" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 589.64 890.62)">2'-0"</text>
+<line x1="583.60" y1="905.42" x2="589.20" y2="899.82" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="583.60" y1="919.82" x2="589.20" y2="914.22" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="572.40" y1="667.98" x2="627.40" y2="667.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="572.40" y1="917.02" x2="627.40" y2="917.02" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="624.40" y1="667.98" x2="624.40" y2="700.76" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="624.40" y1="884.24" x2="624.40" y2="917.02" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="618.28" y="702.26" width="9.45" height="180.48" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="627.64" y="792.50" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 627.64 792.50)">34'-7" GARAGE DOOR TO FACE OF CURB</text>
+<line x1="621.60" y1="670.78" x2="627.20" y2="665.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="621.60" y1="919.82" x2="627.20" y2="914.22" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="210.40" y1="138.00" x2="210.40" y2="115.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="570.40" y1="138.00" x2="570.40" y2="115.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="210.40" y1="118.00" x2="371.74" y2="118.00" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="409.06" y1="118.00" x2="570.40" y2="118.00" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="373.24" y="111.88" width="34.32" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="390.40" y="121.24" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">50'-0"</text>
+<line x1="207.60" y1="120.80" x2="213.20" y2="115.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="567.60" y1="120.80" x2="573.20" y2="115.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="570.40" y1="138.00" x2="570.40" y2="115.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="930.40" y1="138.00" x2="930.40" y2="115.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="570.40" y1="118.00" x2="731.74" y2="118.00" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="769.06" y1="118.00" x2="930.40" y2="118.00" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="733.24" y="111.88" width="34.32" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="750.40" y="121.24" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">50'-0"</text>
+<line x1="567.60" y1="120.80" x2="573.20" y2="115.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="927.60" y1="120.80" x2="933.20" y2="115.20" stroke="#b0121a" stroke-width="0.9"/>
+<text x="462.40" y="165.92" font-size="9.00" text-anchor="middle" fill="#2e5e1e">REAR LOT LINE = ASSEMBLAGE BOUNDARY — ADJOINING R-1 SINGLE-FAMILY LOT BEYOND (SEE 10/C-8.0)</text>
+<line x1="210.40" y1="749.18" x2="210.40" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="253.60" y1="749.18" x2="253.60" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="210.40" y1="769.18" x2="215.95" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="248.05" y1="769.18" x2="253.60" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="217.45" y="763.06" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="232.00" y="772.42" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">6'-0"</text>
+<line x1="207.60" y1="771.98" x2="213.20" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="250.80" y1="771.98" x2="256.40" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="253.60" y1="749.18" x2="253.60" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="527.20" y1="749.18" x2="527.20" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="253.60" y1="769.18" x2="358.69" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="422.11" y1="769.18" x2="527.20" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="360.19" y="763.06" width="60.42" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="390.40" y="772.42" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">38'-0" BODY</text>
+<line x1="250.80" y1="771.98" x2="256.40" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="524.40" y1="771.98" x2="530.00" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="527.20" y1="749.18" x2="527.20" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="570.40" y1="749.18" x2="570.40" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="527.20" y1="769.18" x2="532.75" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="564.85" y1="769.18" x2="570.40" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="534.25" y="763.06" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="548.80" y="772.42" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">6'-0"</text>
+<line x1="524.40" y1="771.98" x2="530.00" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="567.60" y1="771.98" x2="573.20" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="257.20" y1="749.18" x2="257.20" y2="796.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="401.20" y1="749.18" x2="401.20" y2="796.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="257.20" y1="793.18" x2="287.05" y2="793.18" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="371.35" y1="793.18" x2="401.20" y2="793.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="288.55" y="787.06" width="81.30" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="329.20" y="796.42" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">20'-0" DRIVEWAY</text>
+<line x1="254.40" y1="795.98" x2="260.00" y2="790.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="398.40" y1="795.98" x2="404.00" y2="790.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="253.60" y1="749.18" x2="253.60" y2="818.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="404.80" y1="749.18" x2="404.80" y2="818.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="253.60" y1="815.18" x2="292.27" y2="815.18" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="366.13" y1="815.18" x2="404.80" y2="815.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="293.77" y="809.06" width="70.86" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="329.20" y="818.42" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">21'-0" GARAGE</text>
+<line x1="250.80" y1="817.98" x2="256.40" y2="812.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="402.00" y1="817.98" x2="407.60" y2="812.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="570.40" y1="749.18" x2="570.40" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="613.60" y1="749.18" x2="613.60" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="570.40" y1="769.18" x2="575.95" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="608.05" y1="769.18" x2="613.60" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="577.45" y="763.06" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="592.00" y="772.42" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">6'-0"</text>
+<line x1="567.60" y1="771.98" x2="573.20" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="610.80" y1="771.98" x2="616.40" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="613.60" y1="749.18" x2="613.60" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="887.20" y1="749.18" x2="887.20" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="613.60" y1="769.18" x2="718.69" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="782.11" y1="769.18" x2="887.20" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="720.19" y="763.06" width="60.42" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="750.40" y="772.42" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">38'-0" BODY</text>
+<line x1="610.80" y1="771.98" x2="616.40" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="884.40" y1="771.98" x2="890.00" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="887.20" y1="749.18" x2="887.20" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="930.40" y1="749.18" x2="930.40" y2="772.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="887.20" y1="769.18" x2="892.75" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="924.85" y1="769.18" x2="930.40" y2="769.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="894.25" y="763.06" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="908.80" y="772.42" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">6'-0"</text>
+<line x1="884.40" y1="771.98" x2="890.00" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="927.60" y1="771.98" x2="933.20" y2="766.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="617.20" y1="749.18" x2="617.20" y2="796.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="761.20" y1="749.18" x2="761.20" y2="796.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="617.20" y1="793.18" x2="647.05" y2="793.18" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="731.35" y1="793.18" x2="761.20" y2="793.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="648.55" y="787.06" width="81.30" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="689.20" y="796.42" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">20'-0" DRIVEWAY</text>
+<line x1="614.40" y1="795.98" x2="620.00" y2="790.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="758.40" y1="795.98" x2="764.00" y2="790.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="613.60" y1="749.18" x2="613.60" y2="818.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="764.80" y1="749.18" x2="764.80" y2="818.18" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="613.60" y1="815.18" x2="652.27" y2="815.18" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="726.13" y1="815.18" x2="764.80" y2="815.18" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="653.77" y="809.06" width="70.86" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="689.20" y="818.42" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">21'-0" GARAGE</text>
+<line x1="610.80" y1="817.98" x2="616.40" y2="812.38" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="762.00" y1="817.98" x2="767.60" y2="812.38" stroke="#b0121a" stroke-width="0.9"/>
+<text x="73.60" y="926.96" font-size="9.00" text-anchor="start" fill="#fff">PRIVATE LANE — 22'-0" PAVEMENT FACE TO FACE, NO ON-LANE PARKING; HOA TRACT 35'-11" TO 46'-1" WIDE</text>
+<text x="73.60" y="943.52" font-size="9.00" text-anchor="start" fill="#fff">SEE SECTIONS 2/C-8.0 AND 3/C-8.0 FOR THE TRACT, CURB, WALK AND PAVEMENT STRUCTURE</text>
+<text x="109.60" y="889.68" font-size="9.00" text-anchor="start" fill="#111">5'-0" WALK</text>
+<text x="109.60" y="851.19" font-size="9.00" text-anchor="start" fill="#111">LANE TRACT LINE = FRONT LOT LINE</text>
+<text x="60.00" y="962.00" font-size="9.00" text-anchor="start" fill="#333">REAR 20 FT OF EVERY PERIMETER LOT = THE REQUIRED 20-ft REAR YARD AND THE 20-ft UNDISTURBED BUFFER, COINCIDENT, IN A RECORDED BUFFER EASEMENT — Ord. 2023-603 §313(1) with Table 4.1. SEE 10/C-8.0.</text>
+<text x="60.00" y="973.00" font-size="9.00" text-anchor="start" fill="#333">PLAN A — under roof 1,966 SF · patio 72 SF · driveway 690 SF · walk 60 SF · TOTAL IMPERVIOUS 2,789 SF (55.8 % of the lot) · coverage 39.3 % · rearmost element 20'-6" from the rear line, 0'-6" clear of the buffer</text>
+<text x="60.00" y="984.00" font-size="9.00" text-anchor="start" fill="#333">PLAN B — under roof 2,182 SF · rear porch in roof · driveway 693 SF · walk 60 SF · TOTAL IMPERVIOUS 2,935 SF (58.7 % of the lot) · coverage 43.6 % · rearmost element 20'-10" from the rear line, 0'-10" clear of the buffer</text>
+<text x="60.00" y="995.00" font-size="9.00" text-anchor="start" fill="#333">Table 4.1 (R-2) minima: front 15'-0", side 5'-0" (6'-0" provided), rear 20'-0"; garage door 26'-8" from the front lot line, recessed 5'-0" (Table 4.2); 50'-0" of frontage on the private street (§319 requires 30 ft). APPEARS CONSISTENT WITH.</text>
+<circle cx="114.00" cy="158.00" r="26.00" fill="#fff" stroke="#000" stroke-width="0.8"/>
+<line x1="131.79" y1="148.25" x2="94.39" y2="168.74" stroke="#000" stroke-width="2.0"/>
+<polygon points="94.39,168.74 104.17,157.46 109.17,166.58" fill="#000"/>
+<text x="86.50" y="176.57" font-size="12.00" text-anchor="middle" fill="#111" font-weight="bold">N</text>
+<rect x="25.84" y="186.00" width="176.32" height="23.00" fill="#fff" fill-opacity="0.92" stroke="none"/>
+<text x="114.00" y="196.00" font-size="9.00" text-anchor="middle" fill="#111">GRID NORTH (SR 2240 GA WEST)</text>
+<text x="114.00" y="206.00" font-size="9.00" text-anchor="middle" fill="#111">DETAIL ROTATED 180° — SEE 4/C-8.0</text>
+<rect x="688.00" y="922.00" width="322.00" height="22.00" fill="#fff" fill-opacity="0.92" stroke="none"/>
+<rect x="704.00" y="934.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="776.00" y="934.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<rect x="848.00" y="934.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="920.00" y="934.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<text x="704.00" y="931.50" font-size="9.00" text-anchor="middle" fill="#111">0</text>
+<text x="992.00" y="931.50" font-size="9.00" text-anchor="middle" fill="#111">40 ft</text>
+<circle cx="63.00" cy="1025.00" r="10.50" fill="#111" stroke="none"/>
+<text x="63.00" y="1029.00" font-size="12.50" text-anchor="middle" fill="#fff" font-weight="bold">2</text>
+<text x="78.00" y="1029.00" font-size="14.00" text-anchor="start" fill="#111" font-weight="bold">TYPICAL PRIVATE LANE SECTION</text>
+<text x="1496.00" y="1029.00" font-size="9.50" text-anchor="end" fill="#444">SCALE 1/2" = 1'-0"</text>
+<text x="56.00" y="1041.00" font-size="9.00" text-anchor="start" fill="#444">Station u = 300 ft — sidewalk on the north-east side only; typical of the lane from the amenity block (u = 149.5 ft) to u = 530 ft</text>
+<rect x="52.00" y="1060.00" width="1448.00" height="120.00" fill="none" stroke="#000" stroke-width="0.9"/>
+<polygon points="149.68,1164.07 1454.32,1164.07 1454.32,1178.56 149.68,1178.56" fill="url(#d_earth)" stroke="none"/>
+<polyline points="149.68,1164.07 370.00,1164.07 1162.00,1164.07 1454.32,1164.07" fill="none" stroke="#8a7a5c" stroke-width="1.2"/>
+<polygon points="370.00,1130.32 766.00,1122.40 1162.00,1130.32 1162.00,1134.07 766.00,1126.15 370.00,1134.07" fill="#4a4a4a" stroke="#222" stroke-width="0.4"/>
+<polygon points="370.00,1134.07 766.00,1126.15 1162.00,1134.07 1162.00,1140.07 766.00,1132.15 370.00,1140.07" fill="#6f6f6f" stroke="#222" stroke-width="0.4"/>
+<polygon points="370.00,1140.07 766.00,1132.15 1162.00,1140.07 1162.00,1164.07 766.00,1156.15 370.00,1164.07" fill="url(#d_gab2)" stroke="#222" stroke-width="0.4"/>
+<polygon points="424.00,1129.24 370.00,1130.32 352.00,1112.32 352.00,1148.32 424.00,1147.24" fill="url(#d_conc)" stroke="#333" stroke-width="0.9"/>
+<polygon points="1108.00,1129.24 1162.00,1130.32 1180.00,1112.32 1180.00,1148.32 1108.00,1147.24" fill="url(#d_conc)" stroke="#333" stroke-width="0.9"/>
+<polygon points="1180.00,1112.32 1234.00,1111.60 1414.00,1108.00 1454.32,1105.12 1454.32,1132.12 1180.00,1132.12" fill="url(#d_grass)" stroke="none"/>
+<polyline points="1180.00,1112.32 1234.00,1111.60 1414.00,1108.00 1454.32,1105.12" fill="none" stroke="#4b6b3a" stroke-width="1.1"/>
+<polygon points="352.00,1112.32 149.68,1102.96 149.68,1132.12 352.00,1132.12" fill="url(#d_grass)" stroke="none"/>
+<polyline points="352.00,1112.32 149.68,1102.96" fill="none" stroke="#4b6b3a" stroke-width="1.1"/>
+<polygon points="1234.00,1111.60 1414.00,1108.00 1414.00,1119.99 1234.00,1123.59" fill="url(#d_conc)" stroke="#333" stroke-width="0.9"/>
+<text x="1324.00" y="1101.52" font-size="9.00" text-anchor="middle" fill="#111">5'-0" WALK, 4 in</text>
+<line x1="766.00" y1="1066.60" x2="766.00" y2="1176.40" stroke="#444" stroke-width="0.7" stroke-dasharray="16 3 3 3"/>
+<text x="766.00" y="1104.40" font-size="9.00" text-anchor="middle" fill="#111" font-weight="bold">C/L LANE</text>
+<line x1="149.68" y1="1064.80" x2="149.68" y2="1178.56" stroke="#111" stroke-width="1.6"/>
+<text x="158.68" y="1067.32" font-size="9.00" text-anchor="start" fill="#111" font-weight="bold">HOA LANE TRACT LINE = FRONT LOT LINE</text>
+<line x1="1454.32" y1="1064.80" x2="1454.32" y2="1178.56" stroke="#111" stroke-width="1.6"/>
+<text x="1445.32" y="1067.32" font-size="9.00" text-anchor="end" fill="#111" font-weight="bold">HOA LANE TRACT LINE = FRONT LOT LINE</text>
+<text x="550.00" y="1118.80" font-size="9.00" text-anchor="middle" fill="#fff">2 % CROWN</text>
+<text x="982.00" y="1118.80" font-size="9.00" text-anchor="middle" fill="#fff">2 % CROWN</text>
+<line x1="149.68" y1="1104.20" x2="149.68" y2="1089.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="370.00" y1="1104.20" x2="370.00" y2="1089.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="149.68" y1="1092.20" x2="241.18" y2="1092.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="278.50" y1="1092.20" x2="370.00" y2="1092.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="242.68" y="1086.08" width="34.32" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="259.84" y="1095.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">6'-1½"</text>
+<line x1="146.88" y1="1095.00" x2="152.48" y2="1089.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="367.20" y1="1095.00" x2="372.80" y2="1089.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="370.00" y1="1104.20" x2="370.00" y2="1089.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1162.00" y1="1104.20" x2="1162.00" y2="1089.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="370.00" y1="1092.20" x2="645.55" y2="1092.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="886.45" y1="1092.20" x2="1162.00" y2="1092.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="647.05" y="1086.08" width="237.90" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="766.00" y="1095.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">22'-0" PAVEMENT, FACE OF CURB TO FACE OF CURB</text>
+<line x1="367.20" y1="1095.00" x2="372.80" y2="1089.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1159.20" y1="1095.00" x2="1164.80" y2="1089.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1162.00" y1="1104.20" x2="1162.00" y2="1089.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1234.00" y1="1104.20" x2="1234.00" y2="1089.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1162.00" y1="1092.20" x2="1181.95" y2="1092.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1214.05" y1="1092.20" x2="1234.00" y2="1092.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1183.45" y="1086.08" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1198.00" y="1095.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">2'-0"</text>
+<line x1="1159.20" y1="1095.00" x2="1164.80" y2="1089.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1231.20" y1="1095.00" x2="1236.80" y2="1089.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1234.00" y1="1104.20" x2="1234.00" y2="1089.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1414.00" y1="1104.20" x2="1414.00" y2="1089.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1234.00" y1="1092.20" x2="1307.95" y2="1092.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1340.05" y1="1092.20" x2="1414.00" y2="1092.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1309.45" y="1086.08" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1324.00" y="1095.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">5'-0"</text>
+<line x1="1231.20" y1="1095.00" x2="1236.80" y2="1089.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1411.20" y1="1095.00" x2="1416.80" y2="1089.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1414.00" y1="1104.20" x2="1414.00" y2="1089.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1454.32" y1="1104.20" x2="1454.32" y2="1089.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1414.00" y1="1092.20" x2="1454.32" y2="1092.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1454.32" y1="1092.20" x2="1463.32" y2="1092.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1464.82" y="1086.08" width="34.32" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1466.32" y="1095.44" font-size="9.00" text-anchor="start" fill="#b0121a" font-weight="bold">1'-1½"</text>
+<line x1="1411.20" y1="1095.00" x2="1416.80" y2="1089.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1451.52" y1="1095.00" x2="1457.12" y2="1089.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="149.68" y1="1104.20" x2="149.68" y2="1067.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1454.32" y1="1104.20" x2="1454.32" y2="1067.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="149.68" y1="1070.20" x2="584.98" y2="1070.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1019.02" y1="1070.20" x2="1454.32" y2="1070.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="586.48" y="1064.08" width="431.04" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="802.00" y="1073.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">HOA LANE TRACT 36'-3" AT STATION u = 300 FT — TRACT WIDTH VARIES 35'-11" TO 46'-1"</text>
+<line x1="146.88" y1="1073.00" x2="152.48" y2="1067.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1451.52" y1="1073.00" x2="1457.12" y2="1067.40" stroke="#b0121a" stroke-width="0.9"/>
+<rect x="48.00" y="1154.00" width="466.00" height="22.00" fill="#fff" fill-opacity="0.92" stroke="none"/>
+<rect x="64.00" y="1166.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="136.00" y="1166.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<rect x="208.00" y="1166.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="280.00" y="1166.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<rect x="352.00" y="1166.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="424.00" y="1166.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<text x="64.00" y="1163.50" font-size="9.00" text-anchor="middle" fill="#111">0</text>
+<text x="496.00" y="1163.50" font-size="9.00" text-anchor="middle" fill="#111">12 ft</text>
+<text x="60.00" y="1189.00" font-size="9.00" text-anchor="start" fill="#333">PAVEMENT STRUCTURE 1¼ in 9.5 mm Superpave Type II · 2 in 19 mm Superpave · 8 in GAB · subgrade 95 % — SEE 5/C-8.0.   PRIVATE STREET: "All components of private streets and alleys must meet minimum standards for public street" (Checklist §4.s); 15 mph, no on-lane parking, D103.6 fire-lane signs.   SEE GENERAL NOTES 2, 3 AND 4.</text>
+<circle cx="63.00" cy="1207.00" r="10.50" fill="#111" stroke="none"/>
+<text x="63.00" y="1211.00" font-size="12.50" text-anchor="middle" fill="#fff" font-weight="bold">3</text>
+<text x="78.00" y="1211.00" font-size="14.00" text-anchor="start" fill="#111" font-weight="bold">WIDENED PRIVATE LANE SECTION — SIDEWALKS BOTH SIDES</text>
+<text x="1496.00" y="1211.00" font-size="9.50" text-anchor="end" fill="#444">SCALE 1/2" = 1'-0"</text>
+<text x="56.00" y="1223.00" font-size="9.00" text-anchor="start" fill="#444">Station u = 700 ft — typical of the lane from u = 530 ft (data/layout.json lane.widen_both_sidewalks_from_u) to the terminus at u = 1,701 ft</text>
+<rect x="52.00" y="1242.00" width="1448.00" height="120.00" fill="none" stroke="#000" stroke-width="0.9"/>
+<polygon points="77.68,1346.07 1453.96,1346.07 1453.96,1360.56 77.68,1360.56" fill="url(#d_earth)" stroke="none"/>
+<polyline points="77.68,1346.07 370.00,1346.07 1162.00,1346.07 1453.96,1346.07" fill="none" stroke="#8a7a5c" stroke-width="1.2"/>
+<polygon points="370.00,1312.32 766.00,1304.40 1162.00,1312.32 1162.00,1316.07 766.00,1308.15 370.00,1316.07" fill="#4a4a4a" stroke="#222" stroke-width="0.4"/>
+<polygon points="370.00,1316.07 766.00,1308.15 1162.00,1316.07 1162.00,1322.07 766.00,1314.15 370.00,1322.07" fill="#6f6f6f" stroke="#222" stroke-width="0.4"/>
+<polygon points="370.00,1322.07 766.00,1314.15 1162.00,1322.07 1162.00,1346.07 766.00,1338.15 370.00,1346.07" fill="url(#d_gab2)" stroke="#222" stroke-width="0.4"/>
+<polygon points="424.00,1311.24 370.00,1312.32 352.00,1294.32 352.00,1330.32 424.00,1329.24" fill="url(#d_conc)" stroke="#333" stroke-width="0.9"/>
+<polygon points="1108.00,1311.24 1162.00,1312.32 1180.00,1294.32 1180.00,1330.32 1108.00,1329.24" fill="url(#d_conc)" stroke="#333" stroke-width="0.9"/>
+<polygon points="1180.00,1294.32 1234.00,1293.60 1414.00,1290.00 1453.96,1287.12 1453.96,1314.12 1180.00,1314.12" fill="url(#d_grass)" stroke="none"/>
+<polyline points="1180.00,1294.32 1234.00,1293.60 1414.00,1290.00 1453.96,1287.12" fill="none" stroke="#4b6b3a" stroke-width="1.1"/>
+<polygon points="352.00,1294.32 118.00,1293.60 298.00,1290.00 77.68,1287.12 77.68,1314.12 352.00,1314.12" fill="url(#d_grass)" stroke="none"/>
+<polyline points="352.00,1294.32 118.00,1293.60 298.00,1290.00 77.68,1287.12" fill="none" stroke="#4b6b3a" stroke-width="1.1"/>
+<polygon points="1234.00,1293.60 1414.00,1290.00 1414.00,1301.99 1234.00,1305.59" fill="url(#d_conc)" stroke="#333" stroke-width="0.9"/>
+<text x="1324.00" y="1283.52" font-size="9.00" text-anchor="middle" fill="#111">5'-0" WALK, 4 in</text>
+<polygon points="118.00,1293.60 298.00,1290.00 298.00,1301.99 118.00,1305.59" fill="url(#d_conc)" stroke="#333" stroke-width="0.9"/>
+<text x="208.00" y="1283.52" font-size="9.00" text-anchor="middle" fill="#111">5'-0" WALK, 4 in</text>
+<line x1="766.00" y1="1248.60" x2="766.00" y2="1358.40" stroke="#444" stroke-width="0.7" stroke-dasharray="16 3 3 3"/>
+<text x="766.00" y="1286.40" font-size="9.00" text-anchor="middle" fill="#111" font-weight="bold">C/L LANE</text>
+<line x1="77.68" y1="1246.80" x2="77.68" y2="1360.56" stroke="#111" stroke-width="1.6"/>
+<text x="86.68" y="1249.32" font-size="9.00" text-anchor="start" fill="#111" font-weight="bold">HOA LANE TRACT LINE = FRONT LOT LINE</text>
+<line x1="1453.96" y1="1246.80" x2="1453.96" y2="1360.56" stroke="#111" stroke-width="1.6"/>
+<text x="1444.96" y="1249.32" font-size="9.00" text-anchor="end" fill="#111" font-weight="bold">HOA LANE TRACT LINE = FRONT LOT LINE</text>
+<text x="550.00" y="1300.80" font-size="9.00" text-anchor="middle" fill="#fff">2 % CROWN</text>
+<text x="982.00" y="1300.80" font-size="9.00" text-anchor="middle" fill="#fff">2 % CROWN</text>
+<line x1="77.68" y1="1286.20" x2="77.68" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="118.00" y1="1286.20" x2="118.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="77.68" y1="1274.20" x2="118.00" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="118.00" y1="1274.20" x2="127.00" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="128.50" y="1268.08" width="34.32" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="130.00" y="1277.44" font-size="9.00" text-anchor="start" fill="#b0121a" font-weight="bold">1'-1½"</text>
+<line x1="74.88" y1="1277.00" x2="80.48" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="115.20" y1="1277.00" x2="120.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="118.00" y1="1286.20" x2="118.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="298.00" y1="1286.20" x2="298.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="118.00" y1="1274.20" x2="191.95" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="224.05" y1="1274.20" x2="298.00" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="193.45" y="1268.08" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="208.00" y="1277.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">5'-0"</text>
+<line x1="115.20" y1="1277.00" x2="120.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="295.20" y1="1277.00" x2="300.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="298.00" y1="1286.20" x2="298.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="370.00" y1="1286.20" x2="370.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="298.00" y1="1274.20" x2="317.95" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="350.05" y1="1274.20" x2="370.00" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="319.45" y="1268.08" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="334.00" y="1277.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">2'-0"</text>
+<line x1="295.20" y1="1277.00" x2="300.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="367.20" y1="1277.00" x2="372.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="370.00" y1="1286.20" x2="370.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1162.00" y1="1286.20" x2="1162.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="370.00" y1="1274.20" x2="645.55" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="886.45" y1="1274.20" x2="1162.00" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="647.05" y="1268.08" width="237.90" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="766.00" y="1277.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">22'-0" PAVEMENT, FACE OF CURB TO FACE OF CURB</text>
+<line x1="367.20" y1="1277.00" x2="372.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1159.20" y1="1277.00" x2="1164.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1162.00" y1="1286.20" x2="1162.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1234.00" y1="1286.20" x2="1234.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1162.00" y1="1274.20" x2="1181.95" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1214.05" y1="1274.20" x2="1234.00" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1183.45" y="1268.08" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1198.00" y="1277.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">2'-0"</text>
+<line x1="1159.20" y1="1277.00" x2="1164.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1231.20" y1="1277.00" x2="1236.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1234.00" y1="1286.20" x2="1234.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1414.00" y1="1286.20" x2="1414.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1234.00" y1="1274.20" x2="1307.95" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1340.05" y1="1274.20" x2="1414.00" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1309.45" y="1268.08" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1324.00" y="1277.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">5'-0"</text>
+<line x1="1231.20" y1="1277.00" x2="1236.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1411.20" y1="1277.00" x2="1416.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1414.00" y1="1286.20" x2="1414.00" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1453.96" y1="1286.20" x2="1453.96" y2="1271.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1414.00" y1="1274.20" x2="1453.96" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1453.96" y1="1274.20" x2="1462.96" y2="1274.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1464.46" y="1268.08" width="34.32" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1465.96" y="1277.44" font-size="9.00" text-anchor="start" fill="#b0121a" font-weight="bold">1'-1½"</text>
+<line x1="1411.20" y1="1277.00" x2="1416.80" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1451.16" y1="1277.00" x2="1456.76" y2="1271.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="77.68" y1="1286.20" x2="77.68" y2="1249.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1453.96" y1="1286.20" x2="1453.96" y2="1249.20" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="77.68" y1="1252.20" x2="548.80" y2="1252.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="982.84" y1="1252.20" x2="1453.96" y2="1252.20" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="550.30" y="1246.08" width="431.04" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="765.82" y="1255.44" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">HOA LANE TRACT 38'-3" AT STATION u = 700 FT — TRACT WIDTH VARIES 35'-11" TO 46'-1"</text>
+<line x1="74.88" y1="1255.00" x2="80.48" y2="1249.40" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1451.16" y1="1255.00" x2="1456.76" y2="1249.40" stroke="#b0121a" stroke-width="0.9"/>
+<rect x="48.00" y="1336.00" width="466.00" height="22.00" fill="#fff" fill-opacity="0.92" stroke="none"/>
+<rect x="64.00" y="1348.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="136.00" y="1348.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<rect x="208.00" y="1348.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="280.00" y="1348.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<rect x="352.00" y="1348.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="424.00" y="1348.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<text x="64.00" y="1345.50" font-size="9.00" text-anchor="middle" fill="#111">0</text>
+<text x="496.00" y="1345.50" font-size="9.00" text-anchor="middle" fill="#111">12 ft</text>
+<text x="60.00" y="1371.00" font-size="9.00" text-anchor="start" fill="#333">PAVEMENT STRUCTURE 1¼ in 9.5 mm Superpave Type II · 2 in 19 mm Superpave · 8 in GAB · subgrade 95 % — SEE 5/C-8.0.   PRIVATE STREET: "All components of private streets and alleys must meet minimum standards for public street" (Checklist §4.s); 15 mph, no on-lane parking, D103.6 fire-lane signs.   SEE GENERAL NOTES 2, 3 AND 4.</text>
+<circle cx="1031.00" cy="65.00" r="10.50" fill="#111" stroke="none"/>
+<text x="1031.00" y="69.00" font-size="12.50" text-anchor="middle" fill="#fff" font-weight="bold">4</text>
+<text x="1046.00" y="69.00" font-size="14.00" text-anchor="start" fill="#111" font-weight="bold">HAMMERHEAD TURNAROUND</text>
+<text x="1592.00" y="69.00" font-size="9.50" text-anchor="end" fill="#444">SCALE 1" = 20'</text>
+<text x="1024.00" y="81.00" font-size="9.00" text-anchor="start" fill="#444">Turnaround at u = 1,110 ft (station 1,164.5 ft on the travelled way) — typical of the three; legs and pavement</text>
+<text x="1024.00" y="91.50" font-size="9.00" text-anchor="start" fill="#444">from data/layout.json hammerheads[1]</text>
+<rect x="1020.00" y="100.00" width="576.00" height="555.00" fill="none" stroke="#000" stroke-width="0.9"/>
+<polygon points="1020.00,452.86 1056.00,452.90 1092.00,452.93 1128.00,452.97 1164.00,453.00 1200.00,453.04 1236.00,453.11 1272.00,453.15 1308.00,453.22 1344.00,453.29 1380.00,453.36 1416.00,453.44 1452.00,453.47 1488.00,453.51 1524.00,453.54 1560.00,453.62 1596.00,453.65 1596.00,305.37 1560.00,305.55 1524.00,305.73 1488.00,305.91 1452.00,306.09 1416.00,306.27 1380.00,306.45 1344.00,306.63 1308.00,306.81 1272.00,306.99 1236.00,307.17 1200.00,307.35 1164.00,307.53 1128.00,307.71 1092.00,307.89 1056.00,308.07 1020.00,308.25" fill="none" stroke="#111" stroke-width="1.4"/>
+<polygon points="1020.00,420.17 1056.00,420.06 1092.00,419.99 1128.00,419.92 1164.00,419.85 1200.00,419.78 1236.00,419.74 1272.00,419.67 1308.00,419.63 1344.00,419.56 1380.00,419.52 1416.00,419.45 1452.00,419.38 1488.00,419.31 1524.00,419.24 1560.00,419.16 1596.00,419.09 1596.00,339.89 1560.00,339.96 1524.00,340.04 1488.00,340.11 1452.00,340.18 1416.00,340.25 1380.00,340.32 1344.00,340.36 1308.00,340.43 1272.00,340.47 1236.00,340.54 1200.00,340.58 1164.00,340.65 1128.00,340.72 1092.00,340.79 1056.00,340.86 1020.00,340.97" fill="#4a4a4a" stroke="none"/>
+<polygon points="1272.00,635.63 1344.00,635.63 1344.00,419.63 1272.00,419.63" fill="#4a4a4a" stroke="none"/>
+<polygon points="1272.00,340.43 1344.00,340.43 1344.00,124.43 1272.00,124.43" fill="#4a4a4a" stroke="none"/>
+<polygon points="1272.00,419.67 1182.00,419.67 1182.00,419.67 1189.84,420.01 1197.63,421.04 1205.29,422.73 1212.78,425.10 1220.04,428.10 1227.00,431.73 1233.62,435.94 1239.85,440.72 1245.64,446.03 1250.94,451.82 1255.72,458.05 1259.94,464.67 1263.57,471.63 1266.57,478.89 1268.93,486.37 1270.63,494.04 1271.66,501.82 1272.00,509.67 1272.00,509.67" fill="#4a4a4a" stroke="none"/>
+<polyline points="1182.00,419.67 1189.84,420.01 1197.63,421.04 1205.29,422.73 1212.78,425.10 1220.04,428.10 1227.00,431.73 1233.62,435.94 1239.85,440.72 1245.64,446.03 1250.94,451.82 1255.72,458.05 1259.94,464.67 1263.57,471.63 1266.57,478.89 1268.93,486.37 1270.63,494.04 1271.66,501.82 1272.00,509.67" fill="none" stroke="#222" stroke-width="1.1"/>
+<polygon points="1344.00,419.56 1434.00,419.56 1434.00,419.56 1426.16,419.90 1418.37,420.93 1410.71,422.63 1403.22,424.99 1395.96,427.99 1389.00,431.62 1382.38,435.84 1376.15,440.62 1370.36,445.92 1365.06,451.71 1360.28,457.94 1356.06,464.56 1352.43,471.52 1349.43,478.78 1347.07,486.27 1345.37,493.93 1344.34,501.72 1344.00,509.56 1344.00,509.56" fill="#4a4a4a" stroke="none"/>
+<polyline points="1434.00,419.56 1426.16,419.90 1418.37,420.93 1410.71,422.63 1403.22,424.99 1395.96,427.99 1389.00,431.62 1382.38,435.84 1376.15,440.62 1370.36,445.92 1365.06,451.71 1360.28,457.94 1356.06,464.56 1352.43,471.52 1349.43,478.78 1347.07,486.27 1345.37,493.93 1344.34,501.72 1344.00,509.56" fill="none" stroke="#222" stroke-width="1.1"/>
+<polygon points="1272.00,340.47 1182.00,340.47 1182.00,340.47 1189.84,340.13 1197.63,339.10 1205.29,337.40 1212.78,335.04 1220.04,332.04 1227.00,328.41 1233.62,324.19 1239.85,319.41 1245.64,314.11 1250.94,308.32 1255.72,302.09 1259.94,295.47 1263.57,288.50 1266.57,281.25 1268.93,273.76 1270.63,266.10 1271.66,258.31 1272.00,250.47 1272.00,250.47" fill="#4a4a4a" stroke="none"/>
+<polyline points="1182.00,340.47 1189.84,340.13 1197.63,339.10 1205.29,337.40 1212.78,335.04 1220.04,332.04 1227.00,328.41 1233.62,324.19 1239.85,319.41 1245.64,314.11 1250.94,308.32 1255.72,302.09 1259.94,295.47 1263.57,288.50 1266.57,281.25 1268.93,273.76 1270.63,266.10 1271.66,258.31 1272.00,250.47" fill="none" stroke="#222" stroke-width="1.1"/>
+<polygon points="1344.00,340.36 1434.00,340.36 1434.00,340.36 1426.16,340.02 1418.37,338.99 1410.71,337.29 1403.22,334.93 1395.96,331.93 1389.00,328.30 1382.38,324.08 1376.15,319.30 1370.36,314.00 1365.06,308.21 1360.28,301.98 1356.06,295.36 1352.43,288.40 1349.43,281.14 1347.07,273.65 1345.37,265.99 1344.34,258.20 1344.00,250.36 1344.00,250.36" fill="#4a4a4a" stroke="none"/>
+<polyline points="1434.00,340.36 1426.16,340.02 1418.37,338.99 1410.71,337.29 1403.22,334.93 1395.96,331.93 1389.00,328.30 1382.38,324.08 1376.15,319.30 1370.36,314.00 1365.06,308.21 1360.28,301.98 1356.06,295.36 1352.43,288.40 1349.43,281.14 1347.07,273.65 1345.37,265.99 1344.34,258.20 1344.00,250.36" fill="none" stroke="#222" stroke-width="1.1"/>
+<polyline points="1020.00,420.17 1182.00,419.81" fill="none" stroke="#222" stroke-width="1.2"/>
+<polyline points="1434.00,419.42 1596.00,419.09" fill="none" stroke="#222" stroke-width="1.2"/>
+<polyline points="1020.00,340.97 1182.00,340.61" fill="none" stroke="#222" stroke-width="1.2"/>
+<polyline points="1434.00,340.22 1596.00,339.89" fill="none" stroke="#222" stroke-width="1.2"/>
+<polyline points="1272.00,419.67 1272.00,635.63 1344.00,635.63 1344.00,419.56" fill="none" stroke="#222" stroke-width="1.2"/>
+<polyline points="1272.00,340.47 1272.00,124.43 1344.00,124.43 1344.00,340.36" fill="none" stroke="#222" stroke-width="1.2"/>
+<polyline points="1020.00,380.57 1596.00,379.49" fill="none" stroke="#eee" stroke-width="0.9" stroke-dasharray="14 8"/>
+<line x1="1270.00" y1="635.63" x2="1249.00" y2="635.63" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1270.00" y1="419.67" x2="1249.00" y2="419.67" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1252.00" y1="635.63" x2="1252.00" y2="546.31" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1252.00" y1="508.99" x2="1252.00" y2="419.67" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1245.88" y="510.49" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1255.24" y="527.65" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 1255.24 527.65)">60'-0"</text>
+<line x1="1249.20" y1="638.43" x2="1254.80" y2="632.83" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1249.20" y1="422.47" x2="1254.80" y2="416.87" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1270.00" y1="340.47" x2="1249.00" y2="340.47" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1270.00" y1="124.43" x2="1249.00" y2="124.43" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1252.00" y1="340.47" x2="1252.00" y2="251.11" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1252.00" y1="213.79" x2="1252.00" y2="124.43" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1245.88" y="215.29" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1255.24" y="232.45" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 1255.24 232.45)">60'-0"</text>
+<line x1="1249.20" y1="343.27" x2="1254.80" y2="337.67" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1249.20" y1="127.23" x2="1254.80" y2="121.63" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1270.00" y1="635.63" x2="1221.00" y2="635.63" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1270.00" y1="124.43" x2="1221.00" y2="124.43" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1224.00" y1="635.63" x2="1224.00" y2="124.43" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1224.00" y1="124.43" x2="1224.00" y2="115.43" stroke="#b0121a" stroke-width="0.7"/>
+<text x="1227.24" y="112.43" font-size="9.00" text-anchor="end" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 1227.24 112.43)">142'-0" OVERALL</text>
+<line x1="1221.20" y1="638.43" x2="1226.80" y2="632.83" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1221.20" y1="127.23" x2="1226.80" y2="121.63" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1272.00" y1="122.43" x2="1272.00" y2="103.43" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1344.00" y1="122.43" x2="1344.00" y2="103.43" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1272.00" y1="106.43" x2="1289.34" y2="106.43" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1326.66" y1="106.43" x2="1344.00" y2="106.43" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1290.84" y="100.31" width="34.32" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1308.00" y="109.67" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">20'-0"</text>
+<line x1="1269.20" y1="109.23" x2="1274.80" y2="103.63" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1341.20" y1="109.23" x2="1346.80" y2="103.63" stroke="#b0121a" stroke-width="0.9"/>
+<text x="1196.40" y="459.27" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">R = 25'-0"</text>
+<text x="1419.60" y="300.76" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">R = 25'-0"</text>
+<text x="1142.40" y="542.07" font-size="9.00" text-anchor="middle" fill="#b0121a">CURB RETURN (TYP. 4)</text>
+<text x="1459.20" y="363.40" font-size="9.00" text-anchor="middle" fill="#fff" font-weight="bold">HAMMERHEAD (T) TURNAROUND — TYPICAL OF THREE</text>
+<text x="1459.20" y="395.80" font-size="9.00" text-anchor="middle" fill="#fff">22'-0" PRIVATE LANE — NO ON-LANE PARKING</text>
+<text x="1372.80" y="133.00" font-size="9.00" text-anchor="start" fill="#111">HYDRANT AT THE TURNAROUND LEG: the lane is</text>
+<text x="1372.80" y="143.98" font-size="9.00" text-anchor="start" fill="#111">locally 142 ft wide here, so the 26-ft width</text>
+<text x="1372.80" y="154.96" font-size="9.00" text-anchor="start" fill="#111">that Appendix D103.1 asks for where a hydrant</text>
+<text x="1372.80" y="165.94" font-size="9.00" text-anchor="start" fill="#111">stands on the access road is met at the hydrant</text>
+<circle cx="1315.20" cy="205.00" r="6.48" fill="#b00020" stroke="#fff" stroke-width="0.7"/>
+<line x1="1320.60" y1="205.00" x2="1365.60" y2="205.00" stroke="#333" stroke-width="0.6"/>
+<text x="1372.80" y="208.60" font-size="9.00" text-anchor="start" fill="#111">PROPOSED HYDRANT</text>
+<text x="1372.80" y="507.40" font-size="9.00" text-anchor="start" fill="#111">"NO PARKING — FIRE LANE" SIGNS BOTH SIDES</text>
+<text x="1372.80" y="518.38" font-size="9.00" text-anchor="start" fill="#111">of the lane and both legs (Appendix D103.6),</text>
+<text x="1372.80" y="529.36" font-size="9.00" text-anchor="start" fill="#111">with an HOA covenant prohibiting on-lane</text>
+<text x="1372.80" y="540.34" font-size="9.00" text-anchor="start" fill="#111">parking; 4 spaces are provided on every lot</text>
+<text x="1372.80" y="551.32" font-size="9.00" text-anchor="start" fill="#111">and 12 in the guest and mail-kiosk bays</text>
+<text x="1524.00" y="289.53" font-size="9.00" text-anchor="middle" fill="#111">HOA LANE TRACT</text>
+<text x="1084.80" y="472.72" font-size="9.00" text-anchor="middle" fill="#111">HOA LANE TRACT</text>
+<text x="1041.60" y="565.00" font-size="9.00" text-anchor="start" fill="#111" font-weight="bold">DEAD END 1,754 ft → SPECIAL APPROVAL</text>
+<text x="1041.60" y="581.20" font-size="9.00" text-anchor="start" fill="#111">REQUIRED, Table D103.4 (IFC 2024 as</text>
+<text x="1041.60" y="597.40" font-size="9.00" text-anchor="start" fill="#111">modified by 120-3-3-.04) — SEE NOTE 6</text>
+<circle cx="1112.00" cy="154.00" r="21.00" fill="#fff" stroke="#000" stroke-width="0.8"/>
+<line x1="1097.64" y1="161.87" x2="1127.84" y2="145.32" stroke="#000" stroke-width="2.0"/>
+<polygon points="1127.84,145.32 1118.06,156.61 1113.06,147.49" fill="#000"/>
+<text x="1135.73" y="144.50" font-size="12.00" text-anchor="middle" fill="#111" font-weight="bold">N</text>
+<rect x="1036.44" y="177.00" width="151.12" height="23.00" fill="#fff" fill-opacity="0.92" stroke="none"/>
+<text x="1112.00" y="187.00" font-size="9.00" text-anchor="middle" fill="#111">GRID NORTH (SR 2240 GA WEST)</text>
+<text x="1112.00" y="197.00" font-size="9.00" text-anchor="middle" fill="#111">= 28°43' ABOVE THE +u AXIS</text>
+<rect x="1018.00" y="627.00" width="322.00" height="22.00" fill="#fff" fill-opacity="0.92" stroke="none"/>
+<rect x="1034.00" y="639.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="1106.00" y="639.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<rect x="1178.00" y="639.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="1250.00" y="639.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<text x="1034.00" y="636.50" font-size="9.00" text-anchor="middle" fill="#111">0</text>
+<text x="1322.00" y="636.50" font-size="9.00" text-anchor="middle" fill="#111">80 ft</text>
+<circle cx="2131.00" cy="673.00" r="10.50" fill="#111" stroke="none"/>
+<text x="2131.00" y="677.00" font-size="12.50" text-anchor="middle" fill="#fff" font-weight="bold">5</text>
+<text x="2146.00" y="677.00" font-size="14.00" text-anchor="start" fill="#111" font-weight="bold">PAVEMENT STRUCTURES</text>
+<text x="2542.00" y="677.00" font-size="9.50" text-anchor="end" fill="#444">SCALE 1½" = 1'-0"</text>
+<text x="2124.00" y="689.00" font-size="9.00" text-anchor="start" fill="#444">Private lane and turnarounds · residential driveway · guest and mail-kiosk</text>
+<text x="2124.00" y="699.50" font-size="9.00" text-anchor="start" fill="#444">parking bay</text>
+<rect x="2120.00" y="708.00" width="426.00" height="244.00" fill="none" stroke="#000" stroke-width="0.9"/>
+<text x="2201.00" y="768.40" font-size="9.00" text-anchor="middle" fill="#111" font-weight="bold">PRIVATE LANE, TURNAROUNDS</text>
+<text x="2201.00" y="778.66" font-size="9.00" text-anchor="middle" fill="#111">AND THE ENTRANCE APRON</text>
+<polygon points="2141.60,798.64 2260.40,798.64 2260.40,809.89 2141.60,809.89" fill="#4a4a4a" stroke="#222" stroke-width="0.7"/>
+<text x="2201.00" y="807.07" font-size="9.00" text-anchor="middle" fill="#fff">1¼ in 9.5 mm SP II</text>
+<polygon points="2141.60,809.89 2260.40,809.89 2260.40,827.89 2141.60,827.89" fill="#6f6f6f" stroke="#222" stroke-width="0.7"/>
+<text x="2201.00" y="821.70" font-size="9.00" text-anchor="middle" fill="#fff">2 in 19 mm SP</text>
+<polygon points="2141.60,827.89 2260.40,827.89 2260.40,899.89 2141.60,899.89" fill="url(#d_gab2)" stroke="#222" stroke-width="0.7"/>
+<text x="2201.00" y="866.70" font-size="9.00" text-anchor="middle" fill="#111">8 in GAB</text>
+<line x1="2139.60" y1="827.89" x2="2127.60" y2="827.89" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2139.60" y1="899.89" x2="2127.60" y2="899.89" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2130.60" y1="827.89" x2="2130.60" y2="850.45" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2130.60" y1="877.33" x2="2130.60" y2="899.89" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2124.48" y="851.95" width="9.45" height="23.88" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2133.84" y="863.89" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 2133.84 863.89)">8 in</text>
+<line x1="2127.80" y1="830.69" x2="2133.40" y2="825.09" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2127.80" y1="902.69" x2="2133.40" y2="897.09" stroke="#b0121a" stroke-width="0.9"/>
+<polygon points="2141.60,899.89 2260.40,899.89 2260.40,918.25 2141.60,918.25" fill="url(#d_earth)" stroke="none"/>
+<polyline points="2141.60,899.89 2260.40,899.89" fill="none" stroke="#8a7a5c" stroke-width="1.3"/>
+<text x="2201.00" y="912.31" font-size="9.00" text-anchor="middle" fill="#111">COMPACTED SUBGRADE</text>
+<text x="2334.92" y="768.40" font-size="9.00" text-anchor="middle" fill="#111" font-weight="bold">RESIDENTIAL DRIVEWAY</text>
+<text x="2334.92" y="778.66" font-size="9.00" text-anchor="middle" fill="#111">(asphalt option 2 in on 4 in)</text>
+<polygon points="2275.52,798.64 2394.32,798.64 2394.32,852.64 2275.52,852.64" fill="url(#d_conc)" stroke="#222" stroke-width="0.7"/>
+<text x="2334.92" y="828.45" font-size="9.00" text-anchor="middle" fill="#111">6 in CONCRETE</text>
+<line x1="2273.52" y1="798.64" x2="2261.52" y2="798.64" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2273.52" y1="852.64" x2="2261.52" y2="852.64" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2264.52" y1="798.64" x2="2264.52" y2="812.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2264.52" y1="839.08" x2="2264.52" y2="852.64" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2258.40" y="813.70" width="9.45" height="23.88" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2267.76" y="825.64" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 2267.76 825.64)">6 in</text>
+<line x1="2261.72" y1="801.44" x2="2267.32" y2="795.84" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2261.72" y1="855.44" x2="2267.32" y2="849.84" stroke="#b0121a" stroke-width="0.9"/>
+<polygon points="2275.52,852.64 2394.32,852.64 2394.32,888.64 2275.52,888.64" fill="url(#d_gab2)" stroke="#222" stroke-width="0.7"/>
+<text x="2334.92" y="873.45" font-size="9.00" text-anchor="middle" fill="#111">4 in GAB</text>
+<line x1="2273.52" y1="852.64" x2="2261.52" y2="852.64" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2273.52" y1="888.64" x2="2261.52" y2="888.64" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2264.52" y1="852.64" x2="2264.52" y2="857.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2264.52" y1="884.08" x2="2264.52" y2="888.64" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2258.40" y="858.70" width="9.45" height="23.88" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2267.76" y="870.64" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 2267.76 870.64)">4 in</text>
+<line x1="2261.72" y1="855.44" x2="2267.32" y2="849.84" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2261.72" y1="891.44" x2="2267.32" y2="885.84" stroke="#b0121a" stroke-width="0.9"/>
+<polygon points="2275.52,888.64 2394.32,888.64 2394.32,907.00 2275.52,907.00" fill="url(#d_earth)" stroke="none"/>
+<polyline points="2275.52,888.64 2394.32,888.64" fill="none" stroke="#8a7a5c" stroke-width="1.3"/>
+<text x="2334.92" y="901.06" font-size="9.00" text-anchor="middle" fill="#111">COMPACTED SUBGRADE</text>
+<text x="2468.84" y="768.40" font-size="9.00" text-anchor="middle" fill="#111" font-weight="bold">GUEST / MAIL-KIOSK BAY</text>
+<text x="2468.84" y="778.66" font-size="9.00" text-anchor="middle" fill="#111">(pervious pavers an option)</text>
+<polygon points="2409.44,798.64 2528.24,798.64 2528.24,816.64 2409.44,816.64" fill="#4a4a4a" stroke="#222" stroke-width="0.7"/>
+<text x="2468.84" y="810.45" font-size="9.00" text-anchor="middle" fill="#fff">2 in 9.5 mm SP II</text>
+<polygon points="2409.44,816.64 2528.24,816.64 2528.24,870.64 2409.44,870.64" fill="url(#d_gab2)" stroke="#222" stroke-width="0.7"/>
+<text x="2468.84" y="846.45" font-size="9.00" text-anchor="middle" fill="#111">6 in GAB</text>
+<line x1="2407.44" y1="816.64" x2="2395.44" y2="816.64" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2407.44" y1="870.64" x2="2395.44" y2="870.64" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2398.44" y1="816.64" x2="2398.44" y2="830.20" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2398.44" y1="857.08" x2="2398.44" y2="870.64" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2392.32" y="831.70" width="9.45" height="23.88" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2401.68" y="843.64" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 2401.68 843.64)">6 in</text>
+<line x1="2395.64" y1="819.44" x2="2401.24" y2="813.84" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2395.64" y1="873.44" x2="2401.24" y2="867.84" stroke="#b0121a" stroke-width="0.9"/>
+<polygon points="2409.44,870.64 2528.24,870.64 2528.24,889.00 2409.44,889.00" fill="url(#d_earth)" stroke="none"/>
+<polyline points="2409.44,870.64 2528.24,870.64" fill="none" stroke="#8a7a5c" stroke-width="1.3"/>
+<text x="2468.84" y="883.06" font-size="9.00" text-anchor="middle" fill="#111">COMPACTED SUBGRADE</text>
+<text x="2334.92" y="932.56" font-size="9.00" text-anchor="middle" fill="#111">SP = Superpave (GDOT 828) · GAB = graded aggregate base (GDOT 815, 100 % ASTM D698)</text>
+<text x="2334.92" y="941.20" font-size="9.00" text-anchor="middle" fill="#111">concrete = GDOT Class A, 3,500 psi, broom finish · subgrade 95 % (top 12 in 100 %) of max. dry density</text>
+<rect x="2414.00" y="708.00" width="142.00" height="22.00" fill="#fff" fill-opacity="0.92" stroke="none"/>
+<rect x="2430.00" y="720.00" width="54.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="2484.00" y="720.00" width="54.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<text x="2430.00" y="717.50" font-size="9.00" text-anchor="middle" fill="#111">0</text>
+<text x="2538.00" y="717.50" font-size="9.00" text-anchor="middle" fill="#111">1 ft</text>
+<text x="2128.00" y="963.00" font-size="9.00" text-anchor="start" fill="#333">BASIS: Checklist §7.i (minimum 4 in GAB and 2 in Type E or F) and §4.t; Gwinnett</text>
+<text x="2128.00" y="973.40" font-size="9.00" text-anchor="start" fill="#333">County UDO §900-70.4.A taken as the presumptive public-street standard under §4.s;</text>
+<text x="2128.00" y="983.80" font-size="9.00" text-anchor="start" fill="#333">GDOT Standard Specifications 2021 §310, §400, §815, §828. The Lilburn Development</text>
+<text x="2128.00" y="994.20" font-size="9.00" text-anchor="start" fill="#333">Regulations are not retrievable online — VERIFY the required section. The lane shall</text>
+<text x="2128.00" y="1004.60" font-size="9.00" text-anchor="start" fill="#333">carry a 75,000-lb apparatus (IFC 2024 (GA) D102.1); a geotechnical pavement design by</text>
+<text x="2128.00" y="1015.00" font-size="9.00" text-anchor="start" fill="#333">the PE governs.</text>
+<circle cx="1619.00" cy="579.00" r="10.50" fill="#111" stroke="none"/>
+<text x="1619.00" y="583.00" font-size="12.50" text-anchor="middle" fill="#fff" font-weight="bold">6</text>
+<text x="1634.00" y="583.00" font-size="14.00" text-anchor="start" fill="#111" font-weight="bold">ACCESSIBLE SPACE AND SIGN</text>
+<text x="2104.00" y="583.00" font-size="9.50" text-anchor="end" fill="#444">SCALE plan 3/16" = 1'-0"; sign 3/8" = 1'-0"</text>
+<text x="1612.00" y="595.00" font-size="9.00" text-anchor="start" fill="#444">One van-accessible space and its 8'-0" aisle in the mail-kiosk bay — data/layout.json</text>
+<text x="1612.00" y="605.50" font-size="9.00" text-anchor="start" fill="#444">amenity.accessible_stall / accessible_aisle</text>
+<rect x="1608.00" y="614.00" width="500.00" height="394.00" fill="none" stroke="#000" stroke-width="0.9"/>
+<polygon points="1614.00,920.00 1939.35,920.00 1939.35,618.95 1614.00,618.95" fill="#fff" stroke="none"/>
+<polygon points="1614.00,920.00 1939.35,920.00 1939.35,645.95 1614.00,645.95" fill="#4a4a4a" stroke="none"/>
+<polygon points="1614.00,645.95 1939.35,645.95 1939.35,640.55 1614.00,640.55" fill="url(#d_conc)" stroke="#333" stroke-width="0.8"/>
+<polygon points="1614.00,640.55 1939.35,640.55 1939.35,623.00 1614.00,623.00" fill="url(#d_conc)" stroke="#333" stroke-width="0.8"/>
+<text x="1762.50" y="634.47" font-size="9.00" text-anchor="middle" fill="#111">5'-0" WALK — ACCESSIBLE ROUTE TO THE MAIL KIOSK (§208.3.1)</text>
+<polygon points="1634.25,888.95 1742.25,888.95 1742.25,645.95 1634.25,645.95" fill="#4a4a4a" stroke="#fff" stroke-width="1.8"/>
+<polygon points="1742.25,888.95 1850.25,888.95 1850.25,645.95 1742.25,645.95" fill="#2f4a66" stroke="#fff" stroke-width="1.8"/>
+<polygon points="1850.25,888.95 1917.75,888.95 1917.75,645.95 1850.25,645.95" fill="#4a4a4a" stroke="#fff" stroke-width="1.8"/>
+<line x1="1746.97" y1="687.58" x2="1783.88" y2="650.67" stroke="#fff" stroke-width="1.1"/>
+<line x1="1746.97" y1="724.48" x2="1820.78" y2="650.67" stroke="#fff" stroke-width="1.1"/>
+<line x1="1746.97" y1="761.38" x2="1845.53" y2="662.83" stroke="#fff" stroke-width="1.1"/>
+<line x1="1746.97" y1="798.27" x2="1845.53" y2="699.73" stroke="#fff" stroke-width="1.1"/>
+<line x1="1746.97" y1="835.17" x2="1845.53" y2="736.62" stroke="#fff" stroke-width="1.1"/>
+<line x1="1746.97" y1="872.08" x2="1845.53" y2="773.53" stroke="#fff" stroke-width="1.1"/>
+<line x1="1771.72" y1="884.23" x2="1845.53" y2="810.43" stroke="#fff" stroke-width="1.1"/>
+<line x1="1808.62" y1="884.23" x2="1845.53" y2="847.32" stroke="#fff" stroke-width="1.1"/>
+<circle cx="1688.25" cy="702.65" r="10.12" fill="#fff" stroke="none"/>
+<polygon points="1679.14,712.77 1693.31,712.77 1710.53,728.97 1703.44,738.09 1691.29,726.95 1691.29,745.17 1679.14,745.17" fill="#fff" stroke="none"/>
+<polyline points="1667.20,766.28 1666.46,763.73 1666.05,761.11 1665.99,758.47 1666.28,755.83 1666.91,753.26 1667.87,750.79 1669.15,748.47 1670.71,746.33 1672.54,744.42 1674.61,742.76 1676.87,741.39 1679.30,740.32 1681.84,739.58 1684.46,739.18 1687.11,739.12 1689.74,739.41 1692.31,740.04 1694.78,741.00 1697.11,742.27 1699.24,743.84 1701.15,745.67 1702.81,747.74 1704.19,750.00 1705.25,752.42" fill="none" stroke="#fff" stroke-width="2.0"/>
+<polygon points="1704.45,753.27 1714.58,767.45 1706.47,772.51 1697.36,758.34" fill="#fff" stroke="none"/>
+<text x="1688.25" y="870.05" font-size="9.00" text-anchor="middle" fill="#fff" font-weight="bold">VAN</text>
+<text x="1796.25" y="759.35" font-size="9.00" text-anchor="middle" fill="#fff" font-weight="bold">NO</text>
+<text x="1796.25" y="779.60" font-size="9.00" text-anchor="middle" fill="#fff" font-weight="bold">PARKING</text>
+<text x="1884.00" y="759.35" font-size="9.00" text-anchor="middle" fill="#fff">STANDARD</text>
+<text x="1884.00" y="779.60" font-size="9.00" text-anchor="middle" fill="#fff">9'-0" × 18'-0"</text>
+<line x1="1634.25" y1="890.95" x2="1634.25" y2="905.95" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1742.25" y1="890.95" x2="1742.25" y2="905.95" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1634.25" y1="902.95" x2="1646.10" y2="902.95" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1730.40" y1="902.95" x2="1742.25" y2="902.95" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1647.60" y="896.83" width="81.30" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1688.25" y="906.19" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">8'-0" VAN SPACE</text>
+<line x1="1631.45" y1="905.75" x2="1637.05" y2="900.15" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1739.45" y1="905.75" x2="1745.05" y2="900.15" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1742.25" y1="890.95" x2="1742.25" y2="905.95" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1850.25" y1="890.95" x2="1850.25" y2="905.95" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1742.25" y1="902.95" x2="1764.54" y2="902.95" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1827.96" y1="902.95" x2="1850.25" y2="902.95" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1766.04" y="896.83" width="60.42" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1796.25" y="906.19" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">8'-0" AISLE</text>
+<line x1="1739.45" y1="905.75" x2="1745.05" y2="900.15" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1847.45" y1="905.75" x2="1853.05" y2="900.15" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1850.25" y1="890.95" x2="1850.25" y2="905.95" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1917.75" y1="890.95" x2="1917.75" y2="905.95" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1850.25" y1="902.95" x2="1867.95" y2="902.95" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1900.05" y1="902.95" x2="1917.75" y2="902.95" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1869.45" y="896.83" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1884.00" y="906.19" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">9'-0"</text>
+<line x1="1847.45" y1="905.75" x2="1853.05" y2="900.15" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1914.95" y1="905.75" x2="1920.55" y2="900.15" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1632.25" y1="888.95" x2="1617.25" y2="888.95" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1632.25" y1="645.95" x2="1617.25" y2="645.95" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1620.25" y1="888.95" x2="1620.25" y2="786.11" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1620.25" y1="748.79" x2="1620.25" y2="645.95" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1614.13" y="750.29" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1623.49" y="767.45" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 1623.49 767.45)">18'-0"</text>
+<line x1="1617.45" y1="891.75" x2="1623.05" y2="886.15" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1617.45" y1="648.75" x2="1623.05" y2="643.15" stroke="#b0121a" stroke-width="0.9"/>
+<text x="1782.75" y="918.65" font-size="9.00" text-anchor="middle" fill="#fff">DRIVE AISLE — 22'-0" LANE PAVEMENT</text>
+<text x="1615.35" y="919.33" font-size="11.00" text-anchor="start" fill="#fff" font-weight="bold">PLAN</text>
+<polygon points="1960.00,920.00 2103.10,920.00 2103.10,876.80 1960.00,876.80" fill="url(#d_earth)" stroke="none"/>
+<line x1="1960.00" y1="876.80" x2="2103.10" y2="876.80" stroke="#5a4a30" stroke-width="1.4"/>
+<polygon points="2026.15,876.80 2036.95,876.80 2036.95,674.30 2026.15,674.30" fill="#8a8a8a" stroke="#333" stroke-width="0.7"/>
+<polygon points="2004.55,741.80 2058.55,741.80 2058.55,674.30 2004.55,674.30" fill="#1b5fa8" stroke="#111" stroke-width="1.0"/>
+<circle cx="2031.55" cy="685.37" r="5.67" fill="#fff" stroke="none"/>
+<polygon points="2026.45,691.04 2034.38,691.04 2044.02,700.11 2040.06,705.22 2033.25,698.98 2033.25,709.18 2026.45,709.18" fill="#fff" stroke="none"/>
+<polyline points="2019.76,721.00 2019.34,719.58 2019.12,718.11 2019.09,716.63 2019.25,715.15 2019.60,713.71 2020.14,712.33 2020.85,711.03 2021.73,709.83 2022.75,708.76 2023.91,707.83 2025.18,707.06 2026.54,706.47 2027.96,706.05 2029.43,705.83 2030.91,705.79 2032.39,705.95 2033.83,706.31 2035.21,706.84 2036.51,707.56 2037.71,708.44 2038.78,709.46 2039.71,710.62 2040.47,711.89 2041.07,713.24" fill="none" stroke="#fff" stroke-width="2.0"/>
+<polygon points="2040.62,713.72 2046.29,721.66 2041.76,724.49 2036.65,716.56" fill="#fff" stroke="none"/>
+<polygon points="2004.55,771.50 2058.55,771.50 2058.55,741.80 2004.55,741.80" fill="#fff" stroke="#111" stroke-width="1.0"/>
+<text x="2031.55" y="760.70" font-size="9.00" text-anchor="middle" fill="#111" font-weight="bold">VAN ACCESSIBLE</text>
+<line x1="2075.40" y1="876.80" x2="2089.40" y2="876.80" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2075.40" y1="771.50" x2="2089.40" y2="771.50" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2086.40" y1="876.80" x2="2086.40" y2="853.25" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2086.40" y1="795.05" x2="2086.40" y2="771.50" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2080.28" y="796.55" width="9.45" height="55.20" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2089.64" y="824.15" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 2089.64 824.15)">5'-0" MIN.</text>
+<line x1="2083.60" y1="879.60" x2="2089.20" y2="874.00" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2083.60" y1="774.30" x2="2089.20" y2="768.70" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1967.45" y1="876.80" x2="1954.45" y2="876.80" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1967.45" y1="674.30" x2="1954.45" y2="674.30" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1957.45" y1="876.80" x2="1957.45" y2="791.60" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1957.45" y1="759.50" x2="1957.45" y2="674.30" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1951.33" y="761.00" width="9.45" height="29.10" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1960.69" y="775.55" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 1960.69 775.55)">7'-6"</text>
+<line x1="1954.65" y1="879.60" x2="1960.25" y2="874.00" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1954.65" y1="677.10" x2="1960.25" y2="671.50" stroke="#b0121a" stroke-width="0.9"/>
+<text x="2031.55" y="644.60" font-size="11.00" text-anchor="middle" fill="#111" font-weight="bold">SIGN</text>
+<text x="2031.55" y="910.55" font-size="9.00" text-anchor="middle" fill="#111">CONCRETE FOOTING</text>
+<text x="1616.00" y="934.00" font-size="9.00" text-anchor="start" fill="#333">2010 ADA Standards §208.2 — 1 accessible space where 1 to 25 are provided; 12 guest and kiosk spaces</text>
+<text x="1616.00" y="944.40" font-size="9.00" text-anchor="start" fill="#333">are provided, so 1 is required and 1 is shown. §502.2 — a 96-in space with a 96-in aisle IS a</text>
+<text x="1616.00" y="954.80" font-size="9.00" text-anchor="start" fill="#333">van-accessible space (8'-0" + 8'-0" as drawn). §502.3 — the aisle runs the full length of the space,</text>
+<text x="1616.00" y="965.20" font-size="9.00" text-anchor="start" fill="#333">marked to discourage parking. §502.4 — space and aisle ≤ 1:48 in all directions (a PE grading item).</text>
+<text x="1616.00" y="975.60" font-size="9.00" text-anchor="start" fill="#333">§502.6 — sign with the ISA and a "VAN ACCESSIBLE" designation, bottom ≥ 60 in above the surface;</text>
+<text x="1616.00" y="986.00" font-size="9.00" text-anchor="start" fill="#333">O.C.G.A. §40-6-226 requires it. Checklist §4.x: the count is "calculated by Gwinnett Fire Marshal" —</text>
+<text x="1616.00" y="996.40" font-size="9.00" text-anchor="start" fill="#333">VERIFY. §4.w — standard spaces 9'-0" × 18'-0".</text>
+<circle cx="1619.00" cy="65.00" r="10.50" fill="#111" stroke="none"/>
+<text x="1619.00" y="69.00" font-size="12.50" text-anchor="middle" fill="#fff" font-weight="bold">7</text>
+<text x="1634.00" y="69.00" font-size="14.00" text-anchor="start" fill="#111" font-weight="bold">MONUMENT ENTRY SIGN</text>
+<text x="2104.00" y="69.00" font-size="9.50" text-anchor="end" fill="#444">SCALE 1/2" = 1'-0"</text>
+<text x="1612.00" y="81.00" font-size="9.00" text-anchor="start" fill="#444">The only sign proposed in the development — footprint from data/layout.json amenity.entry_sign.</text>
+<text x="1612.00" y="91.50" font-size="9.00" text-anchor="start" fill="#444">NO WALL SIGNS ARE PROPOSED ON ANY STRUCTURE.</text>
+<rect x="1608.00" y="100.00" width="500.00" height="456.00" fill="none" stroke="#000" stroke-width="0.9"/>
+<polygon points="1614.00,314.00 1959.60,314.00 1959.60,247.40 1614.00,247.40" fill="url(#d_earth)" stroke="none"/>
+<line x1="1614.00" y1="247.40" x2="1959.60" y2="247.40" stroke="#5a4a30" stroke-width="1.5"/>
+<polygon points="1641.00,301.40 1929.00,301.40 1929.00,251.00 1641.00,251.00" fill="url(#d_conc)" stroke="#333" stroke-width="0.8"/>
+<polygon points="1641.00,247.40 1929.00,247.40 1929.00,124.28 1641.00,124.28" fill="url(#d_mas)" stroke="#111" stroke-width="1.2"/>
+<polygon points="1633.80,124.28 1936.20,124.28 1936.20,112.40 1633.80,112.40" fill="#ded3c2" stroke="#111" stroke-width="1.2"/>
+<polygon points="1677.00,216.80 1893.00,216.80 1893.00,153.80 1677.00,153.80" fill="#ded3c2" stroke="#111" stroke-width="1.0"/>
+<text x="1785.00" y="179.00" font-size="11.50" text-anchor="middle" fill="#111" font-weight="bold">THE COTTAGES</text>
+<text x="1785.00" y="204.20" font-size="9.50" text-anchor="middle" fill="#111" font-weight="bold">AT ARCADO SPRINGS</text>
+<line x1="1641.00" y1="110.40" x2="1641.00" y2="98.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1929.00" y1="110.40" x2="1929.00" y2="98.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1641.00" y1="101.40" x2="1768.95" y2="101.40" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1801.05" y1="101.40" x2="1929.00" y2="101.40" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1770.45" y="95.28" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1785.00" y="104.64" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">8'-0"</text>
+<line x1="1638.20" y1="104.20" x2="1643.80" y2="98.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1926.20" y1="104.20" x2="1931.80" y2="98.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1931.00" y1="247.40" x2="1948.00" y2="247.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1931.00" y1="112.40" x2="1948.00" y2="112.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1945.00" y1="247.40" x2="1945.00" y2="195.95" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1945.00" y1="163.85" x2="1945.00" y2="112.40" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1938.88" y="165.35" width="9.45" height="29.10" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1948.24" y="179.90" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 1948.24 179.90)">3'-9"</text>
+<line x1="1942.20" y1="250.20" x2="1947.80" y2="244.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1942.20" y1="115.20" x2="1947.80" y2="109.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1639.00" y1="301.40" x2="1625.00" y2="301.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1639.00" y1="247.40" x2="1625.00" y2="247.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1628.00" y1="301.40" x2="1628.00" y2="290.45" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1628.00" y1="258.35" x2="1628.00" y2="247.40" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1621.88" y="259.85" width="9.45" height="29.10" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1631.24" y="274.40" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 1631.24 274.40)">1'-6"</text>
+<line x1="1625.20" y1="304.20" x2="1630.80" y2="298.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1625.20" y1="250.20" x2="1630.80" y2="244.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1677.00" y1="218.80" x2="1677.00" y2="236.80" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1893.00" y1="218.80" x2="1893.00" y2="236.80" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1677.00" y1="233.80" x2="1768.95" y2="233.80" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1801.05" y1="233.80" x2="1893.00" y2="233.80" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1770.45" y="227.68" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1785.00" y="237.04" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">6'-0"</text>
+<line x1="1674.20" y1="236.60" x2="1679.80" y2="231.00" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1890.20" y1="236.60" x2="1895.80" y2="231.00" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1675.00" y1="216.80" x2="1661.00" y2="216.80" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1675.00" y1="153.80" x2="1661.00" y2="153.80" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1664.00" y1="216.80" x2="1664.00" y2="201.35" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1664.00" y1="169.25" x2="1664.00" y2="153.80" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1657.88" y="170.75" width="9.45" height="29.10" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1667.24" y="185.30" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 1667.24 185.30)">1'-9"</text>
+<line x1="1661.20" y1="219.60" x2="1666.80" y2="214.00" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1661.20" y1="156.60" x2="1666.80" y2="151.00" stroke="#b0121a" stroke-width="0.9"/>
+<text x="1785.00" y="281.60" font-size="9.00" text-anchor="middle" fill="#111">CONCRETE FOOTING — PE DESIGN</text>
+<text x="1615.80" y="309.32" font-size="11.00" text-anchor="start" fill="#111" font-weight="bold">ELEVATION</text>
+<rect x="1720.00" y="282.00" width="250.00" height="22.00" fill="#fff" fill-opacity="0.92" stroke="none"/>
+<rect x="1736.00" y="294.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="1808.00" y="294.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<rect x="1880.00" y="294.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<text x="1736.00" y="291.50" font-size="9.00" text-anchor="middle" fill="#111">0</text>
+<text x="1952.00" y="291.50" font-size="9.00" text-anchor="middle" fill="#111">6 ft</text>
+<polygon points="1614.00,489.00 1959.60,489.00 1959.60,315.84 1614.00,315.84" fill="url(#d_grass)" stroke="none"/>
+<polygon points="1641.00,409.98 1929.00,409.98 1929.00,362.10 1641.00,362.10" fill="url(#d_mas)" stroke="#111" stroke-width="1.2"/>
+<polygon points="1641.00,458.04 1688.88,458.04 1688.88,314.04 1641.00,314.04" fill="url(#d_mas)" stroke="#111" stroke-width="1.2"/>
+<polygon points="1881.12,458.04 1929.00,458.04 1929.00,314.04 1881.12,314.04" fill="url(#d_mas)" stroke="#111" stroke-width="1.2"/>
+<line x1="1641.00" y1="460.04" x2="1641.00" y2="475.04" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1929.00" y1="460.04" x2="1929.00" y2="475.04" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1641.00" y1="472.04" x2="1768.95" y2="472.04" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1801.05" y1="472.04" x2="1929.00" y2="472.04" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1770.45" y="465.92" width="29.10" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1785.00" y="475.28" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">8'-0"</text>
+<line x1="1638.20" y1="474.84" x2="1643.80" y2="469.24" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1926.20" y1="474.84" x2="1931.80" y2="469.24" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1931.00" y1="458.04" x2="1947.00" y2="458.04" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1931.00" y1="314.04" x2="1947.00" y2="314.04" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1944.00" y1="458.04" x2="1944.00" y2="402.09" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1944.00" y1="369.99" x2="1944.00" y2="314.04" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1937.88" y="371.49" width="9.45" height="29.10" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1947.24" y="386.04" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 1947.24 386.04)">4'-0"</text>
+<line x1="1941.20" y1="460.84" x2="1946.80" y2="455.24" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1941.20" y1="316.84" x2="1946.80" y2="311.24" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1725.40" y1="409.98" x2="1712.40" y2="409.98" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1725.40" y1="362.10" x2="1712.40" y2="362.10" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1715.40" y1="409.98" x2="1715.40" y2="402.09" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1715.40" y1="369.99" x2="1715.40" y2="362.10" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1709.28" y="371.49" width="9.45" height="29.10" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1718.64" y="386.04" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 1718.64 386.04)">1'-4"</text>
+<line x1="1712.60" y1="412.78" x2="1718.20" y2="407.18" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1712.60" y1="364.90" x2="1718.20" y2="359.30" stroke="#b0121a" stroke-width="0.9"/>
+<text x="1785.00" y="485.40" font-size="11.00" text-anchor="middle" fill="#111" font-weight="bold">PLAN — SIGN FACE ON BOTH SIDES OF THE WALL</text>
+<text x="1616.00" y="500.00" font-size="10.50" text-anchor="start" fill="#111" font-weight="bold">AREA COMPUTATION</text>
+<text x="1616.00" y="511.00" font-size="9.00" text-anchor="start" fill="#333">WHOLE STRUCTURE FACE (most conservative): 8'-0" × 3'-9" = 30.0 SF ≤ 32 SF · SIGN PANEL ONLY 6'-0" ×</text>
+<text x="1616.00" y="521.40" font-size="9.00" text-anchor="start" fill="#333">1'-9" = 10.5 SF · OVERALL HEIGHT 3'-9" ≤ 6'-0" · 19.0 ft from the Arcado Rd R/W, outside the 390-ft</text>
+<text x="1616.00" y="531.80" font-size="9.00" text-anchor="start" fill="#333">sight triangle (C-2.3). The 32-SF and 6-ft limits are the applicant's voluntary condition, not a</text>
+<text x="1616.00" y="542.20" font-size="9.00" text-anchor="start" fill="#333">cited ordinance limit — the Lilburn sign article is not in data/ordinance-excerpts.md; VERIFY. See</text>
+<text x="1616.00" y="552.60" font-size="9.00" text-anchor="start" fill="#333">general note 8.</text>
+<circle cx="2131.00" cy="65.00" r="10.50" fill="#111" stroke="none"/>
+<text x="2131.00" y="69.00" font-size="12.50" text-anchor="middle" fill="#fff" font-weight="bold">8</text>
+<text x="2146.00" y="69.00" font-size="14.00" text-anchor="start" fill="#111" font-weight="bold">MAIL KIOSK — CLUSTER BOX UNITS</text>
+<text x="2542.00" y="69.00" font-size="9.50" text-anchor="end" fill="#444">SCALE 1/8" = 1'-0"</text>
+<text x="2124.00" y="81.00" font-size="9.00" text-anchor="start" fill="#444">Footprint from data/layout.json amenity.mail_kiosk — 16'-0" × 10'-0"; weather</text>
+<text x="2124.00" y="91.50" font-size="9.00" text-anchor="start" fill="#444">protection per Checklist §4.r</text>
+<rect x="2120.00" y="100.00" width="426.00" height="264.00" fill="none" stroke="#000" stroke-width="0.9"/>
+<polygon points="2126.00,220.00 2287.10,220.00 2287.10,98.50 2126.00,98.50" fill="#fff" stroke="none"/>
+<polygon points="2126.90,210.10 2286.20,210.10 2286.20,103.90 2126.90,103.90" fill="url(#d_conc)" stroke="none"/>
+<polygon points="2125.10,211.90 2287.10,211.90 2287.10,103.90 2125.10,103.90" fill="none" stroke="#777" stroke-width="0.7" stroke-dasharray="7 3"/>
+<polygon points="2134.10,202.90 2278.10,202.90 2278.10,112.90 2134.10,112.90" fill="#fdf3e4" stroke="#111" stroke-width="1.5"/>
+<polygon points="2134.10,118.93 2278.10,118.93 2278.10,112.90 2134.10,112.90" fill="url(#d_mas)" stroke="#111" stroke-width="1.0"/>
+<polygon points="2155.70,134.50 2178.20,134.50 2178.20,118.93 2155.70,118.93" fill="#cfd6dc" stroke="#111" stroke-width="0.9"/>
+<polygon points="2190.80,134.50 2213.30,134.50 2213.30,118.93 2190.80,118.93" fill="#cfd6dc" stroke="#111" stroke-width="0.9"/>
+<polygon points="2225.90,134.50 2248.40,134.50 2248.40,118.93 2225.90,118.93" fill="#cfd6dc" stroke="#111" stroke-width="0.9"/>
+<polygon points="2134.10,202.90 2142.20,202.90 2142.20,194.80 2134.10,194.80" fill="url(#d_mas)" stroke="#111" stroke-width="0.9"/>
+<polygon points="2134.10,121.00 2142.20,121.00 2142.20,112.90 2134.10,112.90" fill="url(#d_mas)" stroke="#111" stroke-width="0.9"/>
+<polygon points="2270.00,202.90 2278.10,202.90 2278.10,194.80 2270.00,194.80" fill="url(#d_mas)" stroke="#111" stroke-width="0.9"/>
+<polygon points="2270.00,121.00 2278.10,121.00 2278.10,112.90 2270.00,112.90" fill="url(#d_mas)" stroke="#111" stroke-width="0.9"/>
+<line x1="2134.10" y1="204.90" x2="2134.10" y2="219.90" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2278.10" y1="204.90" x2="2278.10" y2="219.90" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2134.10" y1="216.90" x2="2187.44" y2="216.90" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2224.76" y1="216.90" x2="2278.10" y2="216.90" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2188.94" y="210.78" width="34.32" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2206.10" y="220.14" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">16'-0"</text>
+<line x1="2131.30" y1="219.70" x2="2136.90" y2="214.10" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2275.30" y1="219.70" x2="2280.90" y2="214.10" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2280.10" y1="202.90" x2="2294.10" y2="202.90" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2280.10" y1="112.90" x2="2294.10" y2="112.90" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2291.10" y1="202.90" x2="2291.10" y2="176.56" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2291.10" y1="139.24" x2="2291.10" y2="112.90" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2284.98" y="140.74" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2294.34" y="157.90" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 2294.34 157.90)">10'-0"</text>
+<line x1="2288.30" y1="205.70" x2="2293.90" y2="200.10" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2288.30" y1="115.70" x2="2293.90" y2="110.10" stroke="#b0121a" stroke-width="0.9"/>
+<text x="2206.10" y="174.10" font-size="9.00" text-anchor="middle" fill="#111">5'-0" CLEAR APPROACH</text>
+<text x="2206.10" y="189.40" font-size="9.00" text-anchor="middle" fill="#111">OPEN TO THE LANE</text>
+<text x="2134.10" y="218.20" font-size="10.50" text-anchor="start" fill="#111" font-weight="bold">PLAN (ROOF DASHED)</text>
+<rect x="2122.00" y="98.00" width="178.00" height="22.00" fill="#fff" fill-opacity="0.92" stroke="none"/>
+<rect x="2138.00" y="110.00" width="36.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="2174.00" y="110.00" width="36.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<rect x="2210.00" y="110.00" width="36.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="2246.00" y="110.00" width="36.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<text x="2138.00" y="107.50" font-size="9.00" text-anchor="middle" fill="#111">0</text>
+<text x="2282.00" y="107.50" font-size="9.00" text-anchor="middle" fill="#111">16 ft</text>
+<polygon points="2126.00,360.00 2287.10,360.00 2287.10,342.00 2126.00,342.00" fill="url(#d_earth)" stroke="none"/>
+<line x1="2126.00" y1="342.00" x2="2286.20" y2="342.00" stroke="#5a4a30" stroke-width="1.5"/>
+<polygon points="2130.50,342.00 2281.70,342.00 2281.70,339.03 2130.50,339.03" fill="url(#d_conc)" stroke="#333" stroke-width="0.9"/>
+<polygon points="2125.10,255.78 2206.10,237.78 2287.10,255.78 2287.10,259.56 2125.10,259.56" fill="#8d7f6c" stroke="#111" stroke-width="1.2"/>
+<polygon points="2139.50,339.03 2146.70,339.03 2146.70,259.56 2139.50,259.56" fill="url(#d_mas)" stroke="#111" stroke-width="1.1"/>
+<polygon points="2265.50,339.03 2272.70,339.03 2272.70,259.56 2265.50,259.56" fill="url(#d_mas)" stroke="#111" stroke-width="1.1"/>
+<polygon points="2155.70,327.78 2178.20,327.78 2178.20,294.03 2155.70,294.03" fill="#cfd6dc" stroke="#111" stroke-width="1.1"/>
+<polygon points="2190.80,327.78 2213.30,327.78 2213.30,294.03 2190.80,294.03" fill="#cfd6dc" stroke="#111" stroke-width="1.1"/>
+<polygon points="2225.90,327.78 2248.40,327.78 2248.40,294.03 2225.90,294.03" fill="#cfd6dc" stroke="#111" stroke-width="1.1"/>
+<line x1="2127.60" y1="342.00" x2="2114.60" y2="342.00" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2127.60" y1="237.78" x2="2114.60" y2="237.78" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2117.60" y1="342.00" x2="2117.60" y2="308.55" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2117.60" y1="271.23" x2="2117.60" y2="237.78" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2111.48" y="272.73" width="9.45" height="34.32" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2120.84" y="289.89" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 2120.84 289.89)">11'-7"</text>
+<line x1="2114.80" y1="344.80" x2="2120.40" y2="339.20" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2114.80" y1="240.58" x2="2120.40" y2="234.98" stroke="#b0121a" stroke-width="0.9"/>
+<text x="2206.10" y="246.06" font-size="9.00" text-anchor="middle" fill="#111">4:12 HIP ROOF</text>
+<text x="2134.10" y="357.75" font-size="10.50" text-anchor="start" fill="#111" font-weight="bold">FRONT (SOUTH-WEST) ELEVATION</text>
+<text x="2296.00" y="108.00" font-size="9.00" text-anchor="start" fill="#333">3 USPS-approved cluster box units = 48 tenant</text>
+<text x="2296.00" y="118.40" font-size="9.00" text-anchor="start" fill="#333">compartments + 6 parcel lockers (VERIFY the</text>
+<text x="2296.00" y="128.80" font-size="9.00" text-anchor="start" fill="#333">approved model with USPS)</text>
+<text x="2296.00" y="139.20" font-size="9.00" text-anchor="start" fill="#333"></text>
+<text x="2296.00" y="149.60" font-size="9.00" text-anchor="start" fill="#333">Roofed, three-sided shelter open to the lane;</text>
+<text x="2296.00" y="160.00" font-size="9.00" text-anchor="start" fill="#333">masonry piers and water table matching the</text>
+<text x="2296.00" y="170.40" font-size="9.00" text-anchor="start" fill="#333">cottages; ridge 11'-7" above finished grade</text>
+<text x="2296.00" y="180.80" font-size="9.00" text-anchor="start" fill="#333"></text>
+<text x="2296.00" y="191.20" font-size="9.00" text-anchor="start" fill="#333">6-in concrete pad, 5'-0" clear approach,</text>
+<text x="2296.00" y="201.60" font-size="9.00" text-anchor="start" fill="#333">flush with the walk (no step)</text>
+<text x="2296.00" y="212.00" font-size="9.00" text-anchor="start" fill="#333"></text>
+<text x="2296.00" y="222.40" font-size="9.00" text-anchor="start" fill="#333">Four 9'-0" × 18'-0" short-term stalls in the</text>
+<text x="2296.00" y="232.80" font-size="9.00" text-anchor="start" fill="#333">kiosk bay, plus the van-accessible space</text>
+<text x="2296.00" y="243.20" font-size="9.00" text-anchor="start" fill="#333">of 6/C-8.0 on the accessible route</text>
+<text x="2296.00" y="253.60" font-size="9.00" text-anchor="start" fill="#333"></text>
+<text x="2296.00" y="264.00" font-size="9.00" text-anchor="start" fill="#333">Operable parts of every CBU between 15 in</text>
+<text x="2296.00" y="274.40" font-size="9.00" text-anchor="start" fill="#333">and 48 in above the slab; 36-in clear route</text>
+<text x="2296.00" y="284.80" font-size="9.00" text-anchor="start" fill="#333">and a 5-ft turning space (ICC A117.1-2017)</text>
+<text x="2296.00" y="295.20" font-size="9.00" text-anchor="start" fill="#333"></text>
+<text x="2296.00" y="305.60" font-size="9.00" text-anchor="start" fill="#333">MAIL DELIVERY — SEE GENERAL NOTE 9</text>
+<text x="2296.00" y="316.00" font-size="9.00" text-anchor="start" fill="#333">(Checklist §4.r: contact the Lilburn Post</text>
+<text x="2296.00" y="326.40" font-size="9.00" text-anchor="start" fill="#333">Office Growth Manager; "provide accessory</text>
+<text x="2296.00" y="336.80" font-size="9.00" text-anchor="start" fill="#333">structure details with protection from the</text>
+<text x="2296.00" y="347.20" font-size="9.00" text-anchor="start" fill="#333">elements")</text>
+<circle cx="2131.00" cy="387.00" r="10.50" fill="#111" stroke="none"/>
+<text x="2131.00" y="391.00" font-size="12.50" text-anchor="middle" fill="#fff" font-weight="bold">9</text>
+<text x="2146.00" y="391.00" font-size="14.00" text-anchor="start" fill="#111" font-weight="bold">TREE-PROTECTION FENCE</text>
+<text x="2542.00" y="391.00" font-size="9.50" text-anchor="end" fill="#444">SCALE 1/4" = 1'-0"</text>
+<text x="2124.00" y="403.00" font-size="9.00" text-anchor="start" fill="#444">At the limits of disturbance, the buffer line and the drip line of every</text>
+<text x="2124.00" y="413.50" font-size="9.00" text-anchor="start" fill="#444">retained tree</text>
+<rect x="2120.00" y="422.00" width="426.00" height="182.00" fill="none" stroke="#000" stroke-width="0.9"/>
+<polygon points="2120.00,604.00 2577.20,604.00 2577.20,555.40 2120.00,555.40" fill="url(#d_earth)" stroke="none"/>
+<line x1="2120.00" y1="555.40" x2="2577.20" y2="555.40" stroke="#5a4a30" stroke-width="1.6"/>
+<polygon points="2160.32,591.40 2166.08,591.40 2166.08,447.40 2160.32,447.40" fill="#8a8a8a" stroke="#222" stroke-width="0.6"/>
+<polygon points="2304.32,591.40 2310.08,591.40 2310.08,447.40 2304.32,447.40" fill="#8a8a8a" stroke="#222" stroke-width="0.6"/>
+<polygon points="2163.20,555.40 2307.20,555.40 2307.20,483.40 2163.20,483.40" fill="#d2691e" fill-opacity="0.28" stroke="#d2691e" stroke-width="1.2"/>
+<line x1="2163.20" y1="555.40" x2="2163.20" y2="483.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2181.20" y1="555.40" x2="2181.20" y2="483.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2199.20" y1="555.40" x2="2199.20" y2="483.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2217.20" y1="555.40" x2="2217.20" y2="483.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2235.20" y1="555.40" x2="2235.20" y2="483.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2253.20" y1="555.40" x2="2253.20" y2="483.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2271.20" y1="555.40" x2="2271.20" y2="483.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2289.20" y1="555.40" x2="2289.20" y2="483.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2307.20" y1="555.40" x2="2307.20" y2="483.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2163.20" y1="555.40" x2="2307.20" y2="555.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2163.20" y1="537.40" x2="2307.20" y2="537.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2163.20" y1="519.40" x2="2307.20" y2="519.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2163.20" y1="501.40" x2="2307.20" y2="501.40" stroke="#d2691e" stroke-width="0.7"/>
+<line x1="2163.20" y1="483.40" x2="2307.20" y2="483.40" stroke="#d2691e" stroke-width="0.7"/>
+<polygon points="2197.40,476.20 2273.00,476.20 2273.00,452.80 2197.40,452.80" fill="#fff" stroke="#111" stroke-width="1.0"/>
+<text x="2235.20" y="462.70" font-size="9.00" text-anchor="middle" fill="#111" font-weight="bold">TREE PROTECTION AREA</text>
+<text x="2235.20" y="472.24" font-size="9.00" text-anchor="middle" fill="#111" font-weight="bold">DO NOT ENTER</text>
+<polygon points="2318.00,555.40 2372.00,555.40 2372.00,549.46 2318.00,549.46" fill="url(#d_mulch)" stroke="#9c8465" stroke-width="0.5"/>
+<line x1="2411.60" y1="555.40" x2="2411.60" y2="507.02" stroke="#6b4c2a" stroke-width="1.7"/>
+<circle cx="2411.60" cy="474.76" r="50.40" fill="#3f7a37" fill-opacity="0.28" stroke="#3f7a37" stroke-width="0.9"/>
+<line x1="2359.40" y1="555.40" x2="2359.40" y2="440.20" stroke="#3f7a37" stroke-width="0.8" stroke-dasharray="5 3"/>
+<line x1="2307.20" y1="557.40" x2="2307.20" y2="573.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2359.40" y1="557.40" x2="2359.40" y2="573.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2307.20" y1="570.40" x2="2359.40" y2="570.40" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2359.40" y1="570.40" x2="2368.40" y2="570.40" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2369.90" y="564.28" width="86.52" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2371.40" y="573.64" font-size="9.00" text-anchor="start" fill="#b0121a" font-weight="bold">AT THE DRIP LINE</text>
+<line x1="2304.40" y1="573.20" x2="2310.00" y2="567.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2356.60" y1="573.20" x2="2362.20" y2="567.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2152.20" y1="555.40" x2="2139.20" y2="555.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2152.20" y1="447.40" x2="2139.20" y2="447.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2142.20" y1="555.40" x2="2142.20" y2="530.50" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2142.20" y1="472.30" x2="2142.20" y2="447.40" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2136.08" y="473.80" width="9.45" height="55.20" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2145.44" y="501.40" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 2145.44 501.40)">6'-0" POST</text>
+<line x1="2139.40" y1="558.20" x2="2145.00" y2="552.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2139.40" y1="450.20" x2="2145.00" y2="444.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2311.00" y1="555.40" x2="2324.00" y2="555.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2311.00" y1="483.40" x2="2324.00" y2="483.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2321.00" y1="555.40" x2="2321.00" y2="535.45" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2321.00" y1="503.35" x2="2321.00" y2="483.40" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2314.88" y="504.85" width="9.45" height="29.10" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2324.24" y="519.40" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 2324.24 519.40)">4'-0"</text>
+<line x1="2318.20" y1="558.20" x2="2323.80" y2="552.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2318.20" y1="486.20" x2="2323.80" y2="480.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2161.20" y1="591.40" x2="2148.20" y2="591.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2161.20" y1="555.40" x2="2148.20" y2="555.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2151.20" y1="591.40" x2="2151.20" y2="555.40" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2151.20" y1="555.40" x2="2151.20" y2="546.40" stroke="#b0121a" stroke-width="0.7"/>
+<text x="2154.44" y="543.40" font-size="9.00" text-anchor="end" fill="#b0121a" font-weight="bold" transform="rotate(-90.00 2154.44 543.40)">2'-0"</text>
+<line x1="2148.40" y1="594.20" x2="2154.00" y2="588.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2148.40" y1="558.20" x2="2154.00" y2="552.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2163.20" y1="445.40" x2="2163.20" y2="431.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2307.20" y1="445.40" x2="2307.20" y2="431.40" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="2163.20" y1="434.40" x2="2193.05" y2="434.40" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="2277.35" y1="434.40" x2="2307.20" y2="434.40" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="2194.55" y="428.28" width="81.30" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="2235.20" y="437.64" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">8'-0" O.C. MAX.</text>
+<line x1="2160.40" y1="437.20" x2="2166.00" y2="431.60" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="2304.40" y1="437.20" x2="2310.00" y2="431.60" stroke="#b0121a" stroke-width="0.9"/>
+<text x="2490.80" y="451.00" font-size="9.00" text-anchor="middle" fill="#111">RETAINED TREE</text>
+<text x="2377.40" y="538.30" font-size="9.00" text-anchor="start" fill="#111">4-in MULCH</text>
+<text x="2490.80" y="485.20" font-size="9.00" text-anchor="middle" fill="#111">NO STORAGE, PARKING,</text>
+<text x="2490.80" y="503.20" font-size="9.00" text-anchor="middle" fill="#111">GRADE CHANGE,</text>
+<text x="2490.80" y="521.20" font-size="9.00" text-anchor="middle" fill="#111">TRENCHING OR</text>
+<text x="2145.20" y="427.60" font-size="9.00" text-anchor="start" fill="#111">4'-0" ORANGE SAFETY FENCE ON 6-ft STEEL T-POSTS</text>
+<text x="2490.80" y="539.20" font-size="9.00" text-anchor="middle" fill="#111">SPOIL INSIDE THE FENCE</text>
+<text x="2128.00" y="615.00" font-size="9.00" text-anchor="start" fill="#333">REQUIRED NOTE (Checklist §6.g, verbatim): "Tree Protection fence must be installed</text>
+<text x="2128.00" y="625.40" font-size="9.00" text-anchor="start" fill="#333">prior to commencing land disturbing activities." A reasonable effort must be made to</text>
+<text x="2128.00" y="635.80" font-size="9.00" text-anchor="start" fill="#333">preserve specimen trees and trees over 5-in caliper in buffers, landscape strips and</text>
+<text x="2128.00" y="646.20" font-size="9.00" text-anchor="start" fill="#333">parking islands. The tree-protection, buffer and landscape plan must be sealed by a</text>
+<text x="2128.00" y="656.60" font-size="9.00" text-anchor="start" fill="#333">registered landscape architect, forester or arborist (§6.a) — Sheet C-7.0.</text>
+<circle cx="1031.00" cy="678.00" r="10.50" fill="#111" stroke="none"/>
+<text x="1031.00" y="682.00" font-size="12.50" text-anchor="middle" fill="#fff" font-weight="bold">10</text>
+<text x="1046.00" y="682.00" font-size="14.00" text-anchor="start" fill="#111" font-weight="bold">TYPICAL BUFFER SECTION</text>
+<text x="1592.00" y="682.00" font-size="9.50" text-anchor="end" fill="#444">SCALE 1" = 10' (no exaggeration)</text>
+<text x="1024.00" y="694.00" font-size="9.00" text-anchor="start" fill="#444">The §313(1) design basis in one picture — the 20-ft undisturbed buffer held inside the rear of the lot under a</text>
+<text x="1024.00" y="704.50" font-size="9.00" text-anchor="start" fill="#444">recorded easement</text>
+<rect x="1020.00" y="713.00" width="576.00" height="249.00" fill="none" stroke="#000" stroke-width="0.9"/>
+<polygon points="1020.00,921.68 1588.80,921.68 1588.80,962.00 1020.00,962.00" fill="url(#d_earth)" stroke="none"/>
+<polygon points="1020.00,921.68 1588.80,921.68 1588.80,917.72 1020.00,917.72" fill="url(#d_grass)" stroke="none"/>
+<polygon points="1128.00,921.68 1272.00,921.68 1272.00,734.48 1128.00,734.48" fill="url(#bufhatch)" fill-opacity="0.75" stroke="none"/>
+<line x1="1020.00" y1="921.68" x2="1588.80" y2="921.68" stroke="#5a4a30" stroke-width="1.7"/>
+<polygon points="1020.00,921.68 1020.00,795.68 1056.00,770.48 1092.00,795.68 1092.00,921.68" fill="#efe7dc" stroke="#7a6a55" stroke-width="1.1"/>
+<text x="1057.44" y="846.08" font-size="9.00" text-anchor="middle" fill="#111">ADJOINING</text>
+<text x="1057.44" y="861.92" font-size="9.00" text-anchor="middle" fill="#111">R-1 DWELLING</text>
+<line x1="1146.00" y1="921.68" x2="1146.00" y2="858.18" stroke="#6b4c2a" stroke-width="1.7"/>
+<circle cx="1146.00" cy="815.84" r="43.20" fill="#3f7a37" fill-opacity="0.28" stroke="#3f7a37" stroke-width="0.9"/>
+<line x1="1207.20" y1="921.68" x2="1207.20" y2="850.62" stroke="#6b4c2a" stroke-width="1.7"/>
+<circle cx="1207.20" cy="803.24" r="50.40" fill="#3f7a37" fill-opacity="0.28" stroke="#3f7a37" stroke-width="0.9"/>
+<line x1="1257.60" y1="921.68" x2="1257.60" y2="862.71" stroke="#6b4c2a" stroke-width="1.7"/>
+<circle cx="1257.60" cy="823.40" r="39.60" fill="#3f7a37" fill-opacity="0.28" stroke="#3f7a37" stroke-width="0.9"/>
+<line x1="1167.60" y1="921.68" x2="1167.60" y2="891.44" stroke="#6b4c2a" stroke-width="1.7"/>
+<polygon points="1167.60,884.24 1146.00,907.28 1189.20,907.28" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<polygon points="1167.60,875.63 1150.75,893.60 1184.45,893.60" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<polygon points="1167.60,867.02 1155.50,879.92 1179.70,879.92" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<polygon points="1167.60,858.41 1160.26,866.24 1174.94,866.24" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<line x1="1189.20" y1="921.68" x2="1189.20" y2="891.44" stroke="#6b4c2a" stroke-width="1.7"/>
+<polygon points="1189.20,884.24 1167.60,907.28 1210.80,907.28" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<polygon points="1189.20,875.63 1172.35,893.60 1206.05,893.60" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<polygon points="1189.20,867.02 1177.10,879.92 1201.30,879.92" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<polygon points="1189.20,858.41 1181.86,866.24 1196.54,866.24" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<line x1="1236.00" y1="921.68" x2="1236.00" y2="891.44" stroke="#6b4c2a" stroke-width="1.7"/>
+<polygon points="1236.00,884.24 1214.40,907.28 1257.60,907.28" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<polygon points="1236.00,875.63 1219.15,893.60 1252.85,893.60" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<polygon points="1236.00,867.02 1223.90,879.92 1248.10,879.92" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<polygon points="1236.00,858.41 1228.66,866.24 1243.34,866.24" fill="#2f6b46" fill-opacity="0.50" stroke="#2f6b46" stroke-width="0.6"/>
+<line x1="1066.80" y1="921.68" x2="1066.80" y2="871.78" stroke="#6b4c2a" stroke-width="1.7"/>
+<circle cx="1066.80" cy="838.52" r="34.20" fill="#3f7a37" fill-opacity="0.28" stroke="#3f7a37" stroke-width="0.9"/>
+<polygon points="1275.60,916.86 1318.80,916.86 1318.80,848.46 1275.60,848.46" fill="#fdf3e4" stroke="#111" stroke-width="1.0"/>
+<polygon points="1318.80,916.86 1318.80,848.46 1545.60,848.46 1545.60,916.86" fill="#f9e4c8" stroke="#111" stroke-width="1.4"/>
+<polygon points="1268.40,850.62 1408.80,788.48 1545.60,850.62" fill="#8d7f6c" stroke="#111" stroke-width="1.2"/>
+<polyline points="1538.40,830.46 1548.48,840.54 1538.40,850.62 1548.48,860.70 1538.40,870.78 1548.48,880.86 1538.40,890.94 1548.48,901.02 1538.40,911.10 1545.60,918.30" fill="none" stroke="#777" stroke-width="1.1"/>
+<text x="1297.20" y="880.86" font-size="9.00" text-anchor="middle" fill="#111">REAR</text>
+<text x="1297.20" y="896.70" font-size="9.00" text-anchor="middle" fill="#111">PORCH</text>
+<text x="1430.40" y="872.22" font-size="9.00" text-anchor="middle" fill="#111">ONE-STORY COTTAGE</text>
+<text x="1430.40" y="888.06" font-size="9.00" text-anchor="middle" fill="#111">RIDGE 17'-10" (PLAN A) /</text>
+<text x="1430.40" y="903.90" font-size="9.00" text-anchor="middle" fill="#111">19'-0" (PLAN B) ABOVE FFE</text>
+<line x1="1128.00" y1="959.12" x2="1128.00" y2="741.68" stroke="#111" stroke-width="1.6"/>
+<line x1="1272.00" y1="959.12" x2="1272.00" y2="741.68" stroke="#2e5e1e" stroke-width="1.6"/>
+<text x="1128.00" y="724.40" font-size="9.00" text-anchor="middle" fill="#111">REAR LOT LINE = ASSEMBLAGE BOUNDARY</text>
+<text x="1128.00" y="738.80" font-size="9.00" text-anchor="middle" fill="#111">= R-2 / R-1 ZONING LINE</text>
+<text x="1282.80" y="724.40" font-size="9.00" text-anchor="start" fill="#2e5e1e">BUFFER EASEMENT LINE =</text>
+<text x="1282.80" y="738.80" font-size="9.00" text-anchor="start" fill="#2e5e1e">20-ft REAR BUILDING SETBACK</text>
+<line x1="1128.00" y1="928.72" x2="1128.00" y2="944.72" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1272.00" y1="928.72" x2="1272.00" y2="944.72" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1128.00" y1="941.72" x2="1131.75" y2="941.72" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1268.25" y1="941.72" x2="1272.00" y2="941.72" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1133.25" y="935.60" width="133.50" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1200.00" y="944.96" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">20'-0" UNDISTURBED BUFFER</text>
+<line x1="1125.20" y1="944.52" x2="1130.80" y2="938.92" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1269.20" y1="944.52" x2="1274.80" y2="938.92" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1128.00" y1="928.72" x2="1128.00" y2="961.72" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1275.60" y1="928.72" x2="1275.60" y2="961.72" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1128.00" y1="958.72" x2="1275.60" y2="958.72" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1275.60" y1="958.72" x2="1284.60" y2="958.72" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1286.10" y="952.60" width="164.82" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1287.60" y="961.96" font-size="9.00" text-anchor="start" fill="#b0121a" font-weight="bold">20'-6" TO THE NEAREST STRUCTURE</text>
+<line x1="1125.20" y1="961.52" x2="1130.80" y2="955.92" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1272.80" y1="961.52" x2="1278.40" y2="955.92" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1020.00" y1="928.72" x2="1020.00" y2="944.72" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1128.00" y1="928.72" x2="1128.00" y2="944.72" stroke="#b0121a" stroke-width="0.4"/>
+<line x1="1020.00" y1="941.72" x2="1026.63" y2="941.72" stroke="#b0121a" stroke-width="0.7"/>
+<line x1="1121.37" y1="941.72" x2="1128.00" y2="941.72" stroke="#b0121a" stroke-width="0.7"/>
+<rect x="1028.13" y="935.60" width="91.74" height="9.45" fill="#fff" fill-opacity="0.9" stroke="none"/>
+<text x="1074.00" y="944.96" font-size="9.00" text-anchor="middle" fill="#b0121a" font-weight="bold">ADJOINING R-1 LOT</text>
+<line x1="1017.20" y1="944.52" x2="1022.80" y2="938.92" stroke="#b0121a" stroke-width="0.9"/>
+<line x1="1125.20" y1="944.52" x2="1130.80" y2="938.92" stroke="#b0121a" stroke-width="0.9"/>
+<rect x="1132.32" y="903.68" width="135.36" height="12.00" fill="#fff" fill-opacity="0.85" stroke="none"/>
+<text x="1200.00" y="910.16" font-size="9.00" text-anchor="middle" fill="#2e5e1e" font-weight="bold">NO CLEARING · NO GRADING · NO STRUCTURES · NO STORAGE</text>
+<rect x="1424.00" y="713.00" width="178.00" height="22.00" fill="#fff" fill-opacity="0.92" stroke="none"/>
+<rect x="1440.00" y="725.00" width="72.00" height="5.00" fill="#000" stroke="#000" stroke-width="0.5"/>
+<rect x="1512.00" y="725.00" width="72.00" height="5.00" fill="#fff" stroke="#000" stroke-width="0.5"/>
+<text x="1440.00" y="722.50" font-size="9.00" text-anchor="middle" fill="#111">0</text>
+<text x="1584.00" y="722.50" font-size="9.00" text-anchor="middle" fill="#111">20 ft</text>
+<text x="1028.00" y="973.00" font-size="9.00" text-anchor="start" fill="#333">Cottage homes are listed separately from detached single-family in Table 4.1, so the plan designs to the 20-ft buffer. §313(1):</text>
+<text x="1028.00" y="983.40" font-size="9.00" text-anchor="start" fill="#333">"Buffer requirements … supersede these minimum required yards" — 41,000 SF of buffer easement over 41 lots, reported separately</text>
+<text x="1028.00" y="993.80" font-size="9.00" text-anchor="start" fill="#333">from the 141,089 SF of common open space. 100'-0" + 35'-11" of tract + 100'-0" = 235'-11" against 235'-11" available at u = 230 ft.</text>
+<rect x="52.00" y="1378.00" width="1448.00" height="150.00" fill="#fff" stroke="#000" stroke-width="0.9"/>
+<text x="60.00" y="1394.00" font-size="13.00" text-anchor="start" fill="#111" font-weight="bold">LEGEND</text>
+<text x="126.00" y="1394.00" font-size="9.00" text-anchor="start" fill="#555">— every symbol drawn on this sheet appears below, and no entry below is unused (audit-2026-09-03/drawing-standards.md §3.2)</text>
+<line x1="60.00" y1="1407.00" x2="92.00" y2="1407.00" stroke="#111" stroke-width="1.6" stroke-dasharray=""/>
+<text x="98.00" y="1410.00" font-size="9.00" text-anchor="start" fill="#111">Property / lot line; HOA lane tract line</text>
+<line x1="60.00" y1="1418.70" x2="92.00" y2="1418.70" stroke="#8a8a8a" stroke-width="0.7" stroke-dasharray="7 3 2 3"/>
+<text x="98.00" y="1421.70" font-size="9.00" text-anchor="start" fill="#111">Building setback line (15 / 5 / 20 ft)</text>
+<rect x="60.00" y="1423.40" width="32.00" height="12.00" fill="url(#bufhatch)" stroke="#555" stroke-width="0.4"/>
+<text x="98.00" y="1433.40" font-size="9.00" text-anchor="start" fill="#111">20'-0" undisturbed buffer easement, on the lot</text>
+<rect x="60.00" y="1435.10" width="32.00" height="12.00" fill="#f9e4c8" stroke="#555" stroke-width="0.4"/>
+<text x="98.00" y="1445.10" font-size="9.00" text-anchor="start" fill="#111">Dwelling — conditioned body</text>
+<rect x="60.00" y="1446.80" width="32.00" height="12.00" fill="#efd2ad" stroke="#555" stroke-width="0.4"/>
+<text x="98.00" y="1456.80" font-size="9.00" text-anchor="start" fill="#111">Garage, recessed 5'-0" behind the front wall</text>
+<rect x="60.00" y="1458.50" width="32.00" height="12.00" fill="#fdf3e4" stroke="#555" stroke-width="0.4"/>
+<text x="98.00" y="1468.50" font-size="9.00" text-anchor="start" fill="#111">Covered porch; roofed open shelter</text>
+<rect x="60.00" y="1470.20" width="32.00" height="12.00" fill="#f0efe6" stroke="#555" stroke-width="0.4"/>
+<text x="98.00" y="1480.20" font-size="9.00" text-anchor="start" fill="#111">Uncovered patio</text>
+<rect x="60.00" y="1481.90" width="32.00" height="12.00" fill="url(#d_conc)" stroke="#555" stroke-width="0.4"/>
+<text x="98.00" y="1491.90" font-size="9.00" text-anchor="start" fill="#111">Concrete — walk, drive, curb, pad, footing</text>
+<rect x="60.00" y="1493.60" width="32.00" height="12.00" fill="#4a4a4a" stroke="#555" stroke-width="0.4"/>
+<text x="98.00" y="1503.60" font-size="9.00" text-anchor="start" fill="#111">Asphalt surface course / pavement in plan</text>
+<rect x="60.00" y="1505.30" width="32.00" height="12.00" fill="#6f6f6f" stroke="#555" stroke-width="0.4"/>
+<text x="98.00" y="1515.30" font-size="9.00" text-anchor="start" fill="#111">Asphalt intermediate course</text>
+<rect x="537.33" y="1400.00" width="32.00" height="12.00" fill="url(#d_gab2)" stroke="#555" stroke-width="0.4"/>
+<text x="575.33" y="1410.00" font-size="9.00" text-anchor="start" fill="#111">Graded aggregate base (GAB)</text>
+<rect x="537.33" y="1411.70" width="32.00" height="12.00" fill="url(#d_earth)" stroke="#555" stroke-width="0.4"/>
+<text x="575.33" y="1421.70" font-size="9.00" text-anchor="start" fill="#111">Compacted subgrade / undisturbed earth</text>
+<rect x="537.33" y="1423.40" width="32.00" height="12.00" fill="url(#d_grass)" stroke="#555" stroke-width="0.4"/>
+<text x="575.33" y="1433.40" font-size="9.00" text-anchor="start" fill="#111">Grass verge, lawn, landscape area</text>
+<rect x="537.33" y="1435.10" width="32.00" height="12.00" fill="url(#d_mas)" stroke="#555" stroke-width="0.4"/>
+<text x="575.33" y="1445.10" font-size="9.00" text-anchor="start" fill="#111">Masonry — sign base, piers, water table</text>
+<rect x="537.33" y="1446.80" width="32.00" height="12.00" fill="url(#d_mulch)" stroke="#555" stroke-width="0.4"/>
+<text x="575.33" y="1456.80" font-size="9.00" text-anchor="start" fill="#111">Mulch inside the tree-protection zone</text>
+<rect x="537.33" y="1458.50" width="32.00" height="12.00" fill="#8d7f6c" stroke="#555" stroke-width="0.4"/>
+<text x="575.33" y="1468.50" font-size="9.00" text-anchor="start" fill="#111">Roof, seen in section or elevation</text>
+<rect x="537.33" y="1470.20" width="32.00" height="12.00" fill="#ded3c2" stroke="#555" stroke-width="0.4"/>
+<text x="575.33" y="1480.20" font-size="9.00" text-anchor="start" fill="#111">Cast-stone sign panel and cap</text>
+<rect x="537.33" y="1481.90" width="32.00" height="12.00" fill="#efe7dc" stroke="#555" stroke-width="0.4"/>
+<text x="575.33" y="1491.90" font-size="9.00" text-anchor="start" fill="#111">Adjoining R-1 dwelling (section, for scale)</text>
+<rect x="537.33" y="1493.60" width="32.00" height="12.00" fill="#cfd6dc" stroke="#555" stroke-width="0.4"/>
+<text x="575.33" y="1503.60" font-size="9.00" text-anchor="start" fill="#111">USPS cluster box unit</text>
+<rect x="537.33" y="1505.30" width="32.00" height="12.00" fill="#2f4a66" stroke="#555" stroke-width="0.4"/>
+<text x="575.33" y="1515.30" font-size="9.00" text-anchor="start" fill="#111">Painted access aisle — no parking</text>
+<rect x="1014.67" y="1400.00" width="32.00" height="12.00" fill="#8a8a8a" stroke="#555" stroke-width="0.4"/>
+<text x="1052.67" y="1410.00" font-size="9.00" text-anchor="start" fill="#111">Steel post — sign post, fence post</text>
+<rect x="1014.67" y="1411.70" width="32.00" height="12.00" fill="#1b5fa8" stroke="#555" stroke-width="0.4"/>
+<text x="1052.67" y="1421.70" font-size="9.00" text-anchor="start" fill="#111">Accessible parking sign (R7-8 + van plaque)</text>
+<rect x="1014.67" y="1423.40" width="32.00" height="12.00" fill="#d2691e" stroke="#555" stroke-width="0.4"/>
+<text x="1052.67" y="1433.40" font-size="9.00" text-anchor="start" fill="#111">Tree-protection fence, 4'-0", on steel posts</text>
+<circle cx="1030.67" cy="1441.10" r="6.00" fill="#3f7a37" fill-opacity="0.28" stroke="#3f7a37" stroke-width="0.8"/>
+<text x="1052.67" y="1445.10" font-size="9.00" text-anchor="start" fill="#111">Tree retained or supplemental canopy planting</text>
+<circle cx="1030.67" cy="1452.80" r="6.00" fill="#2f6b46" fill-opacity="0.28" stroke="#2f6b46" stroke-width="0.8"/>
+<text x="1052.67" y="1456.80" font-size="9.00" text-anchor="start" fill="#111">Supplemental evergreen screen planting</text>
+<circle cx="1030.67" cy="1465.50" r="3.00" fill="#b00020" stroke="#fff" stroke-width="0.6"/>
+<text x="1052.67" y="1468.50" font-size="9.00" text-anchor="start" fill="#111">Proposed fire hydrant</text>
+<line x1="1014.67" y1="1477.20" x2="1046.67" y2="1477.20" stroke="#444" stroke-width="0.7" stroke-dasharray="16 3 3 3"/>
+<text x="1052.67" y="1480.20" font-size="9.00" text-anchor="start" fill="#111">Centreline</text>
+<line x1="1014.67" y1="1488.90" x2="1046.67" y2="1488.90" stroke="#b0121a" stroke-width="0.7" stroke-dasharray=""/>
+<text x="1052.67" y="1491.90" font-size="9.00" text-anchor="start" fill="#111">Dimension line (US survey feet and inches)</text>
+<rect x="1512.00" y="1014.00" width="1034.00" height="514.00" fill="#fff" stroke="#000" stroke-width="0.9"/>
+<text x="1520.00" y="1031.00" font-size="13.00" text-anchor="start" fill="#111" font-weight="bold">GENERAL NOTES — CIVIL DETAILS</text>
+<text x="1520.00" y="1044.00" font-size="9.00" text-anchor="start" fill="#111">1. STATUS AND SCOPE. CONCEPT DETAILS prepared by the owner for a rezoning application under Lilburn Zoning Ordinance 2023-603 §1003. NOT construction documents and NOT SEALED. Every pavement section, curb,</text>
+<text x="1530.00" y="1054.00" font-size="9.00" text-anchor="start" fill="#111">footing, slope and structural element must be designed and sealed by a Georgia PE, and the tree-protection and buffer details by a registered landscape architect, forester or arborist, before any permit.</text>
+<text x="1530.00" y="1064.00" font-size="9.00" text-anchor="start" fill="#111">Every statement of conformity reads "appears consistent with"; none is a certification.</text>
+<text x="1520.00" y="1076.00" font-size="9.00" text-anchor="start" fill="#111">2. PRIVATE STREET STANDARD. The lane is a private street in an HOA tract. Checklist §4.s: "Label new streets as 'Private' unless previously approved by Gwinnett and City of Lilburn. All components of</text>
+<text x="1530.00" y="1086.00" font-size="9.00" text-anchor="start" fill="#111">private streets and alleys must meet minimum standards for public street." Details 2 and 3 are drawn to Gwinnett County UDO §900-70.4.A as the PRESUMPTIVE public-street standard because the Lilburn</text>
+<text x="1530.00" y="1096.00" font-size="9.00" text-anchor="start" fill="#111">Development Regulations (Code Appendix B) are not retrievable online. VERIFY the required section, curb profile, sidewalk thickness and horizontal-curve standard at the pre-application conference.</text>
+<text x="1520.00" y="1108.00" font-size="9.00" text-anchor="start" fill="#111">3. PAVING. Checklist §7.i requires a typical paving section for parking areas and drives at a minimum of 4 in GAB and 2 in Type E or F; §4.t requires the materials to be labelled with standard details.</text>
+<text x="1530.00" y="1118.00" font-size="9.00" text-anchor="start" fill="#111">Detail 5 gives three: lane, turnarounds and entrance apron at 8 in GAB + 2 in 19 mm Superpave + 1¼ in 9.5 mm Superpave Type II; driveways at 6 in concrete on 4 in GAB (asphalt option 2 in on 4 in, the §7.i</text>
+<text x="1530.00" y="1128.00" font-size="9.00" text-anchor="start" fill="#111">minimum); guest and kiosk bays at 2 in on 6 in GAB, pervious pavers an owner option (Table 4.2). GDOT Standard Specifications 2021.</text>
+<text x="1520.00" y="1140.00" font-size="9.00" text-anchor="start" fill="#111">4. SIDEWALKS — ONE OPEN QUESTION, STATED. A 5'-0" walk is carried on the north-east side of the whole lane and the entry drive, and on the south-west side from u = 530 ft to the terminus (detail 3). As</text>
+<text x="1530.00" y="1150.00" font-size="9.00" text-anchor="start" fill="#111">drawn the walk sits 2'-0" from the FACE of curb, i.e. 1'-6" behind the back of a 6-in curb; the checklist asks for 2 ft off the BACK of curb, which needs 2'-6" from the face. The north-east half-section is</text>
+<text x="1530.00" y="1160.00" font-size="9.00" text-anchor="start" fill="#111">18'-9" at its narrowest (u = 149.5 ft) against the 18'-0" used, so the shift fits there; the south-west half-section is 18'-4" at u = 530 ft, so it does not without taking 2 in from the lot depth. Over u =</text>
+<text x="1530.00" y="1170.00" font-size="9.00" text-anchor="start" fill="#111">230–530 ft the south-west half-width is 16'-11" to 18'-4" and a second walk does not fit at all. The question is put to staff rather than drawn away.</text>
+<text x="1520.00" y="1182.00" font-size="9.00" text-anchor="start" fill="#111">5. GRADES. Street grades shall not exceed 12 %. REQUIRED NOTE (Checklist §7.k, verbatim): "12% to 15% street grades require an 'As Graded' survey before installation of the curb." IFC 2024 (GA) Appendix</text>
+<text x="1530.00" y="1192.00" font-size="9.00" text-anchor="start" fill="#111">D103.2 limits the fire apparatus access road to 10 % unless approved. The steepest EXISTING ground grade on the lane centreline is 10.9 % at u ≈ 1,494 ft (3DEP, approx.). The FINISHED profile is not</text>
+<text x="1530.00" y="1202.00" font-size="9.00" text-anchor="start" fill="#111">designed here — see Sheet C-5.0.</text>
+<text x="1520.00" y="1214.00" font-size="9.00" text-anchor="start" fill="#111">6. FIRE ACCESS. IFC 2024, as adopted and modified by Ga. Comp. R. &amp; Regs. R. 120-3-3-.04. Table D103.4: 0–150 ft, 20 ft wide, no turnaround; 151–500 ft, 20 ft + a 120-ft hammerhead; 501–750 ft, 26 ft +</text>
+<text x="1530.00" y="1224.00" font-size="9.00" text-anchor="start" fill="#111">turnaround; over 750 ft, "Special approval required". The travelled way is 1,754 ft from the Arcado Rd right-of-way, so SPECIAL APPROVAL IS REQUESTED and must be obtained in writing from the Gwinnett</text>
+<text x="1530.00" y="1234.00" font-size="9.00" text-anchor="start" fill="#111">County Fire Marshal before the Planning Commission hearing. Three hammerhead turnarounds (detail 4), each two 20'-0" × 60'-0" legs = 142'-0" overall, exceed Figure D103.1's 120-ft hammerhead; runs between</text>
+<text x="1530.00" y="1244.00" font-size="9.00" text-anchor="start" fill="#111">intersections are 594.5 / 570.0 / 580.0 ft. D107.1 as replaced by 120-3-3-.04 requires two access roads only above 120 dwelling units, so at 41 units it is NOT triggered and NFPA 13D sprinklers are a</text>
+<text x="1530.00" y="1254.00" font-size="9.00" text-anchor="start" fill="#111">VOLUNTARY offer. "NO PARKING — FIRE LANE" signs both sides (D103.6). The 22-ft width against Table D103.4's 26 ft is the relief item; 26'-0" of pavement is offered from u ≈ 1,010 ft where the tract reaches</text>
+<text x="1530.00" y="1264.00" font-size="9.00" text-anchor="start" fill="#111">40'-0".</text>
+<text x="1520.00" y="1276.00" font-size="9.00" text-anchor="start" fill="#111">7. SETBACKS AND BUFFER. Table 4.1 (R-2): lot area 3,000 SF min (5,000 provided), width 50 ft (50), depth 100 ft (100), front 15 ft from the right-of-way, side 5 ft (6 provided), rear 20 ft; buffer abutting</text>
+<text x="1530.00" y="1286.00" font-size="9.00" text-anchor="start" fill="#111">R-1 is 0 ft for detached single-family and 20 ft for all other allowed dwelling types. Cottage homes are listed separately from detached single-family, so the plan designs to the 20-ft buffer and states</text>
+<text x="1530.00" y="1296.00" font-size="9.00" text-anchor="start" fill="#111">the interpretation. §313(1): "Buffer requirements … supersede these minimum required yards" — the buffer is held inside the rear 20 ft of the lot, coincident with the rear yard, in a recorded easement</text>
+<text x="1530.00" y="1306.00" font-size="9.00" text-anchor="start" fill="#111">(details 1 and 10). Table 4.2 requires front-loaded garages recessed ≥ 5 ft behind the front wall; 5'-0" is provided. THE INTERPRETATION IS TO BE CONFIRMED AT THE PRE-APPLICATION CONFERENCE; the fallback</text>
+<text x="1530.00" y="1316.00" font-size="9.00" text-anchor="start" fill="#111">(buffer in a separate tract, 50 × 82 lots, §1005 variance) is Sheet C-2.4.</text>
+<text x="1520.00" y="1328.00" font-size="9.00" text-anchor="start" fill="#111">8. SIGNS. One ground-mounted monument entry sign is proposed (detail 7). NO WALL SIGNS ARE PROPOSED on any dwelling, on the clubhouse or on any accessory structure. REQUIRED NOTE (Checklist §4.q,</text>
+<text x="1530.00" y="1338.00" font-size="9.00" text-anchor="start" fill="#111">verbatim): "All signs shall be permitted separately." A sign easement may be required. The 32-SF face and 6'-0" height are the applicant's voluntary condition, not a cited ordinance limit — the Lilburn</text>
+<text x="1530.00" y="1348.00" font-size="9.00" text-anchor="start" fill="#111">sign article has not been obtained. VERIFY the article, edition, measurement method, setback and illumination limits.</text>
+<text x="1520.00" y="1360.00" font-size="9.00" text-anchor="start" fill="#111">9. MAIL DELIVERY. REQUIRED NOTE (Checklist §4.r): a cluster-box system is proposed for the entire project and one street name may serve to assign all house numbers. Contact the Lilburn Post Office Growth</text>
+<text x="1530.00" y="1370.00" font-size="9.00" text-anchor="start" fill="#111">Manager for mail delivery and mailbox requirements. The accessory structure and its protection from the elements are detail 8.</text>
+<text x="1520.00" y="1382.00" font-size="9.00" text-anchor="start" fill="#111">10. TREE PROTECTION. REQUIRED NOTE (Checklist §6.g, verbatim): "Tree Protection fence must be installed prior to commencing land disturbing activities." Fence at the limits of disturbance, the buffer line</text>
+<text x="1530.00" y="1392.00" font-size="9.00" text-anchor="start" fill="#111">and the drip line of retained trees (detail 9). Tree density unit calculations are not required of an SFR subdivision (§6.i). No tree survey has been performed; one is required with the Land Disturbance</text>
+<text x="1530.00" y="1402.00" font-size="9.00" text-anchor="start" fill="#111">Permit.</text>
+<text x="1520.00" y="1414.00" font-size="9.00" text-anchor="start" fill="#111">11. ACCESSIBILITY. The 2010 ADA Standards govern the common facilities (§208 parking, §502 space and aisle, §402–403 routes); PROWAG (2023 final rule, 36 CFR 1190) is applied by policy on the private lane</text>
+<text x="1530.00" y="1424.00" font-size="9.00" text-anchor="start" fill="#111">and is mandatory at the Arcado Rd public sidewalk; ICC A117.1-2017 governs the reach ranges at the cluster boxes. All 41 cottages are offered with zero-step entries, 36-in doors and blocking for grab bars</text>
+<text x="1530.00" y="1434.00" font-size="9.00" text-anchor="start" fill="#111">as a voluntary condition; §734 applies to attached dwellings only.</text>
+<text x="1520.00" y="1446.00" font-size="9.00" text-anchor="start" fill="#111">12. LETTERING, SCALES AND UNITS. Minimum lettering is 9.0 pt — 0.125 in of overall glyph height and 0.089 in of cap height at full size, 0.058 in at the 46.4 % reduction to 11 × 17. The scale is stated at</text>
+<text x="1530.00" y="1456.00" font-size="9.00" text-anchor="start" fill="#111">every detail and a graphic scale is drawn on details 1, 2, 3, 4, 5, 7, 8 and 10. Dimensions are US customary in architectural notation; areas are SF with the area type named. Site-local coordinates (u</text>
+<text x="1530.00" y="1466.00" font-size="9.00" text-anchor="start" fill="#111">along the strip from the Arcado Rd right-of-way, v across, feet) are those of FACTS.md §1; detail 1's north arrow is drawn for that detail's 180°-rotated frame and detail 4 carries true plan north.</text>
+<text x="1520.00" y="1478.00" font-size="9.00" text-anchor="start" fill="#111">13. SOURCES. GEOMETRY — data/layout.json and data/plans.json, regenerated 2026-09-03: detail 1 is lots 7 and 8; details 2 and 3 are lane stations u = 300 and 700 ft; detail 4 is hammerheads[1] at u = 1,110</text>
+<text x="1530.00" y="1488.00" font-size="9.00" text-anchor="start" fill="#111">ft; details 6, 7 and 8 are the amenity records. Every dimension on this sheet is regenerated by tools/details.py — none is typed by hand. SPECIFICATIONS — docs/12 §32 12 16, §32 16 13, §10 14 00. FIRE —</text>
+<text x="1530.00" y="1498.00" font-size="9.00" text-anchor="start" fill="#111">docs/08 Memo E. CODE — Lilburn Zoning Ordinance 2023-603; Lilburn Site Development Plan Review Checklist; IFC 2024 as modified by Ga. Comp. R. &amp; Regs. R. 120-3-3-.04; Gwinnett County UDO §900-70; GDOT</text>
+<text x="1530.00" y="1508.00" font-size="9.00" text-anchor="start" fill="#111">Specs 2021; 2010 ADA Standards.</text>
+</svg>
+<!-- Disclaimer: This is an AI-generated analysis for preliminary planning purposes. All findings must be verified by a licensed professional before use in design, permitting, or regulatory submissions. -->
+<!-- architecture-studio:requires-disclaimer -->

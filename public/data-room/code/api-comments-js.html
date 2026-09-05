@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Public Comment Board Endpoint — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">web page</p>
+    <div class="doc-meta">2026-07-17 <span class="dot">·</span> JavaScript</div>
+    
+    <h1>Public Comment Board Endpoint</h1><p class="src-note">JavaScript · 161 lines · <a href="/data-room/src/api/comments.js">download the raw file</a></p><pre><code>// api/comments.js
+// Pre-moderated public comment board — public endpoint.
+//
+// Required environment variables (set in the Vercel project):
+//   BLOB_READ_WRITE_TOKEN  — read/write token for the linked Vercel Blob store.
+//                            Auto-read by the @vercel/blob SDK; never hard-code it.
+//   MODERATION_TOKEN       — admin secret used by api/moderate.js (not used here,
+//                            documented for completeness of the feature).
+//
+// Storage model (two stable public JSON blobs, overwritten in place):
+//   comments/approved.json — JSON array of approved comments (public)
+//   comments/pending.json  — JSON array of pending comments (moderation queue)
+// Comment shape: { id, name, role, comment, ts }  (ts = new Date().toISOString())
+
+import { put, list } from &#x27;@vercel/blob&#x27;;
+
+const APPROVED = &#x27;comments/approved.json&#x27;;
+const PENDING = &#x27;comments/pending.json&#x27;;
+
+const MAX_PENDING = 1000;
+const ROLES = [&#x27;resident&#x27;, &#x27;business&#x27;, &#x27;planner&#x27;];
+
+// Read a JSON-array blob by exact pathname. Returns [] when it does not exist
+// yet (first run) or on any read/parse error.
+async function readList(pathname) {
+  try {
+    const { blobs } = await list({ prefix: pathname, limit: 1 });
+    if (!blobs || blobs.length === 0) return [];
+    // Blob public URLs are CDN-cached (default 30 days) at a STABLE pathname, so
+    // a plain re-fetch after an overwrite returns stale content. Bust the CDN
+    // cache key with a unique query param so every read gets the latest version.
+    const fresh = blobs[0].url + (blobs[0].url.includes(&#x27;?&#x27;) ? &#x27;&amp;&#x27; : &#x27;?&#x27;) + &#x27;_ts=&#x27; + Date.now();
+    const r = await fetch(fresh, { cache: &#x27;no-store&#x27; });
+    if (!r.ok) return [];
+    const data = await r.json();
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error(&#x27;readList error&#x27;, pathname, e);
+    return [];
+  }
+}
+
+// Overwrite a JSON-array blob at a stable pathname (no random suffix).
+async function writeList(pathname, arr) {
+  await put(pathname, JSON.stringify(arr), {
+    access: &#x27;public&#x27;,
+    addRandomSuffix: false,
+    contentType: &#x27;application/json&#x27;,
+    allowOverwrite: true,
+    cacheControlMaxAge: 0, // minimize CDN caching of this mutable list
+  });
+}
+
+// Normalize a stored record to the public comment shape.
+function toPublic(c) {
+  return {
+    id: c.id,
+    name: c.name,
+    role: c.role,
+    comment: c.comment,
+    ts: c.ts,
+  };
+}
+
+// Robustly obtain a parsed JSON body from a Vercel Node request.
+async function readBody(req) {
+  if (req.body &amp;&amp; typeof req.body === &#x27;object&#x27;) return req.body;
+  if (typeof req.body === &#x27;string&#x27; &amp;&amp; req.body.length) {
+    try {
+      return JSON.parse(req.body);
+    } catch {
+      return {};
+    }
+  }
+  // Fall back to reading the raw request stream.
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(typeof chunk === &#x27;string&#x27; ? Buffer.from(chunk) : chunk);
+  }
+  const raw = Buffer.concat(chunks).toString(&#x27;utf8&#x27;).trim();
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
+function newId() {
+  return (
+    globalThis.crypto?.randomUUID?.() ??
+    String(Date.now()) + Math.random().toString(16).slice(2)
+  );
+}
+
+export default async function handler(req, res) {
+  try {
+    if (req.method === &#x27;GET&#x27;) {
+      const approved = await readList(APPROVED);
+      // Stored newest-first; expose mapped to the public shape, newest first.
+      const comments = approved.map(toPublic);
+      res.setHeader(&#x27;Cache-Control&#x27;, &#x27;public, s-maxage=30, max-age=30&#x27;);
+      res.status(200).json({ comments });
+      return;
+    }
+
+    if (req.method === &#x27;POST&#x27;) {
+      const body = await readBody(req);
+
+      // Honeypot: any non-empty website field means a bot. Silently drop.
+      if (typeof body.website === &#x27;string&#x27; &amp;&amp; body.website.trim().length &gt; 0) {
+        res.status(200).json({ ok: true, pending: true });
+        return;
+      }
+
+      // Validate comment (required, 4..2000 after trim).
+      const rawComment = typeof body.comment === &#x27;string&#x27; ? body.comment.trim() : &#x27;&#x27;;
+      if (rawComment.length &lt; 4 || rawComment.length &gt; 2000) {
+        res.status(400).json({ error: &#x27;comment must be between 4 and 2000 characters&#x27; });
+        return;
+      }
+
+      // name optional, trimmed, capped at 80 chars.
+      let name = typeof body.name === &#x27;string&#x27; ? body.name.trim().slice(0, 80) : &#x27;&#x27;;
+
+      // role must be one of the allowed values; default &#x27;resident&#x27;.
+      let role = typeof body.role === &#x27;string&#x27; ? body.role : &#x27;&#x27;;
+      if (!ROLES.includes(role)) role = &#x27;resident&#x27;;
+
+      // Defense-in-depth: strip angle brackets from user-rendered text.
+      const strip = (s) =&gt; s.replace(/[&lt;&gt;]/g, &#x27;&#x27;);
+      name = strip(name);
+      const comment = strip(rawComment);
+
+      const record = {
+        id: newId(),
+        name,
+        role,
+        comment,
+        ts: new Date().toISOString(),
+      };
+
+      const pending = await readList(PENDING);
+      if (pending.length &gt;= MAX_PENDING) {
+        res.status(429).json({ error: &#x27;queue full&#x27; });
+        return;
+      }
+      pending.unshift(record); // newest first
+      await writeList(PENDING, pending);
+
+      res.status(200).json({ ok: true, pending: true });
+      return;
+    }
+
+    res.setHeader(&#x27;Allow&#x27;, &#x27;GET, POST&#x27;);
+    res.status(405).json({ error: &#x27;method not allowed&#x27; });
+  } catch (e) {
+    console.error(&#x27;comments handler error&#x27;, e);
+    res.status(500).json({ error: &#x27;server error&#x27; });
+  }
+}
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>api/comments.js</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

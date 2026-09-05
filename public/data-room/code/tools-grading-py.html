@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Sheet C-3.0 grading, drainage and stormwater concept — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Sheet C-3.0 grading, drainage and stormwater concept</h1><p class="src-note">Python · 1,481 lines · <a href="/data-room/src/submission/tools/grading.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Sheet C-3.0 &quot;GRADING, DRAINAGE AND STORMWATER CONCEPT&quot; — The Cottages at Arcado Springs.
+
+    python3 tools/grading.py        -&gt;  drawings/grading-drainage.svg + .png
+
+ARCH D 36 x 24 in at 1&quot; = 60&#x27;, drawn on tools/sitebase.py in the site-local (u, v) system so
+that it overlays Sheet C-0 (existing conditions) and Sheet C-2.0 (master concept plan) exactly.
+
+WHY THIS SHEET EXISTS
+The 2026 Lilburn &quot;Application Instructions&quot; item 8 requires &quot;existing AND PROPOSED topography ...
+and drainage (approximate location of ponds and structures)&quot;; the 2026-09-03 completeness audit
+records the whole of it as missing (item M10), and the drawing-standards audit section 3.1 sets
+the content of the C-3.0 row.  This sheet carries:
+
+  * proposed 2-ft contours over screened existing 2-ft contours, tying to existing at the
+    limits of disturbance;
+  * a drainage-area map with the pre- and the post-development basins and their divides;
+  * both detention basins with top of bank (= the 100-year ponding limit), basin bottom, the
+    100-year ponding elevation, a forebay, an outlet control structure, an 8&#x27;-0&quot; minimum
+    earthen-dam top width, an emergency spillway, a 10-ft drainage easement outside the
+    100-year ponding limit and a 30-ft BMP access easement carrying a 15-ft access road at
+    not more than 20 % (City of Lilburn Site Development Plan Review Checklist section 11.i);
+  * storm structures, pipe runs, headwalls and outfalls with a pipe chart (checklist 10.c);
+  * limits of disturbance with the disturbed acreage stated (checklist 4.e);
+  * the receiving-water note (Jackson Creek headwaters, GAR030701030315, Georgia 2024 303(d)
+    list) with the runoff-reduction and water-quality approach; and
+  * a LANE PROFILE band at 1&quot; = 60&#x27; horizontal / 1&quot; = 10&#x27; vertical showing the proposed grade
+    line against existing ground, because existing ground on the lane centreline reaches
+    11.00 % and the package claims street grades of 12 % or less
+    (checklist 7.k; audit-2026-09-03/site-geometry.md item SG-20).
+
+WHAT IS COMPUTED HERE AND WHAT IS READ
+Read, never re-derived: the basin volumes, the disturbed area, the impervious area, the water
+quality volume and every plan geometry come from data/layout.json as it stands at run time
+(regenerated 2026-09-03 — older numbers in docs/ and in the audits are stale).  Computed here,
+and only here: the proposed vertical alignment of the lane, the proposed ground surface and its
+2-ft contours, the earthwork balance, the drainage-area split and the storm-pipe chart.  The
+existing surface is the same bilinear interpolation of the USGS 3DEP samples in
+data/topo-samples.json that tools/siteplan.py used to build the existing contours, so the
+proposed contours tie to the existing ones by construction.
+
+DRAFT — NOT SEALED.  Grading and drainage design must be sealed by a Georgia registered
+professional engineer; topography is approximate until a topographic survey is performed.
+&quot;&quot;&quot;
+import math
+import os
+import sys
+from collections import defaultdict
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import sitebase as sb                                       # noqa: E402
+
+L = sb.LAYOUT
+M = L[&#x27;metrics&#x27;]
+SW_ORD = L[&#x27;stormwater&#x27;]
+
+# =========================================================================== 1. existing surface
+_TS = sb.TOPO[&#x27;samples&#x27;]
+_TU = sorted(set(t[&#x27;u&#x27;] for t in _TS))
+_TV = sorted(set(t[&#x27;v&#x27;] for t in _TS))
+_ZG = {(t[&#x27;u&#x27;], t[&#x27;v&#x27;]): t[&#x27;z_ft&#x27;] for t in _TS}
+
+
+def ground(u, v):
+    &quot;&quot;&quot;Existing ground, NAVD88 ft — bilinear over the 100 x 50-ft USGS 3DEP grid.
+    Identical to the interpolation tools/siteplan.py used for the existing 2-ft contours.&quot;&quot;&quot;
+    u = min(max(u, _TU[0]), _TU[-1])
+    v = min(max(v, _TV[0]), _TV[-1])
+    i = min(max(int((u - _TU[0]) // 100), 0), len(_TU) - 2)
+    j = min(max(int((v - _TV[0]) // 50), 0), len(_TV) - 2)
+    u0, u1, v0, v1 = _TU[i], _TU[i + 1], _TV[j], _TV[j + 1]
+    fu, fv = (u - u0) / (u1 - u0), (v - v0) / (v1 - v0)
+    return ((1 - fu) * (1 - fv) * _ZG[(u0, v0)] + fu * (1 - fv) * _ZG[(u1, v0)]
+            + (1 - fu) * fv * _ZG[(u0, v1)] + fu * fv * _ZG[(u1, v1)])
+
+
+# =========================================================================== 2. proposed lane profile
+LANE_CL = [tuple(p) for p in L[&#x27;lane&#x27;][&#x27;centerline&#x27;]]
+ENTRY_CL = [tuple(p) for p in L[&#x27;lane&#x27;][&#x27;entry_drive&#x27;][&#x27;centerline&#x27;]]
+GP = [(float(u), float(z)) for u, z in L[&#x27;lane&#x27;][&#x27;ground_profile&#x27;]]     # existing ground, lane C/L
+U_PROF0, U_PROF1 = GP[0][0], GP[-1][0]                                  # 149 .. 1699
+
+
+def vc(u):
+    return sb.interp_v(LANE_CL, u)
+
+
+def ex_prof(u):
+    return sb.interp_v(GP, u)
+
+
+# Vertical alignment.  Four tangents and three parabolic vertical curves, chosen so that the
+# proposed grade line balances cut against fill on the lane centreline (mean deviation 0.00 ft)
+# while holding every grade under 6 % — against existing ground that reaches 11.00 %.
+PVI = [(149.5, 944.20), (830.0, 939.80), (1160.0, 951.00), (1470.0, 934.00), (1700.0, 945.00)]
+VC_LEN = [150.0, 150.0, 150.0]                       # vertical-curve lengths at PVI 2, 3, 4
+GRADE = [(PVI[i + 1][1] - PVI[i][1]) / (PVI[i + 1][0] - PVI[i][0]) for i in range(len(PVI) - 1)]
+
+
+def prof(u):
+    &quot;&quot;&quot;Proposed lane centreline elevation (NAVD88 ft).&quot;&quot;&quot;
+    for i in range(1, len(PVI) - 1):
+        Lv, (pu, pz) = VC_LEN[i - 1], PVI[i]
+        if abs(u - pu) &lt;= Lv / 2.0:
+            g1, g2 = GRADE[i - 1], GRADE[i]
+            x = u - (pu - Lv / 2.0)
+            return pz + g1 * (x - Lv / 2.0) + (g2 - g1) / (2.0 * Lv) * x * x
+    for i in range(len(PVI) - 1):
+        if PVI[i][0] &lt;= u &lt;= PVI[i + 1][0]:
+            return PVI[i][1] + GRADE[i] * (u - PVI[i][0])
+    return PVI[0][1] if u &lt; PVI[0][0] else PVI[-1][1]
+
+
+def grade_pct(u, dx=1.0):
+    return (prof(u + dx) - prof(u - dx)) / (2.0 * dx) * 100.0
+
+
+def _max_run(fn, u0, u1, step):
+    best, at = 0.0, u0
+    u = u0
+    while u &lt;= u1 - step:
+        g = (fn(u + step) - fn(u)) / step * 100.0
+        if abs(g) &gt; abs(best):
+            best, at = g, u
+        u += 10.0
+    return best, at
+
+
+EX_GMAX, EX_GMAX_U = _max_run(ex_prof, U_PROF0, U_PROF1, 10.0)          # 11.00 % at u = 999
+EX_GMAX50, EX_GMAX50_U = _max_run(ex_prof, U_PROF0, U_PROF1, 50.0)
+PR_GMAX, PR_GMAX_U = _max_run(prof, PVI[0][0], PVI[-1][0], 10.0)
+DEV = [(u, prof(u) - ex_prof(u)) for u in [U_PROF0 + 5 * k for k in range(int((U_PROF1 - U_PROF0) / 5) + 1)]]
+DEV_MAX = max(DEV, key=lambda t: abs(t[1]))
+DEV_MEAN = sum(d for _, d in DEV) / len(DEV)
+
+# Entry drive: a uniform grade from the Arcado Rd right-of-way (existing pavement edge) up to
+# the lane crest at u = 149.5.  The drive fills the shallow front swale at u ~ 84.
+ENTRY_RW = ENTRY_CL[0]
+ENTRY_Z0 = round(ground(ENTRY_RW[0], ENTRY_RW[1]), 1)
+ENTRY_LEN = sum(sb.dist(ENTRY_CL[i], ENTRY_CL[i + 1]) for i in range(len(ENTRY_CL) - 1))
+ENTRY_GRADE = (PVI[0][1] - ENTRY_Z0) / ENTRY_LEN * 100.0
+
+# =========================================================================== 3. corridor + LOD
+BND = sb.BOUNDARY
+BUF = 20.0                                            # 20-ft perimeter buffer = limit of grading
+CREEK_U0, CREEK_U1 = 1280.0, 1480.0                   # preserved creek-woods tract (SW side)
+CREEK_V = -135.0
+
+
+def lod_polygon():
+    &quot;&quot;&quot;Limits of disturbance: the Arcado Rd right-of-way on the front, the 20-ft undisturbed
+    perimeter buffer on the two long lines and the rear line, and the preserved creek-woods
+    tract notched out of the southwest side.&quot;&quot;&quot;
+    us = [0.0] + [float(u) for u in range(20, int(sb.U_REAR - BUF), 20)] + [sb.U_REAR - BUF]
+    ne = [(u, sb.NE(u) - BUF) for u in us]
+    sw = []
+    for u in reversed(us):
+        if CREEK_U0 &lt;= u &lt;= CREEK_U1:
+            sw.append((u, CREEK_V))
+        else:
+            sw.append((u, sb.SW(u) + BUF))
+    # square the notch off at its two ends
+    out, prev = [], None
+    for p in sw:
+        if prev is not None and abs(p[1] - prev[1]) &gt; 20:
+            out.append((prev[0], p[1]) if prev[0] &lt; p[0] else (p[0], prev[1]))
+        out.append(p)
+        prev = p
+    front = [tuple(p) for p in sb.FRONT_LINE]
+    return ne + out + list(reversed(front))[1:-1]
+
+
+LOD = lod_polygon()
+
+# design centreline: the entry drive then the lane, at 10-ft stations, each with a design elevation
+CORRIDOR = []
+for i in range(0, int(ENTRY_LEN) + 1, 10):
+    t = i / ENTRY_LEN
+    k = t * (len(ENTRY_CL) - 1)
+    a, b = ENTRY_CL[int(k)], ENTRY_CL[min(int(k) + 1, len(ENTRY_CL) - 1)]
+    f = k - int(k)
+    p = (a[0] + f * (b[0] - a[0]), a[1] + f * (b[1] - a[1]))
+    CORRIDOR.append((p[0], p[1], ENTRY_Z0 + (PVI[0][1] - ENTRY_Z0) * t))
+for u in range(150, int(PVI[-1][0]) + 1, 10):
+    CORRIDOR.append((float(u), vc(u), prof(float(u))))
+
+PAVE_HALF = 11.0                                      # 22-ft pavement, crowned at 2 %
+CROWN = 0.02
+
+
+def _taper(u, side):
+    &quot;&quot;&quot;Distance from the pavement edge out to the limit of disturbance, on one side.&quot;&quot;&quot;
+    uu = min(max(u, 0.0), sb.U_REAR - BUF)
+    if side &gt; 0:
+        t = (sb.NE(uu) - BUF) - vc(max(uu, 150.0)) - PAVE_HALF
+    else:
+        t = vc(max(uu, 150.0)) - (sb.SW(uu) + BUF) - PAVE_HALF
+    return max(t, 25.0)
+
+
+def corridor_z(u, v):
+    &quot;&quot;&quot;Proposed ground before the basins are cut: the existing surface shifted vertically by
+    the lane&#x27;s cut or fill, the shift decaying to zero at the limit of disturbance, with the
+    22-ft crowned pavement modelled inside the pavement edges.&quot;&quot;&quot;
+    best, bd = None, 1e18
+    for c in CORRIDOR:
+        d = (c[0] - u) ** 2 + (c[1] - v) ** 2
+        if d &lt; bd:
+            bd, best = d, c
+    a = math.sqrt(bd)
+    zc = best[2]
+    if a &lt;= PAVE_HALF:
+        return zc - CROWN * a
+    z_edge = zc - CROWN * PAVE_HALF
+    side = 1 if v &gt; best[1] else -1
+    d_edge = z_edge - ground(best[0], best[1] + side * PAVE_HALF)
+    T = _taper(best[0], side)
+    w = max(0.0, 1.0 - (a - PAVE_HALF) / T)
+    return ground(u, v) + d_edge * w
+
+
+# =========================================================================== 4. detention basins
+def _rect_bounds(poly):
+    us = [p[0] for p in poly]
+    vs = [p[1] for p in poly]
+    return min(us), max(us), min(vs), max(vs)
+
+
+PONDS = []
+for i, p in enumerate(L[&#x27;ponds&#x27;], 1):
+    u0, u1, v0, v1 = _rect_bounds([tuple(q) for q in p[&#x27;polygon&#x27;]])
+    t0, t1, tv0, tv1 = _rect_bounds([tuple(q) for q in p[&#x27;tract_polygon&#x27;]])
+    PONDS.append({
+        &#x27;n&#x27;: i, &#x27;name&#x27;: &#x27;POND %d&#x27; % i, &#x27;u0&#x27;: u0, &#x27;u1&#x27;: u1, &#x27;v0&#x27;: v0, &#x27;v1&#x27;: v1,
+        &#x27;tract&#x27;: (t0, t1, tv0, tv1), &#x27;tract_poly&#x27;: [tuple(q) for q in p[&#x27;tract_polygon&#x27;]],
+        &#x27;tract_sf&#x27;: int(round(abs(sb.poly_area([tuple(q) for q in p[&#x27;tract_polygon&#x27;]])))),
+        &#x27;tob_dims&#x27;: p[&#x27;top_of_bank_ft&#x27;], &#x27;storage_cf&#x27;: p[&#x27;est_storage_cf&#x27;], &#x27;depth&#x27;: 6.0,
+        &#x27;area_sf&#x27;: p[&#x27;area_sf&#x27;],
+    })
+# Design elevations.  Top of bank is set at the 100-year ponding limit so that the storage read
+# from data/layout.json (top of bank to basin bottom, 6-ft depth, 3:1 side slopes) is the volume
+# available below the 100-year water surface; the earthen embankment crest is carried 1&#x27;-6&quot;
+# higher for the freeboard the checklist requires at section 11.i.8.
+PONDS[0].update({&#x27;tob&#x27;: 936.50, &#x27;bottom&#x27;: 930.50, &#x27;dam&#x27;: 938.00, &#x27;spillway&#x27;: 937.00,
+                 &#x27;ocs&#x27;: (812.0, -186.0), &#x27;fb&#x27;: (794.0, 828.0, -166.0, -146.0), &#x27;fb_depth&#x27;: 2.0,
+                 &#x27;hw&#x27;: (805.0, -206.0), &#x27;apron&#x27;: (800.0, -212.0), &#x27;spread&#x27;: (796.0, -214.0),
+                 &#x27;acc&#x27;: [(965.0, -128.0), (965.0, -150.0), (862.0, -170.0), (816.0, -184.0)],
+                 &#x27;acc_from_u&#x27;: 965.0, &#x27;baffle&#x27;: [(800.0, -168.0), (918.0, -172.0)],
+                 &#x27;dam_path&#x27;: [(790.0, -141.0), (790.0, -193.0), (970.0, -193.0)],
+                 &#x27;spill&#x27;: [(928.0, -193.0), (948.0, -193.0)],
+                 &#x27;flow&#x27;: &#x27;INLET AND OUTLET BOTH AT THE SE (LOW) END; BAFFLE BERM LENGTHENS THE &#x27;
+                         &#x27;PATH (§11.i.13)&#x27;})
+PONDS[1].update({&#x27;tob&#x27;: 938.00, &#x27;bottom&#x27;: 932.00, &#x27;dam&#x27;: 939.50, &#x27;spillway&#x27;: 938.50,
+                 &#x27;ocs&#x27;: (1508.0, -198.0), &#x27;fb&#x27;: (1500.0, 1526.0, -160.0, -142.0), &#x27;fb_depth&#x27;: 2.0,
+                 &#x27;hw&#x27;: (1496.0, -208.0), &#x27;apron&#x27;: (1490.0, -212.0), &#x27;spread&#x27;: (1484.0, -214.0),
+                 &#x27;acc&#x27;: [(1560.0, -128.0), (1560.0, -152.0), (1538.0, -186.0), (1512.0, -196.0)],
+                 &#x27;acc_from_u&#x27;: 1560.0, &#x27;baffle&#x27;: [(1498.0, -172.0), (1604.0, -176.0)],
+                 &#x27;dam_path&#x27;: [(1490.0, -142.0), (1490.0, -206.0), (1546.0, -206.0)],
+                 &#x27;spill&#x27;: [(1490.0, -186.0), (1490.0, -166.0)],
+                 &#x27;flow&#x27;: &#x27;INLET AND OUTLET BOTH AT THE SE (LOW) END; BAFFLE BERM LENGTHENS THE &#x27;
+                         &#x27;PATH (§11.i.13)&#x27;})
+for p in PONDS:
+    p[&#x27;fb_area&#x27;] = (p[&#x27;fb&#x27;][1] - p[&#x27;fb&#x27;][0]) * (p[&#x27;fb&#x27;][3] - p[&#x27;fb&#x27;][2])
+    p[&#x27;fb_vol&#x27;] = p[&#x27;fb_area&#x27;] * p[&#x27;fb_depth&#x27;]          # forebay below the basin bottom
+    p[&#x27;pond_poly&#x27;] = sb.rect(p[&#x27;u0&#x27;], p[&#x27;u1&#x27;], p[&#x27;v0&#x27;], p[&#x27;v1&#x27;])
+    inset = 3.0 * p[&#x27;depth&#x27;]                            # 3:1 side slopes, full depth
+    p[&#x27;bottom_poly&#x27;] = sb.rect(p[&#x27;u0&#x27;] + inset, p[&#x27;u1&#x27;] - inset, p[&#x27;v0&#x27;] + inset, p[&#x27;v1&#x27;] - inset)
+    p[&#x27;esmt_poly&#x27;] = sb.rect(p[&#x27;u0&#x27;] - 10.0, p[&#x27;u1&#x27;] + 10.0, p[&#x27;v0&#x27;] - 10.0, p[&#x27;v1&#x27;] + 10.0)
+
+
+def _inside_rect_dist(u, v, u0, u1, v0, v1):
+    if not (u0 &lt;= u &lt;= u1 and v0 &lt;= v &lt;= v1):
+        return None
+    return min(u - u0, u1 - u, v - v0, v1 - v)
+
+
+def _outside_rect_dist(u, v, u0, u1, v0, v1):
+    du = max(u0 - u, 0.0, u - u1)
+    dv = max(v0 - v, 0.0, v - v1)
+    return math.hypot(du, dv)
+
+
+def z_prop(u, v):
+    &quot;&quot;&quot;Proposed ground surface (NAVD88 ft) = graded corridor, then the two basins cut in.&quot;&quot;&quot;
+    z = corridor_z(u, v)
+    for p in PONDS:
+        din = _inside_rect_dist(u, v, p[&#x27;u0&#x27;], p[&#x27;u1&#x27;], p[&#x27;v0&#x27;], p[&#x27;v1&#x27;])
+        if din is not None:
+            return p[&#x27;tob&#x27;] - min(din / 3.0, p[&#x27;depth&#x27;])
+        dout = _outside_rect_dist(u, v, p[&#x27;u0&#x27;], p[&#x27;u1&#x27;], p[&#x27;v0&#x27;], p[&#x27;v1&#x27;])
+        if dout &lt; 3.0 * abs(z - p[&#x27;tob&#x27;]):
+            return p[&#x27;tob&#x27;] + math.copysign(min(dout / 3.0, abs(z - p[&#x27;tob&#x27;])), z - p[&#x27;tob&#x27;])
+    return z
+
+
+# =========================================================================== 5. proposed contours
+def marching_squares(xs, ys, Z, level):
+    &quot;&quot;&quot;Z[j][i] at (xs[i], ys[j]); returns chained polylines at `level` (same routine as
+    tools/siteplan.py so the proposed contours chain exactly like the existing ones).&quot;&quot;&quot;
+    segs = []
+
+    def lerp(p, q, zp, zq):
+        t = 0.5 if zq == zp else (level - zp) / (zq - zp)
+        return (p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1]))
+
+    for j in range(len(ys) - 1):
+        for i in range(len(xs) - 1):
+            c = [(xs[i], ys[j]), (xs[i + 1], ys[j]), (xs[i + 1], ys[j + 1]), (xs[i], ys[j + 1])]
+            z = [Z[j][i], Z[j][i + 1], Z[j + 1][i + 1], Z[j + 1][i]]
+            idx = sum(1 &lt;&lt; k for k in range(4) if z[k] &gt;= level)
+            if idx in (0, 15):
+                continue
+            e = {0: lerp(c[0], c[1], z[0], z[1]), 1: lerp(c[1], c[2], z[1], z[2]),
+                 2: lerp(c[2], c[3], z[2], z[3]), 3: lerp(c[3], c[0], z[3], z[0])}
+            table = {1: [(3, 0)], 2: [(0, 1)], 3: [(3, 1)], 4: [(1, 2)], 6: [(0, 2)], 7: [(3, 2)],
+                     8: [(2, 3)], 9: [(0, 2)], 11: [(1, 2)], 12: [(1, 3)], 13: [(0, 1)], 14: [(3, 0)],
+                     5: [(3, 0), (1, 2)] if sum(z) / 4 &lt; level else [(0, 1), (2, 3)],
+                     10: [(0, 1), (2, 3)] if sum(z) / 4 &lt; level else [(3, 0), (1, 2)]}
+            for a, b in table[idx]:
+                segs.append((e[a], e[b]))
+    key = lambda p: (round(p[0], 3), round(p[1], 3))                              # noqa: E731
+    adj = defaultdict(list)
+    for k, (a, b) in enumerate(segs):
+        adj[key(a)].append(k)
+        adj[key(b)].append(k)
+    used = [False] * len(segs)
+    lines = []
+    for k in range(len(segs)):
+        if used[k]:
+            continue
+        used[k] = True
+        line = [segs[k][0], segs[k][1]]
+        for end in (1, 0):
+            while True:
+                cur = key(line[-1] if end else line[0])
+                nxt = None
+                for m in adj[cur]:
+                    if not used[m]:
+                        nxt = m
+                        break
+                if nxt is None:
+                    break
+                used[nxt] = True
+                a, b = segs[nxt]
+                other = b if key(a) == cur else a
+                if end:
+                    line.append(other)
+                else:
+                    line.insert(0, other)
+        lines.append(line)
+    return lines
+
+
+GX = [float(x) for x in range(-40, 1740, 8)]
+GY = [float(y) for y in range(-244, 20, 4)]
+ZP = [[z_prop(x, y) for x in GX] for y in GY]
+ZE = [[ground(x, y) for x in GX] for y in GY]
+
+
+def _split_inside(line, poly):
+    out, cur = [], []
+    for p in line:
+        if sb.point_in_poly(p, poly):
+            cur.append(p)
+        else:
+            if len(cur) &gt; 1:
+                out.append(cur)
+            cur = []
+    if len(cur) &gt; 1:
+        out.append(cur)
+    return out
+
+
+PROP_CONTOURS = {}
+for lev in range(922, 960, 2):
+    runs = []
+    for ln in marching_squares(GX, GY, ZP, lev):
+        runs += _split_inside(ln, LOD)
+    if runs:
+        PROP_CONTOURS[str(lev)] = runs
+
+# ------------------------------------------------------------------ earthwork and disturbed area
+CELL = (GX[1] - GX[0]) * (GY[1] - GY[0])
+CUT_CF = FILL_CF = 0.0
+DIST_SF = 0.0
+BASIN_SF = {1: 0.0, 2: 0.0, 0: 0.0}                 # 0 = to the Arcado Rd right-of-way
+U_DIVIDE = 1160.0                                    # proposed crest = the post-development divide
+U_FRONT_DIV = 25.0
+for j, y in enumerate(GY):
+    for i, x in enumerate(GX):
+        if not sb.point_in_poly((x, y), BND):
+            continue
+        d = ZP[j][i] - ZE[j][i]
+        if sb.point_in_poly((x, y), LOD):
+            DIST_SF += CELL
+            key = 0 if x &lt; U_FRONT_DIV else (1 if x &lt; U_DIVIDE else 2)
+            BASIN_SF[key] += CELL
+            if d &gt; 0.05:
+                FILL_CF += d * CELL
+            elif d &lt; -0.05:
+                CUT_CF += -d * CELL
+CUT_CY, FILL_CY = CUT_CF / 27.0, FILL_CF / 27.0
+DIST_AC_DRAWN = DIST_SF / 43560.0
+
+# The disturbed acreage the package publishes (data/layout.json, re-derived 2026-09-03)
+DIST_SF_PUB = SW_ORD[&#x27;disturbed_area&#x27;][&#x27;disturbed_sf&#x27;]
+DIST_AC_PUB = SW_ORD[&#x27;disturbed_area&#x27;][&#x27;disturbed_ac&#x27;]
+DET_REQ = SW_ORD[&#x27;detention_required_cf&#x27;]
+DET_PROV = SW_ORD[&#x27;detention_provided_cf&#x27;]
+DET_RATE = SW_ORD[&#x27;detention_rate_cf_per_disturbed_ac&#x27;]
+WQV = SW_ORD[&#x27;wqv_cf&#x27;]
+IMP_SF = L[&#x27;impervious_summary&#x27;][&#x27;total_sf&#x27;]
+IMP_PCT = L[&#x27;impervious_summary&#x27;][&#x27;pct_of_gis_area&#x27;]
+RV = 0.05 + 0.009 * IMP_PCT
+RRV = RV * 1.0 / 12.0 * sb.BOUNDARY_SF
+
+# forebay requirement: 10 % of each basin&#x27;s share of the water quality volume (§11.i.15)
+# (filled in after BASIN_AC is known, below)
+
+# per-basin disturbed acreage, scaled so the three sub-basins sum to the published figure
+_scale = DIST_SF_PUB / max(DIST_SF, 1.0)
+BASIN_AC = {k: BASIN_SF[k] * _scale / 43560.0 for k in BASIN_SF}
+BASIN_REQ = {k: BASIN_AC[k] * DET_RATE for k in BASIN_AC}
+for _p in PONDS:
+    _p[&#x27;wqv_share&#x27;] = WQV * BASIN_AC[_p[&#x27;n&#x27;]] / DIST_AC_PUB
+    _p[&#x27;fb_req&#x27;] = 0.10 * _p[&#x27;wqv_share&#x27;]
+
+# ------------------------------------------------------------------ impervious by drainage basin
+_per_lot = L[&#x27;impervious_summary&#x27;][&#x27;per_lot_sf&#x27;]
+LOT_IMP = {0: 0.0, 1: 0.0, 2: 0.0}
+for lot in L[&#x27;lots&#x27;]:
+    umid = sum(p[0] for p in lot[&#x27;polygon&#x27;]) / len(lot[&#x27;polygon&#x27;])
+    k = 0 if umid &lt; U_FRONT_DIV else (1 if umid &lt; U_DIVIDE else 2)
+    LOT_IMP[k] += _per_lot[lot[&#x27;plan&#x27;]][&#x27;total&#x27;] if isinstance(_per_lot[lot[&#x27;plan&#x27;]], dict) \
+        and &#x27;total&#x27; in _per_lot[lot[&#x27;plan&#x27;]] else sum(v for v in _per_lot[lot[&#x27;plan&#x27;]].values()
+                                                      if isinstance(v, (int, float)))
+_comp = M[&#x27;impervious_components_sf&#x27;]
+_lane_imp = (_comp[&#x27;Private lane pavement&#x27;] + _comp[&#x27;Sidewalks&#x27;] + _comp[&#x27;Hammerhead turnaround legs&#x27;])
+_front_imp = (_comp[&#x27;Entry drive pavement&#x27;] + _comp[&#x27;Entrance curb returns&#x27;]
+              + _comp[&#x27;Guest and mail-kiosk parking bays&#x27;]
+              + _comp[&#x27;Clubhouse roof, court pads, mail kiosk and amenity walks&#x27;])
+_f1 = (U_DIVIDE - 150.0) / (1700.0 - 150.0)
+IMP_BY = {0: _front_imp * 0.25 + LOT_IMP[0],
+          1: _front_imp * 0.75 + _lane_imp * _f1 + LOT_IMP[1],
+          2: _lane_imp * (1.0 - _f1) + LOT_IMP[2]}
+_tot = sum(IMP_BY.values())
+IMP_BY = {k: v * IMP_SF / _tot for k, v in IMP_BY.items()}
+
+# pre-development impervious: the two mapped dwellings and the 4541 drive (aerial-imagery
+# footprints carried by tools/sitebase.py) — everything else on the site is woodland or lawn
+PRE_IMP = []
+for _rec, _poly, _area in sb.existing_polys():
+    PRE_IMP.append((sb.poly_centroid(_poly)[0], _area))
+_dpath, _dband = sb.existing_drive_poly()
+PRE_IMP.append((sb.poly_centroid(_dband)[0], abs(sb.poly_area(_dband))))
+
+
+def pre_impervious_sf(ua, ub):
+    return sum(a for u, a in PRE_IMP if ua &lt;= u &lt; ub)
+
+# =========================================================================== 6. storm network
+def _rim(u, v):
+    return round(z_prop(u, v), 2)
+
+
+STRUCT = [
+    # id, type, u, v, note
+    (&#x27;A-1&#x27;, &#x27;DOUBLE CURB INLET&#x27;, 95.0, -168.0, &#x27;entry drive at the existing front swale&#x27;),
+    (&#x27;A-1B&#x27;, &#x27;JUNCTION BOX&#x27;, 150.0, -122.0, &#x27;entry drive / lane junction — bend&#x27;),
+    (&#x27;A-2&#x27;, &#x27;CURB INLET&#x27;, 300.0, -128.0, &#x27;lane, southwest edge of pavement&#x27;),
+    (&#x27;A-3&#x27;, &#x27;CURB INLET&#x27;, 500.0, -127.0, &#x27;lane, southwest edge of pavement&#x27;),
+    (&#x27;A-4&#x27;, &#x27;CURB INLET&#x27;, 680.0, -126.0, &#x27;lane, southwest edge of pavement&#x27;),
+    (&#x27;A-5&#x27;, &#x27;DOUBLE CURB INLET&#x27;, 830.0, -126.0, &#x27;lane sag at PVI 2&#x27;),
+    (&#x27;A-6&#x27;, &#x27;JUNCTION BOX&#x27;, 800.0, -134.0, &#x27;Pond 1 tract; also receives Line B&#x27;),
+    (&#x27;A-7&#x27;, &#x27;FLARED END SECTION&#x27;, 806.0, -142.0, &#x27;into the Pond 1 forebay&#x27;),
+    (&#x27;B-1&#x27;, &#x27;CURB INLET&#x27;, 1140.0, -125.5, &#x27;lane, southeast of the crest at PVI 3&#x27;),
+    (&#x27;B-2&#x27;, &#x27;CURB INLET&#x27;, 1040.0, -125.8, &#x27;lane, southwest edge of pavement&#x27;),
+    (&#x27;B-3&#x27;, &#x27;CURB INLET&#x27;, 930.0, -126.0, &#x27;lane, southwest edge of pavement&#x27;),
+    (&#x27;C-1&#x27;, &#x27;CURB INLET&#x27;, 1190.0, -125.0, &#x27;lane, northwest of the crest at PVI 3&#x27;),
+    (&#x27;C-2&#x27;, &#x27;CURB INLET&#x27;, 1330.0, -125.0, &#x27;lane, southwest edge of pavement&#x27;),
+    (&#x27;C-3&#x27;, &#x27;DOUBLE CURB INLET&#x27;, 1470.0, -125.0, &#x27;lane sag at PVI 4&#x27;),
+    (&#x27;C-4&#x27;, &#x27;JUNCTION BOX&#x27;, 1500.0, -132.0, &#x27;lane tract at the Pond 2 access&#x27;),
+    (&#x27;C-5&#x27;, &#x27;FLARED END SECTION&#x27;, 1512.0, -140.0, &#x27;into the Pond 2 forebay&#x27;),
+    (&#x27;OF-1&#x27;, &#x27;HEADWALL + RIPRAP APRON&#x27;, 805.0, -206.0, &#x27;Pond 1 outlet, thence level spreader&#x27;),
+    (&#x27;OF-2&#x27;, &#x27;HEADWALL + RIPRAP APRON&#x27;, 1496.0, -208.0, &#x27;Pond 2 outlet, thence level spreader&#x27;),
+]
+S_XY = {s[0]: (s[2], s[3]) for s in STRUCT}
+
+# reaches: from, to, diameter (in), material, slope (%), and the invert at the upstream end
+REACH = [
+    (&#x27;A-1&#x27;, &#x27;A-1B&#x27;, 24, &#x27;RCP&#x27;, 0.35, 936.20),
+    (&#x27;A-1B&#x27;, &#x27;A-2&#x27;, 24, &#x27;RCP&#x27;, 0.35, None),
+    (&#x27;A-2&#x27;, &#x27;A-3&#x27;, 24, &#x27;RCP&#x27;, 0.35, None),
+    (&#x27;A-3&#x27;, &#x27;A-4&#x27;, 24, &#x27;RCP&#x27;, 0.35, None),
+    (&#x27;A-4&#x27;, &#x27;A-5&#x27;, 24, &#x27;RCP&#x27;, 0.35, None),
+    (&#x27;A-5&#x27;, &#x27;A-6&#x27;, 24, &#x27;RCP&#x27;, 0.50, None),
+    (&#x27;A-6&#x27;, &#x27;A-7&#x27;, 24, &#x27;RCP&#x27;, 0.50, None),
+    (&#x27;B-1&#x27;, &#x27;B-2&#x27;, 18, &#x27;RCP&#x27;, 2.50, 945.20),
+    (&#x27;B-2&#x27;, &#x27;B-3&#x27;, 18, &#x27;RCP&#x27;, 4.80, None),
+    (&#x27;B-3&#x27;, &#x27;A-6&#x27;, 18, &#x27;RCP&#x27;, 3.00, None),
+    (&#x27;C-1&#x27;, &#x27;C-2&#x27;, 18, &#x27;RCP&#x27;, 5.10, 944.20),
+    (&#x27;C-2&#x27;, &#x27;C-3&#x27;, 18, &#x27;RCP&#x27;, 4.20, None),
+    (&#x27;C-3&#x27;, &#x27;C-4&#x27;, 24, &#x27;RCP&#x27;, 0.50, None),
+    (&#x27;C-4&#x27;, &#x27;C-5&#x27;, 24, &#x27;RCP&#x27;, 0.50, None),
+]
+OUTLETS = [                        # OCS -&gt; headwall, through the earthen embankment
+    (&#x27;POND 1 OCS&#x27;, &#x27;OF-1&#x27;, 24, &#x27;RCP&#x27;, 1.40, PONDS[0][&#x27;bottom&#x27;], PONDS[0][&#x27;ocs&#x27;], S_XY[&#x27;OF-1&#x27;]),
+    (&#x27;POND 2 OCS&#x27;, &#x27;OF-2&#x27;, 24, &#x27;RCP&#x27;, 1.40, PONDS[1][&#x27;bottom&#x27;], PONDS[1][&#x27;ocs&#x27;], S_XY[&#x27;OF-2&#x27;]),
+]
+
+PIPES = []
+_inv_out = {}
+for a, b, dia, mat, slope, inv0 in REACH:
+    pa, pb = S_XY[a], S_XY[b]
+    ln = sb.dist(pa, pb)
+    iv_up = inv0 if inv0 is not None else _inv_out[a]
+    iv_dn = iv_up - slope / 100.0 * ln
+    if b not in _inv_out or iv_dn &lt; _inv_out[b]:
+        _inv_out[b] = iv_dn
+    PIPES.append({&#x27;from&#x27;: a, &#x27;to&#x27;: b, &#x27;dia&#x27;: dia, &#x27;mat&#x27;: mat, &#x27;len&#x27;: ln, &#x27;slope&#x27;: slope,
+                  &#x27;inv_up&#x27;: iv_up, &#x27;inv_dn&#x27;: iv_dn, &#x27;a&#x27;: pa, &#x27;b&#x27;: pb})
+for name, b, dia, mat, slope, inv0, pa, pb in OUTLETS:
+    ln = sb.dist(pa, pb)
+    PIPES.append({&#x27;from&#x27;: name, &#x27;to&#x27;: b, &#x27;dia&#x27;: dia, &#x27;mat&#x27;: mat, &#x27;len&#x27;: ln, &#x27;slope&#x27;: slope,
+                  &#x27;inv_up&#x27;: inv0, &#x27;inv_dn&#x27;: inv0 - slope / 100.0 * ln, &#x27;a&#x27;: pa, &#x27;b&#x27;: pb})
+
+STR_RIM, STR_TYPE = {}, {}
+for sid, typ, u, v, note in STRUCT:
+    STR_RIM[sid] = _rim(u, v)
+    STR_TYPE[sid] = typ
+
+
+def pipe_rows():
+    rows = []
+    for p in PIPES:
+        cov = None
+        typ = STR_TYPE.get(p[&#x27;from&#x27;], &#x27;&#x27;)
+        if p[&#x27;from&#x27;] in STR_RIM and &#x27;FLARED&#x27; not in typ and &#x27;HEADWALL&#x27; not in typ:
+            cov = STR_RIM[p[&#x27;from&#x27;]] - p[&#x27;inv_up&#x27;] - p[&#x27;dia&#x27;] / 12.0
+        rows.append([
+            &#x27;%s → %s&#x27; % (p[&#x27;from&#x27;], p[&#x27;to&#x27;]),
+            &#x27;%d&quot; %s&#x27; % (p[&#x27;dia&#x27;], p[&#x27;mat&#x27;]),
+            &quot;%.0f&#x27;&quot; % p[&#x27;len&#x27;],
+            &#x27;%.2f&#x27; % p[&#x27;slope&#x27;],
+            &#x27;%.2f&#x27; % p[&#x27;inv_up&#x27;],
+            &#x27;%.2f&#x27; % p[&#x27;inv_dn&#x27;],
+            (&#x27;%.1f&#x27; % cov) if cov is not None else &#x27;—&#x27;,
+        ])
+    return rows
+
+
+def struct_rows():
+    rows = []
+    for sid, typ, u, v, note in STRUCT:
+        rows.append([sid, typ, &#x27;(%.0f, %+.0f)&#x27; % (u, v), &#x27;%.2f&#x27; % STR_RIM[sid], note])
+    return rows
+
+
+# =========================================================================== 7. drainage areas
+def band_poly(ua, ub, front=False):
+    us = [float(u) for u in range(int(max(ua, 0.0)), int(ub) + 1, 20)] + [float(ub)]
+    top = [(u, sb.NE(u)) for u in us]
+    bot = [(u, sb.SW(u)) for u in reversed(us)]
+    poly = top + bot
+    if front:
+        poly = poly + list(reversed([tuple(p) for p in sb.FRONT_LINE]))
+    return poly
+
+
+PRE = [
+    (&#x27;PRE-A&#x27;, 0.0, 250.0, True, &#x27;#8e24aa&#x27;,
+     &#x27;Front slope and the existing swale at u ≈ 84 — southwest, off site, to the branch of the &#x27;
+     &#x27;Jackson Creek headwaters that runs 38–58 ft outside the southwest line&#x27;),
+    (&#x27;PRE-B&#x27;, 250.0, 1160.0, False, &#x27;#00838f&#x27;,
+     &#x27;Mid-strip swale (existing sag at u ≈ 800) — southwest, off site, to the same branch&#x27;),
+    (&#x27;PRE-C&#x27;, 1160.0, sb.U_REAR, False, &#x27;#ef6c00&#x27;,
+     &#x27;Rear low pocket — southwest to the on-site headwater channel at (u 1,392, v −210)&#x27;),
+]
+POST = [
+    (&#x27;POST-0&#x27;, 0.0, U_FRONT_DIV, True, &#x27;#8e24aa&#x27;, 0,
+     &#x27;Arcado Rd frontage strip and the entrance apron — sheet flow to the existing Arcado Rd &#x27;
+     &#x27;right-of-way as today (no change in outfall)&#x27;),
+    (&#x27;POST-1&#x27;, U_FRONT_DIV, U_DIVIDE, False, &#x27;#0277bd&#x27;, 1,
+     &#x27;Lines A and B → POND 1 forebay → OCS → OF-1 headwall, riprap apron and level spreader → &#x27;
+     &#x27;sheet flow through the undisturbed buffer to the existing southwest swale&#x27;),
+    (&#x27;POST-2&#x27;, U_DIVIDE, sb.U_REAR, False, &#x27;#2e7d32&#x27;, 2,
+     &#x27;Line C → POND 2 forebay → OCS → OF-2 headwall, riprap apron and level spreader → sheet &#x27;
+     &#x27;flow through the creek woods to the headwater channel&#x27;),
+]
+
+# =========================================================================== 8. sheet content
+G = {&#x27;prop&#x27;: &#x27;#6d4c2f&#x27;, &#x27;lod&#x27;: &#x27;#c62828&#x27;, &#x27;storm&#x27;: &#x27;#00695c&#x27;, &#x27;pond&#x27;: &#x27;#0d47a1&#x27;,
+     &#x27;esmt&#x27;: &#x27;#7b1fa2&#x27;, &#x27;acc&#x27;: &#x27;#a1450a&#x27;, &#x27;pre&#x27;: &#x27;#8e24aa&#x27;, &#x27;ctx&#x27;: &#x27;#b5b5b5&#x27;}
+
+LEGEND = [
+    (&#x27;line&#x27;, sb.C[&#x27;bnd&#x27;], 1.8, &#x27;&#x27;, &#x27;Assemblage boundary (Gwinnett GIS — DRAFT)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;adj_fill&#x27;], 0, &#x27;&#x27;, &#x27;Adjoining tax parcel (all zoned R-1, Lilburn)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;rw&#x27;], 0.9, &#x27;&#x27;, &#x27;Arcado Rd right-of-way line&#x27;),
+    (&#x27;line&#x27;, &#x27;#333&#x27;, 0.6, &#x27;14 3 3 3&#x27;, &#x27;Existing road centreline&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;contour&#x27;], 0.45, &#x27;2 2&#x27;, &#x27;EXISTING 2-ft contour (3DEP, screened)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;contour_txt&#x27;], 0.9, &#x27;7 3&#x27;, &#x27;EXISTING 10-ft index contour (screened)&#x27;),
+    (&#x27;line&#x27;, G[&#x27;prop&#x27;], 0.8, &#x27;&#x27;, &#x27;PROPOSED 2-ft contour&#x27;),
+    (&#x27;line&#x27;, G[&#x27;prop&#x27;], 1.9, &#x27;&#x27;, &#x27;PROPOSED 10-ft index contour&#x27;),
+    (&#x27;plus&#x27;, G[&#x27;prop&#x27;], 0, &#x27;&#x27;, &#x27;Proposed spot elevation (checklist §10.b)&#x27;),
+    (&#x27;line&#x27;, G[&#x27;lod&#x27;], 1.6, &#x27;18 4 3 4&#x27;, &#x27;LIMITS OF DISTURBANCE (§4.e)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;stream&#x27;], 1.6, &#x27;&#x27;, &#x27;Stream — state waters (top of bank approx.)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.5, &#x27;3 2&#x27;, &quot;25&#x27; state (GA EPD) buffer&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.8, &#x27;6 2&#x27;, &quot;50&#x27; undisturbed stream buffer (Lilburn)&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.8, &#x27;8 2 2 2&#x27;, &quot;75&#x27; impervious setback&quot;),
+    (&#x27;line&#x27;, G[&#x27;pre&#x27;], 1.2, &#x27;9 3 2 3&#x27;, &#x27;Pre-development drainage divide&#x27;),
+    (&#x27;rect&#x27;, &#x27;#cfe0f0&#x27;, 0, &#x27;&#x27;, &#x27;Post-development drainage area (tinted, labelled)&#x27;),
+    (&#x27;line&#x27;, G[&#x27;storm&#x27;], 1.8, &#x27;&#x27;, &#x27;Proposed storm sewer (RCP) — see pipe chart&#x27;),
+    (&#x27;sq&#x27;, G[&#x27;storm&#x27;], 0, &#x27;&#x27;, &#x27;Proposed curb inlet / double curb inlet&#x27;),
+    (&#x27;dot&#x27;, G[&#x27;storm&#x27;], 0, &#x27;&#x27;, &#x27;Proposed junction box&#x27;),
+    (&#x27;tri&#x27;, G[&#x27;storm&#x27;], 0, &#x27;&#x27;, &#x27;Flared end section / headwall + riprap apron&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#rip)&#x27;, 0, &#x27;&#x27;, &#x27;Riprap outlet protection and level spreader&#x27;),
+    (&#x27;line&#x27;, G[&#x27;pond&#x27;], 1.4, &#x27;&#x27;, &#x27;Basin top of bank = 100-yr ponding limit&#x27;),
+    (&#x27;line&#x27;, G[&#x27;pond&#x27;], 0.7, &#x27;5 3&#x27;, &#x27;Basin bottom (3:1 side slopes)&#x27;),
+    (&#x27;line&#x27;, &#x27;#5d4037&#x27;, 2.2, &#x27;&#x27;, &quot;Earthen embankment crest — 8&#x27;-0\&quot; min. top width&quot;),
+    (&#x27;line&#x27;, &#x27;#2e7d32&#x27;, 1.4, &#x27;3 2&#x27;, &#x27;Emergency spillway (grassed, 20 ft wide)&#x27;),
+    (&#x27;line&#x27;, &#x27;#5d4037&#x27;, 1.4, &#x27;6 3&#x27;, &#x27;Internal baffle berm (flow path, §11.i.13)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#bcd7c2&#x27;, 0, &#x27;&#x27;, &#x27;Sediment forebay (10 % of WQv per inlet)&#x27;),
+    (&#x27;ocs&#x27;, G[&#x27;pond&#x27;], 0, &#x27;&#x27;, &#x27;Outlet control structure (OCS)&#x27;),
+    (&#x27;line&#x27;, G[&#x27;esmt&#x27;], 1.0, &#x27;7 3&#x27;, &quot;10&#x27; drainage easement outside the 100-yr limit&quot;),
+    (&#x27;line&#x27;, G[&#x27;acc&#x27;], 1.0, &#x27;12 4&#x27;, &quot;30&#x27; BMP access easement (cleared and grubbed)&quot;),
+    (&#x27;line&#x27;, G[&#x27;acc&#x27;], 3.2, &#x27;2 3&#x27;, &quot;15&#x27; BMP access road at ≤ 20 % to the OCS&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;sewer&#x27;], 0.9, &#x27;&#x27;, &#x27;Existing 8-in sanitary sewer and manhole&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#exhatch)&#x27;, 0, &#x27;&#x27;, &#x27;Existing building — to be removed&#x27;),
+    (&#x27;rect&#x27;, &#x27;#efe6dc&#x27;, 0, &#x27;&#x27;, &#x27;Existing drive — to be removed&#x27;),
+    (&#x27;line&#x27;, G[&#x27;ctx&#x27;], 0.5, &#x27;&#x27;, &#x27;Proposed lot, tract and structure line (Sheet C-2.0)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#e6e6e6&#x27;, 0, &#x27;&#x27;, &#x27;Proposed pavement (lane, drive, turnarounds)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;green&#x27;], 0, &#x27;&#x27;, &#x27;Common open-space tract (HOA)&#x27;),
+]
+
+
+def basin_rows():
+    rows = []
+    for p in PONDS:
+        rows.append([p[&#x27;name&#x27;], &#x27;%s ft&#x27; % p[&#x27;tob_dims&#x27;].replace(&#x27;x&#x27;, &#x27;×&#x27;),
+                     &#x27;%.2f&#x27; % p[&#x27;bottom&#x27;], &#x27;%.2f&#x27; % p[&#x27;tob&#x27;], &#x27;%.2f&#x27; % p[&#x27;dam&#x27;],
+                     &#x27;%.2f&#x27; % p[&#x27;spillway&#x27;],
+                     &#x27;%s&#x27; % format(p[&#x27;storage_cf&#x27;], &#x27;,&#x27;),
+                     &#x27;%s&#x27; % format(int(round(BASIN_REQ[p[&#x27;n&#x27;]])), &#x27;,&#x27;),
+                     &#x27;%.2f&#x27; % BASIN_AC[p[&#x27;n&#x27;]],
+                     &#x27;%s / %s&#x27; % (format(int(p[&#x27;fb_vol&#x27;]), &#x27;,&#x27;),
+                                  format(int(round(p[&#x27;fb_req&#x27;])), &#x27;,&#x27;))])
+    return rows
+
+
+def da_rows():
+    rows = []
+    for tag, ua, ub, front, col, txt in PRE:
+        gross = _band_area(ua, ub, front)
+        imp = pre_impervious_sf(ua, ub)
+        rows.append([tag, &#x27;PRE&#x27;, &quot;u %.0f – %.0f&quot; % (ua, ub), &#x27;%.2f&#x27; % (gross / 43560.0), &#x27;—&#x27;,
+                     &#x27;%.2f ac (%.1f %%)&#x27; % (imp / 43560.0, 100.0 * imp / max(gross, 1.0)), txt])
+    for tag, ua, ub, front, col, key, txt in POST:
+        gross = _band_area(ua, ub, front)
+        rows.append([tag, &#x27;POST&#x27;, &quot;u %.0f – %.0f&quot; % (ua, ub), &#x27;%.2f&#x27; % (gross / 43560.0),
+                     &#x27;%.2f&#x27; % BASIN_AC[key],
+                     &#x27;%.2f ac (%.0f %%)&#x27; % (IMP_BY[key] / 43560.0, 100.0 * IMP_BY[key] / max(gross, 1.0)),
+                     txt])
+    return rows
+
+
+_AREA_CACHE = {}
+
+
+def _band_area(ua, ub, front):
+    k = (ua, ub, front)
+    if k in _AREA_CACHE:
+        return _AREA_CACHE[k]
+    a = 0.0
+    for j, y in enumerate(GY):
+        for i, x in enumerate(GX):
+            if ua - (25.0 if front else 0.0) &lt;= x &lt; ub and sb.point_in_poly((x, y), BND):
+                a += CELL
+    _AREA_CACHE[k] = a
+    return a
+
+
+SW_ROWS = [
+    [&#x27;Regulatory basis&#x27;, &#x27;Gwinnett County Stormwater Management Manual (GCSWMM) as applied by the City &#x27;
+                         &#x27;of Lilburn; City of Lilburn Development Regulations, Post-Development Stormwater &#x27;
+                         &#x27;Ordinance; Site Development Plan Review Checklist §11&#x27;],
+    [&#x27;Gross site area&#x27;, &#x27;%s SF = %.3f ac (GIS ring); 9.44 ac deeded — RLS survey governs&#x27;
+     % (format(int(round(sb.BOUNDARY_SF)), &#x27;,&#x27;), sb.BOUNDARY_SF / 43560.0)],
+    [&#x27;Disturbed area&#x27;, &#x27;%s SF = %.3f ac (data/layout.json, re-derived 2026-09-03: site raster less the &#x27;
+                       &#x27;20-ft perimeter buffer bands and the creek-woods tract). Limits of disturbance as &#x27;
+                       &#x27;drawn on this sheet enclose %s SF = %.2f ac. No off-site disturbance is proposed &#x27;
+                       &#x27;except the outfall aprons shown.&#x27;
+     % (format(DIST_SF_PUB, &#x27;,&#x27;), DIST_AC_PUB, format(int(round(DIST_SF)), &#x27;,&#x27;), DIST_AC_DRAWN)],
+    [&#x27;Impervious area&#x27;, &#x27;%s SF = %.1f %% of the GIS area (data/layout.json)&#x27;
+     % (format(IMP_SF, &#x27;,&#x27;), IMP_PCT)],
+    [&#x27;Rv&#x27;, &#x27;Rv = 0.05 + 0.009 · I = 0.05 + 0.009 × %.1f = %.4f&#x27; % (IMP_PCT, RV)],
+    [&#x27;Water quality volume&#x27;, &#x27;WQv = 1.2 · (0.05 + 0.009 · I) ÷ 12 · A = %s CF (data/layout.json)&#x27;
+     % format(WQV, &#x27;,&#x27;)],
+    [&#x27;Runoff reduction volume&#x27;, &#x27;RRv = Rv · 1.0 in ÷ 12 · A = %s CF if credited. Taken as ZERO in the &#x27;
+                                &#x27;detention sizing below (conservative); any RRv credit reduces the &#x27;
+                                &#x27;required detention one-for-one.&#x27; % format(int(round(RRV)), &#x27;,&#x27;)],
+    [&#x27;Detention required&#x27;, &#x27;%s CF/disturbed ac × %.3f ac = %s CF (screening rate, RRv = 0)&#x27;
+     % (format(int(DET_RATE), &#x27;,&#x27;), DIST_AC_PUB, format(DET_REQ, &#x27;,&#x27;))],
+    [&#x27;Detention provided&#x27;, &#x27;%s CF = POND 1 %s CF + POND 2 %s CF, measured between top of bank and basin &#x27;
+                           &#x27;bottom (6-ft depth, 3:1 side slopes, prismoidal) — data/layout.json&#x27;
+     % (format(DET_PROV, &#x27;,&#x27;), format(PONDS[0][&#x27;storage_cf&#x27;], &#x27;,&#x27;), format(PONDS[1][&#x27;storage_cf&#x27;], &#x27;,&#x27;))],
+    [&#x27;Adequacy&#x27;, &#x27;Provided ÷ required = %.1f %% of the site total. The split between the two basins does &#x27;
+                 &#x27;not yet match the tributary split — see general note 9.&#x27; % (100.0 * DET_PROV / DET_REQ)],
+    [&#x27;Receiving water&#x27;, &#x27;Jackson Creek headwaters, GAR030701030315 — Georgia 2024 Integrated 305(b)/303(d) &#x27;
+                        &#x27;list, NOT SUPPORTING (bacteria, biota; urban runoff)&#x27;],
+    [&#x27;Floodplain&#x27;, &#x27;FEMA Zone X, FIRM panel 13135C0114F eff. 2006-09-29 — no SFHA, floodway or BFE on &#x27;
+                   &#x27;site (checklist §7.c, §9.a)&#x27;],
+    [&#x27;Earthwork (concept)&#x27;, &#x27;Cut ≈ %s CY, fill ≈ %s CY inside the limits of disturbance — a net surplus of &#x27;
+                            &#x27;≈ %s CY of excavation, most of it the two basins. The lane centreline itself &#x27;
+                            &#x27;balances (mean deviation %+.2f ft). Shrinkage, topsoil stripping, rock and &#x27;
+                            &#x27;undercut are NOT included; rock probes required (NRCS ARE: gneiss at 22–40 in).&#x27;
+     % (format(int(round(CUT_CY)), &#x27;,&#x27;), format(int(round(FILL_CY)), &#x27;,&#x27;),
+        format(int(round(CUT_CY - FILL_CY)), &#x27;,&#x27;), DEV_MEAN)],
+]
+
+OF1_TO_SW = abs(S_XY[&#x27;OF-1&#x27;][1] - sb.SW(S_XY[&#x27;OF-1&#x27;][0]))
+OF2_TO_SW = abs(S_XY[&#x27;OF-2&#x27;][1] - sb.SW(S_XY[&#x27;OF-2&#x27;][0]))
+CUT_MAX_CL = -min(d for _, d in DEV)
+FILL_MAX_CL = max(d for _, d in DEV)
+GRADE_STR = &#x27; / &#x27;.join(&#x27;%+.2f %%&#x27; % (g * 100.0) for g in GRADE)
+
+NOTES = [
+    &#x27;BASIS AND STATUS. This is a CONCEPT grading and drainage exhibit prepared by the owner for a &#x27;
+    &#x27;rezoning application; it is DRAFT and NOT SEALED. Grading, drainage, hydrology and hydraulics must &#x27;
+    &#x27;be designed and sealed by a Georgia registered professional engineer, and topography must be &#x27;
+    &#x27;established by a topographic survey, before any land disturbance permit. Every statement of &#x27;
+    &#x27;conformity on this sheet reads &quot;appears consistent with&quot; and none is a compliance certification.&#x27;,
+
+    &#x27;DATUM AND TOPOGRAPHY (checklist §7.b, §7.d). Vertical datum NAVD88; horizontal SR 2240 GA West, &#x27;
+    &#x27;US survey feet, shown in the site-local (u, v) system of FACTS §1. EXISTING contours (screened) are &#x27;
+    &#x27;2-ft contours interpolated from the USGS 3DEP 1-metre digital elevation model sampled on a &#x27;
+    &#x27;100 × 50-ft grid — APPROXIMATE. PROPOSED contours are 2-ft contours generated from the design &#x27;
+    &#x27;surface described in note 3. NO BENCHMARK HAS BEEN SET: a benchmark and a field topographic survey &#x27;
+    &#x27;are required and govern over this sheet.&#x27;,
+
+    &#x27;PROPOSED SURFACE. The proposed surface is the existing surface displaced vertically by the cut or &#x27;
+    &#x27;fill on the private-lane centreline, the displacement decaying to zero at the limits of &#x27;
+    &#x27;disturbance, with the 22-ft crowned pavement (2 %) modelled between the pavement edges and the two &#x27;
+    &#x27;detention basins cut in at 3:1 side slopes. Individual lot and driveway grading, finished floor &#x27;
+    &#x27;elevations, retaining structures if any, and the erosion and sedimentation control plan are NOT &#x27;
+    &#x27;part of this exhibit and are to be designed by the PE at the land disturbance permit stage.&#x27;,
+
+    &#x27;LANE PROFILE AND STREET GRADES (checklist §7.k). The profile band at the bottom of this sheet plots &#x27;
+    &#x27;the proposed grade line against existing ground on the lane centreline from u = %.0f to u = %.0f. &#x27;
+    &#x27;EXISTING ground reaches %.2f %% over the 10-ft station interval at u ≈ %.0f and %.2f %% over a &#x27;
+    &#x27;50-ft interval at u ≈ %.0f. The PROPOSED alignment — four tangents at %s and three %.0f-ft &#x27;
+    &#x27;vertical curves — holds a maximum grade of %.2f %% at u ≈ %.0f, inside the 12 %% maximum street &#x27;
+    &#x27;grade the package cites and below the 12 %%–15 %% band that triggers the checklist note &quot;12%% to &#x27;
+    &#x27;15%% street grades require an ‘As Graded’ survey before installation of the curb&quot;. That note is &#x27;
+    &#x27;carried on this sheet for completeness. Maximum deviation from existing ground on the centreline &#x27;
+    &#x27;is %.1f ft at u ≈ %.0f; the mean deviation is %+.2f ft, so the centreline earthwork balances.&#x27;
+    % (U_PROF0, U_PROF1, EX_GMAX, EX_GMAX_U + 5, EX_GMAX50, EX_GMAX50_U + 25, GRADE_STR, VC_LEN[0],
+       abs(PR_GMAX), PR_GMAX_U + 5, abs(DEV_MAX[1]), DEV_MAX[0], DEV_MEAN),
+
+    &#x27;ENTRY DRIVE. The 24-ft entry drive rises from the Arcado Rd right-of-way at approximately %.1f &#x27;
+    &#x27;(existing ground) to the lane crest at %.2f over %.0f ft, a uniform %.2f %%. It fills the shallow &#x27;
+    &#x27;front swale at u ≈ 84; cross-drain STR A-1 picks that swale up and carries it to POND 1 (Line A) so &#x27;
+    &#x27;the front of the site is detained rather than discharged untreated. The tie-in elevation at the &#x27;
+    &#x27;right-of-way must be confirmed against a field survey of the Arcado Rd pavement edge and against &#x27;
+    &#x27;the Gwinnett County DOT driveway permit.&#x27;
+    % (ENTRY_Z0, PVI[0][1], ENTRY_LEN, ENTRY_GRADE),
+
+    &#x27;LIMITS OF DISTURBANCE (checklist §4.e). Total site %.3f ac (GIS) / 9.44 ac (deeded). DISTURBED AREA &#x27;
+    &#x27;= %s SF = %.3f ac, being the site less the 20-ft undisturbed perimeter buffer bands and the &#x27;
+    &#x27;preserved creek-woods tract (data/layout.json, re-derived 2026-09-03; this supersedes the &#x27;
+    &#x27;&quot;≈ 4.4 disturbed acres&quot; figure carried in earlier revisions of docs/03 and the &quot;≈ 7.9 ac&quot; &#x27;
+    &#x27;estimate in docs/08). The limits of disturbance as drawn enclose %s SF = %.2f ac. NO OFF-SITE &#x27;
+    &#x27;DISTURBANCE is proposed. Land disturbance exceeds one acre: an NPDES permit (GAR100001), the &#x27;
+    &#x27;$40/disturbed-acre Lilburn NPDES fee, the EPD fee and an erosion control bond apply &#x27;
+    &#x27;(checklist §3.e, §3.f).&#x27;
+    % (sb.BOUNDARY_SF / 43560.0, format(DIST_SF_PUB, &#x27;,&#x27;), DIST_AC_PUB,
+       format(int(round(DIST_SF)), &#x27;,&#x27;), DIST_AC_DRAWN),
+
+    &#x27;STREAM BUFFERS. STREAM BUFFERS ARE TO REMAIN IN A NATURAL AND UNDISTURBED CONDITION. STREAM BUFFER &#x27;
+    &#x27;SHALL BE STAKED AND PROTECTED PRIOR TO LAND DISTURBANCE (checklist §9.e, §9.f). The 25-ft state &#x27;
+    &#x27;buffer (O.C.G.A. §12-7-6(b)(15)), the 50-ft undisturbed city buffer and the 75-ft impervious &#x27;
+    &#x27;setback (Lilburn Code Ch. 109 Art. VII) are drawn from the digitised channel centreline of all &#x27;
+    &#x27;three mapped reaches and are APPROXIMATE — the top of bank must be field-delineated by a qualified &#x27;
+    &#x27;professional and governs. No grading, no basin and no impervious surface is proposed inside the &#x27;
+    &#x27;75-ft setback; both outfall aprons and level spreaders are held outside it.&#x27;,
+
+    &#x27;RECEIVING WATER AND WATER QUALITY. All runoff from this site discharges to the headwaters of &#x27;
+    &#x27;JACKSON CREEK, GA EPD reach GAR030701030315, which is on GEORGIA’S 2024 303(d) LIST as NOT &#x27;
+    &#x27;SUPPORTING for bacteria and biota with urban runoff cited as the cause. There is no direct &#x27;
+    &#x27;discharge to the buffer or to any adjoining yard: every outfall terminates in a riprap apron and a &#x27;
+    &#x27;level spreader, and the last reach to the channel is sheet flow across undisturbed woodland. &#x27;
+    &#x27;WQv = %s CF, treated in the two dry extended-detention / water-quality basins. RUNOFF REDUCTION: &#x27;
+    &#x27;RRv = %s CF if credited — to be met by bioretention with underdrains in the two pocket greens and &#x27;
+    &#x27;the terminus green, roof-drain disconnection to HOA-maintained yards, pervious pavers in the guest &#x27;
+    &#x27;and mail-kiosk bays (permitted by Zoning Ordinance 2023-603 Table 4.2), and credit for the &#x27;
+    &#x27;preserved buffers and creek woods. Infiltration will test poorly on the eroded Appling / Madison / &#x27;
+    &#x27;Pacolet clays, so no infiltration credit is assumed at this stage.&#x27;
+    % (format(WQV, &#x27;,&#x27;), format(int(round(RRV)), &#x27;,&#x27;)),
+
+    &#x27;DETENTION SIZING AND THE SPLIT BETWEEN THE TWO BASINS. At the hydrology basis the City accepted for &#x27;
+    &#x27;this site — %s CF of detention per disturbed acre, less any runoff-reduction volume — %.3f &#x27;
+    &#x27;disturbed acres require %s CF with RRv taken as zero. The two basins as drawn provide %s CF &#x27;
+    &#x27;(POND 1 %s + POND 2 %s, from data/layout.json), which clears the SITE TOTAL at %.1f %%. The &#x27;
+    &#x27;DISTRIBUTION does not yet match the tributary split: POND 1 drains %.2f disturbed acres &#x27;
+    &#x27;(%s CF required at the screening rate) against %s CF drawn, and POND 2 drains %.2f acres &#x27;
+    &#x27;(%s CF required) against %s CF drawn. POND 1 sits in a %s SF HOA tract against a %s SF basin &#x27;
+    &#x27;footprint and can be widened within that tract to about 90 ft × 190 ft at top of bank without &#x27;
+    &#x27;moving a lot line; the basins are to be re-proportioned, and the true tributary areas established, &#x27;
+    &#x27;by the design PE. THIS SHEET DOES NOT CERTIFY DETENTION ADEQUACY.&#x27;
+    % (format(int(DET_RATE), &#x27;,&#x27;), DIST_AC_PUB, format(DET_REQ, &#x27;,&#x27;), format(DET_PROV, &#x27;,&#x27;),
+       format(PONDS[0][&#x27;storage_cf&#x27;], &#x27;,&#x27;), format(PONDS[1][&#x27;storage_cf&#x27;], &#x27;,&#x27;),
+       100.0 * DET_PROV / DET_REQ,
+       BASIN_AC[1], format(int(round(BASIN_REQ[1])), &#x27;,&#x27;), format(PONDS[0][&#x27;storage_cf&#x27;], &#x27;,&#x27;),
+       BASIN_AC[2], format(int(round(BASIN_REQ[2])), &#x27;,&#x27;), format(PONDS[1][&#x27;storage_cf&#x27;], &#x27;,&#x27;),
+       format(int(PONDS[0][&#x27;tract_sf&#x27;]), &#x27;,&#x27;), format(PONDS[0][&#x27;area_sf&#x27;], &#x27;,&#x27;)),
+
+    &#x27;DETENTION BASINS — GENERAL (checklist §11.i). Each basin is a DRY extended-detention / &#x27;
+    &#x27;water-quality basin on its own HOA-owned tract (§11.i.1). TOP OF BANK IS SET AT THE 100-YEAR &#x27;
+    &#x27;PONDING LIMIT, and the earthen embankment crest is carried 1′-6″ above it to provide the minimum &#x27;
+    &#x27;freeboard of §11.i.8; the volumes tabulated are therefore the volumes available below the 100-year &#x27;
+    &#x27;water surface. Minimum earthen dam top width 8′-0″ (§11.i.5; Development Regulations 9.8.2.d(5)). &#x27;
+    &#x27;Maximum cut or fill slope 2H:1V; basin side slopes 3H:1V. A sediment forebay equal to 10 % of the &#x27;
+    &#x27;water quality volume is provided at each inlet (§11.i.15) and is sized against that basin’s share &#x27;
+    &#x27;of the water quality volume in the DETENTION BASIN DATA table. FLOW PATH (§11.i.13): in BOTH basins &#x27;
+    &#x27;the inlet and the outlet are at the SOUTHEAST (low) end. Existing ground rises to the northwest &#x27;
+    &#x27;across each basin site — about 6 ft at POND 1 and about 10 ft at POND 2 — so the lane sag that feeds &#x27;
+    &#x27;the basin and the only corner at which it can discharge by gravity are the same end, and the inlet &#x27;
+    &#x27;and outlet cannot be put at opposite ends. An INTERNAL BAFFLE BERM is therefore shown in each basin, &#x27;
+    &#x27;as §11.i.13 expressly permits (&quot;baffles or islands may be installed to increase the flow path &#x27;
+    &#x27;length&quot;). Toe of slope is more than 10 ft from every &#x27;
+    &#x27;adjoining property line (§11.i.6; §8.f). Outlet control structure details, the trash rack, the &#x27;
+    &#x27;anti-clog orifice, the embankment cross-section, benches, the emergency spillway section and the &#x27;
+    &#x27;WQ / CPv / 100-year elevations and volumes tabulated on the OCS detail belong on Sheet C-3.1 and &#x27;
+    &#x27;are NOT on this sheet.&#x27;,
+
+    &#x27;BMP ACCESS AND DRAINAGE EASEMENTS. A 30-FT BMP ACCESS EASEMENT is provided from the private lane to &#x27;
+    &#x27;each basin (residential projects, §11.i.2), carrying a 15-FT WIDE GRASSED ACCESS ROAD GRADED AT NOT &#x27;
+    &#x27;MORE THAN 20 %. Both basins exceed 50 ft in width, so the access road extends to the bottom of the &#x27;
+    &#x27;basin at the outlet control structure (§11.i.3). ACCESS EASEMENT TO BE CLEARED AND GRUBBED &#x27;
+    &#x27;(§11.i.4). A 10-FT DRAINAGE EASEMENT is provided around each basin outside the 100-year ponding &#x27;
+    &#x27;limit (§11.i.12); both lie wholly within the HOA-owned pond and private-lane tracts. All drainage, &#x27;
+    &#x27;access and maintenance easements for storm and sanitary pipes and for the stormwater facilities &#x27;
+    &#x27;will be shown and recorded with the final plat (§10.h). A Stormwater BMP Maintenance Agreement with &#x27;
+    &#x27;as-built hydrology, volume certification, maintenance schedule, access easement, inspection report &#x27;
+    &#x27;and an 18-month BMP inspection is required of the HOA (checklist §3.f.3).&#x27;,
+
+    &#x27;STORM SEWER. Structure and pipe data are tabulated in the STORM STRUCTURE SCHEDULE and PIPE CHART. &#x27;
+    &#x27;Rim elevations are read from the proposed surface of this sheet; inverts are set at the slopes &#x27;
+    &#x27;tabulated and are CONCEPT values for feasibility only — final sizes, slopes, inverts, inlet &#x27;
+    &#x27;spacing, spread and hydraulic grade line are the design PE’s. Minimum cover over the pipe barrel &#x27;
+    &#x27;is tabulated in the pipe chart. All pipe is reinforced concrete pipe to Gwinnett County standards. &#x27;
+    &#x27;OUTLET DISCHARGE PIPES ARE HELD MORE THAN SIX PIPE DIAMETERS FROM EVERY ADJOINING PROPERTY LINE &#x27;
+    &#x27;(§10.e): OF-1 is %.0f ft and OF-2 is %.0f ft from the southwest line against a 12-ft requirement &#x27;
+    &#x27;for the 24-in outlets. Energy-dissipation calculations for every outfall are required with the &#x27;
+    &#x27;erosion control plan (§12.c).&#x27;
+    % (OF1_TO_SW, OF2_TO_SW),
+
+    &#x27;GRADING NOTES, VERBATIM (checklist §10.a — to appear on all SESPC sheets if clearing/grubbing or &#x27;
+    &#x27;grading are permitted separately). 1. MAXIMUM CUT OR FILL SLOPES IS 2H:1V. 2. CITY OF LILBURN / &#x27;
+    &#x27;GWINNETT COUNTY ASSUMES NO RESPONSIBILITY FOR OVERFLOW OR EROSION OF NATURAL OR ARTIFICIAL DRAINS &#x27;
+    &#x27;BEYOND THE EXTENT OF THE STREET RIGHT-OF-WAY, OR FOR THE EXTENSION OF CULVERTS BEYOND THE POINT &#x27;
+    &#x27;SHOWN ON THE APPROVED AND RECORDED PLAN. THE CITY OF LILBURN / GWINNETT COUNTY DOES NOT ASSUME THE &#x27;
+    &#x27;RESPONSIBILITY FOR THE MAINTENANCE OF PIPES IN DRAINAGE EASEMENTS BEYOND THE CITY / COUNTY &#x27;
+    &#x27;RIGHT-OF-WAY. 3. STRUCTURES ARE NOT ALLOWED IN DRAINAGE EASEMENTS. 4. 12% TO 15% STREET GRADES &#x27;
+    &#x27;REQUIRE AN &quot;AS GRADED&quot; SURVEY BEFORE INSTALLATION OF THE CURB (§7.k).&#x27;,
+
+    &#x27;RETAINING WALLS. NO RETAINING WALL IS PROPOSED. Maximum cut on the lane centreline is %.1f ft and &#x27;
+    &#x27;maximum fill %.1f ft, and every graded slope daylights at 2H:1V or flatter inside the limits of &#x27;
+    &#x27;disturbance, so no wall envelope, hydrostatic design, wall easement or as-built wall certification &#x27;
+    &#x27;(checklist §8) is triggered by this concept. If lot grading at the land disturbance permit stage &#x27;
+    &#x27;introduces a wall, top, bottom and ground elevations must be shown (§10.f) and any wall over 4 ft &#x27;
+    &#x27;must be designed by a Georgia registered professional engineer.&#x27;
+    % (CUT_MAX_CL, FILL_MAX_CL),
+
+    &#x27;SOILS AND ROCK. NRCS SSURGO GA135 maps ARE (Ashlar–Rion–Wateree, gneiss bedrock at 22–40 in) under &#x27;
+    &#x27;BOTH basin sites and the mid-strip swale, and HYB (Helena sandy loam, hydrologic soil group D, &#x27;
+    &#x27;seasonal high water table ≈ 24 in) at the front southwest corner. ROCK PROBES AND TEST PITS AT BOTH &#x27;
+    &#x27;BASINS AND ALONG THE STORM TRUNK ARE REQUIRED BEFORE THE HYDROLOGY BASIS OR THE EARTHWORK BALANCE &#x27;
+    &#x27;IS TRUSTED; an undercut allowance should be carried. Shallow rock at either basin changes the &#x27;
+    &#x27;volume, the depth and the cost, and the alternatives are a third facility at the terminus green or &#x27;
+    &#x27;shallower, longer basins.&#x27;,
+
+    &#x27;EARTHWORK. Cut ≈ %s CY and fill ≈ %s CY inside the limits of disturbance, a net surplus of &#x27;
+    &#x27;≈ %s CY of excavation — most of it the two basins. The centreline itself balances (mean &#x27;
+    &#x27;deviation %+.2f ft); the surplus is to be placed on site in lot pads, buffer berms and topsoil, or &#x27;
+    &#x27;exported. Shrinkage, topsoil stripping, rock and undercut are NOT included, and the quantity is a &#x27;
+    &#x27;concept estimate from an approximate digital elevation model, not a survey.&#x27;
+    % (format(int(round(CUT_CY)), &#x27;,&#x27;), format(int(round(FILL_CY)), &#x27;,&#x27;),
+       format(int(round(CUT_CY - FILL_CY)), &#x27;,&#x27;), DEV_MEAN),
+
+    &#x27;PHASING. The phase line is at u = %.0f (data/layout.json). POND 1 and Lines A and B serve Phase 1; &#x27;
+    &#x27;POND 2 and Line C serve Phase 2. Each phase must stand alone hydrologically: the Phase 1 basin, its &#x27;
+    &#x27;outfall and its erosion control must be built and stabilised with Phase 1, and the Phase 2 area &#x27;
+    &#x27;remains undisturbed woodland until Phase 2 begins. Phasing is permitted only if platted in blocks &#x27;
+    &#x27;(checklist §4.i).&#x27;
+    % (L[&#x27;phase_line_u&#x27;],),
+
+    &#x27;RECORD DRAWINGS (checklist §4.a, verbatim). DEVELOPER TO PROVIDE TO CITY CERTIFIED DETENTION &#x27;
+    &#x27;POST-CONSTRUCTION (RECORD) DRAWINGS WITH THE SUBMITTAL OF THE FINAL PLAT OR ONE WEEK PRIOR TO &#x27;
+    &#x27;REQUESTING A CERTIFICATE OF OCCUPANCY, SO THAT THE POST-CONSTRUCTION CONDITIONS MAY BE VERIFIED AND &#x27;
+    &#x27;APPROVED. CERTIFIED RECORD DRAWINGS SHALL INCLUDE TOPOGRAPHY OF POND AND OUTLET STRUCTURE DETAIL &#x27;
+    &#x27;USING POST-CONSTRUCTION SURVEY DATA. USING RECORD DRAWINGS, PROVIDE A CERTIFIED HYDROLOGY REPORT &#x27;
+    &#x27;VERIFYING POND VOLUMES AND PEAK OUTFLOWS FROM REGULATED STORM EVENTS.&#x27;,
+
+    &#x27;PROFILE STATIONS. Existing ground on the profile is data/layout.json lane.ground_profile — &#x27;
+    &#x27;156 stations at 10 ft from u = %.0f to u = %.0f interpolated from the USGS 3DEP model, &#x27;
+    &#x27;APPROXIMATE. The three hammerhead turnarounds at u = 540, 1,110 and 1,690 fall on proposed &#x27;
+    &#x27;grades of %.2f %%, %.2f %% and %.2f %%. Vertical curves are %.0f ft long at each of the three &#x27;
+    &#x27;interior PVIs; sight distance and K-values at the 15-mph design speed, together with the &#x27;
+    &#x27;horizontal alignment and its curve data, belong on Sheet C-5.0.&#x27;
+    % (U_PROF0, U_PROF1, grade_pct(540.0), grade_pct(1110.0), grade_pct(1690.0), VC_LEN[0]),
+
+    &#x27;WHAT IS NOT ON THIS SHEET. Storm sewer profiles and stormwater construction details (Sheet C-3.1); &#x27;
+    &#x27;the soil erosion, sedimentation and pollution control plan and its GSWCC checklist and &#x27;
+    &#x27;certifications; the tree protection plan; sanitary sewer and water (Sheet C-4.0); the private lane &#x27;
+    &#x27;plan and profile with horizontal curve data (Sheet C-5.0). Utility locates through Georgia 811 &#x27;
+    &#x27;(O.C.G.A. §25-9) are required before any field work.&#x27;,
+]
+
+
+# Two note frames: a four-column block in the empty top band of the plan window, and a tall
+# single column at the right of the data band.  flow_notes() picks the largest type size that
+# holds the whole note set and never clips.
+NOTE_FRAMES = [(840.0, 82.0, 1650.0, 242.0, 4), (1982.0, 900.0, 558.0, 626.0, 1)]
+
+
+def flow_notes(D, frames, blocks_text):
+    for size, lead in ((6.5, 7.6), (6.4, 7.45), (6.3, 7.3), (6.2, 7.15), (6.1, 7.0)):
+        cols = []
+        for (fx, fy, fw, fh, nc) in frames:
+            cw = fw / nc
+            for k in range(nc):
+                cols.append((fx + k * cw, fy, int((cw - 12) / (0.56 * size)), int(fh / lead)))
+        placed, ci, used, ok = [], 0, 0, True
+        for t in blocks_text:
+            lines = sb.wrap(t, cols[ci][2])
+            if used + len(lines) &gt; cols[ci][3]:
+                ci += 1
+                used = 0
+                if ci &gt;= len(cols):
+                    ok = False
+                    break
+                lines = sb.wrap(t, cols[ci][2])
+            placed.append((ci, used, lines))
+            used += len(lines) + 1
+        if ok:
+            for ci, row, lines in placed:
+                cx, cy, _, _ = cols[ci]
+                for j, ln in enumerate(lines):
+                    D.stext(cx + (0 if j == 0 else 7), cy + (row + j) * lead, ln, size=size)
+            print(&#x27;  notes     : %d notes flowed into %d columns at %.1f pt&#x27;
+                  % (len(blocks_text), ci + 1, size))
+            return size
+    raise RuntimeError(&#x27;general notes do not fit the note frames&#x27;)
+
+
+# =========================================================================== 9. plan layers
+def context(c):
+    &quot;&quot;&quot;Screened proposed layout from Sheet C-2.0 — lots, pavement, structures, open space.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;context&quot;&gt;&#x27;)
+    for g in L[&#x27;greens&#x27;]:
+        for p in g[&#x27;polygons&#x27;]:
+            c.poly([tuple(q) for q in p], fill=sb.C[&#x27;green&#x27;], stroke=&#x27;#c8d8c0&#x27;, stroke_width=0.3)
+    for p in L[&#x27;amenity&#x27;][&#x27;tract_polygons&#x27;]:
+        c.poly([tuple(q) for q in p], fill=&#x27;#eef4e6&#x27;, stroke=&#x27;#c8d8c0&#x27;, stroke_width=0.3)
+    ln = L[&#x27;lane&#x27;]
+    for key in (ln[&#x27;tract_polygon&#x27;], ln[&#x27;entry_drive&#x27;][&#x27;tract_polygon&#x27;]):
+        c.poly([tuple(p) for p in key], fill=&#x27;#f4f4f4&#x27;, stroke=G[&#x27;ctx&#x27;], stroke_width=0.35,
+               stroke_dasharray=&#x27;4 2&#x27;)
+    for key in (ln[&#x27;pavement_polygon&#x27;], ln[&#x27;entry_drive&#x27;][&#x27;pavement_polygon&#x27;]):
+        c.poly([tuple(p) for p in key], fill=&#x27;#e6e6e6&#x27;, stroke=&#x27;#9a9a9a&#x27;, stroke_width=0.5)
+    for h in L[&#x27;hammerheads&#x27;]:
+        for leg in h[&#x27;legs&#x27;]:
+            c.poly([tuple(p) for p in leg], fill=&#x27;#e6e6e6&#x27;, stroke=&#x27;#9a9a9a&#x27;, stroke_width=0.5)
+    for lot in L[&#x27;lots&#x27;]:
+        c.poly([tuple(p) for p in lot[&#x27;polygon&#x27;]], fill=&#x27;none&#x27;, stroke=G[&#x27;ctx&#x27;], stroke_width=0.5)
+        for k in (&#x27;house_rect&#x27;, &#x27;garage_rect&#x27;):
+            c.poly([tuple(p) for p in lot[k]], fill=&#x27;#f0f0f0&#x27;, stroke=G[&#x27;ctx&#x27;], stroke_width=0.35)
+    c.poly([tuple(p) for p in L[&#x27;amenity&#x27;][&#x27;clubhouse&#x27;]], fill=&#x27;#f0f0f0&#x27;, stroke=G[&#x27;ctx&#x27;],
+           stroke_width=0.5)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def screened_existing(c, labels=True):
+    &quot;&quot;&quot;sitebase&#x27;s existing 2-ft contours, screened back so the proposed contours read over them.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g opacity=&quot;0.30&quot;&gt;&#x27;)
+    sb.contours(c, existing=True, labels=labels)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def proposed_contours(c, labels=True):
+    c.add(&#x27;&lt;g id=&quot;contours-proposed&quot;&gt;&#x27;)
+    for lev, lines in sorted(PROP_CONTOURS.items(), key=lambda kv: int(kv[0])):
+        idx = int(lev) % 10 == 0
+        for lnn in lines:
+            c.pline(lnn, fill=&#x27;none&#x27;, stroke=G[&#x27;prop&#x27;], stroke_width=(1.9 if idx else 0.8))
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    for lev, lines in sorted(PROP_CONTOURS.items(), key=lambda kv: int(kv[0])):
+        if int(lev) % 10:
+            continue
+        for lnn in lines:
+            if len(lnn) &lt; 8:
+                continue
+            p = lnn[len(lnn) // 2]
+            c.text(p[0], p[1], str(lev), size=6.2, bold=True, fill=G[&#x27;prop&#x27;], halo=True, avoid=True)
+
+
+def drainage_areas(c):
+    c.add(&#x27;&lt;g id=&quot;drainage-areas&quot;&gt;&#x27;)
+    for tag, ua, ub, front, col, key, txt in POST:
+        poly = band_poly(ua, ub, front)
+        c.poly(poly, fill=col, fill_opacity=&#x27;0.13&#x27;, stroke=col, stroke_width=1.2,
+               stroke_dasharray=&#x27;14 4 3 4&#x27;)
+    for tag, ua, ub, front, col, txt in PRE:
+        if ua &gt; 0:
+            c.line((ua, sb.NE(ua)), (ua, sb.SW(ua)), stroke=G[&#x27;pre&#x27;], stroke_width=1.2,
+                   stroke_dasharray=&#x27;9 3 2 3&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def lod_layer(c):
+    c.poly(LOD, fill=&#x27;none&#x27;, stroke=G[&#x27;lod&#x27;], stroke_width=1.6, stroke_dasharray=&#x27;18 4 3 4&#x27;)
+
+
+def basins(c):
+    c.add(&#x27;&lt;g id=&quot;basins&quot;&gt;&#x27;)
+    for p in PONDS:
+        c.poly(p[&#x27;tract_poly&#x27;], fill=&#x27;#eaf1e6&#x27;, fill_opacity=&#x27;0.55&#x27;, stroke=sb.C[&#x27;green_line&#x27;],
+               stroke_width=0.4)
+        c.poly(p[&#x27;esmt_poly&#x27;], fill=&#x27;none&#x27;, stroke=G[&#x27;esmt&#x27;], stroke_width=1.0, stroke_dasharray=&#x27;7 3&#x27;)
+        c.poly(p[&#x27;pond_poly&#x27;], fill=&#x27;#dceaf6&#x27;, stroke=G[&#x27;pond&#x27;], stroke_width=1.4)
+        c.poly(p[&#x27;bottom_poly&#x27;], fill=&#x27;#cfe3f3&#x27;, stroke=G[&#x27;pond&#x27;], stroke_width=0.7,
+               stroke_dasharray=&#x27;5 3&#x27;)
+        # forebay
+        f = p[&#x27;fb&#x27;]
+        c.poly(sb.rect(f[0], f[1], f[2], f[3]), fill=&#x27;#bcd7c2&#x27;, stroke=G[&#x27;pond&#x27;], stroke_width=0.6)
+        # earthen embankment crest along the downhill sides (8&#x27;-0&quot; minimum top width)
+        c.pline(p[&#x27;dam_path&#x27;], fill=&#x27;none&#x27;, stroke=&#x27;#5d4037&#x27;, stroke_width=2.4)
+        # emergency spillway: a 20-ft grassed notch in the embankment away from the OCS
+        c.pline(p[&#x27;spill&#x27;], fill=&#x27;none&#x27;, stroke=&#x27;#2e7d32&#x27;, stroke_width=3.4, stroke_dasharray=&#x27;3 2&#x27;)
+        # internal baffle berm where the inlet and the outlet share an end
+        if p[&#x27;baffle&#x27;]:
+            c.pline(p[&#x27;baffle&#x27;], fill=&#x27;none&#x27;, stroke=&#x27;#5d4037&#x27;, stroke_width=1.4,
+                    stroke_dasharray=&#x27;6 3&#x27;)
+        # OCS
+        o = p[&#x27;ocs&#x27;]
+        c.poly(sb.rect(o[0] - 3, o[0] + 3, o[1] - 3, o[1] + 3), fill=&#x27;#fff&#x27;, stroke=G[&#x27;pond&#x27;],
+               stroke_width=1.2)
+        # BMP access easement + 15-ft road
+        c.poly(sb.offset_band(p[&#x27;acc&#x27;], 15.0), fill=&#x27;none&#x27;, stroke=G[&#x27;acc&#x27;], stroke_width=1.0,
+               stroke_dasharray=&#x27;12 4&#x27;)
+        c.pline(p[&#x27;acc&#x27;], fill=&#x27;none&#x27;, stroke=G[&#x27;acc&#x27;], stroke_width=3.2, stroke_dasharray=&#x27;2 3&#x27;)
+        # outfall: headwall, riprap apron, level spreader
+        hw, ap, sp2 = p[&#x27;hw&#x27;], p[&#x27;apron&#x27;], p[&#x27;spread&#x27;]
+        c.pline([o, hw, ap, sp2], fill=&#x27;none&#x27;, stroke=G[&#x27;storm&#x27;], stroke_width=1.8)
+        c.poly(sb.rect(ap[0] - 10, ap[0] + 10, ap[1] - 7, ap[1] + 7), fill=&#x27;url(#rip)&#x27;,
+               stroke=G[&#x27;storm&#x27;], stroke_width=0.5)
+        c.line((sp2[0] - 14, sp2[1]), (sp2[0] + 14, sp2[1]), stroke=G[&#x27;storm&#x27;], stroke_width=2.4)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def storm(c):
+    c.add(&#x27;&lt;g id=&quot;storm&quot;&gt;&#x27;)
+    for p in PIPES:
+        c.line(p[&#x27;a&#x27;], p[&#x27;b&#x27;], stroke=G[&#x27;storm&#x27;], stroke_width=1.8)
+    for sid, typ, u, v, note in STRUCT:
+        if &#x27;CURB INLET&#x27; in typ:
+            c.poly(sb.rect(u - 4, u + 4, v - 2.5, v + 2.5), fill=G[&#x27;storm&#x27;], stroke=&#x27;#fff&#x27;,
+                   stroke_width=0.4)
+        elif &#x27;JUNCTION&#x27; in typ:
+            c.circle((u, v), 3.0, fill=&#x27;#fff&#x27;, stroke=G[&#x27;storm&#x27;], stroke_width=1.1)
+        else:
+            c.poly([(u - 4, v - 4), (u + 4, v - 4), (u, v + 4)], fill=G[&#x27;storm&#x27;], stroke=&#x27;#fff&#x27;,
+                   stroke_width=0.4)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def spot_elevs(c, picks):
+    for u, v, z, anc in picks:
+        c.line((u - 3.5, v), (u + 3.5, v), stroke=G[&#x27;prop&#x27;], stroke_width=0.7)
+        c.line((u, v - 3.5), (u, v + 3.5), stroke=G[&#x27;prop&#x27;], stroke_width=0.7)
+        c.text(u + (6 if anc == &#x27;start&#x27; else -6), v + 8.0, &#x27;%.2f&#x27; % z, size=6.0, anchor=anc,
+               fill=G[&#x27;prop&#x27;], bold=True, halo=True)
+
+
+# =========================================================================== 10. profile band
+def profile_band(D, x0, y0, w, h):
+    &quot;&quot;&quot;Lane profile: 1&quot; = 60&#x27; horizontal, 1&quot; = 10&#x27; vertical (6:1 exaggeration).&quot;&quot;&quot;
+    hs = sb.SCALE60
+    vs = 72.0 / 10.0
+    zlo, zhi = 930.0, 954.0
+    px0 = x0 + 46
+    py1 = y0 + (zhi - zlo) * vs                    # datum line (z = zlo)
+
+    def X(u):
+        return px0 + (u - U_PROF0) * hs
+
+    def Y(z):
+        return py1 - (z - zlo) * vs
+
+    D.stext(x0, y0 - 24, &#x27;LANE PROFILE — PRIVATE LANE CENTRELINE, u = %.0f TO u = %.0f&#x27;
+            % (U_PROF0, U_PROF1), size=12, bold=True)
+    D.stext(x0, y0 - 12, &#x27;HORIZONTAL 1&quot; = 60\&#x27;   ·   VERTICAL 1&quot; = 10\&#x27;   ·   EXAGGERATION 6:1   ·   &#x27;
+                         &#x27;DATUM ELEV. %.0f   ·   NAVD88   ·   DRAFT — NOT SEALED — grading and profile &#x27;
+                         &#x27;design must be sealed by a Georgia PE&#x27; % zlo, size=8, fill=&#x27;#444&#x27;)
+    D.srect(px0, Y(zhi), (U_PROF1 - U_PROF0) * hs, (zhi - zlo) * vs, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;,
+            stroke_width=1.0)
+    z = int(zlo)
+    while z &lt;= zhi:
+        idx = z % 10 == 0
+        D.sline(px0, Y(z), X(U_PROF1), Y(z), stroke=&#x27;#999&#x27; if idx else &#x27;#ddd&#x27;,
+                stroke_width=0.6 if idx else 0.25)
+        D.stext(px0 - 5, Y(z) + 2.5, str(z), size=6.6, anchor=&#x27;end&#x27;, bold=idx)
+        D.stext(X(U_PROF1) + 5, Y(z) + 2.5, str(z), size=6.6, anchor=&#x27;start&#x27;, bold=idx)
+        z += 2
+    u = 200.0
+    while u &lt;= U_PROF1:
+        idx = int(u) % 500 == 0
+        D.sline(X(u), Y(zlo), X(u), Y(zhi), stroke=&#x27;#666&#x27; if idx else &#x27;#ddd&#x27;,
+                stroke_width=0.6 if idx else 0.25)
+        D.stext(X(u), py1 + 12, &#x27;%d&#x27; % u, size=6.6, anchor=&#x27;middle&#x27;, bold=idx)
+        u += 100.0
+    D.stext(X((U_PROF0 + U_PROF1) / 2.0), py1 + 24, &#x27;u — DISTANCE ALONG THE STRIP FROM THE ARCADO ROAD &#x27;
+                                                    &#x27;RIGHT-OF-WAY CORNER (ft)&#x27;, size=8,
+            anchor=&#x27;middle&#x27;, bold=True)
+    # existing ground and proposed grade
+    us = [U_PROF0 + 5.0 * k for k in range(int((U_PROF1 - U_PROF0) / 5) + 1)]
+    D.add(&#x27;&lt;polyline points=&quot;%s&quot; fill=&quot;none&quot; stroke=&quot;%s&quot; stroke-width=&quot;1.6&quot; stroke-dasharray=&quot;9 4&quot;/&gt;&#x27;
+          % (&#x27; &#x27;.join(&#x27;%.2f,%.2f&#x27; % (X(u), Y(ex_prof(u))) for u in us), sb.C[&#x27;contour_txt&#x27;]))
+    D.add(&#x27;&lt;polyline points=&quot;%s&quot; fill=&quot;none&quot; stroke=&quot;%s&quot; stroke-width=&quot;2.8&quot;/&gt;&#x27;
+          % (&#x27; &#x27;.join(&#x27;%.2f,%.2f&#x27; % (X(u), Y(prof(u))) for u in us), G[&#x27;prop&#x27;]))
+    # PVI markers, tangent grades, vertical curves
+    for i, (pu, pz) in enumerate(PVI):
+        D.sline(X(pu), Y(zlo), X(pu), Y(zhi), stroke=G[&#x27;prop&#x27;], stroke_width=0.5,
+                stroke_dasharray=&#x27;4 3&#x27;)
+        D.scircle(X(pu), Y(prof(pu)), 2.8, fill=&#x27;#fff&#x27;, stroke=G[&#x27;prop&#x27;], stroke_width=1.3)
+        lab = [&#x27;PVI %d&#x27; % (i + 1), &#x27;u = %.0f&#x27; % pu, &#x27;ELEV %.2f&#x27; % pz]
+        if 0 &lt; i &lt; len(PVI) - 1:
+            lab.append(&#x27;VC = %.0f ft&#x27; % VC_LEN[i - 1])
+        anc = &#x27;end&#x27; if i == len(PVI) - 1 else &#x27;start&#x27;
+        dx = -5 if anc == &#x27;end&#x27; else 5
+        yb = Y(zhi) + 10
+        D.srect(X(pu) + (dx - 3 if anc == &#x27;start&#x27; else dx - 55), yb - 8, 58, 8 + len(lab) * 7.8,
+                fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.9&#x27;, stroke=&#x27;none&#x27;)
+        for k, t in enumerate(lab):
+            D.stext(X(pu) + dx, yb + k * 7.8, t, size=6.3, bold=(k == 0), fill=G[&#x27;prop&#x27;], anchor=anc)
+    for i, g in enumerate(GRADE):
+        um = (PVI[i][0] + PVI[i + 1][0]) / 2.0
+        D.srect(X(um) - 24, Y(prof(um)) - 18, 48, 12, fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.85&#x27;, stroke=&#x27;none&#x27;)
+        D.stext(X(um), Y(prof(um)) - 9, &#x27;%+.2f %%&#x27; % (g * 100.0), size=9, bold=True,
+                anchor=&#x27;middle&#x27;, fill=G[&#x27;prop&#x27;])
+    # cut / fill call-outs
+    for u in (300.0, 620.0, 830.0, 1160.0, 1470.0, 1650.0):
+        d = prof(u) - ex_prof(u)
+        if abs(d) &lt; 0.4:
+            continue
+        D.sline(X(u), Y(ex_prof(u)), X(u), Y(prof(u)), stroke=&#x27;#555&#x27;, stroke_width=0.8)
+        yy = Y(min(prof(u), ex_prof(u))) + 11
+        D.srect(X(u) - 20, yy - 7, 40, 9, fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.85&#x27;, stroke=&#x27;none&#x27;)
+        D.stext(X(u), yy, &#x27;%s %.1f\&#x27;&#x27; % (&#x27;FILL&#x27; if d &gt; 0 else &#x27;CUT&#x27;, abs(d)), size=7,
+                anchor=&#x27;middle&#x27;, fill=&#x27;#333&#x27;, bold=True)
+    # hammerheads
+    for h in L[&#x27;hammerheads&#x27;]:
+        u = float(h[&#x27;u&#x27;])
+        if U_PROF0 &lt;= u &lt;= U_PROF1:
+            D.spoly([(X(u), py1), (X(u) - 4.5, py1 + 7), (X(u) + 4.5, py1 + 7)], fill=&#x27;#555&#x27;)
+    # the existing 11 % reach, called out clear of the lines
+    ux = EX_GMAX_U + 5
+    D.scircle(X(ux), Y(ex_prof(ux)), 4.2, fill=&#x27;none&#x27;, stroke=sb.C[&#x27;red&#x27;], stroke_width=1.4)
+    lx, ly = X(ux) - 40, Y(zhi) + 74
+    D.sline(X(ux) - 4, Y(ex_prof(ux)) - 4, lx + 6, ly + 3, stroke=sb.C[&#x27;red&#x27;], stroke_width=0.7)
+    D.srect(lx - 178, ly - 9, 186, 22, fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.9&#x27;, stroke=sb.C[&#x27;red&#x27;],
+            stroke_width=0.6)
+    D.stext(lx - 6, ly, &#x27;EXISTING GROUND REACHES %.2f %% AT u ≈ %.0f&#x27; % (EX_GMAX, ux), size=7.4,
+            bold=True, anchor=&#x27;end&#x27;, fill=sb.C[&#x27;red&#x27;])
+    D.stext(lx - 6, ly + 9, &#x27;PROPOSED GRADE HERE %+.2f %% — MAX. %.2f %% ON THE WHOLE LANE&#x27;
+            % (grade_pct(ux), abs(PR_GMAX)), size=7.0, anchor=&#x27;end&#x27;, fill=sb.C[&#x27;red&#x27;])
+    # key, in the empty lower-left of the plot
+    kx, ky = px0 + 14, Y(936.4)
+    D.srect(kx - 8, ky - 10, 300, 42, fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.92&#x27;, stroke=&#x27;#999&#x27;,
+            stroke_width=0.5)
+    D.sline(kx, ky - 3, kx + 26, ky - 3, stroke=sb.C[&#x27;contour_txt&#x27;], stroke_width=1.6,
+            stroke_dasharray=&#x27;9 4&#x27;)
+    D.stext(kx + 31, ky, &#x27;EXISTING GROUND ON THE LANE CENTRELINE (3DEP — approximate)&#x27;, size=6.8)
+    D.sline(kx, ky + 8, kx + 26, ky + 8, stroke=G[&#x27;prop&#x27;], stroke_width=2.8)
+    D.stext(kx + 31, ky + 11, &#x27;PROPOSED FINISHED GRADE — lane centreline&#x27;, size=6.8)
+    D.spoly([(kx + 13, ky + 17), (kx + 9, ky + 24), (kx + 17, ky + 24)], fill=&#x27;#555&#x27;)
+    D.stext(kx + 31, ky + 23, &#x27;Hammerhead turnaround (u = 540 / 1,110 / 1,690)&#x27;, size=6.8)
+    return py1 + 30
+
+
+# =========================================================================== 11. build
+def build():
+    scale_note = &#x27;Scale 1&quot; = 60\&#x27; (ARCH D 36 × 24 in); profile 1&quot; = 60\&#x27; H / 1&quot; = 10\&#x27; V&#x27;
+    D, F = sb.sheet(
+        &#x27;GRADING, DRAINAGE AND STORMWATER CONCEPT&#x27;, &#x27;C-3.0&#x27;,
+        &#x27;Proposed grading, drainage-area map, detention concept and lane profile — 2026 Application &#x27;
+        &#x27;Instructions item 8; City of Lilburn Site Development Plan Review Checklist §4.e, §7, §10, §11&#x27;,
+        scale_note, generator=&#x27;tools/sitebase.py + tools/grading.py&#x27;,
+        north_at=(F0 := (2400.0, 780.0)), scale_at=(1470.0, 812.0),
+        status_lines=[
+            &#x27;Concept grading and drainage for pre-application review. Existing&#x27;,
+            &#x27;topography is USGS 3DEP (approximate) — a topographic survey is&#x27;,
+            &#x27;required and governs. Grading, hydrology, hydraulics and the&#x27;,
+            &#x27;detention design must be sealed by a Georgia PE. NOT FOR CONSTRUCTION.&#x27;])
+    del F0
+    # sitebase queues an &quot;EXISTING CONDITIONS OF RECORD&quot; watermark for Sheet C-0; this sheet
+    # shows proposed work, so that queued layer is replaced (sitebase itself is not modified).
+    D.late.pop(1)
+    px, py, pw, ph = F[&#x27;plan&#x27;]
+    D.later(lambda: D.add(&#x27;&lt;text x=&quot;%.1f&quot; y=&quot;%.1f&quot; font-size=&quot;34&quot; fill=&quot;#c00&quot; fill-opacity=&quot;0.10&quot; &#x27;
+                          &#x27;font-weight=&quot;bold&quot; text-anchor=&quot;middle&quot; transform=&quot;rotate(-8 %.1f %.1f)&quot;&gt;&#x27;
+                          &#x27;DRAFT — NOT SEALED — CONCEPT GRADING AND DRAINAGE, NOT FOR CONSTRUCTION&lt;/text&gt;&#x27;
+                          % (px + pw / 2, py + ph - 38, px + pw / 2, py + ph - 38)))
+    D.add(&#x27;&lt;defs&gt;&lt;pattern id=&quot;rip&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;7&quot; height=&quot;7&quot;&gt;&#x27;
+          &#x27;&lt;rect width=&quot;7&quot; height=&quot;7&quot; fill=&quot;#eceff1&quot;/&gt;&#x27;
+          &#x27;&lt;circle cx=&quot;2&quot; cy=&quot;2&quot; r=&quot;1.1&quot; fill=&quot;none&quot; stroke=&quot;#00695c&quot; stroke-width=&quot;0.4&quot;/&gt;&#x27;
+          &#x27;&lt;circle cx=&quot;5.5&quot; cy=&quot;5&quot; r=&quot;1.1&quot; fill=&quot;none&quot; stroke=&quot;#00695c&quot; stroke-width=&quot;0.4&quot;/&gt;&#x27;
+          &#x27;&lt;/pattern&gt;&lt;/defs&gt;&#x27;)
+
+    # ---------------------------------------------------------------- plan
+    D.clip_open(fill=&#x27;#fff&#x27;)
+    sb.adjoiners(D, labels=False, zoning=False)
+    sb.arcado_row(D, labels=False)
+    context(D)
+    drainage_areas(D)
+    screened_existing(D, labels=True)
+    proposed_contours(D, labels=True)
+    sb.streams_and_buffers(D, labels=False)
+    sb.sewer_existing(D, labels=False, easement=False)
+    sb.existing_structures(D, labels=False)
+    basins(D)
+    storm(D)
+    lod_layer(D)
+    sb.boundary(D, bearings=False, label=False)
+
+    spot_elevs(D, [
+        (ENTRY_RW[0] + 16, ENTRY_RW[1], ENTRY_Z0, &#x27;start&#x27;),
+        (150.0, vc(150.0), prof(150.0), &#x27;start&#x27;),
+        (830.0, vc(830.0), prof(830.0), &#x27;start&#x27;),
+        (1160.0, vc(1160.0), prof(1160.0), &#x27;start&#x27;),
+        (1470.0, vc(1470.0), prof(1470.0), &#x27;start&#x27;),
+        (1699.0, vc(1699.0), prof(1699.0), &#x27;end&#x27;),
+        (PONDS[0][&#x27;u0&#x27;] + 22, PONDS[0][&#x27;v0&#x27;] + 26, PONDS[0][&#x27;bottom&#x27;], &#x27;start&#x27;),
+        (PONDS[1][&#x27;u0&#x27;] + 22, PONDS[1][&#x27;v0&#x27;] + 26, PONDS[1][&#x27;bottom&#x27;], &#x27;start&#x27;),
+    ])
+
+    # --- plan annotation: drainage areas, basins, outfalls, structures
+    for tag, ua, ub, front, col, key, txt in POST:
+        um = (max(ua, 0) + ub) / 2.0
+        D.textlines(um, sb.NE(um) - 26, [&#x27;%s → %s&#x27; % (tag, &#x27;ARCADO RD R/W&#x27; if key == 0 else &#x27;POND %d&#x27; % key),
+                                         &#x27;%.2f ac gross / %.2f ac disturbed&#x27;
+                                         % (_band_area(ua, ub, front) / 43560.0, BASIN_AC[key])],
+                    size=7, gap=1.2, bold_first=True, fill=col, halo=True)
+    for tag, ua, ub, front, col, txt in PRE:
+        if ua &gt; 0:
+            D.text(ua, sb.SW(ua) + 30, &#x27;PRE-DEVELOPMENT DIVIDE  u = %.0f&#x27; % ua, size=6.4, rot=-81,
+                   fill=G[&#x27;pre&#x27;], halo=True)
+    D.text(60, -294, &#x27;PRE-DEVELOPMENT DRAINAGE: the strip falls northeast to southwest across its whole &#x27;
+                     &#x27;length; PRE-A, PRE-B and PRE-C all leave the site on the southwest line, PRE-A and &#x27;
+                     &#x27;PRE-B to the off-site branch 38–58 ft outside that line and PRE-C to the on-site &#x27;
+                     &#x27;headwater channel.&#x27;, size=7.5, bold=True, fill=G[&#x27;pre&#x27;], halo=True, anchor=&#x27;start&#x27;)
+
+    for p in PONDS:
+        u0, u1, v0, v1 = p[&#x27;u0&#x27;], p[&#x27;u1&#x27;], p[&#x27;v0&#x27;], p[&#x27;v1&#x27;]
+        lines = [&#x27;%s — DRY EXTENDED-DETENTION / WATER-QUALITY BASIN&#x27; % p[&#x27;name&#x27;],
+                 &#x27;TOP OF BANK = 100-YR PONDING ELEV. %.2f   ·   BOTTOM %.2f   ·   6.0 ft, 3:1&#x27;
+                 % (p[&#x27;tob&#x27;], p[&#x27;bottom&#x27;]),
+                 &#x27;EMBANKMENT CREST %.2f (8\&#x27;-0&quot; MIN. TOP WIDTH)   ·   FREEBOARD 1\&#x27;-6&quot;&#x27; % p[&#x27;dam&#x27;],
+                 &#x27;EMERG. SPILLWAY CREST %.2f, 20 ft WIDE, GRASSED&#x27; % p[&#x27;spillway&#x27;],
+                 &#x27;STORAGE %s CF TO THE 100-YR LIMIT (data/layout.json)&#x27; % format(p[&#x27;storage_cf&#x27;], &#x27;,&#x27;),
+                 &#x27;TOP OF BANK %s ft   ·   FOREBAY %.0f × %.0f ft, %.0f ft DEEP = %s CF PROVIDED &#x27;
+                 &#x27;vs %s CF REQUIRED (10 %% OF WQv, §11.i.15)&#x27;
+                 % (p[&#x27;tob_dims&#x27;], p[&#x27;fb&#x27;][1] - p[&#x27;fb&#x27;][0], p[&#x27;fb&#x27;][3] - p[&#x27;fb&#x27;][2], p[&#x27;fb_depth&#x27;],
+                    format(int(p[&#x27;fb_vol&#x27;]), &#x27;,&#x27;), format(int(round(p[&#x27;fb_req&#x27;])), &#x27;,&#x27;)),
+                 &quot;30&#x27; BMP ACCESS EASEMENT, 15&#x27; ROAD AT ≤ 20 % TO THE BASIN BOTTOM AT THE OCS&quot;,
+                 &#x27;(§11.i.2, §11.i.3) — ACCESS EASEMENT TO BE CLEARED AND GRUBBED (§11.i.4)&#x27;,
+                 &quot;10&#x27; DRAINAGE EASEMENT OUTSIDE THE 100-YR PONDING LIMIT (§11.i.12)&quot;,
+                 &#x27;FLOW PATH: %s&#x27; % p[&#x27;flow&#x27;]]
+        D.textlines(u0 - 6, v0 - 46, lines, size=6.6, gap=1.24,
+                    bold_first=True, fill=G[&#x27;pond&#x27;], halo=True, anchor=&#x27;start&#x27;)
+        D.line((u0 + 40, v0 - 44), (u0 + 40, v0 - 4), stroke=G[&#x27;pond&#x27;], stroke_width=0.5)
+
+        D.text((u0 + u1) / 2.0 + 34, v0 + 13, p[&#x27;name&#x27;], size=9, bold=True, fill=G[&#x27;pond&#x27;],
+               halo=True)
+        D.text(p[&#x27;ocs&#x27;][0] + 7, p[&#x27;ocs&#x27;][1] + 1, &#x27;OCS&#x27;, size=6.2, bold=True, fill=G[&#x27;pond&#x27;],
+               anchor=&#x27;start&#x27;, halo=True)
+        D.text((p[&#x27;fb&#x27;][0] + p[&#x27;fb&#x27;][1]) / 2.0, (p[&#x27;fb&#x27;][2] + p[&#x27;fb&#x27;][3]) / 2.0 + 2, &#x27;FOREBAY&#x27;,
+               size=6.0, bold=True, fill=&#x27;#1b5e20&#x27;, halo=True)
+        am = p[&#x27;acc&#x27;][1]
+        anc = &#x27;start&#x27; if p[&#x27;n&#x27;] == 1 else &#x27;end&#x27;
+        sgn = 1 if p[&#x27;n&#x27;] == 1 else -1
+        D.line((am[0] + sgn * 6, am[1] + 3), (am[0] + sgn * 26, am[1] + 3), stroke=G[&#x27;acc&#x27;],
+               stroke_width=0.6)
+        D.poly([(am[0] + sgn * 5, am[1] + 3), (am[0] + sgn * 13, am[1] - 1),
+                (am[0] + sgn * 13, am[1] + 7)], fill=G[&#x27;acc&#x27;], stroke=&#x27;none&#x27;)
+        D.textlines(am[0] + sgn * 28, am[1] + 1,
+                    [&quot;30&#x27; BMP ACCESS EASEMENT — 15&#x27; ROAD AT ≤ 20 %&quot;,
+                     &#x27;ACCESS EASEMENT TO BE CLEARED AND GRUBBED&#x27;],
+                    size=6.3, gap=1.24, fill=G[&#x27;acc&#x27;], anchor=anc, halo=True, bold_first=True)
+        D.text(u0 - 12, v0 - 6, &quot;10&#x27; DRAIN. ESMT (§11.i.12)&quot;, size=6.2, fill=G[&#x27;esmt&#x27;],
+               anchor=&#x27;end&#x27;, halo=True)
+        dm = p[&#x27;dam_path&#x27;][1]
+        D.line((dm[0], dm[1] + 12), (dm[0] - 14, dm[1] + 16), stroke=&#x27;#5d4037&#x27;, stroke_width=0.5)
+        D.text(dm[0] - 16, dm[1] + 18, &#x27;EARTHEN EMBANKMENT — CREST %.2f, 8\&#x27;-0&quot; MIN. TOP WIDTH&#x27;
+               % p[&#x27;dam&#x27;], size=6.3, bold=True, fill=&#x27;#5d4037&#x27;, anchor=&#x27;end&#x27;, halo=True)
+        sp = p[&#x27;spill&#x27;]
+        spm = ((sp[0][0] + sp[1][0]) / 2.0, (sp[0][1] + sp[1][1]) / 2.0)
+        lt = (spm[0], spm[1] - 16) if p[&#x27;n&#x27;] == 1 else (spm[0] - 18, spm[1] - 46)
+        D.line(spm, lt, stroke=&#x27;#1b5e20&#x27;, stroke_width=0.5)
+        D.text(lt[0], lt[1] - 2, &#x27;EMERG. SPILLWAY %.2f&#x27; % p[&#x27;spillway&#x27;], size=6.2, bold=True,
+               fill=&#x27;#1b5e20&#x27;, anchor=&#x27;middle&#x27; if p[&#x27;n&#x27;] == 1 else &#x27;end&#x27;, halo=True)
+        if p[&#x27;baffle&#x27;]:
+            D.text((p[&#x27;baffle&#x27;][0][0] + p[&#x27;baffle&#x27;][1][0]) / 2.0,
+                   (p[&#x27;baffle&#x27;][0][1] + p[&#x27;baffle&#x27;][1][1]) / 2.0 + 5,
+                   &#x27;BAFFLE BERM — FLOW PATH (§11.i.13)&#x27;, size=6.0, bold=True, fill=&#x27;#5d4037&#x27;,
+                   halo=True)
+        D.text(p[&#x27;spread&#x27;][0] - 26, p[&#x27;spread&#x27;][1] - 32,
+               &#x27;OF-%d HEADWALL, RIPRAP APRON AND LEVEL SPREADER — NO DIRECT DISCHARGE TO THE BUFFER &#x27;
+               &#x27;OR TO ANY ADJOINING YARD&#x27; % p[&#x27;n&#x27;], size=6.3, bold=True, fill=G[&#x27;storm&#x27;],
+               anchor=&#x27;end&#x27;, halo=True)
+
+    LAB_DX = {&#x27;C-5&#x27;: (16, -2), &#x27;C-4&#x27;: (-9, 11), &#x27;A-7&#x27;: (16, -2), &#x27;A-1&#x27;: (0, 10), &#x27;A-1B&#x27;: (0, 10)}
+    for sid, typ, u, v, note in STRUCT:
+        if sid.startswith(&#x27;OF&#x27;):
+            continue
+        dx, dv = LAB_DX.get(sid, (0, -9))
+        D.text(u + dx, v + dv, sid, size=6.3, bold=True, fill=G[&#x27;storm&#x27;], halo=True,
+               anchor=&#x27;start&#x27; if dx &gt; 0 else (&#x27;end&#x27; if dx &lt; 0 else &#x27;middle&#x27;))
+    D.text(430, -182, &#x27;STORM LINE A — 24&quot; RCP TRUNK, ENTRANCE TO POND 1&#x27;, size=6.6, bold=True,
+           fill=G[&#x27;storm&#x27;], halo=True)
+    D.text(1075, -182, &#x27;LINE B — 18&quot; RCP&#x27;, size=6.6, bold=True, fill=G[&#x27;storm&#x27;], halo=True)
+    D.text(1310, -182, &#x27;LINE C — 18&quot;/24&quot; RCP&#x27;, size=6.6, bold=True, fill=G[&#x27;storm&#x27;], halo=True)
+    D.text(60, -278, &#x27;LIMITS OF DISTURBANCE — %s SF = %.3f ac (data/layout.json, 2026-09-03). &#x27;
+                     &#x27;NO OFF-SITE DISTURBANCE IS PROPOSED.&#x27; % (format(DIST_SF_PUB, &#x27;,&#x27;), DIST_AC_PUB),
+           size=7.5, bold=True, fill=G[&#x27;lod&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    D.text(1470, -258, &#x27;PRESERVED CREEK WOODS AND STREAM BUFFERS — NO GRADING, NO IMPERVIOUS SURFACE&#x27;,
+           size=7, bold=True, fill=sb.C[&#x27;stream&#x27;], halo=True, anchor=&#x27;end&#x27;)
+    D.line((1392.0, -212.0), (1436.0, -268.0), stroke=sb.C[&#x27;stream&#x27;], stroke_width=0.5)
+    D.text(1470, -272, &#x27;STREAM HEAD (u 1,392, v −210) — FIELD DELINEATION REQUIRED&#x27;, size=6.6,
+           fill=sb.C[&#x27;stream&#x27;], halo=True, anchor=&#x27;end&#x27;)
+    D.text(60, -262, &#x27;ALL RUNOFF DISCHARGES TO THE HEADWATERS OF JACKSON CREEK — GAR030701030315, &#x27;
+                     &quot;GEORGIA&#x27;S 2024 303(d) LIST, NOT SUPPORTING (BACTERIA, BIOTA; URBAN RUNOFF)&quot;,
+           size=8, bold=True, fill=sb.C[&#x27;stream&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    D.clip_close()
+
+    # ------------------------------------------------- grading-plan notes, verbatim (checklist §10.a)
+    gx, gy, gw = 318.0, 706.0, 884.0
+    D.srect(gx - 8, gy - 8, gw + 16, 112, fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.95&#x27;, stroke=&#x27;#000&#x27;,
+            stroke_width=0.8)
+    D.stext(gx, gy + 5, &#x27;GRADING PLAN NOTES — City of Lilburn Site Development Plan Review Checklist &#x27;
+                        &#x27;§10.a and §7.k, VERBATIM&#x27;, size=8.5, bold=True)
+    yy = gy + 18
+    for t in [
+        &#x27;1.  MAXIMUM CUT OR FILL SLOPES IS 2H:1V.&#x27;,
+        &#x27;2.  CITY OF LILBURN / GWINNETT COUNTY ASSUMES NO RESPONSIBILITY FOR OVERFLOW OR EROSION OF &#x27;
+        &#x27;NATURAL OR ARTIFICIAL DRAINS BEYOND THE EXTENT OF THE STREET RIGHT-OF-WAY, OR FOR THE &#x27;
+        &#x27;EXTENSION OF CULVERTS BEYOND THE POINT SHOWN ON THE APPROVED AND RECORDED PLAN. THE CITY OF &#x27;
+        &#x27;LILBURN / GWINNETT COUNTY DOES NOT ASSUME THE RESPONSIBILITY FOR THE MAINTENANCE OF PIPES IN &#x27;
+        &#x27;DRAINAGE EASEMENTS BEYOND THE CITY / COUNTY RIGHT-OF-WAY.&#x27;,
+        &#x27;3.  STRUCTURES ARE NOT ALLOWED IN DRAINAGE EASEMENTS.&#x27;,
+        &#x27;4.  12% TO 15% STREET GRADES REQUIRE AN &quot;AS GRADED&quot; SURVEY BEFORE INSTALLATION OF THE CURB.&#x27;,
+        &#x27;These notes are to appear on all soil erosion, sedimentation and pollution control sheets if &#x27;
+        &#x27;clearing / grubbing or grading are permitted separately.&#x27;,
+    ]:
+        yy = D.stextblock(gx, yy, t, size=6.8, chars=int((gw - 8) / (0.56 * 6.8)), lead=8.4,
+                          indent=13, bold=not t.startswith(&#x27;These&#x27;))
+        yy += 1.6
+
+    # ---------------------------------------------------------------- legend (in the plan window)
+    lx, ly, lw, lh = 116.0, 62.0, 700.0, 262.0
+    D.srect(lx - 8, ly - 8, lw + 16, lh + 12, fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.95&#x27;, stroke=&#x27;#000&#x27;,
+            stroke_width=0.8)
+    D.stext(lx, ly + 6, &#x27;LEGEND — every symbol drawn on this sheet appears here; no unused entry&#x27;,
+            size=8.5, bold=True)
+    half = (len(LEGEND) + 1) // 2
+    for i, (kind, col, wdt, dash, txt) in enumerate(LEGEND):
+        cx = lx + (0 if i &lt; half else lw / 2.0)
+        yy = ly + 22 + (i % half) * 14.0
+        if kind == &#x27;line&#x27;:
+            D.sline(cx, yy - 3, cx + 30, yy - 3, stroke=col, stroke_width=wdt, stroke_dasharray=dash)
+        elif kind == &#x27;dot&#x27;:
+            D.scircle(cx + 15, yy - 3, 3.0, fill=&#x27;#fff&#x27;, stroke=col, stroke_width=1.1)
+        elif kind == &#x27;sq&#x27;:
+            D.srect(cx + 7, yy - 6, 16, 6, fill=col, stroke=&#x27;#fff&#x27;, stroke_width=0.4)
+        elif kind == &#x27;ocs&#x27;:
+            D.srect(cx + 10, yy - 8, 10, 10, fill=&#x27;#fff&#x27;, stroke=col, stroke_width=1.2)
+        elif kind == &#x27;tri&#x27;:
+            D.spoly([(cx + 8, yy), (cx + 22, yy), (cx + 15, yy - 8)], fill=col)
+        elif kind == &#x27;plus&#x27;:
+            D.sline(cx + 10, yy - 3, cx + 20, yy - 3, stroke=col, stroke_width=0.8)
+            D.sline(cx + 15, yy - 8, cx + 15, yy + 2, stroke=col, stroke_width=0.8)
+        else:
+            D.srect(cx, yy - 9.5, 30, 12, fill=col, stroke=&#x27;#555&#x27;, stroke_width=0.4)
+        D.stext(cx + 36, yy, txt, size=6.7)
+
+    f1 = NOTE_FRAMES[0]
+    D.srect(f1[0] - 10, 54.0, f1[2] + 18, f1[3] + 34, fill=&#x27;#fff&#x27;, fill_opacity=&#x27;0.95&#x27;,
+            stroke=&#x27;#000&#x27;, stroke_width=0.8)
+
+    # ---------------------------------------------------------------- band: tables
+    y0 = sb.BAND_Y0
+    x = F[&#x27;inner_l&#x27;]
+    ya = sb.table(D, x, y0, [&#x27;STR.&#x27;, &#x27;TYPE&#x27;, &#x27;LOCATION (u, v)&#x27;, &#x27;RIM / GRADE&#x27;, &#x27;DESCRIPTION / LOCATION&#x27;],
+                  struct_rows(), size=6.5, widths=[38, 116, 74, 58, 242],
+                  title=&#x27;STORM STRUCTURE SCHEDULE — concept, checklist §10.c (rim elevations read from &#x27;
+                        &#x27;the proposed surface of this sheet)&#x27;)
+    y1 = sb.table(D, x, ya + 20, [&#x27;REACH&#x27;, &#x27;PIPE&#x27;, &#x27;LENGTH&#x27;, &#x27;SLOPE %&#x27;, &#x27;INV. UP&#x27;, &#x27;INV. DN&#x27;, &#x27;COVER ft&#x27;],
+                  pipe_rows(), size=6.5, widths=[84, 60, 46, 46, 52, 52, 52],
+                  title=&#x27;PIPE CHART — concept sizes and slopes; final design by the PE&#x27;)
+    D.stext(x, y1 + 11, &#x27;Cover is measured from the structure rim to the top of the pipe barrel. All &#x27;
+                        &#x27;pipe reinforced concrete to Gwinnett County standards.&#x27;, size=6.2, fill=&#x27;#444&#x27;)
+
+    x2 = x + 570
+    yb = sb.table(D, x2, y0, [&#x27;AREA&#x27;, &#x27;COND.&#x27;, &#x27;EXTENT (u, ft)&#x27;, &#x27;GROSS ac&#x27;, &#x27;DISTURBED ac&#x27;,
+                              &#x27;IMPERVIOUS&#x27;, &#x27;RECEIVING SYSTEM / FACILITY&#x27;],
+                  da_rows(), size=6.5, widths=[46, 40, 78, 50, 62, 90, 336],
+                  title=&#x27;DRAINAGE AREA SUMMARY — PRE- AND POST-DEVELOPMENT (divides interpreted from &#x27;
+                        &#x27;the 3DEP model; confirm against the topographic survey)&#x27;)
+    D.stext(x2, yb + 11, &#x27;Gross areas are measured inside the boundary between the u-limits shown; &#x27;
+                         &#x27;disturbed areas are the part of each inside the limits of disturbance, scaled &#x27;
+                         &#x27;so the three post-development areas&#x27;, size=6.2, fill=&#x27;#444&#x27;)
+    D.stext(x2, yb + 20, &#x27;sum to the published %s SF. PRE-A, PRE-B and PRE-C are the three existing &#x27;
+                         &#x27;sub-basins; the strip falls northeast to southwest along its whole length and &#x27;
+                         &#x27;all three leave the site on the southwest line.&#x27;
+            % format(DIST_SF_PUB, &#x27;,&#x27;), size=6.2, fill=&#x27;#444&#x27;)
+    yc = sb.table(D, x2, yb + 40, [&#x27;BASIN&#x27;, &#x27;TOP OF BANK&#x27;, &#x27;BOTTOM&#x27;, &#x27;TOB / 100-YR&#x27;, &#x27;DAM&#x27;,
+                                   &#x27;SPILLWAY&#x27;, &#x27;STORAGE CF&#x27;, &#x27;REQ. CF&#x27;, &#x27;TRIB. ac&#x27;,
+                                   &#x27;FOREBAY CF prov/req&#x27;],
+                  basin_rows(), size=6.5, widths=[44, 66, 44, 62, 40, 50, 58, 52, 46, 84],
+                  title=&#x27;DETENTION BASIN DATA — checklist §11.i&#x27;)
+    D.stext(x2, yc + 12, &#x27;Storage is the prismoidal volume between top of bank and basin bottom at 6-ft &#x27;
+                         &#x27;depth and 3:1 side slopes, read from data/layout.json. Top of bank is set at &#x27;
+                         &#x27;the 100-year ponding limit and the&#x27;, size=6.3, fill=&#x27;#444&#x27;)
+    D.stext(x2, yc + 21, &#x27;embankment crest 1\&#x27;-6&quot; above it (checklist §11.i.8). REQ. CF = %s CF per &#x27;
+                         &#x27;disturbed acre × the basin\&#x27;s tributary disturbed acreage — see general note 9 &#x27;
+                         &#x27;on the split between the two basins.&#x27; % format(int(DET_RATE), &#x27;,&#x27;),
+            size=6.3, fill=&#x27;#444&#x27;)
+
+    x3 = x + 1290
+    sb.table(D, x3, y0, [&#x27;ITEM&#x27;, &#x27;VALUE / BASIS&#x27;], SW_ROWS, size=6.5, widths=[126, 496],
+             title=&#x27;STORMWATER MANAGEMENT SUMMARY — GCSWMM basis (checklist §11)&#x27;)
+
+    # ---------------------------------------------------------------- band: profile
+    profile_band(D, x, 1312.0, 1900.0, 0.0)
+
+    # ---------------------------------------------------------------- general notes (two frames)
+    D.stext(NOTE_FRAMES[0][0], 68.0,
+            &#x27;GENERAL NOTES — GRADING, DRAINAGE AND STORMWATER  (the checklist cited throughout is the &#x27;
+            &#x27;City of Lilburn Site Development Plan Review Checklist; notes continue at the right of &#x27;
+            &#x27;the sheet)&#x27;, size=8.5, bold=True)
+    D.stext(NOTE_FRAMES[1][0], 890.0, &#x27;GENERAL NOTES (CONTINUED)&#x27;, size=8.5, bold=True)
+    flow_notes(D, NOTE_FRAMES, [&#x27;%d. %s&#x27; % (i, _fill(n)) for i, n in enumerate(NOTES, 1)])
+    return D
+
+
+def _fill(t):
+    return &#x27; &#x27;.join(str(t).split())
+
+
+if __name__ == &#x27;__main__&#x27;:
+    D = build()
+    svg, png = sb.save(D, &#x27;grading-drainage&#x27;, dpi=150)
+    print(&#x27;wrote %s\n      %s&#x27; % (svg, png))
+    print(&#x27;  profile   : existing max %.2f%% at u=%.0f; proposed max %.2f%% at u=%.0f; &#x27;
+          &#x27;max deviation %.2f ft at u=%.0f; mean %+.3f ft&#x27;
+          % (EX_GMAX, EX_GMAX_U + 5, PR_GMAX, PR_GMAX_U + 5, DEV_MAX[1], DEV_MAX[0], DEV_MEAN))
+    print(&#x27;  grades    : &#x27; + &#x27;, &#x27;.join(&#x27;%+.2f%%&#x27; % (g * 100) for g in GRADE))
+    print(&#x27;  earthwork : cut %.0f CY, fill %.0f CY (grid %d x %d at %.0f x %.0f ft)&#x27;
+          % (CUT_CY, FILL_CY, len(GX), len(GY), GX[1] - GX[0], GY[1] - GY[0]))
+    print(&#x27;  disturbed : drawn LOD %.0f SF = %.3f ac; published %d SF = %.3f ac&#x27;
+          % (DIST_SF, DIST_AC_DRAWN, DIST_SF_PUB, DIST_AC_PUB))
+    print(&#x27;  detention : required %d CF, provided %d CF (%.1f%%)&#x27;
+          % (DET_REQ, DET_PROV, 100.0 * DET_PROV / DET_REQ))
+    for p in PONDS:
+        print(&#x27;  pond %d    : trib %.2f ac -&gt; %d CF required, %d CF provided&#x27;
+              % (p[&#x27;n&#x27;], BASIN_AC[p[&#x27;n&#x27;]], BASIN_REQ[p[&#x27;n&#x27;]], p[&#x27;storage_cf&#x27;]))
+    print(&#x27;  contours  : %d proposed levels, %d polylines&#x27;
+          % (len(PROP_CONTOURS), sum(len(v) for v in PROP_CONTOURS.values())))
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/grading.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

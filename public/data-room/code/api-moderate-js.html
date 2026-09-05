@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Comment Moderation Console Endpoint — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">web page</p>
+    <div class="doc-meta">2026-07-17 <span class="dot">·</span> JavaScript</div>
+    
+    <h1>Comment Moderation Console Endpoint</h1><p class="src-note">JavaScript · 270 lines · <a href="/data-room/src/api/moderate.js">download the raw file</a></p><pre><code>// api/moderate.js
+// Pre-moderated public comment board — token-gated admin endpoint.
+//
+// Required environment variables (set in the Vercel project):
+//   BLOB_READ_WRITE_TOKEN  — read/write token for the linked Vercel Blob store.
+//                            Auto-read by the @vercel/blob SDK; never hard-code it.
+//   MODERATION_TOKEN       — admin secret. Requests must present it via the
+//                            `token` query param OR the `x-moderation-token`
+//                            header. If this env var is unset, all access is denied.
+//
+// GET  /api/moderate?token=... -&gt; HTML moderation queue (approve/reject buttons)
+// POST /api/moderate           -&gt; action=approve|reject, id=&lt;id&gt;, token=&lt;token&gt;
+//
+// Storage model matches api/comments.js:
+//   comments/approved.json — JSON array of approved comments
+//   comments/pending.json  — JSON array of pending comments
+// Comment shape: { id, name, role, comment, ts }
+
+import { put, list } from &#x27;@vercel/blob&#x27;;
+
+const APPROVED = &#x27;comments/approved.json&#x27;;
+const PENDING = &#x27;comments/pending.json&#x27;;
+
+// --- Blob helpers (kept self-contained; mirror api/comments.js) ---
+
+async function readList(pathname) {
+  try {
+    const { blobs } = await list({ prefix: pathname, limit: 1 });
+    if (!blobs || blobs.length === 0) return [];
+    // Blob public URLs are CDN-cached (default 30 days) at a STABLE pathname, so
+    // a plain re-fetch after an overwrite returns stale content. Bust the CDN
+    // cache key with a unique query param so every read gets the latest version.
+    const fresh = blobs[0].url + (blobs[0].url.includes(&#x27;?&#x27;) ? &#x27;&amp;&#x27; : &#x27;?&#x27;) + &#x27;_ts=&#x27; + Date.now();
+    const r = await fetch(fresh, { cache: &#x27;no-store&#x27; });
+    if (!r.ok) return [];
+    const data = await r.json();
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error(&#x27;readList error&#x27;, pathname, e);
+    return [];
+  }
+}
+
+async function writeList(pathname, arr) {
+  await put(pathname, JSON.stringify(arr), {
+    access: &#x27;public&#x27;,
+    addRandomSuffix: false,
+    contentType: &#x27;application/json&#x27;,
+    allowOverwrite: true,
+    cacheControlMaxAge: 0, // minimize CDN caching of this mutable list
+  });
+}
+
+// --- Auth ---
+
+// Constant-time-ish comparison that does not short-circuit on length.
+function safeEqual(a, b) {
+  const sa = typeof a === &#x27;string&#x27; ? a : &#x27;&#x27;;
+  const sb = typeof b === &#x27;string&#x27; ? b : &#x27;&#x27;;
+  if (sa.length !== sb.length) return false;
+  let diff = 0;
+  for (let i = 0; i &lt; sa.length; i++) {
+    diff |= sa.charCodeAt(i) ^ sb.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+function tokenFrom(req, body) {
+  return (
+    (req.query &amp;&amp; req.query.token) ||
+    (req.headers &amp;&amp; req.headers[&#x27;x-moderation-token&#x27;]) ||
+    (body &amp;&amp; body.token) ||
+    &#x27;&#x27;
+  );
+}
+
+function authorized(token) {
+  const expected = process.env.MODERATION_TOKEN;
+  if (!expected) return false; // env unset -&gt; deny everything
+  return safeEqual(String(token), expected);
+}
+
+// --- Body parsing (handle form-encoded and JSON) ---
+
+async function readBody(req) {
+  if (req.body &amp;&amp; typeof req.body === &#x27;object&#x27; &amp;&amp; !Buffer.isBuffer(req.body)) {
+    return req.body;
+  }
+
+  let raw;
+  if (typeof req.body === &#x27;string&#x27;) {
+    raw = req.body;
+  } else if (Buffer.isBuffer(req.body)) {
+    raw = req.body.toString(&#x27;utf8&#x27;);
+  } else {
+    const chunks = [];
+    for await (const chunk of req) {
+      chunks.push(typeof chunk === &#x27;string&#x27; ? Buffer.from(chunk) : chunk);
+    }
+    raw = Buffer.concat(chunks).toString(&#x27;utf8&#x27;);
+  }
+
+  raw = (raw || &#x27;&#x27;).trim();
+  if (!raw) return {};
+
+  const ctype = (req.headers &amp;&amp; req.headers[&#x27;content-type&#x27;]) || &#x27;&#x27;;
+  if (ctype.includes(&#x27;application/json&#x27;)) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  }
+  if (ctype.includes(&#x27;application/x-www-form-urlencoded&#x27;)) {
+    return Object.fromEntries(new URLSearchParams(raw));
+  }
+
+  // Unknown content type: try JSON, then fall back to form-encoded parsing.
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return Object.fromEntries(new URLSearchParams(raw));
+  }
+}
+
+// --- HTML rendering ---
+
+function escapeHtml(s) {
+  return String(s == null ? &#x27;&#x27; : s)
+    .replace(/&amp;/g, &#x27;&amp;amp;&#x27;)
+    .replace(/&lt;/g, &#x27;&amp;lt;&#x27;)
+    .replace(/&gt;/g, &#x27;&amp;gt;&#x27;)
+    .replace(/&quot;/g, &#x27;&amp;quot;&#x27;)
+    .replace(/&#x27;/g, &#x27;&amp;#39;&#x27;);
+}
+
+function renderPage(pending, approvedCount, token) {
+  const tokenAttr = escapeHtml(token);
+  const actionUrl = &#x27;/api/moderate?token=&#x27; + encodeURIComponent(token);
+  const cards = pending
+    .map((c) =&gt; {
+      const name = escapeHtml(c.name) || &#x27;&lt;em&gt;(no name)&lt;/em&gt;&#x27;;
+      const role = escapeHtml(c.role);
+      const ts = escapeHtml(c.ts);
+      const comment = escapeHtml(c.comment);
+      const id = escapeHtml(c.id);
+      return `
+      &lt;div class=&quot;card&quot;&gt;
+        &lt;div class=&quot;meta&quot;&gt;&lt;strong&gt;${name}&lt;/strong&gt; &amp;middot; &lt;span class=&quot;role&quot;&gt;${role}&lt;/span&gt; &amp;middot; &lt;span class=&quot;ts&quot;&gt;${ts}&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;comment&quot;&gt;${comment}&lt;/div&gt;
+        &lt;div class=&quot;actions&quot;&gt;
+          &lt;form method=&quot;POST&quot; action=&quot;${escapeHtml(actionUrl)}&quot;&gt;
+            &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;approve&quot;&gt;
+            &lt;input type=&quot;hidden&quot; name=&quot;id&quot; value=&quot;${id}&quot;&gt;
+            &lt;input type=&quot;hidden&quot; name=&quot;token&quot; value=&quot;${tokenAttr}&quot;&gt;
+            &lt;button class=&quot;approve&quot; type=&quot;submit&quot;&gt;Approve&lt;/button&gt;
+          &lt;/form&gt;
+          &lt;form method=&quot;POST&quot; action=&quot;${escapeHtml(actionUrl)}&quot;&gt;
+            &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;reject&quot;&gt;
+            &lt;input type=&quot;hidden&quot; name=&quot;id&quot; value=&quot;${id}&quot;&gt;
+            &lt;input type=&quot;hidden&quot; name=&quot;token&quot; value=&quot;${tokenAttr}&quot;&gt;
+            &lt;button class=&quot;reject&quot; type=&quot;submit&quot;&gt;Reject&lt;/button&gt;
+          &lt;/form&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;`;
+    })
+    .join(&#x27;\n&#x27;);
+
+  return `&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+&lt;meta name=&quot;robots&quot; content=&quot;noindex, nofollow&quot;&gt;
+&lt;title&gt;Comment Moderation&lt;/title&gt;
+&lt;style&gt;
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 1.5rem; background: #f5f5f4; color: #1c1917; }
+  h1 { font-size: 1.4rem; margin: 0 0 .25rem; }
+  .counts { color: #57534e; margin-bottom: 1.5rem; font-size: .95rem; }
+  .empty { color: #78716c; font-style: italic; }
+  .card { background: #fff; border: 1px solid #e7e5e4; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; max-width: 720px; }
+  .meta { font-size: .85rem; color: #57534e; margin-bottom: .5rem; }
+  .role { text-transform: capitalize; }
+  .comment { white-space: pre-wrap; word-break: break-word; margin-bottom: .75rem; line-height: 1.45; }
+  .actions { display: flex; gap: .5rem; }
+  .actions form { margin: 0; }
+  button { border: 0; border-radius: 6px; padding: .45rem .9rem; font-size: .9rem; cursor: pointer; color: #fff; }
+  button.approve { background: #15803d; }
+  button.reject { background: #b91c1c; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Comment Moderation&lt;/h1&gt;
+  &lt;div class=&quot;counts&quot;&gt;${pending.length} pending &amp;middot; ${approvedCount} approved&lt;/div&gt;
+  ${pending.length ? cards : &#x27;&lt;p class=&quot;empty&quot;&gt;No pending comments.&lt;/p&gt;&#x27;}
+&lt;/body&gt;
+&lt;/html&gt;`;
+}
+
+export default async function handler(req, res) {
+  try {
+    if (req.method === &#x27;GET&#x27;) {
+      const token = tokenFrom(req, {});
+      if (!authorized(token)) {
+        res.status(401).setHeader(&#x27;Content-Type&#x27;, &#x27;text/plain&#x27;);
+        res.send(&#x27;Unauthorized&#x27;);
+        return;
+      }
+      const [pending, approved] = await Promise.all([
+        readList(PENDING),
+        readList(APPROVED),
+      ]);
+      res.status(200).setHeader(&#x27;Content-Type&#x27;, &#x27;text/html; charset=utf-8&#x27;);
+      res.send(renderPage(pending, approved.length, token));
+      return;
+    }
+
+    if (req.method === &#x27;POST&#x27;) {
+      const body = await readBody(req);
+      const token = tokenFrom(req, body);
+      if (!authorized(token)) {
+        res.status(401).setHeader(&#x27;Content-Type&#x27;, &#x27;text/plain&#x27;);
+        res.send(&#x27;Unauthorized&#x27;);
+        return;
+      }
+
+      const action = body.action;
+      const id = body.id;
+
+      if ((action === &#x27;approve&#x27; || action === &#x27;reject&#x27;) &amp;&amp; id) {
+        if (action === &#x27;approve&#x27;) {
+          const [pending, approved] = await Promise.all([
+            readList(PENDING),
+            readList(APPROVED),
+          ]);
+          const idx = pending.findIndex((c) =&gt; c.id === id);
+          if (idx !== -1) {
+            const [item] = pending.splice(idx, 1);
+            approved.unshift(item);
+            await Promise.all([
+              writeList(PENDING, pending),
+              writeList(APPROVED, approved),
+            ]);
+          }
+        } else {
+          const pending = await readList(PENDING);
+          const next = pending.filter((c) =&gt; c.id !== id);
+          if (next.length !== pending.length) {
+            await writeList(PENDING, next);
+          }
+        }
+      }
+
+      res.status(302).setHeader(
+        &#x27;Location&#x27;,
+        &#x27;/api/moderate?token=&#x27; + encodeURIComponent(token)
+      );
+      res.end();
+      return;
+    }
+
+    res.setHeader(&#x27;Allow&#x27;, &#x27;GET, POST&#x27;);
+    res.status(405).setHeader(&#x27;Content-Type&#x27;, &#x27;text/plain&#x27;);
+    res.send(&#x27;Method Not Allowed&#x27;);
+  } catch (e) {
+    console.error(&#x27;moderate handler error&#x27;, e);
+    res.status(500).setHeader(&#x27;Content-Type&#x27;, &#x27;text/plain&#x27;);
+    res.send(&#x27;server error&#x27;);
+  }
+}
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>api/moderate.js</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

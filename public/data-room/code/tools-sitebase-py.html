@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Shared site-drawing base module for the C-series sheets — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Shared site-drawing base module for the C-series sheets</h1><p class="src-note">Python · 1,272 lines · <a href="/data-room/src/submission/tools/sitebase.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;sitebase.py — the shared site-drawing base for the Arcado Springs sheet set.
+
+This module is NOT a sheet generator. It is imported by the site sheets
+(C-0 Existing Conditions, and later L-1 Landscape/Buffer, C-3 Grading and Drainage,
+C-4 Utility and Phasing) so that every one of them draws the same site, in the same
+site-local (u, v) coordinate system, at the same scale, inside the same ARCH D title
+block.
+
+COORDINATE SYSTEM (FACTS.md section 1)
+    origin  = the Arcado Rd right-of-way corner shared by parcel R6123 162 and the R/W
+              (SR 2240 GA West US survey ft: 2,310,954.00 E / 1,411,431.50 N)
+    +u      = along the strip, bearing N 28 deg 43&#x27; W, from Arcado Rd toward the NW end
+              (u runs -36 ft at the R/W to 1,722 ft at the rear line)
+    +v      = across the strip toward the NE line; negative toward the SW line
+              (v runs -237.5 to +9)
+    Grid north therefore lies 28 deg 43&#x27; (28.72 deg) counter-clockwise from the +u axis;
+    north_arrow() draws it at that angle.
+
+DRAWING CONVENTIONS
+    Taken from tools/siteplan.py (Sheet C-1, the master concept plan) so that C-0 and
+    C-1 overlay each other exactly: ARCH D 36 x 24 in, 1&quot; = 60&#x27; (1.2 pt/ft) in the plan
+    window WIN, plan origin at (102, 52) sheet points, the same colour palette, the same
+    hatch definitions, the same Drawing/Labeler/table() primitives and the same title
+    block. The ARCH C title-block wording of tools/elevations.py _sheet_frame() (project
+    line, address line, status line, disclaimer, marker) is carried over as well.
+
+WHY THIS MODULE DOES NOT `import siteplan`
+    tools/siteplan.py builds the whole proposed layout at IMPORT time and, as a
+    module-level side effect, REWRITES data/layout.json (line &quot;json.dump(LAYOUT, ...)&quot;).
+    A sheet generator that imported it would silently regenerate another agent&#x27;s data
+    file every time it ran, and would fail whenever siteplan.py is mid-edit. sitebase
+    therefore reads the JSON that siteplan.py produces and reuses its conventions
+    explicitly; the two files must be kept in step by hand if the palette changes.
+    tools/floorplans.py has no import-time side effects, so render_png() and the
+    canonical DISCLAIMER / MARKER strings ARE imported from it.
+
+WHAT IS IN HERE
+    sheet(title, sheet_no, subtitle, scale_note)     -&gt; (Drawing, frame metrics dict)
+    finish(D) / save(D, basename)                    -&gt; SVG string / .svg + .png on disk
+    enlargement(u0, u1, v0, v1, x, y, scale)         -&gt; a second Drawing at 1&quot; = 30&#x27;
+    place(D, sub, title=...)                         -&gt; paste an enlargement onto a sheet
+    match_lines(c, regions=...)                      -&gt; match-line boxes on the full plan
+    boundary, parcel_lines, adjoiners, contours, streams_and_buffers, sewer_existing,
+    water_existing, arcado_row, existing_structures, wooded_area,
+    lots, lane, amenity, ponds, open_space, north_arrow, scalebar, spot_elevations
+    Every layer takes a Drawing as its first argument, so a sheet composes exactly the
+    layers it needs and each layer works unchanged in the full-length plan and inside an
+    enlargement.
+
+Run `python3 tools/sitebase.py` for a self-check: it loads the data, exercises every
+layer on a throw-away canvas and prints the element counts. It writes nothing.
+
+DRAFT — NOT SEALED. All geometry is from the Gwinnett County GIS parcel fabric, the USGS
+3DEP DEM and public aerial-imagery footprints; a Georgia RLS boundary and topographic
+survey is required and governs.
+&quot;&quot;&quot;
+import json
+import math
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+DATA = os.path.join(ROOT, &#x27;data&#x27;)
+DRAW = os.path.join(ROOT, &#x27;drawings&#x27;)
+sys.path.insert(0, HERE)
+import floorplans as fp                                   # noqa: E402  (no import-time side effects)
+
+DISCLAIMER, MARKER = fp.DISCLAIMER, fp.MARKER
+DATE = &#x27;2026-09-03&#x27;
+
+
+def _load(name):
+    with open(os.path.join(DATA, name)) as fh:
+        return json.load(fh)
+
+
+LAYOUT = _load(&#x27;layout.json&#x27;)                 # the site layout generated by tools/siteplan.py
+CTX = _load(&#x27;site-context-local.json&#x27;)        # GIS context in site-local coordinates
+TOPO = _load(&#x27;topo-samples.json&#x27;)             # USGS 3DEP spot elevations (u, v, lon, lat, z_ft)
+ADJOIN_ROSTER = _load(&#x27;adjoining-parcels.json&#x27;)   # PIN / address roster for the 31 adjoiners + R/W
+OWNERS = _load(&#x27;owners-found.json&#x27;)           # Gwinnett 2026 digest owner records by PIN
+
+# ============================================================================ sheet standards
+SHEET_W, SHEET_H = 36 * 72, 24 * 72           # ARCH D landscape, points
+MARGIN, INNER = 36.0, 6.0
+SCALE60 = 72.0 / 60.0                          # 1&quot; = 60&#x27;  -&gt; 1.2 pt/ft   (full-length layout)
+SCALE30 = 72.0 / 30.0                          # 1&quot; = 30&#x27;  -&gt; 2.4 pt/ft   (enlargements)
+WIN = (-150.0, 1840.0, -430.0, 240.0)          # plan window u0, u1, v0, v1 (ft) — same as Sheet C-1
+PLAN_X0, PLAN_Y0 = 102.0, 52.0                 # plan-window top-left in sheet points
+PLAN_W = (WIN[1] - WIN[0]) * SCALE60           # 2388 pt
+PLAN_H = (WIN[3] - WIN[2]) * SCALE60           # 804 pt
+BAND_Y0 = PLAN_Y0 + PLAN_H + 28                # 884 — top of the data/legend/notes band
+TB_H = 112.0
+TB_Y = SHEET_H - MARGIN - TB_H                 # 1580 — top of the title block
+BAND_Y1 = TB_Y - 50                            # 1530 — bottom of the band (disclaimer strip below)
+FONT = &quot;&#x27;Liberation Sans&#x27;, Arial, Helvetica, sans-serif&quot;
+NORTH_DEG = 28.72                              # grid north, degrees counter-clockwise from +u
+
+PROJECT = &#x27;THE COTTAGES AT ARCADO SPRINGS&#x27;
+ADDRESSES = &#x27;4535 / 4537 / 4539 / 4541 Arcado Rd SW, Lilburn, GA 30047&#x27;
+LEGAL = &#x27;Land Lot 123, 6th District, Gwinnett County — PINs R6123 033, 015, 014, 162 — 9.44 ac (deeded)&#x27;
+APPLICANT = &#x27;Mohammed Awad&#x27;
+
+C = {                                          # palette (identical to Sheet C-1 where the layer is shared)
+    &#x27;bnd&#x27;: &#x27;#000&#x27;, &#x27;parcel&#x27;: &#x27;#333&#x27;, &#x27;adj_fill&#x27;: &#x27;#f5f5f2&#x27;, &#x27;adj_line&#x27;: &#x27;#9a9a9a&#x27;, &#x27;adj_text&#x27;: &#x27;#444&#x27;,
+    &#x27;contour&#x27;: &#x27;#a67c52&#x27;, &#x27;contour_txt&#x27;: &#x27;#7a5230&#x27;, &#x27;stream&#x27;: &#x27;#1565c0&#x27;, &#x27;buf_line&#x27;: &#x27;#1f77b4&#x27;,
+    &#x27;sewer&#x27;: &#x27;#2e7d32&#x27;, &#x27;sewer_txt&#x27;: &#x27;#1b5e20&#x27;, &#x27;water&#x27;: &#x27;#0277bd&#x27;, &#x27;hydrant&#x27;: &#x27;#b00&#x27;,
+    &#x27;exist&#x27;: &#x27;#8d3b0f&#x27;, &#x27;exist_fill&#x27;: &#x27;#f0e2d6&#x27;, &#x27;wood_line&#x27;: &#x27;#3d6b35&#x27;, &#x27;wood_txt&#x27;: &#x27;#1b5e20&#x27;,
+    &#x27;pave&#x27;: &#x27;#d6d6d6&#x27;, &#x27;tract&#x27;: &#x27;#ececec&#x27;, &#x27;house&#x27;: &#x27;#f9e4c8&#x27;, &#x27;green&#x27;: &#x27;#dff0d8&#x27;, &#x27;green_line&#x27;: &#x27;#5a8a4a&#x27;,
+    &#x27;pond&#x27;: &#x27;#cfe3f3&#x27;, &#x27;phase&#x27;: &#x27;#7b1fa2&#x27;, &#x27;red&#x27;: &#x27;#b00&#x27;, &#x27;rw&#x27;: &#x27;#777&#x27;, &#x27;match&#x27;: &#x27;#c62828&#x27;,
+}
+
+DEFS = &#x27;&#x27;&#x27;&lt;defs&gt;
+&lt;pattern id=&quot;bufhatch&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;6&quot; height=&quot;6&quot; patternTransform=&quot;rotate(45)&quot;&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;6&quot; stroke=&quot;#7a9b5a&quot; stroke-width=&quot;0.6&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;r2hatch&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;8&quot; height=&quot;8&quot; patternTransform=&quot;rotate(-45)&quot;&gt;&lt;rect width=&quot;8&quot; height=&quot;8&quot; fill=&quot;#fff3e0&quot;/&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;8&quot; stroke=&quot;#e0a060&quot; stroke-width=&quot;0.6&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;woods&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;26&quot; height=&quot;26&quot;&gt;&lt;rect width=&quot;26&quot; height=&quot;26&quot; fill=&quot;#f3f8f0&quot;/&gt;&lt;circle cx=&quot;6&quot; cy=&quot;6&quot; r=&quot;3.0&quot; fill=&quot;none&quot; stroke=&quot;#7ea373&quot; stroke-width=&quot;0.45&quot;/&gt;&lt;circle cx=&quot;19&quot; cy=&quot;17&quot; r=&quot;3.0&quot; fill=&quot;none&quot; stroke=&quot;#7ea373&quot; stroke-width=&quot;0.45&quot;/&gt;&lt;circle cx=&quot;19&quot; cy=&quot;4&quot; r=&quot;1.7&quot; fill=&quot;none&quot; stroke=&quot;#9dbb95&quot; stroke-width=&quot;0.35&quot;/&gt;&lt;circle cx=&quot;6&quot; cy=&quot;20&quot; r=&quot;1.7&quot; fill=&quot;none&quot; stroke=&quot;#9dbb95&quot; stroke-width=&quot;0.35&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;exhatch&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;5&quot; height=&quot;5&quot; patternTransform=&quot;rotate(45)&quot;&gt;&lt;rect width=&quot;5&quot; height=&quot;5&quot; fill=&quot;#f0e2d6&quot;/&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;5&quot; stroke=&quot;#8d3b0f&quot; stroke-width=&quot;0.55&quot;/&gt;&lt;/pattern&gt;
+&lt;pattern id=&quot;ssehatch&quot; patternUnits=&quot;userSpaceOnUse&quot; width=&quot;7&quot; height=&quot;7&quot; patternTransform=&quot;rotate(-45)&quot;&gt;&lt;line x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;7&quot; stroke=&quot;#2e7d32&quot; stroke-width=&quot;0.5&quot;/&gt;&lt;/pattern&gt;
+&lt;/defs&gt;&#x27;&#x27;&#x27;
+
+
+def esc(t):
+    return str(t).replace(&#x27;&amp;&#x27;, &#x27;&amp;amp;&#x27;).replace(&#x27;&lt;&#x27;, &#x27;&amp;lt;&#x27;).replace(&#x27;&gt;&#x27;, &#x27;&amp;gt;&#x27;)
+
+
+def attrs(kw):
+    return &#x27; &#x27;.join(&#x27;%s=&quot;%s&quot;&#x27; % (k.replace(&#x27;_&#x27;, &#x27;-&#x27;), v) for k, v in kw.items())
+
+
+def wrap(t, n=20):
+    &quot;&quot;&quot;greedy word wrap to n characters (same helper as tools/siteplan.py).&quot;&quot;&quot;
+    words, lines, cur = str(t).split(), [], &#x27;&#x27;
+    for w in words:
+        if len(cur) + len(w) + 1 &gt; n and cur:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = (cur + &#x27; &#x27; + w).strip()
+    if cur:
+        lines.append(cur)
+    return lines or [&#x27;&#x27;]
+
+
+# ============================================================================ geometry helpers
+def dist(a, b):
+    return math.hypot(a[0] - b[0], a[1] - b[1])
+
+
+def poly_area(p):
+    return 0.5 * sum(p[i][0] * p[(i + 1) % len(p)][1] - p[(i + 1) % len(p)][0] * p[i][1] for i in range(len(p)))
+
+
+def poly_centroid(p):
+    A = poly_area(p)
+    if abs(A) &lt; 1e-9:
+        return (sum(q[0] for q in p) / len(p), sum(q[1] for q in p) / len(p))
+    cx = cy = 0.0
+    for i in range(len(p)):
+        x0, y0 = p[i]
+        x1, y1 = p[(i + 1) % len(p)]
+        f = x0 * y1 - x1 * y0
+        cx += (x0 + x1) * f
+        cy += (y0 + y1) * f
+    return (cx / (6 * A), cy / (6 * A))
+
+
+def point_in_poly(pt, poly):
+    x, y = pt
+    inside = False
+    n = len(poly)
+    for i in range(n):
+        x0, y0 = poly[i]
+        x1, y1 = poly[(i + 1) % n]
+        if (y0 &gt; y) != (y1 &gt; y):
+            if x0 + (y - y0) * (x1 - x0) / (y1 - y0) &gt; x:
+                inside = not inside
+    return inside
+
+
+def interp_v(path, u):
+    &quot;&quot;&quot;v on a polyline that is monotone in u (linear interpolation, clamped at the ends).&quot;&quot;&quot;
+    if u &lt;= path[0][0]:
+        return path[0][1]
+    for i in range(len(path) - 1):
+        (u0, v0), (u1, v1) = path[i], path[i + 1]
+        if u0 &lt;= u &lt;= u1 and u1 &gt; u0:
+            return v0 + (v1 - v0) * (u - u0) / (u1 - u0)
+    return path[-1][1]
+
+
+def rect(u0, u1, v0, v1):
+    return [(u0, v0), (u1, v0), (u1, v1), (u0, v1)]
+
+
+def offset_band(path, half):
+    &quot;&quot;&quot;A closed polygon &#x27;half&#x27; feet either side of an open polyline (blunt ends).&quot;&quot;&quot;
+    left, right = [], []
+    n = len(path)
+    for i, p in enumerate(path):
+        a = path[max(i - 1, 0)]
+        b = path[min(i + 1, n - 1)]
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(dx, dy) or 1.0
+        nx, ny = -dy / L, dx / L
+        left.append((p[0] + nx * half, p[1] + ny * half))
+        right.append((p[0] - nx * half, p[1] - ny * half))
+    return left + right[::-1]
+
+
+# ============================================================================ site skeleton
+BOUNDARY = [tuple(p) for p in LAYOUT[&#x27;boundary_ring&#x27;]]
+BOUNDARY_SF = LAYOUT[&#x27;boundary_sf&#x27;]
+PARCELS = LAYOUT[&#x27;parcels&#x27;]
+PINS = [&#x27;6123 033&#x27;, &#x27;6123 015&#x27;, &#x27;6123 014&#x27;, &#x27;6123 162&#x27;]
+BEARINGS = LAYOUT[&#x27;bearings&#x27;]
+METRICS = LAYOUT[&#x27;metrics&#x27;]
+
+NE_LINE = sorted([p for p in BOUNDARY if p[1] &gt; -100 and p[0] &gt;= -0.05], key=lambda p: p[0])
+SW_LINE = sorted([p for p in BOUNDARY if p[1] &lt; -230], key=lambda p: p[0])
+FRONT_LINE = sorted([p for p in BOUNDARY if p[0] &lt;= 0.05 and p[1] &gt;= -235], key=lambda p: -p[1])
+REAR_LINE = sorted([p for p in BOUNDARY if p[0] &gt; 1700], key=lambda p: p[1])
+U_REAR = min(p[0] for p in REAR_LINE)
+
+
+def NE(u):
+    return interp_v(NE_LINE, u)
+
+
+def SW(u):
+    return interp_v(SW_LINE, u)
+
+
+def front_u(v):
+    return interp_v(sorted([(p[1], p[0]) for p in FRONT_LINE]), v)
+
+
+def width(u):
+    return NE(u) - SW(u)
+
+
+def is_frontage_seg(a, b):
+    return a[0] &lt;= 0.05 and b[0] &lt;= 0.05 and a[1] &lt;= 0.05 and b[1] &lt;= 0.05
+
+
+# --- WGS84 &lt;-&gt; local (u, v): least-squares affine fit to the 90 3DEP samples in
+#     data/topo-samples.json, each of which carries u, v, lon and lat. Residual is
+#     reported by the self-check (it is under 0.01 ft), so lon/lat source geometry —
+#     e.g. public building footprints — can be brought into the drawing without any
+#     hand-transcribed local coordinates.
+def _fit_affine():
+    S = TOPO[&#x27;samples&#x27;]
+    rows = [[s[&#x27;u&#x27;], s[&#x27;v&#x27;], 1.0] for s in S]
+
+    def solve(ys):
+        A = [[0.0] * 3 for _ in range(3)]
+        B = [0.0] * 3
+        for r, y in zip(rows, ys):
+            for i in range(3):
+                B[i] += r[i] * y
+                for j in range(3):
+                    A[i][j] += r[i] * r[j]
+        M = [A[i] + [B[i]] for i in range(3)]
+        for i in range(3):
+            p = max(range(i, 3), key=lambda k: abs(M[k][i]))
+            M[i], M[p] = M[p], M[i]
+            for k in range(3):
+                if k != i:
+                    f = M[k][i] / M[i][i]
+                    for j in range(i, 4):
+                        M[k][j] -= f * M[i][j]
+        return [M[i][3] / M[i][i] for i in range(3)]
+
+    return solve([s[&#x27;lon&#x27;] for s in S]), solve([s[&#x27;lat&#x27;] for s in S])
+
+
+_LON, _LAT = _fit_affine()
+_DET = _LON[0] * _LAT[1] - _LON[1] * _LAT[0]
+
+
+def uv_of(lon, lat):
+    &quot;&quot;&quot;WGS84 degrees -&gt; site-local (u, v) feet.&quot;&quot;&quot;
+    dx, dy = lon - _LON[2], lat - _LAT[2]
+    return ((_LAT[1] * dx - _LON[1] * dy) / _DET, (-_LAT[0] * dx + _LON[0] * dy) / _DET)
+
+
+def lonlat_of(u, v):
+    return (_LON[0] * u + _LON[1] * v + _LON[2], _LAT[0] * u + _LAT[1] * v + _LAT[2])
+
+
+def affine_residual_ft():
+    &quot;&quot;&quot;Max |fit - source| over the 90 samples, in feet (1 deg latitude ~ 364,000 ft).&quot;&quot;&quot;
+    worst = 0.0
+    for s in TOPO[&#x27;samples&#x27;]:
+        lo, la = lonlat_of(s[&#x27;u&#x27;], s[&#x27;v&#x27;])
+        worst = max(worst, abs(lo - s[&#x27;lon&#x27;]) * 303000.0, abs(la - s[&#x27;lat&#x27;]) * 364000.0)
+    return worst
+
+
+# ============================================================================ adjoiner roster
+# Gwinnett 2026 digest address for PIN R6123 024 is 225 King David Dr SW (docs/06 line 30).
+# data/adjoining-parcels.json and data/site-context-local.json both carry &quot;255&quot; for it, which
+# duplicates PIN R6123 021 — the defect the 2026-09-03 completeness audit records at item 8(d).
+ADDRESS_FIX = {&#x27;6123 024&#x27;: &#x27;225&#x27;}
+STREET_OF = {&#x27;6123 017&#x27;: &#x27;Arcado Rd SW&#x27;, &#x27;6123 036&#x27;: &#x27;Nantucket Dr&#x27;, &#x27;6123 037&#x27;: &#x27;Nantucket Dr&#x27;,
+             &#x27;6123 038&#x27;: &#x27;Nantucket Dr&#x27;, &#x27;6123 312&#x27;: &#x27;Fieldhouse Cir&#x27;, &#x27;6123 313&#x27;: &#x27;Fieldhouse Cir&#x27;}
+ROSTER = {a[&#x27;PIN&#x27;]: a for a in ADJOIN_ROSTER}
+
+
+def street_of(pin):
+    if pin in STREET_OF:
+        return STREET_OF[pin]
+    n = int(pin.split()[1])
+    if 20 &lt;= n &lt;= 32:
+        return &#x27;King David Dr&#x27;
+    if 300 &lt;= n &lt;= 313:
+        return &#x27;Village Green Ct&#x27;
+    return &#x27;&#x27;
+
+
+def address_of(pin):
+    a = ADDRESS_FIX.get(pin) or (ROSTER.get(pin) or {}).get(&#x27;ADDRESS&#x27;) or &#x27;&#x27;
+    return (&#x27;%s %s&#x27; % (a, street_of(pin))).strip()
+
+
+def owner_of(pin):
+    recs = OWNERS.get(pin) or []
+    return (recs[0].get(&#x27;OWNERNAME1&#x27;) or &#x27;owner VERIFY&#x27;) if recs else &#x27;owner VERIFY (Tax Assessor)&#x27;
+
+
+# ============================================================================ existing improvements
+# Building footprints and the 4541 drive are public aerial-imagery footprints published in
+# OpenStreetMap (c) OpenStreetMap contributors, ODbL; the two building ways carry the
+# Microsoft/Bing ML &quot;BuildingFootprints&quot; lineage. WGS84 vertices are quoted here exactly as
+# the source publishes them and are converted to site-local feet by uv_of() above, so no
+# local coordinate in this file is hand-drawn. Extents were checked against Esri World
+# Imagery on 2026-09-03: both footprints sit on a visible roof, and the drive on a visible
+# track. They are APPROXIMATE and must be located by survey.
+#
+# Areas below are computed from the polygons at run time and printed by the self-check;
+# the tax-record areas they are compared with are 2,053 SF heated at 4541 (split-level,
+# built 1972) and 4,267 SF heated at 4535 (built 1987, full finished basement) —
+# docs/11-site-context-brief.md, Gwinnett 2026 digest.
+EXISTING_STRUCTURES = [
+    {&#x27;key&#x27;: &#x27;4541-house&#x27;, &#x27;label&#x27;: &#x27;EXISTING HOUSE — 4541 ARCADO RD SW&#x27;,
+     &#x27;sub&#x27;: [&#x27;PIN R6123 033 · built 1972 · brick split-level&#x27;, &#x27;2,053 SF heated (2026 digest)&#x27;],
+     &#x27;osm&#x27;: &#x27;OSM way 999395123&#x27;, &#x27;kind&#x27;: &#x27;building&#x27;,
+     &#x27;lonlat&#x27;: [(-84.1201100, 33.8803310), (-84.1200280, 33.8803630), (-84.1200720, 33.8804410),
+                (-84.1202550, 33.8803710), (-84.1201920, 33.8802580), (-84.1200900, 33.8802970)]},
+    {&#x27;key&#x27;: &#x27;4535-house&#x27;, &#x27;label&#x27;: &#x27;EXISTING HOUSE — 4535 ARCADO RD SW&#x27;,
+     &#x27;sub&#x27;: [&#x27;PIN R6123 162 · built 1987 · full finished basement&#x27;, &#x27;4,267 SF heated (2026 digest)&#x27;],
+     &#x27;osm&#x27;: &#x27;OSM way 999395265&#x27;, &#x27;kind&#x27;: &#x27;building&#x27;,
+     &#x27;lonlat&#x27;: [(-84.1214980, 33.8827990), (-84.1214640, 33.8827240), (-84.1213930, 33.8827460),
+                (-84.1214900, 33.8829590), (-84.1217040, 33.8828930), (-84.1216580, 33.8827910),
+                (-84.1216940, 33.8827800), (-84.1216780, 33.8827430)]},
+]
+EXISTING_DRIVE = {
+    &#x27;key&#x27;: &#x27;4541-drive&#x27;, &#x27;label&#x27;: &#x27;EXISTING DRIVE TO 4541 (approx. 12 ft wide)&#x27;, &#x27;osm&#x27;: &#x27;OSM way 913015145&#x27;,
+    &#x27;width_ft&#x27;: 12.0,
+    &#x27;lonlat&#x27;: [(-84.1198650, 33.8796331), (-84.1199760, 33.8797799), (-84.1201118, 33.8799834),
+               (-84.1202094, 33.8801502), (-84.1202262, 33.8802300), (-84.1202262, 33.8802592)],
+}
+
+# Mown-yard clearings digitised from public aerial imagery (Esri World Imagery, accessed
+# 2026-09-03) at the two houses; everything else inside the boundary reads as woodland,
+# which agrees with docs/11 (&quot;the rear two-thirds is Piedmont hardwood&quot;) and FACTS section 2
+# (&quot;wooded rear&quot;). Limits are APPROXIMATE and are the &quot;areas of existing vegetation&quot; element
+# of Lilburn Zoning Ordinance 2023-603 section 1003-4.6 — no tree survey has been performed.
+CLEARINGS = [
+    {&#x27;key&#x27;: &#x27;yard-4541&#x27;, &#x27;polygon&#x27;: rect(120.0, 272.0, -237.0, -128.0)},
+    {&#x27;key&#x27;: &#x27;yard-4535&#x27;, &#x27;polygon&#x27;: rect(1058.0, 1302.0, -196.0, -44.0)},
+]
+
+
+def existing_polys():
+    &quot;&quot;&quot;[(record, polygon in u/v feet, area_sf)] for the mapped buildings.&quot;&quot;&quot;
+    out = []
+    for s in EXISTING_STRUCTURES:
+        poly = [uv_of(*p) for p in s[&#x27;lonlat&#x27;]]
+        out.append((s, poly, abs(poly_area(poly))))
+    return out
+
+
+def existing_drive_poly():
+    path = [uv_of(*p) for p in EXISTING_DRIVE[&#x27;lonlat&#x27;]]
+    return path, offset_band(path, EXISTING_DRIVE[&#x27;width_ft&#x27;] / 2.0)
+
+
+# ============================================================================ drawing primitives
+class Labeler:
+    &quot;&quot;&quot;Greedy label-collision avoidance in sheet points; nudges along y (from siteplan.py).&quot;&quot;&quot;
+
+    def __init__(self):
+        self.boxes = []
+
+    def hit(self, b):
+        return any(not (b[2] &lt; o[0] or b[0] &gt; o[2] or b[3] &lt; o[1] or b[1] &gt; o[3]) for o in self.boxes)
+
+    def place(self, x, y, w, h, anchor=&#x27;middle&#x27;):
+        for k in range(0, 9):
+            for sgn in (1, -1) if k else (1,):
+                yy = y + sgn * k * (h + 1.5)
+                x0 = x - w / 2 if anchor == &#x27;middle&#x27; else (x if anchor == &#x27;start&#x27; else x - w)
+                b = (x0, yy - h * 0.8, x0 + w, yy + h * 0.3)
+                if not self.hit(b):
+                    self.boxes.append(b)
+                    return yy
+        self.boxes.append((x - w / 2, y - h, x + w / 2, y))
+        return y
+
+    def reserve(self, x0, y0, x1, y1):
+        self.boxes.append((x0, y0, x1, y1))
+
+
+_CLIP = [0]
+
+
+class Drawing:
+    &quot;&quot;&quot;SVG collector. Plan methods take (u, v) feet; the s* methods take sheet points.&quot;&quot;&quot;
+
+    def __init__(self, s, x0, y0, fs=1.0, win=WIN):
+        self.s, self.x0, self.y0, self.fs, self.win = s, x0, y0, fs, win
+        self.out, self.late = [], []
+        self.lab = Labeler()
+
+    # -- transforms
+    def X(self, u):
+        return self.x0 + (u - self.win[0]) * self.s
+
+    def Y(self, v):
+        return self.y0 + (self.win[3] - v) * self.s
+
+    def P(self, p):
+        return &#x27;%.2f,%.2f&#x27; % (self.X(p[0]), self.Y(p[1]))
+
+    def box(self):
+        u0, u1, v0, v1 = self.win
+        return (self.X(u0), self.Y(v1), (u1 - u0) * self.s, (v1 - v0) * self.s)
+
+    # -- raw
+    def add(self, t):
+        self.out.append(t)
+
+    def later(self, fn):
+        self.late.append(fn)
+
+    # -- plan-coordinate primitives
+    def poly(self, pts, **kw):
+        self.add(&#x27;&lt;polygon points=&quot;%s&quot; %s/&gt;&#x27; % (&#x27; &#x27;.join(self.P(p) for p in pts), attrs(kw)))
+
+    def pline(self, pts, **kw):
+        self.add(&#x27;&lt;polyline points=&quot;%s&quot; %s/&gt;&#x27; % (&#x27; &#x27;.join(self.P(p) for p in pts), attrs(kw)))
+
+    def line(self, a, b, **kw):
+        self.add(&#x27;&lt;line x1=&quot;%.2f&quot; y1=&quot;%.2f&quot; x2=&quot;%.2f&quot; y2=&quot;%.2f&quot; %s/&gt;&#x27;
+                 % (self.X(a[0]), self.Y(a[1]), self.X(b[0]), self.Y(b[1]), attrs(kw)))
+
+    def circle(self, c, r_pt, **kw):
+        self.add(&#x27;&lt;circle cx=&quot;%.2f&quot; cy=&quot;%.2f&quot; r=&quot;%.2f&quot; %s/&gt;&#x27; % (self.X(c[0]), self.Y(c[1]), r_pt, attrs(kw)))
+
+    def tw(self, text, size):
+        return 0.56 * size * self.fs * len(str(text))
+
+    def text(self, u, v, t, size=6, anchor=&#x27;middle&#x27;, rot=0, bold=False, fill=&#x27;#111&#x27;, halo=False,
+             avoid=False, dy=0):
+        size = size * self.fs
+        x, y = self.X(u), self.Y(v) + dy
+        if avoid and rot == 0:
+            y = self.lab.place(x, y, self.tw(t, size / self.fs), size, anchor)
+        tr = &#x27; transform=&quot;rotate(%.2f %.2f %.2f)&quot;&#x27; % (rot, x, y) if rot else &#x27;&#x27;
+        st = &#x27;font-size=&quot;%.2f&quot; text-anchor=&quot;%s&quot; fill=&quot;%s&quot;%s&#x27; % (size, anchor, fill, &#x27; font-weight=&quot;bold&quot;&#x27; if bold else &#x27;&#x27;)
+        if halo:
+            self.add(&#x27;&lt;text x=&quot;%.2f&quot; y=&quot;%.2f&quot; %s stroke=&quot;#fff&quot; stroke-width=&quot;%.2f&quot; stroke-linejoin=&quot;round&quot;%s&gt;%s&lt;/text&gt;&#x27;
+                     % (x, y, st, size * 0.45, tr, esc(t)))
+        self.add(&#x27;&lt;text x=&quot;%.2f&quot; y=&quot;%.2f&quot; %s%s&gt;%s&lt;/text&gt;&#x27; % (x, y, st, tr, esc(t)))
+
+    def textlines(self, u, v, lines, size=6, anchor=&#x27;middle&#x27;, gap=1.15, avoid=False, bold_first=False,
+                  fill=&#x27;#111&#x27;, halo=False):
+        h = size * self.fs * gap
+        x, y = self.X(u), self.Y(v)
+        if avoid:
+            w = max(self.tw(l, size) for l in lines)
+            y = self.lab.place(x, y, w, h * len(lines), anchor)
+        for i, l in enumerate(lines):
+            st = (&#x27;font-size=&quot;%.2f&quot; text-anchor=&quot;%s&quot; fill=&quot;%s&quot;%s&#x27;
+                  % (size * self.fs, anchor, fill, &#x27; font-weight=&quot;bold&quot;&#x27; if (bold_first and i == 0) else &#x27;&#x27;))
+            if halo:
+                self.add(&#x27;&lt;text x=&quot;%.2f&quot; y=&quot;%.2f&quot; %s stroke=&quot;#fff&quot; stroke-width=&quot;%.2f&quot; stroke-linejoin=&quot;round&quot;&gt;%s&lt;/text&gt;&#x27;
+                         % (x, y + i * h, st, size * self.fs * 0.45, esc(l)))
+            self.add(&#x27;&lt;text x=&quot;%.2f&quot; y=&quot;%.2f&quot; %s&gt;%s&lt;/text&gt;&#x27; % (x, y + i * h, st, esc(l)))
+
+    def rot_of(self, a, b):
+        dx, dy = self.X(b[0]) - self.X(a[0]), self.Y(b[1]) - self.Y(a[1])
+        ang = math.degrees(math.atan2(dy, dx))
+        if ang &gt; 90:
+            ang -= 180
+        if ang &lt; -90:
+            ang += 180
+        return ang
+
+    # -- sheet-point primitives
+    def srect(self, x, y, w, h, **kw):
+        self.add(&#x27;&lt;rect x=&quot;%.2f&quot; y=&quot;%.2f&quot; width=&quot;%.2f&quot; height=&quot;%.2f&quot; %s/&gt;&#x27; % (x, y, w, h, attrs(kw)))
+
+    def sline(self, x0, y0, x1, y1, **kw):
+        self.add(&#x27;&lt;line x1=&quot;%.2f&quot; y1=&quot;%.2f&quot; x2=&quot;%.2f&quot; y2=&quot;%.2f&quot; %s/&gt;&#x27; % (x0, y0, x1, y1, attrs(kw)))
+
+    def spoly(self, pts, **kw):
+        self.add(&#x27;&lt;polygon points=&quot;%s&quot; %s/&gt;&#x27; % (&#x27; &#x27;.join(&#x27;%.2f,%.2f&#x27; % p for p in pts), attrs(kw)))
+
+    def scircle(self, x, y, r, **kw):
+        self.add(&#x27;&lt;circle cx=&quot;%.2f&quot; cy=&quot;%.2f&quot; r=&quot;%.2f&quot; %s/&gt;&#x27; % (x, y, r, attrs(kw)))
+
+    def stext(self, x, y, t, size=7, anchor=&#x27;start&#x27;, bold=False, fill=&#x27;#111&#x27;, rot=0, italic=False):
+        tr = &#x27; transform=&quot;rotate(%.2f %.2f %.2f)&quot;&#x27; % (rot, x, y) if rot else &#x27;&#x27;
+        self.add(&#x27;&lt;text x=&quot;%.2f&quot; y=&quot;%.2f&quot; font-size=&quot;%.2f&quot; text-anchor=&quot;%s&quot; fill=&quot;%s&quot;%s%s%s&gt;%s&lt;/text&gt;&#x27;
+                 % (x, y, size, anchor, fill, &#x27; font-weight=&quot;bold&quot;&#x27; if bold else &#x27;&#x27;,
+                    &#x27; font-style=&quot;italic&quot;&#x27; if italic else &#x27;&#x27;, tr, esc(t)))
+
+    def stextblock(self, x, y, text, size=6.5, chars=120, lead=8.2, fill=&#x27;#111&#x27;, bold=False, indent=0.0):
+        for j, ln in enumerate(wrap(text, chars)):
+            self.stext(x + (0 if j == 0 else indent), y, ln, size=size, fill=fill, bold=bold)
+            y += lead
+        return y
+
+    # -- clip helper
+    def clip_open(self, poly=None, fill=&#x27;#fff&#x27;):
+        _CLIP[0] += 1
+        cid = &#x27;clip%d&#x27; % _CLIP[0]
+        x, y, w, h = self.box()
+        shape = (&#x27;&lt;polygon points=&quot;%s&quot;/&gt;&#x27; % &#x27; &#x27;.join(self.P(p) for p in poly)) if poly else \
+                (&#x27;&lt;rect x=&quot;%.2f&quot; y=&quot;%.2f&quot; width=&quot;%.2f&quot; height=&quot;%.2f&quot;/&gt;&#x27; % (x, y, w, h))
+        self.add(&#x27;&lt;clipPath id=&quot;%s&quot;&gt;%s&lt;/clipPath&gt;&#x27; % (cid, shape))
+        self.add(&#x27;&lt;g clip-path=&quot;url(#%s)&quot; font-family=%s&gt;&#x27; % (cid, &#x27;&quot;&#x27; + FONT.replace(&quot;&#x27;&quot;, &#x27;&#x27;) + &#x27;&quot;&#x27;))
+        if fill:
+            self.add(&#x27;&lt;rect x=&quot;%.2f&quot; y=&quot;%.2f&quot; width=&quot;%.2f&quot; height=&quot;%.2f&quot; fill=&quot;%s&quot;/&gt;&#x27; % (x, y, w, h, fill))
+        return cid
+
+    def clip_close(self):
+        self.add(&#x27;&lt;/g&gt;&#x27;)
+
+    def render(self):
+        return &#x27;\n&#x27;.join(self.out)
+
+
+def table(D, x, y, cols, rows, size=6.5, rowh=None, widths=None, title=None, head_fill=&#x27;#e8e8e8&#x27;):
+    &quot;&quot;&quot;Simple ruled table in sheet points (from siteplan.py); returns the bottom y.&quot;&quot;&quot;
+    rowh = rowh or size * 1.45
+    widths = widths or [140] * len(cols)
+    W = sum(widths)
+    if title:
+        D.stext(x, y, title, size=size + 2.5, bold=True)
+        y += size + 4
+    y_top = y
+    D.srect(x, y, W, rowh, fill=head_fill, stroke=&#x27;#000&#x27;, stroke_width=0.6)
+    cx = x
+    for c, w in zip(cols, widths):
+        D.stext(cx + 3, y + rowh * 0.72, c, size=size, bold=True)
+        cx += w
+    y += rowh
+    for r in rows:
+        nl = max(len(wrap(str(c), max(int(w / (0.56 * size)), 4))) for c, w in zip(r, widths))
+        h = rowh * nl
+        D.srect(x, y, W, h, fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.4)
+        cx = x
+        for c, w in zip(r, widths):
+            for i, ln in enumerate(wrap(str(c), max(int(w / (0.56 * size)), 4))):
+                D.stext(cx + 3, y + rowh * 0.72 + i * rowh, ln, size=size)
+            cx += w
+        y += h
+    cx = x
+    for w in widths[:-1]:
+        cx += w
+        D.sline(cx, y_top, cx, y, stroke=&#x27;#000&#x27;, stroke_width=0.4)
+    return y
+
+
+# ============================================================================ sheet frame
+def sheet(title, sheet_no, subtitle, scale_note, status=&#x27;DRAFT — NOT SEALED&#x27;,
+          status_lines=None, generator=&#x27;tools/sitebase.py&#x27;, north_at=None, scale_at=None,
+          win=WIN, scale=SCALE60, x0=PLAN_X0, y0=PLAN_Y0):
+    &quot;&quot;&quot;Open an ARCH D 36 x 24 sheet and draw its frame, title block and disclaimer.
+
+    Returns (Drawing, frame) where frame carries the sheet-point geometry a sheet body
+    needs: plan window, the lower band, the title-block top and the inner margins.
+    The north arrow and the graphic scale bar are queued with D.later() so that they are
+    painted on top of every layer the caller adds afterwards.
+    &quot;&quot;&quot;
+    M, IN_ = MARGIN, INNER
+    D = Drawing(scale, x0, y0, fs=1.0, win=win)
+    D.add(&#x27;&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;36in&quot; height=&quot;24in&quot; viewBox=&quot;0 0 %d %d&quot; font-family=&quot;%s&quot;&gt;&#x27;
+          % (SHEET_W, SHEET_H, FONT))
+    D.add(&#x27;&lt;title&gt;%s&lt;/title&gt;&#x27; % esc(&#x27;%s — %s — Sheet %s&#x27; % (PROJECT.title(), title, sheet_no)))
+    D.add(DEFS)
+    D.srect(0, 0, SHEET_W, SHEET_H, fill=&#x27;#fff&#x27;)
+    D.srect(M, M, SHEET_W - 2 * M, SHEET_H - 2 * M, fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=2)
+    D.srect(M + IN_, M + IN_, SHEET_W - 2 * M - 2 * IN_, SHEET_H - 2 * M - 2 * IN_,
+            fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.6)
+
+    # ---- title block (cell grid identical to Sheet C-1)
+    tb_y, tb_h = TB_Y, TB_H - 6
+    D.srect(M + IN_, tb_y, SHEET_W - 2 * M - 2 * IN_, tb_h, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1.2)
+    cells = [0, 820, 1330, 1780, 2180, SHEET_W - 2 * M - 2 * IN_]
+    for cx in cells[1:-1]:
+        D.sline(M + IN_ + cx, tb_y, M + IN_ + cx, tb_y + tb_h, stroke=&#x27;#000&#x27;, stroke_width=0.8)
+    bx = M + 8
+    D.stext(bx, tb_y + 30, PROJECT, size=22, bold=True)
+    D.stext(bx, tb_y + 52, &#x27;%s — Rezoning R-1 → R-2 (City of Lilburn, Georgia)&#x27; % title, size=13, bold=True)
+    D.stext(bx, tb_y + 70, &#x27;%s — %s&#x27; % (ADDRESSES, LEGAL), size=9)
+    D.stext(bx, tb_y + 86, subtitle, size=9)
+    bx = M + IN_ + cells[1] + 8
+    D.stext(bx, tb_y + 18, &#x27;APPLICANT / OWNER&#x27;, size=8, fill=&#x27;#555&#x27;)
+    D.stext(bx, tb_y + 34, APPLICANT, size=11, bold=True)
+    D.stext(bx, tb_y + 48, &#x27;4541 Arcado Rd SW, Lilburn GA 30047-3968 (parcels 033, 015); Mendez / Roblero de Leon&#x27;, size=7)
+    D.stext(bx, tb_y + 58, &#x27;(parcels 014, 162) — co-applicants, owner signatures required&#x27;, size=7)
+    D.stext(bx, tb_y + 74, &#x27;PREPARED FOR&#x27;, size=8, fill=&#x27;#555&#x27;)
+    D.stext(bx, tb_y + 88, &#x27;Pre-application conference, City of Lilburn Planning &amp; Zoning (340 Main St) —&#x27;, size=8)
+    D.stext(bx, tb_y + 98, &#x27;rezoning application per Ord. 2023-603 §1003 (2026 Application Instructions)&#x27;, size=8)
+    bx = M + IN_ + cells[2] + 8
+    D.stext(bx, tb_y + 18, &#x27;STATUS&#x27;, size=8, fill=&#x27;#555&#x27;)
+    D.stext(bx, tb_y + 38, status, size=14, bold=True, fill=&#x27;#c00&#x27;)
+    for k, ln in enumerate(status_lines or [
+            &#x27;Existing conditions compiled from public records for pre-application&#x27;,
+            &#x27;review. Boundary from Gwinnett GIS — RLS boundary survey required and&#x27;,
+            &#x27;governs. Topography USGS 3DEP (approximate). To be superseded by a&#x27;,
+            &#x27;sealed RLS boundary and topographic survey and PE civil design.&#x27;]):
+        D.stext(bx, tb_y + 54 + k * 11, ln, size=8)
+    D.stext(bx, tb_y + 100, &#x27;Generator: %s&#x27; % generator, size=8)
+    bx = M + IN_ + cells[3] + 8
+    for k, (a, b) in enumerate([(&#x27;DATE&#x27;, DATE), (&#x27;SCALE&#x27;, scale_note),
+                                (&#x27;DATUM&#x27;, &#x27;SR 2240 GA West US-ft; NAVD88&#x27;),
+                                (&#x27;DRAWN&#x27;, &#x27;owner-prepared (AI-assisted)&#x27;),
+                                (&#x27;CHECKED&#x27;, &#x27;RLS / PE — pending&#x27;)]):
+        D.stext(bx, tb_y + 16 + k * 18, a, size=7.5, fill=&#x27;#555&#x27;)
+        D.stext(bx + 55, tb_y + 16 + k * 18, b, size=8.5)
+    bx = M + IN_ + cells[4] + 8
+    D.stext(bx, tb_y + 18, &#x27;SHEET&#x27;, size=8, fill=&#x27;#555&#x27;)
+    D.stext(bx + 150, tb_y + 72, sheet_no, size=54, bold=True, anchor=&#x27;middle&#x27;)
+    D.stext(bx + 150, tb_y + 92, title, size=8, anchor=&#x27;middle&#x27;)
+
+    # ---- disclaimer strip (house rule: every drawing carries it, with the marker)
+    dy = TB_Y - 46
+    D.srect(M + IN_, dy, SHEET_W - 2 * M - 2 * IN_, 40, fill=&#x27;#fff8e1&#x27;, stroke=&#x27;#b00&#x27;, stroke_width=0.8)
+    D.stext(M + IN_ + 8, dy + 15, &#x27;Disclaimer: &#x27; + DISCLAIMER.split(&#x27;Disclaimer: &#x27;)[-1], size=9,
+            bold=True, fill=&#x27;#7a0000&#x27;)
+    D.stext(M + IN_ + 8, dy + 30,
+            &#x27;Label: DRAFT / NOT SEALED — every item that must be sealed by a Georgia RLS, PE, architect or &#x27;
+            &#x27;landscape architect is shown as a concept only. Statements of conformity read &quot;appears consistent with&quot;.&#x27;,
+            size=8, fill=&#x27;#7a0000&#x27;)
+    D.add(&#x27;&lt;!-- %s --&gt;&#x27; % MARKER)
+
+    # ---- plan window outline + labels
+    px, py, pw, ph = D.box()
+    D.later(lambda: D.srect(px, py, pw, ph, fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1))
+    D.stext(px, py - 8, &#x27;%s — %s  (site-local coordinates: +u along the strip to the NW, &#x27;
+                        &#x27;+v across toward the NE line; see north arrow)&#x27;
+            % (title.upper(), scale_note.split(&#x27;(&#x27;)[0].strip().upper()), size=11, bold=True)
+    D.later(lambda: D.add(&#x27;&lt;text x=&quot;%.1f&quot; y=&quot;%.1f&quot; font-size=&quot;40&quot; fill=&quot;#c00&quot; fill-opacity=&quot;0.09&quot; &#x27;
+                          &#x27;font-weight=&quot;bold&quot; text-anchor=&quot;middle&quot; transform=&quot;rotate(-8 %.1f %.1f)&quot;&gt;&#x27;
+                          &#x27;DRAFT — NOT SEALED — EXISTING CONDITIONS OF RECORD, NOT A SURVEY&lt;/text&gt;&#x27;
+                          % (px + pw / 2, py + ph / 2, px + pw / 2, py + ph / 2)))
+    na = north_at or (px + pw - 105, py + 78)
+    sa = scale_at or (px + pw - 460, py + ph - 34)
+    D.later(lambda: north_arrow(D, na[0], na[1]))
+    D.later(lambda: scalebar(D, sa[0], sa[1], scale=scale))
+
+    frame = {&#x27;W&#x27;: SHEET_W, &#x27;H&#x27;: SHEET_H, &#x27;M&#x27;: M, &#x27;inner_l&#x27;: M + IN_ + 10, &#x27;inner_r&#x27;: SHEET_W - M - IN_ - 10,
+             &#x27;plan&#x27;: (px, py, pw, ph), &#x27;band_y0&#x27;: BAND_Y0, &#x27;band_y1&#x27;: BAND_Y1, &#x27;tb_y&#x27;: TB_Y,
+             &#x27;sheet_no&#x27;: sheet_no, &#x27;title&#x27;: title}
+    return D, frame
+
+
+def finish(D):
+    &quot;&quot;&quot;Close the SVG (running the queued late layers) and append the disclaimer marker.&quot;&quot;&quot;
+    for fn in D.late:
+        fn()
+    D.add(&#x27;&lt;/svg&gt;&#x27;)
+    return D.render() + &#x27;\n&lt;!-- %s --&gt;\n&lt;!-- %s --&gt;\n&#x27; % (DISCLAIMER, MARKER)
+
+
+def save(D, basename, dpi=150):
+    &quot;&quot;&quot;Write drawings/&lt;basename&gt;.svg and .png. Returns both paths.&quot;&quot;&quot;
+    svg_path = os.path.join(DRAW, basename + &#x27;.svg&#x27;)
+    png_path = os.path.join(DRAW, basename + &#x27;.png&#x27;)
+    os.makedirs(DRAW, exist_ok=True)
+    with open(svg_path, &#x27;w&#x27;) as fh:
+        fh.write(finish(D))
+    fp.render_png(svg_path, png_path, dpi=dpi)
+    return svg_path, png_path
+
+
+# ============================================================================ north arrow / scale bar
+def north_arrow(c, x, y, r=30.0):
+    &quot;&quot;&quot;Grid-north arrow at sheet point (x, y). North is NORTH_DEG above the +u axis, and
+    +v is up on the drawing, so on paper north points up and to the right.&quot;&quot;&quot;
+    a = math.radians(NORTH_DEG)
+    dx, dy = math.cos(a), -math.sin(a)
+    px, py = -dy, dx
+    c.scircle(x, y, r, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.8)
+    tip = (x + dx * r * 0.86, y + dy * r * 0.86)
+    tail = (x - dx * r * 0.78, y - dy * r * 0.78)
+    c.sline(tail[0], tail[1], tip[0], tip[1], stroke=&#x27;#000&#x27;, stroke_width=2.0)
+    c.spoly([tip, (tip[0] - 17 * dx + 6.0 * px, tip[1] - 17 * dy + 6.0 * py),
+             (tip[0] - 17 * dx - 6.0 * px, tip[1] - 17 * dy - 6.0 * py)], fill=&#x27;#000&#x27;)
+    c.stext(tip[0] + 11 * dx, tip[1] + 11 * dy + 4, &#x27;N&#x27;, size=13, bold=True, anchor=&#x27;middle&#x27;)
+    c.stext(x, y + r + 11, &#x27;GRID NORTH (SR 2240 GA WEST)&#x27;, size=6, anchor=&#x27;middle&#x27;)
+    c.stext(x, y + r + 19, &#x27;= 28°43\&#x27; ABOVE THE +u AXIS&#x27;, size=6, anchor=&#x27;middle&#x27;)
+
+
+def scalebar(c, x, y, scale=SCALE60, step_ft=60, steps=4):
+    &quot;&quot;&quot;Graphic scale bar at sheet point (x, y) = left end of the bar.&quot;&quot;&quot;
+    h = 7.0
+    for k in range(steps):
+        c.srect(x + step_ft * scale * k, y, step_ft * scale, h,
+                fill=&#x27;#000&#x27; if k % 2 == 0 else &#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.6)
+        c.stext(x + step_ft * scale * k, y - 4, str(step_ft * k), size=6.5, anchor=&#x27;middle&#x27;)
+    c.stext(x + step_ft * scale * steps, y - 4, &#x27;%d ft&#x27; % (step_ft * steps), size=6.5, anchor=&#x27;middle&#x27;)
+    c.stext(x + step_ft * scale * steps / 2.0, y + h + 11,
+            &#x27;GRAPHIC SCALE  1&quot; = %d\&#x27;&#x27; % round(72.0 / scale), size=8, bold=True, anchor=&#x27;middle&#x27;)
+
+
+# ============================================================================ enlargements
+ENLARGEMENTS = []          # filled by a sheet before it calls match_lines()
+
+
+def enlargement(u0, u1, v0, v1, x, y, scale=SCALE30, tag=&#x27;A&#x27;):
+    &quot;&quot;&quot;A second Drawing that crops the u-range [u0, u1] (and v-range) at 1&quot; = 30&#x27; by default.
+    Draw the same layer functions into it, then place() it on the sheet.&quot;&quot;&quot;
+    D2 = Drawing(scale, x, y, fs=1.0, win=(u0, u1, v0, v1))
+    D2.tag = tag
+    return D2
+
+
+def place(D, sub, title=None, note=None):
+    &quot;&quot;&quot;Paste an enlargement onto the sheet with its border and caption.&quot;&quot;&quot;
+    x, y, w, h = sub.box()
+    if title:
+        D.stext(x, y - 16, title, size=9, bold=True)
+    if note:
+        D.stext(x, y - 6, note, size=6.5, fill=&#x27;#444&#x27;)
+    D.add(sub.render())
+    for fn in sub.late:
+        fn()
+        D.add(sub.out.pop())
+    D.srect(x, y, w, h, fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1)
+    D.srect(x + 3, y + 3, 86, 14, fill=&#x27;#fff&#x27;, stroke=C[&#x27;match&#x27;], stroke_width=0.8)
+    D.stext(x + 7, y + 13.5, &#x27;ENLARGEMENT %s&#x27; % getattr(sub, &#x27;tag&#x27;, &#x27;&#x27;), size=8.5, bold=True, fill=C[&#x27;match&#x27;])
+    return y + h
+
+
+def match_lines(c, regions=None):
+    &quot;&quot;&quot;Draw the match-line box(es) for the enlargements on the full-length layout.&quot;&quot;&quot;
+    for (u0, u1, v0, v1, tag) in (regions if regions is not None else ENLARGEMENTS):
+        c.poly(rect(u0, u1, v0, v1), fill=&#x27;none&#x27;, stroke=C[&#x27;match&#x27;], stroke_width=1.1,
+               stroke_dasharray=&#x27;16 5 3 5&#x27;)
+        c.text((u0 + u1) / 2.0, v1 + 6, &#x27;MATCH LINE — SEE ENLARGEMENT %s (1&quot; = 30\&#x27;)&#x27; % tag,
+               size=7, bold=True, fill=C[&#x27;match&#x27;], halo=True)
+
+
+# ============================================================================ layers — existing
+def adjoiners(c, labels=True, zoning=True):
+    &quot;&quot;&quot;Adjoining tax parcels with PIN, owner and zoning; plus the nearby Lilburn R-2 polygon.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;adjoining&quot;&gt;&#x27;)
+    for a in CTX[&#x27;adjoining_parcels&#x27;]:
+        ring = [tuple(p) for p in a[&#x27;ring_local&#x27;]]
+        if a[&#x27;PIN&#x27;] == &#x27;R/W&#x27;:
+            continue
+        c.poly(ring, fill=C[&#x27;adj_fill&#x27;], stroke=C[&#x27;adj_line&#x27;], stroke_width=0.5)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if zoning:
+        for z in CTX[&#x27;zoning&#x27;]:
+            if z[&#x27;type&#x27;] == &#x27;R2&#x27;:
+                c.poly([tuple(p) for p in z[&#x27;ring_local&#x27;]], fill=&#x27;url(#r2hatch)&#x27;, stroke=&#x27;#c8791a&#x27;,
+                       stroke_width=0.8, stroke_dasharray=&#x27;6 3&#x27;)
+    if not labels:
+        return
+    for a in CTX[&#x27;adjoining_parcels&#x27;]:
+        if a[&#x27;PIN&#x27;] == &#x27;R/W&#x27;:
+            continue
+        ring = [tuple(p) for p in a[&#x27;ring_local&#x27;]]
+        ctr = poly_centroid(ring)
+        if a[&#x27;PIN&#x27;] == &#x27;6123 017&#x27;:
+            ctr = (165, 62)
+        if a[&#x27;PIN&#x27;] in (&#x27;6123 036&#x27;, &#x27;6123 037&#x27;, &#x27;6123 038&#x27;):
+            ctr = (ctr[0] - 15, ctr[1])
+        lines = ([&#x27;PIN R%s&#x27; % a[&#x27;PIN&#x27;], address_of(a[&#x27;PIN&#x27;])] + wrap(owner_of(a[&#x27;PIN&#x27;]), 22)
+                 + [&#x27;Zoned R-1 (City of Lilburn)&#x27;])
+        c.textlines(ctr[0], ctr[1] + 12, lines, size=6, gap=1.18, avoid=True, fill=C[&#x27;adj_text&#x27;])
+    if zoning:
+        c.text(60, 212, &#x27;R-2 (Lilburn) — existing&#x27;, size=7.5, bold=True, fill=&#x27;#8a4b00&#x27;, halo=True)
+        c.text(60, 202, &#x27;&quot;Arcado Road Townhomes&quot; site — nearest R-2 precedent (≈106 ft NE of the front corner)&#x27;,
+               size=6, fill=&#x27;#8a4b00&#x27;, halo=True)
+
+
+def arcado_row(c, labels=True):
+    &quot;&quot;&quot;The Arcado Rd right-of-way lines (Gwinnett GIS R/W parcel) and the centreline.&quot;&quot;&quot;
+    rw = [a for a in CTX[&#x27;adjoining_parcels&#x27;] if a[&#x27;PIN&#x27;] == &#x27;R/W&#x27;]
+    c.add(&#x27;&lt;g id=&quot;row&quot;&gt;&#x27;)
+    for a in rw:
+        run, cur = [], []
+        for p in a[&#x27;ring_local&#x27;]:
+            if c.win[0] - 60 &lt; p[0] &lt; c.win[1] + 60 and c.win[2] - 60 &lt; p[1] &lt; c.win[3] + 60:
+                cur.append(tuple(p))
+            else:
+                if len(cur) &gt; 1:
+                    run.append(cur)
+                cur = []
+        if len(cur) &gt; 1:
+            run.append(cur)
+        for path in run:
+            c.pline(path, fill=&#x27;none&#x27;, stroke=C[&#x27;rw&#x27;], stroke_width=0.9)
+    for st in CTX[&#x27;streets&#x27;]:
+        if st[&#x27;name&#x27;] == &#x27;ARCADO RD&#x27; and st[&#x27;min_dist_ft&#x27;] &lt; 70:
+            for path in st[&#x27;paths_local&#x27;]:
+                c.pline([tuple(p) for p in path], fill=&#x27;none&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.6,
+                        stroke_dasharray=&#x27;14 3 3 3&#x27;)
+        elif st[&#x27;name&#x27;] == &#x27;ARCADIA PL&#x27; and st[&#x27;min_dist_ft&#x27;] &lt; 100:
+            for path in st[&#x27;paths_local&#x27;]:
+                c.pline([tuple(p) for p in path], fill=&#x27;none&#x27;, stroke=&#x27;#333&#x27;, stroke_width=0.6,
+                        stroke_dasharray=&#x27;14 3 3 3&#x27;)
+        elif st[&#x27;min_dist_ft&#x27;] &lt; 260:
+            for path in st[&#x27;paths_local&#x27;]:
+                c.pline([tuple(p) for p in path], fill=&#x27;none&#x27;, stroke=C[&#x27;rw&#x27;], stroke_width=0.5,
+                        stroke_dasharray=&#x27;14 3 3 3&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if labels:
+        c.text(-112, -40, &#x27;ARCADO ROAD (Gwinnett County minor collector, 35 mph, 14,800 AADT, GDOT stn 135-6689) &#x27;
+                          &#x27;— R/W WIDTH VARIES&#x27;, size=8, rot=-81, bold=True)
+        c.text(-58, -330, &#x27;C/L ARCADO RD&#x27;, size=6, rot=-81, halo=True)
+        c.text(-95, -395, &#x27;OPPOSITE R/W LINE (Gwinnett GIS)&#x27;, size=6, rot=-81, halo=True)
+
+
+def row_width_ft(vs=(-40.0, -120.0, -200.0, -235.0)):
+    &quot;&quot;&quot;Perpendicular R/W width at the given v stations, measured between the two GIS R/W
+    lines. Returns [(v, width_ft)] — the input for the &#x27;R/W WIDTH VARIES&#x27; note.&quot;&quot;&quot;
+    ring = [tuple(p) for p in [a for a in CTX[&#x27;adjoining_parcels&#x27;] if a[&#x27;PIN&#x27;] == &#x27;R/W&#x27;][0][&#x27;ring_local&#x27;]]
+    run = [p for p in ring if -220 &lt; p[0] &lt; 420 and -520 &lt; p[1] &lt; 320]
+    near = [p for p in run if p[0] &gt; -70]
+    far = [p for p in run if p[0] &lt;= -70]
+    out = []
+    for v in vs:
+        q = min(near, key=lambda p: abs(p[1] - v))
+        d = min(_seg_pt(q, far[i], far[i + 1]) for i in range(len(far) - 1))
+        out.append((v, d))
+    return out
+
+
+def _seg_pt(p, a, b):
+    ax, ay = a
+    bx, by = b
+    dx, dy = bx - ax, by - ay
+    L2 = dx * dx + dy * dy
+    if L2 == 0:
+        return dist(p, a)
+    t = max(0.0, min(1.0, ((p[0] - ax) * dx + (p[1] - ay) * dy) / L2))
+    return dist(p, (ax + t * dx, ay + t * dy))
+
+
+def boundary(c, bearings=True, short_ft=60.0, label=True):
+    &quot;&quot;&quot;The assemblage boundary with per-course bearings and distances.
+    Courses shorter than short_ft get a tag (L1, L2, ...) for the line table; the tags are
+    returned so the sheet can print the table.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;boundary&quot;&gt;&#x27;)
+    c.poly(BOUNDARY, fill=&#x27;none&#x27;, stroke=C[&#x27;bnd&#x27;], stroke_width=1.8)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    tags = []
+    if not bearings:
+        return tags
+    n = 0
+    for b in BEARINGS:
+        a, d = tuple(b[&#x27;from&#x27;]), tuple(b[&#x27;to&#x27;])
+        m = ((a[0] + d[0]) / 2.0, (a[1] + d[1]) / 2.0)
+        if b[&#x27;distance_ft&#x27;] &lt; short_ft:
+            n += 1
+            tag = &#x27;L%d&#x27; % n
+            tags.append((tag, b))
+            if c.s &gt;= SCALE30:
+                dx, dy = d[0] - a[0], d[1] - a[1]
+                L = math.hypot(dx, dy) or 1.0
+                nx, ny = -dy / L, dx / L
+                c.text(m[0] - nx * 7.0, m[1] - ny * 7.0, tag, size=6, bold=True, fill=&#x27;#000&#x27;, halo=True)
+            elif not b[&#x27;frontage&#x27;]:
+                c.text(m[0] + (10 if a[0] &gt; 1700 else 0), m[1] + (0 if a[0] &gt; 1700 else -12), tag,
+                       size=6, fill=&#x27;#000&#x27;, avoid=True)
+            continue
+        dx, dy = d[0] - a[0], d[1] - a[1]
+        L = math.hypot(dx, dy)
+        nx, ny = -dy / L, dx / L
+        c.text(m[0] - nx * 9.0, m[1] - ny * 9.0, &quot;%s   %.2f&#x27;&quot; % (b[&#x27;bearing&#x27;], b[&#x27;distance_ft&#x27;]),
+               size=6, rot=c.rot_of(a, d), fill=&#x27;#000&#x27;, dy=2)
+    if label:
+        c.text(front_u(-150) - 26, -150, &#x27;ARCADO RD FRONTAGE COURSES %s (SEE LINE TABLE)&#x27;
+               % tag_ranges(tags), size=6, rot=-81, fill=&#x27;#000&#x27;)
+        c.text(1000, 165, &#x27;ASSEMBLAGE: 9.44 AC (DEEDED) / %.2f AC (GIS CALC.) — LAND LOT 123, 6th DISTRICT — &#x27;
+                          &#x27;BOUNDARY AND BEARINGS FROM THE GWINNETT GIS PARCEL FABRIC: DRAFT, RLS SURVEY REQUIRED &#x27;
+                          &#x27;AND GOVERNS&#x27; % (BOUNDARY_SF / 43560.0), size=7, bold=True, halo=True)
+    return tags
+
+
+def tag_ranges(tags, frontage=True):
+    &quot;&quot;&quot;&#x27;L1–L7 AND L19–L25&#x27; — the line-table tags of the courses on (or off) the Arcado Rd frontage.&quot;&quot;&quot;
+    nums = [int(t[1:]) for t, b in tags if bool(b[&#x27;frontage&#x27;]) == bool(frontage)]
+    runs, start, prev = [], None, None
+    for n in nums + [None]:
+        if start is None:
+            start = prev = n
+            continue
+        if n == prev + 1:
+            prev = n
+            continue
+        runs.append((start, prev))
+        start = prev = n
+    return &#x27; AND &#x27;.join(&#x27;L%d&#x27; % a if a == b else &#x27;L%d–L%d&#x27; % (a, b) for a, b in runs)
+
+
+def parcel_lines(c, labels=True, at=None):
+    &quot;&quot;&quot;The four interior parcel lines (to be combined) with PIN and deeded acreage.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;parcels&quot;&gt;&#x27;)
+    for pin in PINS:
+        c.poly([tuple(p) for p in PARCELS[pin][&#x27;ring&#x27;]], fill=&#x27;none&#x27;, stroke=C[&#x27;parcel&#x27;],
+               stroke_width=0.6, stroke_dasharray=&#x27;10 4 2 4&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    at = at or {&#x27;6123 033&#x27;: (150, -226), &#x27;6123 015&#x27;: (480, -226), &#x27;6123 014&#x27;: (1000, -12), &#x27;6123 162&#x27;: (1470, -12)}
+    for pin in PINS:
+        p = PARCELS[pin]
+        c.text(at[pin][0], at[pin][1], &#x27;PIN R%s  (%s)  %.2f AC DEEDED / %.3f AC GIS&#x27;
+               % (pin, p[&#x27;address&#x27;].upper(), p[&#x27;deeded_ac&#x27;], p[&#x27;gis_ac&#x27;]),
+               size=6.5, bold=True, fill=&#x27;#444&#x27;, halo=True, avoid=True)
+
+
+def contours(c, existing=True, proposed=None, labels=True):
+    &quot;&quot;&quot;Existing 2-ft contours (USGS 3DEP, NAVD88, approximate). `proposed` may be a
+    {level: [polyline, ...]} dict supplied by a grading sheet; it draws heavier and solid.&quot;&quot;&quot;
+    if existing:
+        c.add(&#x27;&lt;g id=&quot;contours&quot;&gt;&#x27;)
+        for lev, lines in sorted(LAYOUT[&#x27;contours_2ft&#x27;].items(), key=lambda kv: int(kv[0])):
+            idx = int(lev) % 10 == 0
+            for ln in lines:
+                c.pline([tuple(p) for p in ln], fill=&#x27;none&#x27;, stroke=(C[&#x27;contour_txt&#x27;] if idx else C[&#x27;contour&#x27;]),
+                        stroke_width=(0.9 if idx else 0.45), stroke_dasharray=&#x27;7 3&#x27; if idx else &#x27;3 2&#x27;)
+        if labels:
+            for lev, lines in sorted(LAYOUT[&#x27;contours_2ft&#x27;].items(), key=lambda kv: int(kv[0])):
+                if int(lev) % 10:
+                    continue
+                for ln in lines:
+                    for k in range(len(ln) - 1):
+                        for ref in (lambda u: (SW(u) + NE(u)) / 2.0, lambda u: SW(u) + 9.0, lambda u: NE(u) - 9.0):
+                            d0 = ln[k][1] - ref(ln[k][0])
+                            d1 = ln[k + 1][1] - ref(ln[k + 1][0])
+                            if (d0 &gt; 0) != (d1 &gt; 0):
+                                t = d0 / (d0 - d1)
+                                uc = ln[k][0] + t * (ln[k + 1][0] - ln[k][0])
+                                c.text(uc, ref(uc) - 2.5, str(lev), size=6, fill=C[&#x27;contour_txt&#x27;],
+                                       halo=True, avoid=True)
+        c.add(&#x27;&lt;/g&gt;&#x27;)
+    if proposed:
+        c.add(&#x27;&lt;g id=&quot;contours-proposed&quot;&gt;&#x27;)
+        for lev, lines in sorted(proposed.items(), key=lambda kv: int(kv[0])):
+            for ln in lines:
+                c.pline([tuple(p) for p in ln], fill=&#x27;none&#x27;, stroke=&#x27;#6d4c2f&#x27;,
+                        stroke_width=(0.9 if int(lev) % 10 == 0 else 0.5))
+        c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def spot_elevations(c, picks=None, size=5.5):
+    &quot;&quot;&quot;A few labelled 3DEP spot elevations (the ridge, the swale, the rear low pocket).&quot;&quot;&quot;
+    S = TOPO[&#x27;samples&#x27;]
+    hi = max(S, key=lambda s: s[&#x27;z_ft&#x27;])
+    lo = min(S, key=lambda s: s[&#x27;z_ft&#x27;])
+    for s in (picks or [hi, lo]):
+        c.circle((s[&#x27;u&#x27;], s[&#x27;v&#x27;]), 1.6, fill=&#x27;none&#x27;, stroke=C[&#x27;contour_txt&#x27;], stroke_width=0.6)
+        c.line((s[&#x27;u&#x27;] - 3, s[&#x27;v&#x27;]), (s[&#x27;u&#x27;] + 3, s[&#x27;v&#x27;]), stroke=C[&#x27;contour_txt&#x27;], stroke_width=0.5)
+        c.line((s[&#x27;u&#x27;], s[&#x27;v&#x27;] - 3), (s[&#x27;u&#x27;], s[&#x27;v&#x27;] + 3), stroke=C[&#x27;contour_txt&#x27;], stroke_width=0.5)
+        c.text(s[&#x27;u&#x27;] + 6, s[&#x27;v&#x27;] - 4, &#x27;%.1f&#x27; % s[&#x27;z_ft&#x27;], size=size, anchor=&#x27;start&#x27;,
+               fill=C[&#x27;contour_txt&#x27;], halo=True)
+    return hi, lo
+
+
+def streams_and_buffers(c, labels=True):
+    &quot;&quot;&quot;The unnamed stream (state waters) and its 25 / 50 / 75-ft buffer lines.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;streams&quot;&gt;&#x27;)
+    style = {&#x27;25&#x27;: (C[&#x27;buf_line&#x27;], &#x27;3 2&#x27;, 0.5), &#x27;50&#x27;: (C[&#x27;buf_line&#x27;], &#x27;6 2&#x27;, 0.8),
+             &#x27;75&#x27;: (C[&#x27;buf_line&#x27;], &#x27;8 2 2 2&#x27;, 0.8)}
+    for s in LAYOUT[&#x27;stream_setbacks&#x27;]:
+        for lv, lines in sorted(s[&#x27;offsets&#x27;].items(), key=lambda kv: int(kv[0])):
+            col, dash, w = style[lv]
+            for ln in lines:
+                c.pline([tuple(p) for p in ln], fill=&#x27;none&#x27;, stroke=col, stroke_width=w, stroke_dasharray=dash)
+        c.pline([tuple(p) for p in s[&#x27;stream&#x27;]], fill=&#x27;none&#x27;, stroke=C[&#x27;stream&#x27;], stroke_width=1.6)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    c.text(1455, -380, &#x27;UNNAMED STREAM (state waters, order-0 headwater of Jackson Creek, GAR030701030315) — &#x27;
+                       &#x27;TOP OF BANK APPROXIMATE, FIELD DELINEATION REQUIRED&#x27;,
+           size=6, fill=C[&#x27;stream&#x27;], halo=True, anchor=&#x27;end&#x27;)
+    so = LAYOUT[&#x27;stream_setbacks&#x27;][0][&#x27;offsets&#x27;]
+    for lv, vv, txt in ((&#x27;75&#x27;, -262, &quot;75&#x27; IMPERVIOUS SETBACK&quot;), (&#x27;50&#x27;, -276, &quot;50&#x27; UNDISTURBED STREAM BUFFER (LILBURN)&quot;),
+                        (&#x27;25&#x27;, -290, &quot;25&#x27; STATE (GA EPD) BUFFER&quot;)):
+        pts = [tuple(p) for ln in so[lv] for p in ln if p[0] &lt; 1330]
+        if not pts:
+            continue
+        p = min(pts, key=lambda q: abs(q[1] - vv))
+        c.text(p[0] - 4, p[1], txt, size=6, fill=C[&#x27;stream&#x27;], halo=True, anchor=&#x27;end&#x27;)
+    c.text(1000, -258, &quot;50&#x27;/75&#x27; BUFFERS OF THE OFF-SITE BRANCH (they clip the SW edge of the site ≤ 12 ft / ≤ 36 ft)&quot;,
+           size=6, fill=C[&#x27;stream&#x27;], halo=True, avoid=True)
+
+
+def sewer_existing(c, labels=True, easement=True):
+    &quot;&quot;&quot;The existing 8-in gravity sewer, the 20-ft sanitary sewer easement and the manholes
+    with their Gwinnett GIS invert elevations (GIS attributes — unsurveyed).&quot;&quot;&quot;
+    runs = [s for s in CTX[&#x27;sewer&#x27;] if s[&#x27;min_dist_ft&#x27;] &lt; 200]
+    c.add(&#x27;&lt;g id=&quot;sewer&quot;&gt;&#x27;)
+    if easement:
+        for s in runs:
+            if &#x27;ARCADO&#x27; not in s[&#x27;project&#x27;]:
+                continue
+            for path in s[&#x27;paths_local&#x27;]:
+                pts = [tuple(p) for p in path]
+                mid = ((pts[0][0] + pts[-1][0]) / 2.0, (pts[0][1] + pts[-1][1]) / 2.0)
+                if not point_in_poly(mid, BOUNDARY):
+                    continue                       # only the reach that is on the property
+                c.poly(offset_band(pts, 10.0), fill=&#x27;url(#ssehatch)&#x27;,
+                       stroke=C[&#x27;sewer&#x27;], stroke_width=0.4, stroke_dasharray=&#x27;5 3&#x27;)
+    for s in runs:
+        for path in s[&#x27;paths_local&#x27;]:
+            c.pline([tuple(p) for p in path], fill=&#x27;none&#x27;, stroke=C[&#x27;sewer&#x27;], stroke_width=0.9)
+            for p in (path[0], path[-1]):
+                c.circle(tuple(p), 2.2, fill=&#x27;#fff&#x27;, stroke=C[&#x27;sewer&#x27;], stroke_width=0.7)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    c.text(-30, -62, &#x27;EX. MH  INV 943.79 / 940.47&#x27;, size=6, fill=C[&#x27;sewer_txt&#x27;], halo=True, rot=-81)
+    c.line((285.0, -222.0), (396.0, -206.0), stroke=C[&#x27;sewer_txt&#x27;], stroke_width=0.5)
+    c.text(400, -204.0, &#x27;EX. MH  INV 927.13  (GIS ATTRIBUTE — UNSURVEYED)  —  Phase 1 point of connection&#x27;,
+           size=6, fill=C[&#x27;sewer_txt&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    c.textlines(120, -269, [&quot;EX. 8-in SANITARY SEWER IN A 20-ft SANITARY SEWER EASEMENT (\&quot;EX. 20&#x27; SSE\&quot;) — Gwinnett DWR,&quot;,
+                            &quot;Arcado Road Townhomes outfall; the 20-ft width is from the 2025 hydrology sheet and is NOT a &quot;
+                            &quot;surveyed plat dimension — VERIFY&quot;],
+                size=6, gap=1.25, fill=C[&#x27;sewer_txt&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    c.text(1100, -420, &#x27;EX. 8-in SANITARY SEWER — LEGENDS AT PARKVIEW (Gwinnett DWR)&#x27;, size=6,
+           fill=C[&#x27;sewer_txt&#x27;], halo=True)
+    c.text(1339, -418, &#x27;EX. MH  INV 919.58  (GIS ATTRIBUTE — UNSURVEYED)&#x27;, size=6, fill=C[&#x27;sewer_txt&#x27;],
+           halo=True, anchor=&#x27;end&#x27;)
+
+
+def water_existing(c, labels=True):
+    &quot;&quot;&quot;Water mains in Arcado Rd and the hydrants (Gwinnett DWR GIS).&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;water&quot;&gt;&#x27;)
+    for w in CTX[&#x27;water_mains_near&#x27;]:
+        for path in w[&#x27;paths_local&#x27;]:
+            c.pline([tuple(p) for p in path], fill=&#x27;none&#x27;, stroke=C[&#x27;water&#x27;], stroke_width=0.9,
+                    stroke_dasharray=&#x27;9 3 2 3&#x27;)
+    for h in CTX[&#x27;hydrants&#x27;]:
+        p = tuple(h[&#x27;local&#x27;])
+        c.circle(p, 2.6, fill=C[&#x27;hydrant&#x27;], stroke=&#x27;#fff&#x27;, stroke_width=0.5)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    near = min(CTX[&#x27;hydrants&#x27;], key=lambda h: h[&#x27;dist_ft&#x27;])
+    c.text(near[&#x27;local&#x27;][0] + 6, near[&#x27;local&#x27;][1] - 2,
+           &#x27;EX. FIRE HYDRANT at local (u %.0f, v %+.1f) — %.1f ft from the front corner&#x27;
+           % (near[&#x27;local&#x27;][0], near[&#x27;local&#x27;][1], near[&#x27;dist_ft&#x27;]),
+           size=6, fill=C[&#x27;hydrant&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    c.text(-88, -150, &#x27;EX. WATER MAINS IN ARCADO RD (DIP / ACP, Gwinnett DWR — sizes not published in the &#x27;
+                      &#x27;public layer; VERIFY)&#x27;, size=6, rot=-81, fill=C[&#x27;water&#x27;], halo=True)
+
+
+def wooded_area(c, labels=True):
+    &quot;&quot;&quot;Existing wooded area (section 1003-4.6 &#x27;areas of existing vegetation&#x27;) — the site less
+    the two mown yards, with the tree line shown at the yard limits.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;woods&quot;&gt;&#x27;)
+    c.clip_open(BOUNDARY, fill=None)
+    c.poly(BOUNDARY, fill=&#x27;url(#woods)&#x27;, stroke=&#x27;none&#x27;)
+    for g in CLEARINGS:
+        c.poly(g[&#x27;polygon&#x27;], fill=&#x27;#fbf7ef&#x27;, stroke=&#x27;none&#x27;)
+    c.clip_close()
+    for g in CLEARINGS:
+        c.poly(g[&#x27;polygon&#x27;], fill=&#x27;none&#x27;, stroke=C[&#x27;wood_line&#x27;], stroke_width=0.9, stroke_dasharray=&#x27;7 3 2 3&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    c.text(560, -60, &#x27;EXISTING WOODED AREA — LIMITS APPROXIMATE, TO BE FIELD-VERIFIED&#x27;, size=8,
+           bold=True, fill=C[&#x27;wood_txt&#x27;], halo=True)
+    c.text(560, -72, &#x27;Piedmont hardwood over eroded Appling / Madison / Pacolet clays; no tree survey performed&#x27;,
+           size=6, fill=C[&#x27;wood_txt&#x27;], halo=True)
+    for g, at, txt in ((CLEARINGS[0], (276.0, -150.0), &#x27;TREE LINE (APPROX.) — MOWN YARD AT 4541&#x27;),
+                       (CLEARINGS[1], (1062.0, -33.0), &#x27;TREE LINE (APPROX.) — MOWN YARD AT 4535&#x27;)):
+        c.text(at[0], at[1], txt, size=6, fill=C[&#x27;wood_line&#x27;], halo=True, anchor=&#x27;start&#x27;)
+
+
+def existing_structures(c, labels=True):
+    &quot;&quot;&quot;The two existing houses and the mapped drive, drawn in place, dashed, to be removed.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;existing&quot;&gt;&#x27;)
+    path, band = existing_drive_poly()
+    c.poly(band, fill=&#x27;#efe6dc&#x27;, stroke=C[&#x27;exist&#x27;], stroke_width=0.6, stroke_dasharray=&#x27;6 3&#x27;)
+    for s, poly, area in existing_polys():
+        c.poly(poly, fill=&#x27;url(#exhatch)&#x27;, stroke=C[&#x27;exist&#x27;], stroke_width=1.2, stroke_dasharray=&#x27;7 3&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    at = {&#x27;4541-house&#x27;: (203.0, -80.0, &#x27;middle&#x27;), &#x27;4535-house&#x27;: (1252.0, -52.0, &#x27;start&#x27;)}
+    for s, poly, area in existing_polys():
+        u, v, anc = at[s[&#x27;key&#x27;]]
+        c.textlines(u, v, [s[&#x27;label&#x27;], &#x27;%s ± SF FOOTPRINT (APPROXIMATE)&#x27; % format(round(area, -1), &#x27;,.0f&#x27;)]
+                    + s[&#x27;sub&#x27;] + [&#x27;TO BE REMOVED&#x27;],
+                    size=6, gap=1.22, bold_first=True, fill=C[&#x27;exist&#x27;], halo=True, anchor=anc)
+    c.text(60, -212, &#x27;EXISTING DRIVE TO 4541 — TO BE REMOVED&#x27;, size=6, fill=C[&#x27;exist&#x27;],
+           halo=True, anchor=&#x27;start&#x27;)
+    c.line((150.0, -213.0), (150.0, -226.0), stroke=C[&#x27;exist&#x27;], stroke_width=0.5)
+    c.text(1058, -212, &#x27;NO DRIVE TO 4535 IS RESOLVED IN THE FOOTPRINT SOURCE — TO BE LOCATED BY SURVEY&#x27;,
+           size=6, fill=C[&#x27;exist&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    c.text(300, -176, &#x27;APPROXIMATE — FROM AERIAL IMAGERY / TAX RECORDS, TO BE LOCATED BY SURVEY&#x27;, size=7,
+           bold=True, fill=C[&#x27;exist&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    c.text(300, -187, &#x27;Accessory structures are reported near the frontage (FACTS §2; docs/02 §2) but none is &#x27;
+                      &#x27;resolved in the footprint source — inventory by survey before demolition permits.&#x27;,
+           size=6, fill=C[&#x27;exist&#x27;], halo=True, anchor=&#x27;start&#x27;)
+
+
+# ============================================================================ layers — proposed
+def lots(c, labels=True):
+    &quot;&quot;&quot;The 43 proposed lots with their buffer easement and setback envelope.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;lots&quot;&gt;&#x27;)
+    for L in LAYOUT[&#x27;lots&#x27;]:
+        c.poly([tuple(p) for p in L[&#x27;polygon&#x27;]], fill=&#x27;#fff&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.6)
+        c.poly([tuple(p) for p in L[&#x27;buffer_easement&#x27;]], fill=&#x27;url(#bufhatch)&#x27;, stroke=&#x27;none&#x27;)
+        c.poly([tuple(p) for p in L[&#x27;setback_envelope&#x27;]], fill=&#x27;none&#x27;, stroke=&#x27;#999&#x27;, stroke_width=0.3,
+               stroke_dasharray=&#x27;2 1.5&#x27;)
+        c.poly([tuple(p) for p in L[&#x27;driveway_rect&#x27;]], fill=&#x27;#e2e2e2&#x27;, stroke=&#x27;#777&#x27;, stroke_width=0.35)
+        c.poly([tuple(p) for p in L[&#x27;house_rect&#x27;]], fill=C[&#x27;house&#x27;], stroke=&#x27;#222&#x27;, stroke_width=0.6)
+        c.poly([tuple(p) for p in L[&#x27;garage_rect&#x27;]], fill=&#x27;#efd2ad&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.45)
+        for k in (&#x27;porch_rect&#x27;, &#x27;rear_rect&#x27;):
+            c.poly([tuple(p) for p in L[k]], fill=&#x27;#fdf3e4&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.4)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    for L in LAYOUT[&#x27;lots&#x27;]:
+        ctr = poly_centroid([tuple(p) for p in L[&#x27;house_rect&#x27;]])
+        c.textlines(ctr[0], ctr[1] + 10.5, [&#x27;LOT %d&#x27; % L[&#x27;id&#x27;], &#x27;PLAN %s&#x27; % L[&#x27;plan&#x27;],
+                                            &#x27;%s SF&#x27; % format(L[&#x27;area_sf&#x27;], &#x27;,.0f&#x27;),
+                                            &quot;%.0f&#x27; × %.0f&#x27;&quot; % (L[&#x27;width_ft&#x27;], L[&#x27;depth_ft&#x27;])],
+                    size=6, gap=1.2, bold_first=True)
+
+
+def lane(c, labels=True):
+    &quot;&quot;&quot;The private lane tract, pavement, sidewalks, hammerheads and the entry drive.&quot;&quot;&quot;
+    ln = LAYOUT[&#x27;lane&#x27;]
+    c.add(&#x27;&lt;g id=&quot;lane&quot;&gt;&#x27;)
+    for key in (&#x27;tract_polygon&#x27;,):
+        c.poly([tuple(p) for p in ln[key]], fill=C[&#x27;tract&#x27;], stroke=&#x27;#666&#x27;, stroke_width=0.5,
+               stroke_dasharray=&#x27;4 2&#x27;)
+    c.poly([tuple(p) for p in ln[&#x27;entry_drive&#x27;][&#x27;tract_polygon&#x27;]], fill=C[&#x27;tract&#x27;], stroke=&#x27;#666&#x27;,
+           stroke_width=0.5, stroke_dasharray=&#x27;4 2&#x27;)
+    c.poly([tuple(p) for p in ln[&#x27;entry_drive&#x27;][&#x27;pavement_polygon&#x27;]], fill=C[&#x27;pave&#x27;], stroke=&#x27;#333&#x27;,
+           stroke_width=0.7)
+    c.poly([tuple(p) for p in ln[&#x27;pavement_polygon&#x27;]], fill=C[&#x27;pave&#x27;], stroke=&#x27;#333&#x27;, stroke_width=0.7)
+    for h in LAYOUT[&#x27;hammerheads&#x27;]:
+        for leg in h[&#x27;legs&#x27;]:
+            c.poly([tuple(p) for p in leg], fill=C[&#x27;pave&#x27;], stroke=&#x27;#333&#x27;, stroke_width=0.7)
+    for s in ln[&#x27;sidewalks&#x27;]:
+        c.poly([tuple(p) for p in s[&#x27;polygon&#x27;]], fill=&#x27;#f7f7f7&#x27;, stroke=&#x27;#777&#x27;, stroke_width=0.35)
+    c.pline([tuple(p) for p in ln[&#x27;centerline&#x27;]], fill=&#x27;none&#x27;, stroke=&#x27;#444&#x27;, stroke_width=0.4,
+            stroke_dasharray=&#x27;12 3 2 3&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if labels:
+        cl = [tuple(p) for p in ln[&#x27;centerline&#x27;]]
+        mid = cl[len(cl) // 2]
+        c.text(mid[0], mid[1] + 5, &quot;PRIVATE LANE — HOA TRACT %.0f&#x27;–%.0f&#x27; — 22&#x27; PVMT + 2&#x27; STRIP + 5&#x27; WALK&quot;
+               % (ln[&#x27;tract_width_ft&#x27;][0], ln[&#x27;tract_width_ft&#x27;][1]), size=6, bold=True)
+
+
+def amenity(c, labels=True):
+    &quot;&quot;&quot;The front amenity block: clubhouse, village green, pickleball, parking, kiosk, sign.&quot;&quot;&quot;
+    A = LAYOUT[&#x27;amenity&#x27;]
+    c.add(&#x27;&lt;g id=&quot;amenity&quot;&gt;&#x27;)
+    for p in A[&#x27;tract_polygons&#x27;]:
+        c.poly([tuple(q) for q in p], fill=&#x27;#eef4e6&#x27;, stroke=C[&#x27;green_line&#x27;], stroke_width=0.4)
+    c.poly([tuple(p) for p in A[&#x27;village_green&#x27;]], fill=&#x27;#cfe8bd&#x27;, stroke=C[&#x27;green_line&#x27;], stroke_width=0.4)
+    c.poly([tuple(p) for p in A[&#x27;clubhouse&#x27;]], fill=&#x27;#f2c58a&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.8)
+    for pad, court in zip(A[&#x27;pickleball&#x27;], A[&#x27;courts&#x27;]):
+        c.poly([tuple(p) for p in pad], fill=&#x27;#e9e2d0&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.6)
+        c.poly([tuple(p) for p in court], fill=&#x27;#bcd7c2&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.4)
+    for k in (&#x27;parking_bay&#x27;, &#x27;kiosk_bay&#x27;):
+        c.poly([tuple(p) for p in A[k]], fill=C[&#x27;pave&#x27;], stroke=&#x27;#333&#x27;, stroke_width=0.5)
+    for st in A[&#x27;stalls&#x27;] + A[&#x27;kiosk_stalls&#x27;]:
+        c.poly([tuple(p) for p in st], fill=&#x27;none&#x27;, stroke=&#x27;#555&#x27;, stroke_width=0.3)
+    c.poly([tuple(p) for p in A[&#x27;mail_kiosk&#x27;]], fill=&#x27;#f2c58a&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.6)
+    c.poly([tuple(p) for p in A[&#x27;entry_sign&#x27;]], fill=&#x27;#333&#x27;, stroke=&#x27;none&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if labels:
+        ctr = poly_centroid([tuple(p) for p in A[&#x27;clubhouse&#x27;]])
+        c.textlines(ctr[0], ctr[1] + 6, [&#x27;CLUBHOUSE&#x27;, &quot;%s SF  (40&#x27; × 60&#x27;)&quot; % format(A[&#x27;clubhouse_sf&#x27;], &#x27;,&#x27;)],
+                    size=6, gap=1.2, bold_first=True)
+
+
+def ponds(c, labels=True):
+    &quot;&quot;&quot;The two dry detention / water-quality ponds and their tracts.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;ponds&quot;&gt;&#x27;)
+    for p in LAYOUT[&#x27;ponds&#x27;]:
+        c.poly([tuple(q) for q in p[&#x27;tract_polygon&#x27;]], fill=&#x27;#e4efdc&#x27;, stroke=C[&#x27;green_line&#x27;], stroke_width=0.4)
+        c.poly([tuple(q) for q in p[&#x27;polygon&#x27;]], fill=C[&#x27;pond&#x27;], stroke=C[&#x27;buf_line&#x27;], stroke_width=0.8,
+               stroke_dasharray=&#x27;5 2&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if labels:
+        for i, p in enumerate(LAYOUT[&#x27;ponds&#x27;], 1):
+            ctr = poly_centroid([tuple(q) for q in p[&#x27;polygon&#x27;]])
+            c.textlines(ctr[0], ctr[1] + (30 if i == 2 else 8),
+                        [&#x27;POND %d — DRY DETENTION / WQ&#x27; % i,
+                         &#x27;%s ft TOB, 4 ft deep, 3:1&#x27; % p[&#x27;top_of_bank_ft&#x27;],
+                         &#x27;≈%s cf (assumption)&#x27; % format(p[&#x27;est_storage_cf&#x27;], &#x27;,&#x27;)],
+                        size=6, gap=1.2, bold_first=True, fill=&#x27;#0d47a1&#x27;)
+
+
+def open_space(c, labels=True):
+    &quot;&quot;&quot;Common open-space tracts: pocket greens, terminus green and the creek woods.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;openspace&quot;&gt;&#x27;)
+    for g in LAYOUT[&#x27;greens&#x27;]:
+        for p in g[&#x27;polygons&#x27;]:
+            c.poly([tuple(q) for q in p], fill=C[&#x27;green&#x27;], stroke=C[&#x27;green_line&#x27;], stroke_width=0.4)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if labels:
+        for g in LAYOUT[&#x27;greens&#x27;][:2]:
+            ctr = poly_centroid([tuple(q) for q in g[&#x27;polygons&#x27;][0]])
+            c.text(ctr[0], ctr[1] - 20, &#x27;POCKET GREEN&#x27;, size=6, bold=True, fill=&#x27;#2e5e1e&#x27;)
+
+
+# ============================================================================ self-check
+def _selfcheck():
+    print(&#x27;sitebase.py self-check —&#x27;, DATE)
+    print(&#x27;  data      : layout.json (%d lots, %d bearings), site-context-local.json (%d adjoiners), &#x27;
+          &#x27;topo-samples.json (%d samples)&#x27;
+          % (len(LAYOUT[&#x27;lots&#x27;]), len(BEARINGS), len(CTX[&#x27;adjoining_parcels&#x27;]), len(TOPO[&#x27;samples&#x27;])))
+    print(&#x27;  boundary  : %d courses, %.1f SF = %.3f ac GIS; u %.1f..%.1f, v %.1f..%.1f&#x27;
+          % (len(BOUNDARY), BOUNDARY_SF, BOUNDARY_SF / 43560.0,
+             min(p[0] for p in BOUNDARY), max(p[0] for p in BOUNDARY),
+             min(p[1] for p in BOUNDARY), max(p[1] for p in BOUNDARY)))
+    print(&#x27;  width     : %.1f ft at u=0, %.1f ft at u=%.0f (FACTS §1: ~236 -&gt; ~246)&#x27;
+          % (width(0), width(U_REAR - 1), U_REAR - 1))
+    print(&#x27;  affine    : lon/lat &lt;-&gt; u,v residual %.4f ft over %d samples&#x27;
+          % (affine_residual_ft(), len(TOPO[&#x27;samples&#x27;])))
+    for s, poly, area in existing_polys():
+        ctr = poly_centroid(poly)
+        inside = point_in_poly(ctr, BOUNDARY)
+        print(&#x27;  structure : %-28s %6.0f SF footprint at (u %.0f, v %.0f) inside=%s [%s]&#x27;
+              % (s[&#x27;key&#x27;], area, ctr[0], ctr[1], inside, s[&#x27;osm&#x27;]))
+    print(&#x27;  R/W width : &#x27; + &#x27;, &#x27;.join(&#x27;v %+.0f -&gt; %.1f ft&#x27; % (v, w) for v, w in row_width_ft()))
+    hi = max(TOPO[&#x27;samples&#x27;], key=lambda s: s[&#x27;z_ft&#x27;])
+    lo = min(TOPO[&#x27;samples&#x27;], key=lambda s: s[&#x27;z_ft&#x27;])
+    print(&#x27;  topo      : high %.1f at (u %.0f, v %.0f); low %.1f at (u %.0f, v %.0f)&#x27;
+          % (hi[&#x27;z_ft&#x27;], hi[&#x27;u&#x27;], hi[&#x27;v&#x27;], lo[&#x27;z_ft&#x27;], lo[&#x27;u&#x27;], lo[&#x27;v&#x27;]))
+    D, F = sheet(&#x27;SELF CHECK&#x27;, &#x27;X-0&#x27;, &#x27;self-check only — nothing is written&#x27;, &#x27;Scale 1&quot; = 60\&#x27; (ARCH D 36 × 24 in)&#x27;)
+    n0 = len(D.out)
+    for fn in (adjoiners, arcado_row, wooded_area, contours, streams_and_buffers, sewer_existing,
+               water_existing, boundary, parcel_lines, existing_structures, lots, lane, amenity,
+               ponds, open_space):
+        before = len(D.out)
+        fn(D)
+        print(&#x27;  layer     : %-20s %5d elements&#x27; % (fn.__name__, len(D.out) - before))
+    sub = enlargement(-80.0, 300.0, -255.0, -35.0, 100.0, 900.0, tag=&#x27;A&#x27;)
+    for fn in (arcado_row, contours, sewer_existing, existing_structures, boundary):
+        fn(sub)
+    print(&#x27;  enlargement: %d elements at 1&quot; = %d\&#x27;&#x27; % (len(sub.out), round(72.0 / sub.s)))
+    svg = finish(D)
+    print(&#x27;  sheet     : %d elements, %d bytes of SVG, disclaimer=%s marker=%s&#x27;
+          % (len(D.out) - n0, len(svg), DISCLAIMER[:20] in svg, MARKER in svg))
+    print(&#x27;  OK — nothing written.&#x27;)
+
+
+if __name__ == &#x27;__main__&#x27;:
+    _selfcheck()
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/sitebase.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

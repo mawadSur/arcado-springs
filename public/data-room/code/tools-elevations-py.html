@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Exterior elevation engine (Sheets A-2.1, A-2.2, A-2.3) — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Exterior elevation engine (Sheets A-2.1, A-2.2, A-2.3)</h1><p class="src-note">Python · 904 lines · <a href="/data-room/src/submission/tools/elevations.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Exterior ELEVATION engine — The Cottages at Arcado Springs (R-1 → R-2 rezoning, Lilburn GA).
+
+Answers City of Lilburn 2026 Application Instructions item (11), &quot;Architectural Renderings and Elevations&quot;:
+    &quot;An architectural rendering or elevation of each side of the structure visible from the street shall be
+     submitted. The drawings shall be to scale or in proper perspective and shall include the color and
+     materials of all structures and roofing and location and size of wall signs.&quot;
+
+ILLUSTRATIVE — NOT FOR CONSTRUCTION. DRAFT — to be superseded by sealed drawings (GA-registered architect).
+
+    python3 tools/elevations.py              # both plans, all sheets
+    python3 tools/elevations.py A            # one plan
+
+===================================================================================================
+WHERE THE GEOMETRY COMES FROM  (nothing is drawn by hand; an elevation cannot disagree with its plan)
+===================================================================================================
+tools/floorplans.py holds the authoritative plan specs and generates data/plans.json. This module
+imports it and re-derives:
+  * the massing rectangles below are the plan&#x27;s own room groups (checked against the footprint polygon
+    by check_massing(), which fails the build if they drift);
+  * eave height  = plate + heel;
+  * ridge height = eave + (span / 2) x pitch, recomputed per block;
+  * every opening is placed from spec[&#x27;exterior_openings&#x27;] — &#x27;at&#x27; is the plan coordinate, so a window
+    that moves on the floor plan moves on the elevation.
+
+PROJECTION. Each view has a plan view-direction d (the way the viewer looks) and a paper-horizontal
+axis r = (d_y, -d_x), the standard right-handed elevation convention:
+    front  d = (0, +1)  -&gt;  paper right = +x   (lane side; x increases to the right, as on the plan)
+    rear   d = (0, -1)  -&gt;  paper right = -x
+    left   d = (+1, 0)  -&gt;  paper right = -y   (the front of the house appears on the RIGHT)
+    right  d = (-1, 0)  -&gt;  paper right = +y   (the front of the house appears on the LEFT)
+Depth along d orders the masses (smaller p.d is nearer the viewer), and blocks are painted far-to-near.
+
+ROOFS. A block&#x27;s ridge axis a is (1,0) for &#x27;x&#x27; or (0,1) for &#x27;y&#x27;.
+    a.d == 0   the ridge crosses the view -&gt; the eave face is toward us: the wall stops at the eave and
+               the roof projects as a rectangle from the eave to the ridge, widened by the RAKE overhang.
+    |a.d| == 1 the ridge points at the viewer -&gt; the gable end is toward us: the wall carries a gable
+               triangle to the ridge and the roof projects as a rake band widened by the EAVE overhang.
+
+FRONT PORCH (design decision, 2026-09-03 Rev B). The front porch is roofed by carrying the front-wing
+gable forward over it — an integral gable porch — instead of the separate 4:12 shed the 2026-08-28
+program assumed. A full-width shed cannot be built against a gable-end wall: at 4:12 over a 6&#x27;-0&quot; porch
+its high side lands 2&#x27;-0&quot; above the plate, which is above the 8:12 rake for the outer 3&#x27;-0&quot; at each end
+of the wing. Carrying the gable forward keeps the porch its full programmed width and area (Plan A
+17&#x27;-0&quot; x 6&#x27;-0&quot; = 102 SF; Plan B 19&#x27;-0&quot; x 6&#x27;-0&quot; = 114 SF — unchanged), keeps a flat 9&#x27;-0&quot; porch ceiling,
+and adds no height. The gable end above the porch is carried on a header between the outer posts.
+
+WIDTH CHECK (the binding dimension). A 50&#x27;-0&quot; lot less two 5&#x27;-0&quot; side yards leaves 40&#x27;-0&quot; buildable
+(Lilburn Zoning Ordinance 2023-603 Table 4.1). Overhangs are therefore held to 8 in on the two side
+(lot-line) walls and 12 in front and rear, and check_width() fails the build if roof-to-roof width
+exceeds 40&#x27;-0&quot;.
+
+FLOOR HEIGHT. Finished floor is 8 in above finished grade at the front porch, not the 18 in a slab
+house usually carries, so that the entry walk from the lane can rise to a flush landing at no more than
+1:20 and stay a zero-step entry (voluntary accessibility condition) without becoming a ramp under
+IRC 2024 (GA 2026) R311.8. At 8 in the porch is also below the 30-in threshold at which R312.1.1 would
+require a guard. Grade falls away at the sides and rear; the elevations show level grade with a note.
+===================================================================================================
+&quot;&quot;&quot;
+import json, math, os, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import floorplans as fp                                   # noqa: E402
+
+ROOT = os.path.dirname(HERE)
+DATA = os.path.join(ROOT, &#x27;data&#x27;)
+DRAW = os.path.join(ROOT, &#x27;drawings&#x27;)
+os.makedirs(DRAW, exist_ok=True)
+
+DATE = &#x27;2026-09-03&#x27;
+REVISION = &#x27;Rev B — 2026-09-03&#x27;
+fti, esc = fp.fti, fp.esc
+DISCLAIMER, MARKER = fp.DISCLAIMER, fp.MARKER
+
+# ----------------------------------------------------------------------------- standards
+FF = 0.667                  # ft, finished floor above finished grade at the front (8 in — see FLOOR HEIGHT)
+WATER_TABLE = 2.5           # ft, masonry water table above FF (30 in; 04 20 00 / 04 40 00)
+OH_SIDE = 0.667             # ft, 8-in overhang on the two side (lot-line) walls
+OH_FR = 0.667               # ft, 8-in overhang front and rear (held out of the required yards)
+FASCIA = 0.67               # ft, fascia + sub-fascia shown on the roof edge
+BEAM = 0.83                 # ft, porch header depth (10 in shown)
+COL = 0.667                 # ft, 8x8 nominal cedar post
+PIER_W, PIER_H = 1.67, 2.0  # ft, 20-in square masonry pier, 2&#x27;-0&quot; tall
+VENT = (2.0, 1.33)          # ft, louvered gable vent, 24 x 16 in
+CAP_RIDGE = 24.0            # ft, voluntary condition 4: maximum ridge above finished grade
+DISTRICT_MAX = 40.0         # ft, Ord. 2023-603 Table 4.1 R-2 maximum height
+LOT_BUILDABLE = 40.0        # ft, 50-ft lot less two 5-ft side yards
+
+VIEWS = [
+    (&#x27;front&#x27;, (0, 1),  &#x27;FRONT ELEVATION — FACES THE PRIVATE LANE&#x27;),
+    (&#x27;right&#x27;, (-1, 0), &#x27;RIGHT SIDE ELEVATION&#x27;),
+    (&#x27;rear&#x27;,  (0, -1), &#x27;REAR ELEVATION&#x27;),
+    (&#x27;left&#x27;,  (1, 0),  &#x27;LEFT SIDE ELEVATION&#x27;),
+]
+VD = {k: d for k, d, _ in VIEWS}
+VT = {k: t for k, _, t in VIEWS}
+
+SCHEMES = {
+    &#x27;1&#x27;: {&#x27;name&#x27;: &#x27;SCHEME 1 — WARM WHITE&#x27;,
+          &#x27;siding_kind&#x27;: &#x27;batten&#x27;, &#x27;siding&#x27;: &#x27;#F1EDE3&#x27;, &#x27;siding_line&#x27;: &#x27;#D6CFBE&#x27;,
+          &#x27;base_kind&#x27;: &#x27;stone&#x27;, &#x27;base&#x27;: &#x27;#ABA495&#x27;, &#x27;base_line&#x27;: &#x27;#8A8378&#x27;,
+          &#x27;roof&#x27;: &#x27;#4A4E52&#x27;, &#x27;roof_line&#x27;: &#x27;#383C40&#x27;, &#x27;trim&#x27;: &#x27;#FFFFFF&#x27;, &#x27;trim_line&#x27;: &#x27;#CBC5B8&#x27;,
+          &#x27;door&#x27;: &#x27;#2E4A38&#x27;, &#x27;garage&#x27;: &#x27;#F4F1E9&#x27;, &#x27;post&#x27;: &#x27;#A9catch&#x27;, &#x27;sash&#x27;: &#x27;#FFFFFF&#x27;},
+    &#x27;2&#x27;: {&#x27;name&#x27;: &#x27;SCHEME 2 — SAGE&#x27;,
+          &#x27;siding_kind&#x27;: &#x27;lap&#x27;, &#x27;siding&#x27;: &#x27;#98A189&#x27;, &#x27;siding_line&#x27;: &#x27;#7A8370&#x27;,
+          &#x27;base_kind&#x27;: &#x27;brick&#x27;, &#x27;base&#x27;: &#x27;#8C5A4A&#x27;, &#x27;base_line&#x27;: &#x27;#6C4438&#x27;,
+          &#x27;roof&#x27;: &#x27;#6B6255&#x27;, &#x27;roof_line&#x27;: &#x27;#524B41&#x27;, &#x27;trim&#x27;: &#x27;#F7F5EF&#x27;, &#x27;trim_line&#x27;: &#x27;#D5D0C2&#x27;,
+          &#x27;door&#x27;: &#x27;#6E2B2B&#x27;, &#x27;garage&#x27;: &#x27;#98A189&#x27;, &#x27;post&#x27;: &#x27;#A98C5F&#x27;, &#x27;sash&#x27;: &#x27;#FFFFFF&#x27;},
+    &#x27;3&#x27;: {&#x27;name&#x27;: &#x27;SCHEME 3 — CLAY&#x27;,
+          &#x27;siding_kind&#x27;: &#x27;lap&#x27;, &#x27;siding&#x27;: &#x27;#D7C8AD&#x27;, &#x27;siding_line&#x27;: &#x27;#B9A98C&#x27;,
+          &#x27;base_kind&#x27;: &#x27;stone&#x27;, &#x27;base&#x27;: &#x27;#C4B594&#x27;, &#x27;base_line&#x27;: &#x27;#9F9169&#x27;,
+          &#x27;roof&#x27;: &#x27;#7A6E60&#x27;, &#x27;roof_line&#x27;: &#x27;#5E5449&#x27;, &#x27;trim&#x27;: &#x27;#F5EEDC&#x27;, &#x27;trim_line&#x27;: &#x27;#D7CDB4&#x27;,
+          &#x27;door&#x27;: &#x27;#23364F&#x27;, &#x27;garage&#x27;: &#x27;#F5EEDC&#x27;, &#x27;post&#x27;: &#x27;#A98C5F&#x27;, &#x27;sash&#x27;: &#x27;#FFFFFF&#x27;},
+}
+SCHEMES[&#x27;1&#x27;][&#x27;post&#x27;] = &#x27;#A98C5F&#x27;
+LINEWORK = {&#x27;name&#x27;: &#x27;LINE DRAWING&#x27;, &#x27;siding_kind&#x27;: &#x27;lap&#x27;, &#x27;base_kind&#x27;: &#x27;stone&#x27;,
+            &#x27;siding&#x27;: &#x27;#FFFFFF&#x27;, &#x27;siding_line&#x27;: &#x27;#B4B4B4&#x27;, &#x27;base&#x27;: &#x27;#FFFFFF&#x27;, &#x27;base_line&#x27;: &#x27;#8C8C8C&#x27;,
+            &#x27;roof&#x27;: &#x27;#F2F2F2&#x27;, &#x27;roof_line&#x27;: &#x27;#8E8E8E&#x27;, &#x27;trim&#x27;: &#x27;#FFFFFF&#x27;, &#x27;trim_line&#x27;: &#x27;#9A9A9A&#x27;,
+            &#x27;door&#x27;: &#x27;#FFFFFF&#x27;, &#x27;garage&#x27;: &#x27;#FFFFFF&#x27;, &#x27;post&#x27;: &#x27;#FFFFFF&#x27;, &#x27;sash&#x27;: &#x27;#FFFFFF&#x27;}
+
+MATERIAL_KEYS = [
+    (&#x27;ROOF&#x27;, &#x27;07 31 00&#x27;, &#x27;Architectural asphalt shingle, 30-year, over synthetic underlayment; ridge vent; &#x27;
+     &#x27;5-in K-style aluminium gutters and downspouts (07 71 00). Colour by scheme.&#x27;),
+    (&#x27;WALL&#x27;, &#x27;07 46 46&#x27;, &#x27;Fiber-cement siding: 7-1/4-in lap at 6-in exposure (schemes 2 and 3) or vertical &#x27;
+     &#x27;panel with 12-in battens (scheme 1); factory finish. 5/4 cellular-PVC or fiber-cement trim, corner &#x27;
+     &#x27;boards and frieze (06 20 00).&#x27;),
+    (&#x27;BASE&#x27;, &#x27;04 20 00 / 04 40 00&#x27;, &#x27;Masonry water table 30 in above finished floor and porch piers: modular &#x27;
+     &#x27;brick veneer (scheme 2) or adhered ledge stone (schemes 1 and 3), cast-stone cap sloped with drip.&#x27;),
+    (&#x27;PORCH&#x27;, &#x27;06 20 00&#x27;, &#x27;8x8 nominal Western Red Cedar posts on 20-in square masonry piers with cast-stone &#x27;
+     &#x27;caps; cedar brackets at the gable; beadboard porch ceiling; 9\&#x27;-0&quot; flat porch ceiling.&#x27;),
+    (&#x27;WINDOWS&#x27;, &#x27;08 53 13&#x27;, &#x27;Vinyl (fiberglass alternate) single-hung and fixed units, white; 4-in flat casing &#x27;
+     &#x27;with a sloped sill; grilles at the front elevation only.&#x27;),
+    (&#x27;DOORS&#x27;, &#x27;08 14 00 / 08 36 13&#x27;, &#x27;Insulated fiberglass entry door 3\&#x27;-0&quot; x 6\&#x27;-8&quot; with a glazed upper &#x27;
+     &#x27;panel; carriage-style sectional garage door 16\&#x27;-0&quot; x 7\&#x27;-0&quot; with a top row of lites.&#x27;),
+]
+
+# ----------------------------------------------------------------------------- massing
+# Plan rectangles grouped into roofed masses. check_massing() proves these tile the plan footprint.
+MASSING = {
+    &#x27;A&#x27;: {
+        &#x27;blocks&#x27;: [
+            {&#x27;name&#x27;: &#x27;MAIN BLOCK&#x27;, &#x27;rect&#x27;: (0.0, 26.83, 38.0, 51.83), &#x27;ridge&#x27;: &#x27;x&#x27;, &#x27;pitch&#x27;: (8, 12)},
+            {&#x27;name&#x27;: &#x27;FRONT WING&#x27;, &#x27;rect&#x27;: (21.0, -6.0, 38.0, 26.83), &#x27;ridge&#x27;: &#x27;y&#x27;, &#x27;pitch&#x27;: (8, 12),
+             &#x27;porch&#x27;: (21.0, -6.0, 38.0, 0.0), &#x27;inner_wall_y&#x27;: 0.0},
+            {&#x27;name&#x27;: &#x27;GARAGE&#x27;, &#x27;rect&#x27;: (0.0, 5.0, 21.0, 26.83), &#x27;ridge&#x27;: &#x27;y&#x27;, &#x27;pitch&#x27;: (6, 12)},
+        ],
+        &#x27;footprint_check&#x27;: [(0, 26.83, 38, 51.83), (21, 0, 38, 26.83), (0, 5, 21, 26.83)],
+        &#x27;porch_sf&#x27;: 102.0,
+        &#x27;rear&#x27;: {&#x27;kind&#x27;: &#x27;PATIO (UNCOVERED)&#x27;, &#x27;rect&#x27;: (21.0, 51.83, 33.0, 57.83)},
+    },
+    &#x27;B&#x27;: {
+        # conformed 2026-09-03 to the re-proportioned PLAN_B (38&#x27;-0&quot; body x 58&#x27;-6&quot; deep) in tools/floorplans.py
+        &#x27;blocks&#x27;: [
+            {&#x27;name&#x27;: &#x27;MAIN BLOCK&#x27;, &#x27;rect&#x27;: (0.0, 29.0, 38.0, 57.5), &#x27;ridge&#x27;: &#x27;x&#x27;, &#x27;pitch&#x27;: (8, 12),
+             &#x27;rear_porch&#x27;: (24.0, 51.5, 38.0, 57.5)},
+            {&#x27;name&#x27;: &#x27;FRONT WING&#x27;, &#x27;rect&#x27;: (21.0, -6.0, 38.0, 29.0), &#x27;ridge&#x27;: &#x27;y&#x27;, &#x27;pitch&#x27;: (8, 12),
+             &#x27;porch&#x27;: (21.0, -6.0, 38.0, 0.0), &#x27;inner_wall_y&#x27;: 0.0},
+            {&#x27;name&#x27;: &#x27;GARAGE&#x27;, &#x27;rect&#x27;: (0.0, 5.0, 21.0, 29.0), &#x27;ridge&#x27;: &#x27;y&#x27;, &#x27;pitch&#x27;: (6, 12)},
+        ],
+        &#x27;footprint_check&#x27;: [(0, 29, 38, 57.5), (21, 0, 38, 29), (0, 5, 21, 29)],
+        &#x27;footprint_deduct&#x27;: [(24, 51.5, 38, 57.5)],          # covered rear porch, recessed under the main roof
+        &#x27;porch_sf&#x27;: 102.0,
+        &#x27;rear&#x27;: {&#x27;kind&#x27;: &#x27;COVERED REAR PORCH&#x27;, &#x27;rect&#x27;: (24.0, 51.5, 38.0, 57.5)},
+    },
+}
+
+
+def build_model(pid):
+    spec = fp.PLANS[pid]
+    an = fp.analyze(spec)
+    m = json.loads(json.dumps({k: v for k, v in MASSING[pid].items()}))
+    plate = an[&#x27;roof&#x27;][&#x27;plate_ft&#x27;] + an[&#x27;roof&#x27;].get(&#x27;heel_ft&#x27;, 0.5)
+    for b in m[&#x27;blocks&#x27;]:
+        x0, y0, x1, y1 = b[&#x27;rect&#x27;]
+        b[&#x27;span&#x27;] = (x1 - x0) if b[&#x27;ridge&#x27;] == &#x27;y&#x27; else (y1 - y0)
+        b[&#x27;eave&#x27;] = plate
+        b[&#x27;ridge_h&#x27;] = plate + b[&#x27;span&#x27;] / 2.0 * (b[&#x27;pitch&#x27;][0] / float(b[&#x27;pitch&#x27;][1]))
+    m[&#x27;id&#x27;] = pid
+    m[&#x27;spec&#x27;] = spec
+    m[&#x27;an&#x27;] = an
+    m[&#x27;plate&#x27;] = plate
+    m[&#x27;openings&#x27;] = spec_openings_list(pid, an)
+    m[&#x27;max_ridge&#x27;] = max(b[&#x27;ridge_h&#x27;] for b in m[&#x27;blocks&#x27;])
+    m[&#x27;max_ridge_grade&#x27;] = m[&#x27;max_ridge&#x27;] + FF
+    return m
+
+
+def spec_openings_list(pid, an):
+    &quot;&quot;&quot;Exterior openings as floorplans.py computes them (same list that reaches data/plans.json).&quot;&quot;&quot;
+    spec = fp.PLANS[pid]
+    walls = fp.build_walls(spec)
+    return fp.exterior_openings(spec, walls)
+
+
+def check_massing(m):
+    &quot;&quot;&quot;The massing rectangles must tile the plan&#x27;s conditioned + garage footprint exactly, and the roof
+    spans declared in the plan spec must equal the spans the massing actually has — the two drifted once
+    when a plan&#x27;s depth changed and only the massing was updated, which put the drawn ridge 4 in below the
+    published one.&quot;&quot;&quot;
+    fails = []
+    decl = {e[&#x27;name&#x27;]: e[&#x27;span_ft&#x27;] for e in m[&#x27;an&#x27;][&#x27;roof&#x27;][&#x27;elements&#x27;]}
+    for b in m[&#x27;blocks&#x27;]:
+        for nm, sp in decl.items():
+            key = b[&#x27;name&#x27;].split()[0].lower()
+            if (key == &#x27;main&#x27; and nm.startswith(&#x27;main&#x27;)) or (key == &#x27;front&#x27; and nm.startswith(&#x27;front&#x27;)) \
+                    or (key == &#x27;garage&#x27; and nm.startswith(&#x27;garage&#x27;)):
+                if abs(sp - b[&#x27;span&#x27;]) &gt; 0.02:
+                    fails.append(&#x27;roof element &quot;%s&quot; declares span %s but the %s massing is %s&#x27;
+                                 % (nm, fti(sp), b[&#x27;name&#x27;], fti(b[&#x27;span&#x27;])))
+    an = m[&#x27;an&#x27;]
+    got = sum((r[2] - r[0]) * (r[3] - r[1]) for r in m[&#x27;footprint_check&#x27;])
+    got -= sum((r[2] - r[0]) * (r[3] - r[1]) for r in m.get(&#x27;footprint_deduct&#x27;, []))
+    want = an[&#x27;areas&#x27;][&#x27;conditioned_sf&#x27;] + an[&#x27;areas&#x27;][&#x27;garage_sf&#x27;]
+    if abs(got - want) &gt; 12.0:
+        fails.append(&#x27;massing area %.1f SF vs plan conditioned+garage %.1f SF (&gt;12 SF apart)&#x27; % (got, want))
+    bb = an[&#x27;body_bbox&#x27;]
+    mx0 = min(b[&#x27;rect&#x27;][0] for b in m[&#x27;blocks&#x27;]); mx1 = max(b[&#x27;rect&#x27;][2] for b in m[&#x27;blocks&#x27;])
+    if abs(mx0 - bb[0]) &gt; 0.02 or abs(mx1 - bb[2]) &gt; 0.02:
+        fails.append(&#x27;massing x-extent %.2f..%.2f vs plan body bbox %.2f..%.2f&#x27; % (mx0, mx1, bb[0], bb[2]))
+    return fails
+
+
+def check_width(m):
+    &quot;&quot;&quot;Roof-to-roof width across the lot-line walls must fit the 40&#x27;-0&quot; buildable width.&quot;&quot;&quot;
+    left = min(b[&#x27;rect&#x27;][0] - side_overhang(b, &#x27;x0&#x27;) for b in m[&#x27;blocks&#x27;])
+    right = max(b[&#x27;rect&#x27;][2] + side_overhang(b, &#x27;x1&#x27;) for b in m[&#x27;blocks&#x27;])
+    w = right - left
+    body = max(b[&#x27;rect&#x27;][2] for b in m[&#x27;blocks&#x27;]) - min(b[&#x27;rect&#x27;][0] for b in m[&#x27;blocks&#x27;])
+    fails = []
+    if w &gt; LOT_BUILDABLE + 1e-6:
+        fails.append(&#x27;roof-to-roof width %s exceeds the %s buildable width (50-ft lot less two 5-ft side yards)&#x27;
+                     % (fti(w), fti(LOT_BUILDABLE)))
+    return fails, w, body
+
+
+def side_overhang(b, edge):
+    &quot;&quot;&quot;Overhang beyond a lot-line (x) wall: rake if the ridge runs in x, eave if it runs in y.&quot;&quot;&quot;
+    return OH_SIDE
+
+
+# ----------------------------------------------------------------------------- projection
+def rvec(view):
+    d = VD[view]
+    return (d[1], -d[0])
+
+
+def Hh(view, p):
+    r = rvec(view)
+    return p[0] * r[0] + p[1] * r[1]
+
+
+def Dd(view, p):
+    d = VD[view]
+    return p[0] * d[0] + p[1] * d[1]
+
+
+def h_range(view, rect):
+    x0, y0, x1, y1 = rect
+    hs = [Hh(view, q) for q in ((x0, y0), (x1, y0), (x1, y1), (x0, y1))]
+    return min(hs), max(hs)
+
+
+def d_near(view, rect):
+    x0, y0, x1, y1 = rect
+    return min(Dd(view, q) for q in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)))
+
+
+def gable_end_toward(view, b):
+    a = (1, 0) if b[&#x27;ridge&#x27;] == &#x27;x&#x27; else (0, 1)
+    d = VD[view]
+    return abs(a[0] * d[0] + a[1] * d[1]) &gt; 0.5
+
+
+def gable_top(h0, h1, eave, ridge_h, h):
+    hc = (h0 + h1) / 2.0
+    half = (h1 - h0) / 2.0
+    if half &lt;= 0:
+        return eave
+    return eave + (ridge_h - eave) * max(0.0, 1.0 - abs(h - hc) / half)
+
+
+# ----------------------------------------------------------------------------- texture / element painting
+def _lap(c, x0, y0, x1, y1, col, exp=0.5):
+    y = y0 + exp
+    while y &lt; y1 - 0.02:
+        c.line(x0, y, x1, y, lw=0.016, color=col)
+        y += exp
+
+
+def _batten(c, x0, y0, x1, y1, col, sp=1.0):
+    x = x0 + sp
+    while x &lt; x1 - 0.02:
+        c.line(x, y0, x, y1, lw=0.028, color=col)
+        x += sp
+
+
+def _stone(c, x0, y0, x1, y1, col):
+    n, y = 0, y0 + 0.42
+    while y &lt; y1 - 0.02:
+        c.line(x0, y, x1, min(y, y1), lw=0.018, color=col)
+        x = x0 + 0.3 + (0.0 if n % 2 == 0 else 0.6)
+        while x &lt; x1 - 0.12:
+            c.line(x, max(y - 0.42, y0), x, min(y, y1), lw=0.014, color=col)
+            x += 1.2
+        n += 1
+        y += 0.42
+
+
+def _brick(c, x0, y0, x1, y1, col):
+    n, y = 0, y0 + 0.23
+    while y &lt; y1 - 0.02:
+        c.line(x0, y, x1, min(y, y1), lw=0.013, color=col)
+        x = x0 + 0.16 + (0.0 if n % 2 == 0 else 0.33)
+        while x &lt; x1 - 0.06:
+            c.line(x, max(y - 0.23, y0), x, min(y, y1), lw=0.011, color=col)
+            x += 0.67
+        n += 1
+        y += 0.23
+
+
+def base_tex(S):
+    return _brick if S[&#x27;base_kind&#x27;] == &#x27;brick&#x27; else _stone
+
+
+def wall_band(c, S, h0, h1, z0, z1, base=True):
+    &quot;&quot;&quot;A rectangular piece of wall: masonry water table below, siding above.&quot;&quot;&quot;
+    if h1 - h0 &lt;= 1e-6 or z1 - z0 &lt;= 1e-6:
+        return
+    wt = FF + WATER_TABLE
+    if base and z0 &lt; wt:
+        top = min(wt, z1)
+        c.rect((h0, z0, h1, top), fill=S[&#x27;base&#x27;], stroke=&#x27;none&#x27;)
+        base_tex(S)(c, h0, z0, h1, top, S[&#x27;base_line&#x27;])
+        if top &gt;= wt - 1e-6:
+            c.rect((h0, wt - 0.19, h1, wt), fill=S[&#x27;trim&#x27;], stroke=S[&#x27;trim_line&#x27;], lw=0.018)
+    lo = max(z0, wt) if base else z0
+    if z1 &gt; lo:
+        c.rect((h0, lo, h1, z1), fill=S[&#x27;siding&#x27;], stroke=&#x27;none&#x27;)
+        (_batten if S[&#x27;siding_kind&#x27;] == &#x27;batten&#x27; else _lap)(c, h0, lo, h1, z1, S[&#x27;siding_line&#x27;])
+
+
+def gable_wall(c, S, h0, h1, eave, ridge_h, vent=True, brackets=False):
+    hc = (h0 + h1) / 2.0
+    tri = [(h0, eave), (hc, ridge_h), (h1, eave)]
+    c.poly(tri, fill=S[&#x27;siding&#x27;], stroke=&#x27;none&#x27;)
+    y = eave + 0.5
+    while y &lt; ridge_h - 0.04:
+        ch = _chord(tri, y)
+        if ch:
+            if S[&#x27;siding_kind&#x27;] == &#x27;batten&#x27;:
+                x = ch[0] + 0.25
+                while x &lt; ch[1] - 0.05:
+                    c.line(x, max(y - 0.5, eave), x, y, lw=0.028, color=S[&#x27;siding_line&#x27;])
+                    x += 1.0
+            else:
+                c.line(ch[0], y, ch[1], y, lw=0.016, color=S[&#x27;siding_line&#x27;])
+        y += 0.5
+    if vent and ridge_h - eave &gt; 3.2:
+        vw, vh = VENT
+        vy = eave + (ridge_h - eave) * 0.42
+        c.rect((hc - vw / 2, vy, hc + vw / 2, vy + vh), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.024)
+        k = vy + 0.2
+        while k &lt; vy + vh - 0.04:
+            c.line(hc - vw / 2 + 0.09, k, hc + vw / 2 - 0.09, k, lw=0.016, color=S[&#x27;trim_line&#x27;])
+            k += 0.2
+    if brackets:
+        # cedar knee brace: post leg on the wall, diagonal, and a horizontal top under the rake (06 20 00)
+        for sx, sgn in ((h0, 1), (h1, -1)):
+            by = eave + 0.15
+            leg = 1.5
+            x_in = sx + sgn * 0.28
+            c.rect((min(sx, x_in), by, max(sx, x_in), by + leg), fill=S[&#x27;post&#x27;], stroke=&#x27;#111&#x27;, lw=0.022)
+            top_out = sx + sgn * 1.55
+            c.poly([(sx + sgn * 0.28, by + leg), (top_out, by + leg), (top_out, by + leg + 0.28),
+                    (sx + sgn * 0.28, by + leg + 0.28)], fill=S[&#x27;post&#x27;], stroke=&#x27;#111&#x27;, lw=0.022)
+            c.poly([(sx + sgn * 0.28, by + 0.15), (top_out, by + leg), (top_out, by + leg - 0.34),
+                    (sx + sgn * 0.28, by - 0.2)], fill=S[&#x27;post&#x27;], stroke=&#x27;#111&#x27;, lw=0.022)
+
+
+def _chord(pts, y):
+    xs = []
+    n = len(pts)
+    for i in range(n):
+        (xa, ya), (xb, yb) = pts[i], pts[(i + 1) % n]
+        if (ya - y) * (yb - y) &lt; 0:
+            xs.append(xa + (xb - xa) * (y - ya) / (yb - ya))
+        elif abs(ya - y) &lt; 1e-9:
+            xs.append(xa)
+    return (min(xs), max(xs)) if len(xs) &gt;= 2 else None
+
+
+def gutter(c, S, h0, h1, z):
+    &quot;&quot;&quot;5-in K-style gutter along an eave, with a downspout at each end (07 71 00).&quot;&quot;&quot;
+    c.rect((h0, z - 0.42, h1, z - 0.05), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.024)
+    for hx, sgn in ((h0, 1), (h1, -1)):
+        c.rect((hx + sgn * 0.12, 0, hx + sgn * 0.42, z - 0.42), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.02)
+
+
+def corner_and_frieze(c, S, h0, h1, z0, z1, frieze=True):
+    c.rect((h0, z0, h0 + 0.42, z1), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.022)
+    c.rect((h1 - 0.42, z0, h1, z1), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.022)
+    if frieze:
+        c.rect((h0, z1 - 0.55, h1, z1), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.022)
+
+
+def roof_poly(c, S, pts):
+    c.poly(pts, fill=S[&#x27;roof&#x27;], stroke=&#x27;none&#x27;)
+    ys = [p[1] for p in pts]
+    y, n = min(ys) + 0.75, 0
+    while y &lt; max(ys) - 0.06:
+        ch = _chord(pts, y)
+        if ch:
+            c.line(ch[0], y, ch[1], y, lw=0.014, color=S[&#x27;roof_line&#x27;])
+            x = ch[0] + (0.6 if n % 2 else 1.8)          # shingle tabs, staggered course to course
+            while x &lt; ch[1] - 0.05:
+                c.line(x, y, x, max(y - 0.32, min(ys)), lw=0.012, color=S[&#x27;roof_line&#x27;])
+                x += 2.4
+        n += 1
+        y += 0.75
+    c.poly(pts, fill=&#x27;none&#x27;, stroke=&#x27;#111&#x27;, lw=0.042)
+
+
+def opening(c, S, o, hc, z0):
+    w, ht, t = o[&#x27;width_ft&#x27;], o[&#x27;height_ft&#x27;], o[&#x27;type&#x27;]
+    x0, x1, z1 = hc - w / 2.0, hc + w / 2.0, z0 + o[&#x27;height_ft&#x27;]
+    if t == &#x27;garage&#x27;:
+        c.rect((x0 - 0.31, z0, x1 + 0.31, z1 + 0.31), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.028)
+        c.rect((x0, z0, x1, z1), fill=S[&#x27;garage&#x27;], stroke=&#x27;#111&#x27;, lw=0.034)
+        for i in range(1, 4):
+            c.line(x0, z0 + (z1 - z0) * i / 4.0, x1, z0 + (z1 - z0) * i / 4.0, lw=0.02, color=&#x27;#9A9A9A&#x27;)
+        c.line(hc, z0, hc, z1, lw=0.02, color=&#x27;#9A9A9A&#x27;)
+        for k in (0.22, 0.44, 0.56, 0.78):
+            cx = x0 + (x1 - x0) * k
+            c.rect((cx - 0.6, z1 - (z1 - z0) / 4.0 + 0.13, cx + 0.6, z1 - 0.13), fill=&#x27;#DCE5EA&#x27;, stroke=&#x27;#111&#x27;, lw=0.018)
+        return
+    c.rect((x0 - 0.29, z0 - (0.0 if t == &#x27;window&#x27; else 0.29), x1 + 0.29, z1 + 0.4), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.026)
+    if t == &#x27;door&#x27;:
+        c.rect((x0, z0, x1, z1), fill=S[&#x27;door&#x27;], stroke=&#x27;#111&#x27;, lw=0.034)
+        c.rect((x0 + 0.28, z1 - 2.2, x1 - 0.28, z1 - 0.32), fill=&#x27;#DCE5EA&#x27;, stroke=&#x27;#111&#x27;, lw=0.02)
+        c.rect((x0 + 0.28, z0 + 0.32, x1 - 0.28, z1 - 2.55), fill=&#x27;none&#x27;, stroke=&#x27;#111&#x27;, lw=0.018)
+        c.circle(x1 - 0.42, z0 + 2.9, 0.085, fill=&#x27;#8A7A5A&#x27;, stroke=&#x27;#111&#x27;, lw=0.014)
+        return
+    if t == &#x27;french&#x27;:
+        c.rect((x0, z0, x1, z1), fill=&#x27;#DCE5EA&#x27;, stroke=&#x27;#111&#x27;, lw=0.034)
+        c.line(hc, z0, hc, z1, lw=0.034)
+        for k in (1, 2):
+            c.line(x0, z0 + (z1 - z0) * k / 3.0, x1, z0 + (z1 - z0) * k / 3.0, lw=0.016, color=&#x27;#7C8B92&#x27;)
+        return
+    c.rect((x0, z0, x1, z1), fill=S[&#x27;sash&#x27;], stroke=&#x27;#111&#x27;, lw=0.034)
+    lites = 2 if w &gt;= 5.0 else 1
+    for k in range(lites):
+        gx0 = x0 + 0.15 + (w - 0.3) * k / lites
+        gx1 = x0 + 0.15 + (w - 0.3) * (k + 1) / lites
+        c.rect((gx0, z0 + 0.15, gx1, z1 - 0.15), fill=&#x27;#DCE5EA&#x27;, stroke=&#x27;#111&#x27;, lw=0.022)
+        c.line(gx0, (z0 + z1) / 2.0, gx1, (z0 + z1) / 2.0, lw=0.028)
+    c.rect((x0 - 0.33, z0 - 0.19, x1 + 0.33, z0), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.022)
+
+
+# ----------------------------------------------------------------------------- one elevation
+def draw_elevation(c, m, view, S, dims=True):
+    &quot;&quot;&quot;Draw one elevation into canvas c with grade at y = 0 and paper-horizontal h unshifted.&quot;&quot;&quot;
+    blocks = sorted(m[&#x27;blocks&#x27;], key=lambda b: -d_near(view, b[&#x27;rect&#x27;]))
+    for b in blocks:
+        b[&#x27;_h&#x27;] = h_range(view, b[&#x27;rect&#x27;])
+
+    hmin = min(b[&#x27;_h&#x27;][0] for b in m[&#x27;blocks&#x27;]) - OH_SIDE
+    hmax = max(b[&#x27;_h&#x27;][1] for b in m[&#x27;blocks&#x27;]) + OH_SIDE
+
+    plate_z = FF + m[&#x27;plate&#x27;]
+    for b in blocks:
+        h0, h1 = b[&#x27;_h&#x27;]
+        # b[&#x27;eave&#x27;] and b[&#x27;ridge_h&#x27;] are above the FINISHED FLOOR; the drawing datum is finished GRADE,
+        # so every structural height is raised by the floor height FF. (Openings already use FF + sill.)
+        eave, ridge_h = FF + b[&#x27;eave&#x27;], FF + b[&#x27;ridge_h&#x27;]
+        pitch = b[&#x27;pitch&#x27;][0] / float(b[&#x27;pitch&#x27;][1])
+        gable = gable_end_toward(view, b)
+        # overhang beyond the two h-ends of this block in this view
+        oh = OH_SIDE if _h_axis_is_lot_line(view) else OH_FR
+        porch = b.get(&#x27;porch&#x27;)
+        p_h = h_range(view, porch) if porch else None
+
+        if gable:
+            if porch and view == &#x27;front&#x27;:
+                # gable end above the porch header; the recessed front wall shows below
+                inner = b[&#x27;inner_wall_y&#x27;]
+                ih0, ih1 = h_range(view, (b[&#x27;rect&#x27;][0], inner, b[&#x27;rect&#x27;][2], inner))
+                c.rect((ih0, 0, ih1, plate_z), fill=&#x27;#EDEAE3&#x27;, stroke=&#x27;none&#x27;)             # porch recess (shade)
+                wall_band(c, S, ih0, ih1, 0, plate_z)
+                c.rect((ih0, 0, ih1, plate_z), fill=&#x27;#2B2B2B&#x27;, stroke=&#x27;none&#x27;, opacity=0.10)
+                for o in _openings_on(m, view, b, at_y=inner):
+                    opening(c, S, o, Hh(view, o[&#x27;at&#x27;]), FF + o[&#x27;sill_ft&#x27;])
+                gable_wall(c, S, h0, h1, plate_z, ridge_h, brackets=True)
+                c.rect((h0, plate_z - BEAM, h1, plate_z), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.04)
+            else:
+                bay = b.get(&#x27;rear_porch&#x27;)
+                bh = _draw_bay(c, S, view, b, bay, plate_z, eave) if (bay and _bay_at_face(view, b, bay)) else None
+                for a_, b_ in (_segments(h0, h1, bh)):
+                    wall_band(c, S, a_, b_, 0, eave)
+                corner_and_frieze(c, S, h0, h1, FF + WATER_TABLE, eave, frieze=False)
+                gable_wall(c, S, h0, h1, eave, ridge_h, brackets=bool(porch))
+                for o in _openings_on(m, view, b):
+                    opening(c, S, o, Hh(view, o[&#x27;at&#x27;]), FF + o[&#x27;sill_ft&#x27;])
+                if bh:
+                    _close_bay(c, S, bh[0], bh[1], plate_z)
+            drop = oh * pitch
+            roof_poly(c, S, [(h0 - oh, eave - drop - FASCIA), (h0 - oh, eave - drop),
+                             ((h0 + h1) / 2.0, ridge_h), (h1 + oh, eave - drop),
+                             (h1 + oh, eave - drop - FASCIA), ((h0 + h1) / 2.0, ridge_h - FASCIA)])
+            c.line(h0, 0, h0, eave, lw=0.05)
+            c.line(h1, 0, h1, eave, lw=0.05)
+        else:
+            if porch:
+                # side view across an integral porch: wall only outside the porch run
+                seg = [(h0, p_h[0]), (p_h[1], h1)]
+                for a, bb in seg:
+                    wall_band(c, S, a, bb, 0, eave)
+                c.rect((p_h[0], 0, p_h[1], plate_z - BEAM), fill=&#x27;#3A3A3A&#x27;, stroke=&#x27;none&#x27;, opacity=0.16)
+                c.rect((p_h[0], plate_z - BEAM, p_h[1], plate_z), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.03)
+                _porch_base(c, S, p_h[0], p_h[1], plate_z, corner_only=True)
+            else:
+                bay = b.get(&#x27;rear_porch&#x27;)
+                bh = _draw_bay(c, S, view, b, bay, plate_z, eave) if (bay and _bay_at_face(view, b, bay)) else None
+                for a_, b_ in _segments(h0, h1, bh):
+                    wall_band(c, S, a_, b_, 0, eave)
+                corner_and_frieze(c, S, h0, h1, FF + WATER_TABLE, eave)
+            for o in _openings_on(m, view, b):
+                opening(c, S, o, Hh(view, o[&#x27;at&#x27;]), FF + o[&#x27;sill_ft&#x27;])
+            if not porch and b.get(&#x27;rear_porch&#x27;) and _bay_at_face(view, b, b[&#x27;rear_porch&#x27;]):
+                _bh = h_range(view, b[&#x27;rear_porch&#x27;])
+                _close_bay(c, S, _bh[0], _bh[1], plate_z)
+            gutter(c, S, h0 - oh, h1 + oh, eave)
+            roof_poly(c, S, [(h0 - oh, eave - FASCIA), (h0 - oh, ridge_h), (h1 + oh, ridge_h), (h1 + oh, eave - FASCIA)])
+            c.line(h0 - oh, ridge_h, h1 + oh, ridge_h, lw=0.055)
+            c.line(h0 - oh, eave, h1 + oh, eave, lw=0.03, color=&#x27;#666&#x27;)
+
+        if porch and view == &#x27;front&#x27;:
+            _porch_base(c, S, p_h[0], p_h[1], plate_z)
+
+    # ground line last so it reads over the masonry
+    c.line(hmin - 2.0, 0, hmax + 2.0, 0, lw=0.085)
+    x = hmin - 2.0
+    while x &lt; hmax + 2.0:
+        c.line(x, 0, x - 0.4, -0.4, lw=0.018, color=&#x27;#777&#x27;)
+        x += 1.0
+    return hmin, hmax, m[&#x27;max_ridge&#x27;]
+
+
+
+def _segments(h0, h1, skip):
+    if not skip:
+        return [(h0, h1)]
+    out = []
+    if skip[0] - h0 &gt; 0.02:
+        out.append((h0, skip[0]))
+    if h1 - skip[1] &gt; 0.02:
+        out.append((skip[1], h1))
+    return out
+
+
+def _bay_at_face(view, b, bay):
+    &quot;&quot;&quot;True when a recessed bay (e.g. a covered rear porch carved out of the block) opens toward this view.&quot;&quot;&quot;
+    dn = d_near(view, b[&#x27;rect&#x27;])
+    return abs(d_near(view, bay) - dn) &lt; 0.02
+
+
+def _draw_bay(c, S, view, b, bay, plate_z, eave):
+    &quot;&quot;&quot;Draw a recessed covered bay: the wall set back inside it, in shade, with its beam and corner posts.
+    Returns the paper h-range the solid wall must skip.&quot;&quot;&quot;
+    bh0, bh1 = h_range(view, bay)
+    c.rect((bh0, 0, bh1, plate_z), fill=&#x27;#EDEAE3&#x27;, stroke=&#x27;none&#x27;)
+    wall_band(c, S, bh0, bh1, 0, plate_z)
+    c.rect((bh0, 0, bh1, plate_z), fill=&#x27;#2B2B2B&#x27;, stroke=&#x27;none&#x27;, opacity=0.18)
+    c.line(bh0, plate_z - BEAM, bh1, plate_z - BEAM, lw=0.03, color=&#x27;#444&#x27;)      # porch ceiling / soffit
+    return bh0, bh1
+
+
+def _close_bay(c, S, bh0, bh1, plate_z):
+    c.rect((bh0, plate_z - BEAM, bh1, plate_z), fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.034)
+    for cx in (bh0 + COL / 2, bh1 - COL / 2):
+        c.rect((cx - PIER_W / 2, 0, cx + PIER_W / 2, FF + PIER_H), fill=S[&#x27;base&#x27;], stroke=&#x27;#111&#x27;, lw=0.028)
+        base_tex(S)(c, cx - PIER_W / 2, 0, cx + PIER_W / 2, FF + PIER_H, S[&#x27;base_line&#x27;])
+        c.rect((cx - PIER_W / 2 - 0.1, FF + PIER_H, cx + PIER_W / 2 + 0.1, FF + PIER_H + 0.17),
+               fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.022)
+        c.rect((cx - COL / 2, FF + PIER_H + 0.17, cx + COL / 2, plate_z - BEAM),
+               fill=S[&#x27;post&#x27;], stroke=&#x27;#111&#x27;, lw=0.028)
+
+
+def _h_axis_is_lot_line(view):
+    &quot;&quot;&quot;True when the paper-horizontal axis runs across the lot (front/rear views), so the h-ends of a
+    block are the side (lot-line) walls and carry the 8-in overhang.&quot;&quot;&quot;
+    return view in (&#x27;front&#x27;, &#x27;rear&#x27;)
+
+
+def _porch_base(c, S, h0, h1, plate_z, corner_only=False):
+    c.rect((h0, 0, h1, FF), fill=S[&#x27;base&#x27;], stroke=&#x27;#111&#x27;, lw=0.028)
+    base_tex(S)(c, h0, 0, h1, FF, S[&#x27;base_line&#x27;])
+    xs = _col_x(h0, h1) if not corner_only else [h0 + COL / 2, h1 - COL / 2]
+    for cx in xs:
+        c.rect((cx - PIER_W / 2, FF, cx + PIER_W / 2, FF + PIER_H), fill=S[&#x27;base&#x27;], stroke=&#x27;#111&#x27;, lw=0.028)
+        base_tex(S)(c, cx - PIER_W / 2, FF, cx + PIER_W / 2, FF + PIER_H, S[&#x27;base_line&#x27;])
+        c.rect((cx - PIER_W / 2 - 0.1, FF + PIER_H, cx + PIER_W / 2 + 0.1, FF + PIER_H + 0.17),
+               fill=S[&#x27;trim&#x27;], stroke=&#x27;#111&#x27;, lw=0.022)
+        c.rect((cx - COL / 2, FF + PIER_H + 0.17, cx + COL / 2, plate_z - BEAM), fill=S[&#x27;post&#x27;], stroke=&#x27;#111&#x27;, lw=0.028)
+
+
+def _col_x(h0, h1, spacing_max=9.0):
+    n = max(2, int(math.ceil((h1 - h0 - COL) / spacing_max)) + 1)
+    return [h0 + COL / 2 + (h1 - h0 - COL) * k / (n - 1) for k in range(n)]
+
+
+def _openings_on(m, view, b, at_y=None):
+    &quot;&quot;&quot;Openings of this view that sit on this block (optionally on a specific wall line).&quot;&quot;&quot;
+    x0, y0, x1, y1 = b[&#x27;rect&#x27;]
+    out = []
+    for o in m[&#x27;openings&#x27;]:
+        if o[&#x27;wall&#x27;] != view:
+            continue
+        ax, ay = o[&#x27;at&#x27;]
+        if not (x0 - 0.03 &lt;= ax &lt;= x1 + 0.03 and y0 - 0.03 &lt;= ay &lt;= y1 + 0.03):
+            continue
+        if at_y is not None and abs(ay - at_y) &gt; 0.03:
+            continue
+        if at_y is None and b.get(&#x27;porch&#x27;) and view == &#x27;front&#x27; and abs(ay - b[&#x27;inner_wall_y&#x27;]) &lt; 0.03:
+            continue
+        out.append(o)
+    return out
+
+
+SHEET_IN = (24.0, 18.0)               # ARCH C landscape
+PT_PER_FT = 13.5                      # 3/16 in = 1 ft-0 in
+
+
+def _levels(c, m, h0, h1, view):
+    &quot;&quot;&quot;Level datum lines, the voluntary 24-ft ridge cap and the vertical dimension chain.&quot;&quot;&quot;
+    plate = FF + m[&#x27;plate&#x27;]
+    top = FF + max(b[&#x27;ridge_h&#x27;] for b in m[&#x27;blocks&#x27;])
+    x0, x1 = h0 - 0.8, h1 + 0.6
+    for z, tag in ((0.0, &#x27;FIN. GRADE 0\&#x27;-0&quot;&#x27;), (FF, &#x27;&#x27;),
+                   (plate, &#x27;EAVE %s&#x27; % fti(plate)), (top, &#x27;RIDGE %s&#x27; % fti(top))):
+        c.line(x0, z, x1, z, lw=0.016, dash=&#x27;0.5,0.35&#x27;, color=&#x27;#8A8A8A&#x27;)
+        if tag:
+            c.text(x1 + 0.4, z, tag, size=0.46, anchor=&#x27;start&#x27;, color=&#x27;#333&#x27;)
+    c.line(x0, CAP_RIDGE, x1, CAP_RIDGE, lw=0.05, dash=&#x27;1.1,0.5&#x27;, color=&#x27;#B03A2E&#x27;)
+    c.text((h0 + h1) / 2.0, CAP_RIDGE + 0.75,
+           &#x27;%s MAXIMUM RIDGE ABOVE FINISHED GRADE — VOLUNTARY ZONING CONDITION (Ord. 2023-603 Table 4.1 R-2 allows %s)&#x27;
+           % (fti(CAP_RIDGE), fti(DISTRICT_MAX)), size=0.44, color=&#x27;#B03A2E&#x27;)
+    dim_v(c, h0 - 2.1, 0, FF, fti(FF))
+    dim_v(c, h0 - 2.1, FF, plate, fti(plate - FF))
+    dim_v(c, h0 - 2.1, plate, top, fti(top - plate))
+    dim_v(c, h0 - 3.9, 0, top, fti(top))
+
+
+def dim_v(c, x, z0, z1, label, size=0.46, tick=0.3):
+    c.line(x, z0, x, z1, lw=0.022)
+    for z in (z0, z1):
+        c.line(x - tick, z - tick * 0.7, x + tick, z + tick * 0.7, lw=0.022)
+    c.text(x - 0.34, (z0 + z1) / 2.0, label, size=size, anchor=&#x27;middle&#x27;, rot=-90)
+
+
+def dim_h(c, z, h0, h1, label, size=0.46, tick=0.3):
+    c.line(h0, z, h1, z, lw=0.022)
+    for h in (h0, h1):
+        c.line(h - tick * 0.7, z - tick, h + tick * 0.7, z + tick, lw=0.022)
+    c.text((h0 + h1) / 2.0, z - 0.55, label, size=size, anchor=&#x27;middle&#x27;)
+
+
+def elevation_group(m, view, S, with_levels=True):
+    &quot;&quot;&quot;Render one elevation into an SVG group string plus its extents.&quot;&quot;&quot;
+    c = fp.Canvas(ymax=0.0)               # ymax set by the caller&#x27;s translate; use 0 and flip later
+    c.ymax = 0.0
+    h0, h1, ridge = draw_elevation(c, m, view, S)
+    body_h = h_range(view, _body_rect(m, view))
+    if with_levels:
+        _levels(c, m, h0, h1, view)
+        dim_h(c, -2.6, h0, h1, &#x27;ROOF TO ROOF %s&#x27; % fti(h1 - h0))
+        dim_h(c, -4.4, body_h[0], body_h[1], &#x27;BUILDING %s&#x27; % fti(body_h[1] - body_h[0]))
+    return c.svg(), (h0, h1, ridge)
+
+
+def _body_rect(m, view):
+    x0 = min(b[&#x27;rect&#x27;][0] for b in m[&#x27;blocks&#x27;]); x1 = max(b[&#x27;rect&#x27;][2] for b in m[&#x27;blocks&#x27;])
+    y0 = min(b[&#x27;rect&#x27;][1] for b in m[&#x27;blocks&#x27;]); y1 = max(b[&#x27;rect&#x27;][3] for b in m[&#x27;blocks&#x27;])
+    return (x0, y0, x1, y1)
+
+
+def _sheet_frame(c, Wf, Hf, m, sheet_no, subtitle, scale_note):
+    mg, tb = 2.0, 7.6
+    c.rect((mg, mg, Wf - mg, Hf - mg), fill=&#x27;none&#x27;, lw=0.12)
+    c.rect((mg + 0.4, mg + 0.4, Wf - mg - 0.4, Hf - mg - 0.4), fill=&#x27;none&#x27;, lw=0.04)
+    c.line(mg + 0.4, mg + 0.4 + tb, Wf - mg - 0.4, mg + 0.4 + tb, lw=0.08)
+    c.line(Wf - mg - 0.4 - 13.0, mg + 0.4, Wf - mg - 0.4 - 13.0, mg + 0.4 + tb, lw=0.06)
+    y = mg + 0.4 + tb - 1.25
+    c.text(mg + 1.2, y, &#x27;THE COTTAGES AT ARCADO SPRINGS — %s&#x27; % subtitle, size=0.95, weight=&#x27;bold&#x27;, anchor=&#x27;start&#x27;)
+    y -= 1.25
+    c.text(mg + 1.2, y, &#x27;R-1 → R-2 REZONING (Lilburn Zoning Ordinance 2023-603 §1003-4; 2026 Application &#x27;
+           &#x27;Instructions item (11)) — 4535 / 4537 / 4539 / 4541 Arcado Rd SW, Lilburn GA 30047 — Land Lot 123, &#x27;
+           &#x27;6th District, Gwinnett County&#x27;, size=0.44, anchor=&#x27;start&#x27;)
+    y -= 1.05
+    c.text(mg + 1.2, y, &#x27;%s · %s · Prepared by the owner-applicant (Mohammed Awad) with AI drafting tools · &#x27;
+           &#x27;ILLUSTRATIVE — NOT FOR CONSTRUCTION · DRAFT, to be superseded by sealed drawings by a &#x27;
+           &#x27;Georgia-registered architect&#x27; % (scale_note, REVISION), size=0.42, anchor=&#x27;start&#x27;)
+    y -= 1.05
+    c.text(mg + 1.2, y, DISCLAIMER, size=0.4, anchor=&#x27;start&#x27;, color=&#x27;#222&#x27;)
+    y -= 0.95
+    c.text(mg + 1.2, y, &#x27;&lt;!-- &#x27; + MARKER + &#x27; --&gt;&#x27;, size=0.34, anchor=&#x27;start&#x27;, color=&#x27;#AAA&#x27;)
+    c.text(Wf - mg - 7.0, mg + 0.4 + tb - 2.6, sheet_no, size=2.6, weight=&#x27;bold&#x27;, anchor=&#x27;middle&#x27;)
+    c.text(Wf - mg - 7.0, mg + 0.4 + tb - 4.6, subtitle.split(&#x27; — &#x27;)[0], size=0.42, anchor=&#x27;middle&#x27;, color=&#x27;#444&#x27;)
+    c.text(Wf - mg - 7.0, mg + 0.4 + tb - 5.6, DATE, size=0.42, anchor=&#x27;middle&#x27;, color=&#x27;#444&#x27;)
+    return mg, tb
+
+
+def make_elev_sheet(m, path, scheme=&#x27;linework&#x27;):
+    S = LINEWORK if scheme == &#x27;linework&#x27; else SCHEMES[scheme]
+    W, H = SHEET_IN[0] * 72, SHEET_IN[1] * 72
+    Wf, Hf = W / PT_PER_FT, H / PT_PER_FT              # 128 x 96 drawing-feet
+    c = fp.Canvas(ymax=Hf)
+    mg, tb = _sheet_frame(c, Wf, Hf, m, &#x27;A-2.%s&#x27; % (&#x27;1&#x27; if m[&#x27;id&#x27;] == &#x27;A&#x27; else &#x27;2&#x27;),
+                          &#x27;PLAN %s &quot;%s&quot; — EXTERIOR ELEVATIONS&#x27; % (m[&#x27;id&#x27;], m[&#x27;spec&#x27;][&#x27;name&#x27;].title()),
+                          &#x27;Scale 3/16&quot; = 1\&#x27;-0&quot; on ARCH C (24 x 18 in)&#x27;)
+    cells = [(&#x27;right&#x27;, 9.0, 68.0), (&#x27;front&#x27;, 81.0, 68.0), (&#x27;left&#x27;, 9.0, 34.0), (&#x27;rear&#x27;, 81.0, 34.0)]
+    for view, X0, Y0 in cells:
+        g, (h0, h1, ridge) = elevation_group(m, view, S)
+        c.add(&#x27;&lt;g transform=&quot;translate(%.3f %.3f)&quot;&gt;%s&lt;/g&gt;&#x27; % (X0 - h0, Hf - Y0, g))
+        c.text(X0 - h0 + (h0 + h1) / 2.0, Y0 - 6.4, VT[view], size=0.72, weight=&#x27;bold&#x27;)
+        c.text(X0 - h0 + (h0 + h1) / 2.0, Y0 - 7.5, &#x27;SCALE 3/16&quot; = 1\&#x27;-0&quot;&#x27;, size=0.44, color=&#x27;#444&#x27;)
+    _material_key(c, mg + 1.4, 24.0, Wf - 2 * mg - 2.8, m)
+    body = c.svg()
+    svg = (&#x27;&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;%gin&quot; height=&quot;%gin&quot; viewBox=&quot;0 0 %.3f %.3f&quot; &#x27;
+           &#x27;font-family=&quot;Helvetica, Arial, sans-serif&quot;&gt;&lt;rect width=&quot;%.3f&quot; height=&quot;%.3f&quot; fill=&quot;#fff&quot;/&gt;\n%s\n&lt;/svg&gt;&#x27;
+           % (SHEET_IN[0], SHEET_IN[1], Wf, Hf, Wf, Hf, body))
+    open(path, &#x27;w&#x27;).write(svg + &#x27;\n&lt;!-- &#x27; + MARKER + &#x27; --&gt;\n&#x27;)
+    return path
+
+
+def _material_key(c, x, y, w, m):
+    c.text(x, y, &#x27;MATERIALS AND COLOURS — Application Instructions item (11)&#x27;, size=0.62, weight=&#x27;bold&#x27;, anchor=&#x27;start&#x27;)
+    yy = y - 1.15
+    for i, (name, csi, txt) in enumerate(MATERIAL_KEYS, 1):
+        c.circle(x + 0.45, yy + 0.05, 0.42, fill=&#x27;#fff&#x27;, stroke=&#x27;#111&#x27;, lw=0.035)
+        c.text(x + 0.45, yy + 0.05, str(i), size=0.44, weight=&#x27;bold&#x27;)
+        c.text(x + 1.3, yy + 0.05, &#x27;%s  (%s)&#x27; % (name, csi), size=0.44, weight=&#x27;bold&#x27;, anchor=&#x27;start&#x27;)
+        import textwrap
+        tx = x + 9.5
+        for k, ln in enumerate(textwrap.wrap(txt, 150)):
+            c.text(tx, yy + 0.05 - k * 0.62, ln, size=0.42, anchor=&#x27;start&#x27;, color=&#x27;#333&#x27;)
+        yy -= 0.6 * max(1, len(textwrap.wrap(txt, 150))) + 0.24
+    yy -= 0.3
+    for ln in (&#x27;WALL SIGNS: none proposed on any dwelling, the clubhouse or an accessory structure. One &#x27;
+               &#x27;ground-mounted monument entry sign not exceeding 32 SF is proposed at the Arcado Road entrance — &#x27;
+               &#x27;see sheet A-4 for its elevation, dimensions, materials and colours.&#x27;,
+               &#x27;HEIGHT: maximum ridge %s above finished grade — within the %s voluntary condition and well &#x27;
+               &#x27;below the %s maximum of Ord. 2023-603 Table 4.1 (R-2). One story throughout; no basement.&#x27;
+               % (fti(m[&#x27;max_ridge_grade&#x27;]), fti(CAP_RIDGE), fti(DISTRICT_MAX)),
+               &#x27;GRADE: elevations are drawn on level finished grade. Finished floor is %s above finished grade at &#x27;
+               &#x27;the front porch so the entry walk stays at or under 1:20 (zero-step entry, voluntary accessibility &#x27;
+               &#x27;condition); grade falls away at the sides and rear. Lot grading is shown on sheet C-3.&#x27; % fti(FF)):
+        import textwrap
+        for ln2 in textwrap.wrap(ln, 205):
+            c.text(x, yy, ln2, size=0.42, anchor=&#x27;start&#x27;, color=&#x27;#222&#x27;)
+            yy -= 0.62
+        yy -= 0.2
+
+
+def make_color_sheet(models, path):
+    &quot;&quot;&quot;Sheet A-2.3 — the three colour schemes on the front elevation of both plans, plus a materials board.
+    Instruction item (11): &#x27;shall include the color and materials of all structures and roofing&#x27;.&quot;&quot;&quot;
+    W, H = SHEET_IN[0] * 72, SHEET_IN[1] * 72
+    Wf, Hf = W / PT_PER_FT, H / PT_PER_FT
+    c = fp.Canvas(ymax=Hf)
+    _sheet_frame(c, Wf, Hf, models[0], &#x27;A-2.3&#x27;, &#x27;EXTERIOR COLOUR SCHEMES AND MATERIALS&#x27;,
+                 &#x27;Scale 3/16&quot; = 1\&#x27;-0&quot; on ARCH C (24 x 18 in)&#x27;)
+    cols = [5.5, 45.5, 85.5]
+    rows = [(models[0], 66.0), (models[1] if len(models) &gt; 1 else models[0], 42.0)]
+    for ci, key in enumerate((&#x27;1&#x27;, &#x27;2&#x27;, &#x27;3&#x27;)):
+        S = SCHEMES[key]
+        c.text(cols[ci] + 19.0, 88.0, S[&#x27;name&#x27;], size=0.86, weight=&#x27;bold&#x27;)
+        for m, Y0 in rows:
+            g, (h0, h1, _r) = elevation_group(m, &#x27;front&#x27;, S, with_levels=False)
+            c.add(&#x27;&lt;g transform=&quot;translate(%.3f %.3f)&quot;&gt;%s&lt;/g&gt;&#x27; % (cols[ci] - h0, Hf - Y0, g))
+            c.text(cols[ci] + (h1 - h0) / 2.0, Y0 - 2.6,
+                   &#x27;PLAN %s &quot;%s&quot; — FRONT ELEVATION&#x27; % (m[&#x27;id&#x27;], m[&#x27;spec&#x27;][&#x27;name&#x27;].title()), size=0.56, weight=&#x27;bold&#x27;)
+    _swatches(c, 6.0, 34.0)
+    _color_notes(c, 6.0, 18.6, Wf - 12.0)
+    body = c.svg()
+    svg = (&#x27;&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;%gin&quot; height=&quot;%gin&quot; viewBox=&quot;0 0 %.3f %.3f&quot; &#x27;
+           &#x27;font-family=&quot;Helvetica, Arial, sans-serif&quot;&gt;&lt;rect width=&quot;%.3f&quot; height=&quot;%.3f&quot; fill=&quot;#fff&quot;/&gt;\n%s\n&lt;/svg&gt;&#x27;
+           % (SHEET_IN[0], SHEET_IN[1], Wf, Hf, Wf, Hf, body))
+    open(path, &#x27;w&#x27;).write(svg + &#x27;\n&lt;!-- &#x27; + MARKER + &#x27; --&gt;\n&#x27;)
+    return path
+
+
+SWATCH_ROWS = [
+    (&#x27;SIDING (07 46 46)&#x27;, &#x27;siding&#x27;, (&#x27;Board-and-batten, warm white&#x27;, &#x27;Lap 6-in exposure, sage&#x27;,
+                                     &#x27;Lap 6-in exposure, clay/beige&#x27;)),
+    (&#x27;WATER TABLE / PIERS (04 20 00, 04 40 00)&#x27;, &#x27;base&#x27;, (&#x27;Ledge stone, gray-tan blend&#x27;,
+                                                          &#x27;Modular brick, red-brown blend&#x27;, &#x27;Ledge stone, buff blend&#x27;)),
+    (&#x27;ROOFING (07 31 00)&#x27;, &#x27;roof&#x27;, (&#x27;Architectural shingle, charcoal&#x27;, &#x27;Architectural shingle, weathered wood&#x27;,
+                                    &#x27;Architectural shingle, driftwood&#x27;)),
+    (&#x27;TRIM / FASCIA / FRIEZE (06 20 00, 09 91 13)&#x27;, &#x27;trim&#x27;, (&#x27;Warm white&#x27;, &#x27;Soft white&#x27;, &#x27;Cream&#x27;)),
+    (&#x27;FRONT DOOR (08 14 00)&#x27;, &#x27;door&#x27;, (&#x27;Deep green&#x27;, &#x27;Oxblood&#x27;, &#x27;Navy&#x27;)),
+    (&#x27;GARAGE DOOR (08 36 13)&#x27;, &#x27;garage&#x27;, (&#x27;Painted to match trim&#x27;, &#x27;Painted to match siding&#x27;,
+                                          &#x27;Painted to match trim&#x27;)),
+    (&#x27;PORCH POSTS (06 20 00)&#x27;, &#x27;post&#x27;, (&#x27;Western Red Cedar, natural stain&#x27;, &#x27;Western Red Cedar, natural stain&#x27;,
+                                        &#x27;Western Red Cedar, natural stain&#x27;)),
+]
+
+
+def _swatches(c, x, y):
+    c.text(x, y + 1.6, &#x27;MATERIAL AND COLOUR BOARD — basis of design per docs/12-outline-specifications.md; &#x27;
+           &#x27;final selections by the Owner and Architect from the manufacturers\&#x27; full ranges&#x27;,
+           size=0.56, weight=&#x27;bold&#x27;, anchor=&#x27;start&#x27;)
+    colw = 41.0
+    for ci, key in enumerate((&#x27;1&#x27;, &#x27;2&#x27;, &#x27;3&#x27;)):
+        c.text(x + 21.0 + ci * colw, y + 0.4, SCHEMES[key][&#x27;name&#x27;], size=0.5, weight=&#x27;bold&#x27;)
+    yy = y - 0.9
+    for label, field, notes in SWATCH_ROWS:
+        c.text(x, yy - 0.55, label, size=0.44, anchor=&#x27;start&#x27;, weight=&#x27;bold&#x27;)
+        for ci, key in enumerate((&#x27;1&#x27;, &#x27;2&#x27;, &#x27;3&#x27;)):
+            S = SCHEMES[key]
+            bx = x + 17.0 + ci * colw
+            c.rect((bx, yy - 1.25, bx + 3.4, yy + 0.15), fill=S[field], stroke=&#x27;#111&#x27;, lw=0.03)
+            c.text(bx + 3.9, yy - 0.55, notes[ci], size=0.42, anchor=&#x27;start&#x27;, color=&#x27;#222&#x27;)
+        yy -= 1.85
+
+
+def _color_notes(c, x, y, w):
+    import textwrap
+    lines = [
+        &#x27;Every dwelling is one story. Colour schemes are distributed so that no scheme repeats on adjacent &#x27;
+        &#x27;lots and no scheme exceeds 40 % of the 43 lots; the distribution is a voluntary condition and is &#x27;
+        &#x27;administered by the homeowners association.&#x27;,
+        &#x27;Roofing is the same product on every dwelling, the clubhouse and the mail kiosk; only the colour &#x27;
+        &#x27;changes with the scheme.&#x27;,
+        &#x27;WALL SIGNS: none are proposed on any dwelling, on the clubhouse or on any accessory structure. &#x27;
+        &#x27;One ground-mounted monument entry sign not exceeding 32 SF in face area and 6\&#x27;-0&quot; in height is &#x27;
+        &#x27;proposed at the Arcado Road entrance; see sheet A-4 for its elevation, dimensions, materials, &#x27;
+        &#x27;colours and sight-triangle clearance.&#x27;,
+        &#x27;These elevations are illustrative and are drawn to scale. They are DRAFT work by the &#x27;
+        &#x27;owner-applicant and are to be superseded by sealed drawings by a Georgia-registered architect &#x27;
+        &#x27;before any building permit.&#x27;,
+    ]
+    yy = y
+    for ln in lines:
+        for k, seg in enumerate(textwrap.wrap(ln, 200)):
+            c.text(x, yy, seg, size=0.44, anchor=&#x27;start&#x27;, color=&#x27;#222&#x27;)
+            yy -= 0.62
+        yy -= 0.25
+
+
+def make_ref_image(m, view, scheme, path, px_per_ft=48.0, pad=3.0):
+    &quot;&quot;&quot;A tight, furniture-free coloured elevation — the structural reference handed to an image model so a
+    photoreal rendering cannot contradict the drawn dimensions. No dimensions, no title block, no notes.&quot;&quot;&quot;
+    S = SCHEMES[scheme]
+    probe = fp.Canvas(ymax=0.0)
+    h0, h1, ridge = draw_elevation(probe, m, view, S)
+    top = max(b[&#x27;ridge_h&#x27;] for b in m[&#x27;blocks&#x27;]) + 1.2
+    w, hgt = (h1 - h0) + 2 * pad, top + 2 * pad
+    c = fp.Canvas(ymax=hgt - pad)
+    draw_elevation(c, m, view, S)
+    body = &#x27;&lt;g transform=&quot;translate(%.3f 0)&quot;&gt;%s&lt;/g&gt;&#x27; % (pad - h0, c.svg())
+    svg = (&#x27;&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;%.0f&quot; height=&quot;%.0f&quot; viewBox=&quot;0 0 %.3f %.3f&quot; &#x27;
+           &#x27;font-family=&quot;Helvetica, Arial, sans-serif&quot;&gt;&lt;rect width=&quot;%.3f&quot; height=&quot;%.3f&quot; fill=&quot;#FBFAF7&quot;/&gt;\n%s\n&lt;/svg&gt;&#x27;
+           % (w * px_per_ft, hgt * px_per_ft, w, hgt, w, hgt, body))
+    open(path, &#x27;w&#x27;).write(svg)
+    fp.render_png(path, path[:-4] + &#x27;.png&#x27;, px_scale=1.0)
+    return path[:-4] + &#x27;.png&#x27;
+
+
+def build(pid):
+    m = build_model(pid)
+    fails = check_massing(m)
+    f2, w, body = check_width(m)
+    fails += f2
+    p = os.path.join(DRAW, &#x27;plan-%s-elev.svg&#x27; % pid.lower())
+    make_elev_sheet(m, p)
+    fp.render_png(p, p[:-4] + &#x27;.png&#x27;, dpi=150)
+    print(&#x27;PLAN %s: body %s, roof-to-roof %s, ridge %s AFF / %s above grade -&gt; %s&#x27;
+          % (pid, fti(body), fti(w), fti(m[&#x27;max_ridge&#x27;]), fti(m[&#x27;max_ridge_grade&#x27;]), p))
+    for f in fails:
+        print(&#x27;   FAIL:&#x27;, f)
+    return m, fails
+
+
+if __name__ == &#x27;__main__&#x27;:
+    ids = sys.argv[1:] or list(fp.PLANS)
+    models = []
+    for pid in ids:
+        m, _f = build(pid)
+        models.append(m)
+    REF = os.path.join(ROOT, &#x27;renderings&#x27;, &#x27;reference&#x27;)
+    os.makedirs(REF, exist_ok=True)
+    for m in models:
+        for view in (&#x27;front&#x27;, &#x27;rear&#x27;, &#x27;right&#x27;, &#x27;left&#x27;):
+            for sch in (&#x27;1&#x27;, &#x27;2&#x27;, &#x27;3&#x27;):
+                if view != &#x27;front&#x27; and sch != &#x27;2&#x27;:
+                    continue
+                q = os.path.join(REF, &#x27;ref-plan-%s-%s-scheme%s.svg&#x27; % (m[&#x27;id&#x27;].lower(), view, sch))
+                print(&#x27;   ref -&gt;&#x27;, make_ref_image(m, view, sch, q))
+    if len(models) &gt;= 1:
+        p = os.path.join(DRAW, &#x27;plan-colors.svg&#x27;)
+        make_color_sheet(models, p)
+        fp.render_png(p, p[:-4] + &#x27;.png&#x27;, dpi=150)
+        print(&#x27;colour sheet -&gt;&#x27;, p)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/elevations.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

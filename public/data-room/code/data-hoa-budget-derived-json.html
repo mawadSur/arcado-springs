@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>HOA Operating Budget and Reserve Study — Derived — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">financial</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> JSON</div>
+    
+    <h1>HOA Operating Budget and Reserve Study — Derived</h1><p class="src-note">JSON · 1,180 lines · <a href="/data-room/src/submission/data/hoa-budget-derived.json">download the raw file</a></p><pre><code>{
+ &quot;generated_by&quot;: &quot;tools/hoa_budget.py&quot;,
+ &quot;inputs&quot;: [
+  &quot;data/layout.json&quot;,
+  &quot;data/plans.json&quot;
+ ],
+ &quot;unit_costs&quot;: {
+  &quot;mow_visit_per_lot&quot;: {
+   &quot;value&quot;: 22.0,
+   &quot;unit&quot;: &quot;$/lot/visit&quot;,
+   &quot;basis&quot;: &quot;routed price for 41 stops on one 1,754-ft lane at ~1,340 SF of maintained turf each; Atlanta open-market mowing is $35\u201355/visit on a 10,890-SF quarter-acre lot (yourgreenpal 2026; Angi 2026)&quot;
+  },
+  &quot;mow_visits_per_year&quot;: {
+   &quot;value&quot;: 34,
+   &quot;unit&quot;: &quot;visits/yr&quot;,
+   &quot;basis&quot;: &quot;weekly April\u2013October (31) + 3 winter cleanups; Georgia Piedmont growing season&quot;
+  },
+  &quot;lot_beds_per_year&quot;: {
+   &quot;value&quot;: 120.0,
+   &quot;unit&quot;: &quot;$/lot/yr&quot;,
+   &quot;basis&quot;: &quot;2 visits: shrub pruning + pre-emergent + 2 CY mulch at ~$45/CY installed; well below the $100\u2013300/unit/month full-service national range because the yards are ~1,340 SF&quot;
+  },
+  &quot;common_landscape_per_ac&quot;: {
+   &quot;value&quot;: 4500.0,
+   &quot;unit&quot;: &quot;$/ac/yr&quot;,
+   &quot;basis&quot;: &quot;Southeast HOA common-area maintenance contracts $2,500\u20136,000/ac/yr (United Land Services 2026 budget guide); midpoint for mown turf + beds&quot;
+  },
+  &quot;natural_area_per_ac&quot;: {
+   &quot;value&quot;: 900.0,
+   &quot;unit&quot;: &quot;$/ac/yr&quot;,
+   &quot;basis&quot;: &quot;2 crew-visits/yr for vine and invasive removal, storm debris and buffer-marker checks, plus one arborist walk; no mowing (undisturbed buffer)&quot;
+  },
+  &quot;tree_prune_each&quot;: {
+   &quot;value&quot;: 65.0,
+   &quot;unit&quot;: &quot;$/tree per 3-yr cycle&quot;,
+   &quot;basis&quot;: &quot;structural pruning of young street trees on a 3-year cycle, annualised&quot;
+  },
+  &quot;plant_replacement_each&quot;: {
+   &quot;value&quot;: 450.0,
+   &quot;unit&quot;: &quot;$/tree&quot;,
+   &quot;basis&quot;: &quot;2-in caliper B&amp;B canopy tree installed; 3 % annual loss after the 12-month warranty (checklist \u00a76.m)&quot;
+  },
+  &quot;irrigation_year&quot;: {
+   &quot;value&quot;: 1400.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;spring start-up + winterisation + 2 backflow tests at $150 + repair allowance (amenity block only; no lot irrigation)&quot;
+  },
+  &quot;sweep_event&quot;: {
+   &quot;value&quot;: 650.0,
+   &quot;unit&quot;: &quot;$/event&quot;,
+   &quot;basis&quot;: &quot;mobilisation + 1,754 ft of curb line; 2 events/yr&quot;
+  },
+  &quot;pavement_patch_per_sf&quot;: {
+   &quot;value&quot;: 0.05,
+   &quot;unit&quot;: &quot;$/SF/yr&quot;,
+   &quot;basis&quot;: &quot;operating crack-fill and pothole allowance; the 20-year overlay is in reserves&quot;
+  },
+  &quot;signs_markings_year&quot;: {
+   &quot;value&quot;: 900.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;&#x27;NO PARKING \u2014 FIRE LANE&#x27; signs both sides (IFC 2024 (GA) App. D103.6), stop and speed signs, hammerhead striping; ~10 % of the installed sign inventory per year&quot;
+  },
+  &quot;storm_structure_clean&quot;: {
+   &quot;value&quot;: 1400.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;vacuum-truck day for inlets, pipes and both outlet structures&quot;
+  },
+  &quot;pond_inspection_each&quot;: {
+   &quot;value&quot;: 900.0,
+   &quot;unit&quot;: &quot;$/pond/yr&quot;,
+   &quot;basis&quot;: &quot;annual inspection and written report by a qualified professional, as the recorded Storm Water BMP Maintenance Agreement requires (Site Development Plan Review Checklist \u00a72.g.3)&quot;
+  },
+  &quot;pond_routine_each&quot;: {
+   &quot;value&quot;: 1300.0,
+   &quot;unit&quot;: &quot;$/pond/yr&quot;,
+   &quot;basis&quot;: &quot;trash-rack and orifice cleaning, forebay hand-cleaning, rip-rap reset, erosion repair, mosquito/vegetation control (dry ponds; the mowing is in the common-landscape line)&quot;
+  },
+  &quot;light_per_fixture_month&quot;: {
+   &quot;value&quot;: 23.0,
+   &quot;unit&quot;: &quot;$/fixture/month&quot;,
+   &quot;basis&quot;: &quot;Georgia Power outdoor-lighting service (energy + lamp/fixture maintenance) for a decorative post-top; VERIFY the tariff and whether the fixtures are company- or association-owned&quot;
+  },
+  &quot;snow_year&quot;: {
+   &quot;value&quot;: 600.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;one plow/sand event every other year at ~$1,200 for 1,754 ft&quot;
+  },
+  &quot;clubhouse_electric_per_sf&quot;: {
+   &quot;value&quot;: 1.85,
+   &quot;unit&quot;: &quot;$/SF/yr&quot;,
+   &quot;basis&quot;: &quot;small assembly/community building ~14 kWh/SF/yr at ~$0.13/kWh; VERIFY against the Georgia Power commercial rate&quot;
+  },
+  &quot;clubhouse_water_year&quot;: {
+   &quot;value&quot;: 2600.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;clubhouse restrooms and kitchen plus amenity irrigation on a 1-in meter, Gwinnett DWR inside-county water and sewer rates; VERIFY&quot;
+  },
+  &quot;clubhouse_gas_year&quot;: {
+   &quot;value&quot;: 700.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;water heating and supplemental heat&quot;
+  },
+  &quot;janitorial_visit&quot;: {
+   &quot;value&quot;: 65.0,
+   &quot;unit&quot;: &quot;$/visit&quot;,
+   &quot;basis&quot;: &quot;2 visits/week for a 2,400-SF clubhouse with two restrooms&quot;
+  },
+  &quot;clubhouse_rm_year&quot;: {
+   &quot;value&quot;: 3900.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;HVAC service contract (2 systems \u00d7 $220), pest control, quarterly fire-alarm monitoring and the annual NFPA 13 sprinkler inspection/test of the clubhouse system, plus a repair allowance&quot;
+  },
+  &quot;clubhouse_tel_year&quot;: {
+   &quot;value&quot;: 1700.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;internet, cameras, access-control/fob service, Knox-box and alarm line&quot;
+  },
+  &quot;court_year&quot;: {
+   &quot;value&quot;: 900.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;nets, wind screens, blowing and washing 2 courts; resurfacing is in reserves&quot;
+  },
+  &quot;kiosk_year&quot;: {
+   &quot;value&quot;: 500.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;cleaning, lighting, lock and key replacement for the cluster-box unit shelter&quot;
+  },
+  &quot;management_per_door_month&quot;: {
+   &quot;value&quot;: 22.0,
+   &quot;unit&quot;: &quot;$/door/month&quot;,
+   &quot;basis&quot;: &quot;Georgia management fees run $15\u201330/unit/month and small associations pay the top of the band (Access Management Group 2026; FirstService Residential Georgia; hoamanagement.com)&quot;
+  },
+  &quot;hopa_survey_per_unit&quot;: {
+   &quot;value&quot;: 18.0,
+   &quot;unit&quot;: &quot;$/unit per survey&quot;,
+   &quot;basis&quot;: &quot;printing, mailing, follow-up and filing of the biennial occupancy survey and affidavit required by 24 CFR \u00a7100.307(b)\u2013(c); run every 2 years, annualised&quot;
+  },
+  &quot;hopa_certificate_each&quot;: {
+   &quot;value&quot;: 150.0,
+   &quot;unit&quot;: &quot;$/certificate&quot;,
+   &quot;basis&quot;: &quot;resale/lease occupancy certification and age verification; ~3 transfers/yr at 41 units (often reimbursed by the seller \u2014 carried as a cost, not netted)&quot;
+  },
+  &quot;hopa_admin_year&quot;: {
+   &quot;value&quot;: 600.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;records retention, the annual \u00a7100.308(b)(2) written certification, the public postings required by 24 CFR \u00a7100.306(a)(7) and the annual compliance letter to the City&quot;
+  },
+  &quot;hopa_legal_cycle&quot;: {
+   &quot;value&quot;: 900.0,
+   &quot;unit&quot;: &quot;$/3 yr&quot;,
+   &quot;basis&quot;: &quot;counsel&#x27;s review of the survey form, affidavit and published policies every 3 years&quot;
+  },
+  &quot;insurance_year&quot;: {
+   &quot;value&quot;: 13500.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;master property on association assets + GL $1M/$2M + D&amp;O $1M + crime/fidelity + $5M umbrella; a 25\u201375-unit PUD with a clubhouse quotes $9,000\u201324,300 in 2026 (Professional Insurance Group 2026), $120\u2013325/unit&quot;
+  },
+  &quot;audit_year&quot;: {
+   &quot;value&quot;: 1600.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;financial review (not a full audit) and Form 1120-H preparation&quot;
+  },
+  &quot;legal_year&quot;: {
+   &quot;value&quot;: 2500.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;general counsel, covenant enforcement demand letters, annual document review&quot;
+  },
+  &quot;reserve_study_cycle&quot;: {
+   &quot;value&quot;: 3500.0,
+   &quot;unit&quot;: &quot;$/3 yr&quot;,
+   &quot;basis&quot;: &quot;full study then an update every 3 years; US HOA reserve studies run $2,500\u20135,000 (CMGT 2026; CAMS 2026)&quot;
+  },
+  &quot;admin_year&quot;: {
+   &quot;value&quot;: 1900.0,
+   &quot;unit&quot;: &quot;$/yr&quot;,
+   &quot;basis&quot;: &quot;bank and lockbox fees, accounting software, owner portal/website, postage, annual meeting, registered agent, Georgia nonprofit annual registration ($50)&quot;
+  },
+  &quot;bad_debt_pct&quot;: {
+   &quot;value&quot;: 0.02,
+   &quot;unit&quot;: &quot;of assessments&quot;,
+   &quot;basis&quot;: &quot;2 % delinquency allowance; the POA Act lien (O.C.G.A. \u00a744-3-232) makes eventual recovery likely but the budget cannot assume it&quot;
+  },
+  &quot;contingency_pct&quot;: {
+   &quot;value&quot;: 0.05,
+   &quot;unit&quot;: &quot;of operating&quot;,
+   &quot;basis&quot;: &quot;5 % operating contingency; this is a first-year budget for a community that does not yet exist&quot;
+  },
+  &quot;waste_per_home_month&quot;: {
+   &quot;value&quot;: 22.0,
+   &quot;unit&quot;: &quot;$/home/month&quot;,
+   &quot;basis&quot;: &quot;bundled residential hauler contract, one truck per week on a private lane; shown as an option \u2014 VERIFY whether the City&#x27;s residential collection serves private streets&quot;
+  }
+ },
+ &quot;full_buildout&quot;: {
+  &quot;scenario&quot;: &quot;full&quot;,
+  &quot;lots&quot;: 41,
+  &quot;quantities&quot;: {
+   &quot;lots_total&quot;: 41,
+   &quot;lots_phase1&quot;: 24,
+   &quot;lots_phase2&quot;: 17,
+   &quot;plan_A_lots&quot;: 21,
+   &quot;plan_B_lots&quot;: 20,
+   &quot;lane_cl_ft&quot;: 1551.5,
+   &quot;entry_drive_ft&quot;: 204.0,
+   &quot;lane_length_ft&quot;: 1754.0,
+   &quot;pavement_width_ft&quot;: 22.0,
+   &quot;pavement_lane_sf&quot;: 34111,
+   &quot;pavement_entry_sf&quot;: 4865,
+   &quot;pavement_hammerhead_sf&quot;: 7200,
+   &quot;pavement_bay_sf&quot;: 2070,
+   &quot;pavement_curb_return_sf&quot;: 184,
+   &quot;pavement_sf_computed&quot;: 48430,
+   &quot;pavement_sf_published&quot;: 48430,
+   &quot;sidewalk_sf_computed&quot;: 14619,
+   &quot;sidewalk_sf_published&quot;: 14619,
+   &quot;lane_tract_sf&quot;: 71085,
+   &quot;lane_verge_sf&quot;: 8036,
+   &quot;hammerheads&quot;: 3,
+   &quot;open_space_tracts&quot;: {
+    &quot;Pocket green (u 530-580)&quot;: 10000,
+    &quot;Pocket green (u 1080-1130)&quot;: 10000,
+    &quot;Terminus green + rear buffer&quot;: 9312,
+    &quot;Pond 1 (dry detention / WQ) tract&quot;: 20000,
+    &quot;Pond 2 (dry detention / WQ) tract&quot;: 20000,
+    &quot;Creek woods (stream head + 50/75-ft buffers) \u2014 preserved&quot;: 20000,
+    &quot;Stream-setback open-space tract (SW side, u 1230-1280) \u2014 unlotted, no impervious&quot;: 5000,
+    &quot;Front amenity tract (clubhouse, village green, courts, landscape strip)&quot;: 46777
+   },
+   &quot;greens_sf&quot;: 29312,
+   &quot;pond_tract_sf&quot;: 40000,
+   &quot;creek_woods_sf&quot;: 20000,
+   &quot;amenity_tract_sf&quot;: 46777,
+   &quot;ponds&quot;: 2,
+   &quot;pond_water_area_sf&quot;: 20970,
+   &quot;pond_storage_cf&quot;: 77863,
+   &quot;buffer_easement_on_lots_sf&quot;: 41000,
+   &quot;open_space_sf&quot;: 141089,
+   &quot;amenity_hard_sf&quot;: 8262,
+   &quot;amenity_soft_sf&quot;: 38515,
+   &quot;clubhouse_sf&quot;: 2400,
+   &quot;guest_spaces&quot;: 8,
+   &quot;kiosk_spaces&quot;: 4,
+   &quot;pickleball_courts&quot;: 2,
+   &quot;pickleball_pad_perimeter_lf&quot;: 360,
+   &quot;plan_A_lot_impervious_sf&quot;: 2635,
+   &quot;plan_A_yard_sf&quot;: 1365,
+   &quot;plan_B_lot_impervious_sf&quot;: 2780,
+   &quot;plan_B_yard_sf&quot;: 1220,
+   &quot;yard_total_sf&quot;: 53065,
+   &quot;yard_avg_sf&quot;: 1294,
+   &quot;street_trees&quot;: 73,
+   &quot;frontage_strip_trees&quot;: 10,
+   &quot;frontage_strip_shrubs&quot;: 10,
+   &quot;parking_lot_trees&quot;: 2,
+   &quot;trees_total&quot;: 85,
+   &quot;light_poles&quot;: 16,
+   &quot;common_landscape_sf&quot;: 115863,
+   &quot;common_landscape_ac&quot;: 2.66,
+   &quot;natural_area_sf&quot;: 61000,
+   &quot;natural_area_ac&quot;: 1.4
+  },
+  &quot;lines&quot;: [
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Lot yard care \u2014 mow, edge, trim, blow&quot;,
+    &quot;41 lots \u00d7 34 visits&quot;,
+    &quot;$22/lot/visit&quot;,
+    30668
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Lot beds \u2014 pruning, pre-emergent, mulch, leaf removal&quot;,
+    &quot;41 lots \u00d7 2 visits&quot;,
+    &quot;$120/lot/yr&quot;,
+    4920
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Common-area turf and beds (lane verge, greens, amenity, pond tracts)&quot;,
+    &quot;2.66 ac&quot;,
+    &quot;$4,500/ac/yr&quot;,
+    11970
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Buffer easement and creek-woods stewardship (undisturbed areas)&quot;,
+    &quot;1.40 ac&quot;,
+    &quot;$900/ac/yr&quot;,
+    1260
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Street- and strip-tree pruning (3-year cycle, annualised)&quot;,
+    &quot;85 trees \u00f7 3&quot;,
+    &quot;$65/tree&quot;,
+    1842
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Tree, shrub and turf replacement (3 % of stock per year)&quot;,
+    &quot;85 trees \u00d7 3 %&quot;,
+    &quot;$450/tree&quot;,
+    1148
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Irrigation operation, backflow testing and repair (amenity block)&quot;,
+    &quot;1 system&quot;,
+    &quot;$1,400/yr&quot;,
+    1400
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Lane sweeping and gutter cleaning&quot;,
+    &quot;2 events/yr&quot;,
+    &quot;$650/event&quot;,
+    1300
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Pavement crack fill and pothole patching (operating)&quot;,
+    &quot;48,430 SF&quot;,
+    &quot;$0.05/SF/yr&quot;,
+    2422
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Fire-lane and traffic signs, pavement markings&quot;,
+    &quot;lane inventory&quot;,
+    &quot;$900/yr&quot;,
+    900
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Storm inlet, pipe and outlet-structure cleaning&quot;,
+    &quot;1 vacuum-truck day&quot;,
+    &quot;$1,400/yr&quot;,
+    1400
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Pond annual inspection and report to the City&quot;,
+    &quot;2 ponds&quot;,
+    &quot;$900/pond/yr&quot;,
+    1800
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Pond routine maintenance (racks, forebay, rip-rap, erosion)&quot;,
+    &quot;2 ponds&quot;,
+    &quot;$1,300/pond/yr&quot;,
+    2600
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Lane and common lighting \u2014 energy and fixture maintenance&quot;,
+    &quot;16 fixtures \u00d7 12 mo&quot;,
+    &quot;$23/fixture/mo&quot;,
+    4416
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Snow and ice event allowance&quot;,
+    &quot;0.5 event/yr&quot;,
+    &quot;$600/yr&quot;,
+    600
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Clubhouse electricity&quot;,
+    &quot;2,400 SF&quot;,
+    &quot;$1.85/SF/yr&quot;,
+    4440
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Clubhouse water and sewer, amenity irrigation water&quot;,
+    &quot;1 meter&quot;,
+    &quot;$2,600/yr&quot;,
+    2600
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Clubhouse gas&quot;,
+    &quot;1 service&quot;,
+    &quot;$700/yr&quot;,
+    700
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Clubhouse janitorial and supplies&quot;,
+    &quot;104 visits/yr&quot;,
+    &quot;$65/visit&quot;,
+    6760
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Clubhouse repairs, HVAC contract, pest, alarm and NFPA 13 sprinkler ITM&quot;,
+    &quot;1 building&quot;,
+    &quot;$3,900/yr&quot;,
+    3900
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Internet, cameras, access control, Knox box&quot;,
+    &quot;1 building&quot;,
+    &quot;$1,700/yr&quot;,
+    1700
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Pickleball court cleaning, nets and screens&quot;,
+    &quot;2 courts&quot;,
+    &quot;$900/yr&quot;,
+    900
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Mail kiosk cleaning, lighting and locks&quot;,
+    &quot;1 kiosk&quot;,
+    &quot;$500/yr&quot;,
+    500
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Professional community management&quot;,
+    &quot;41 doors \u00d7 12 mo&quot;,
+    &quot;$22/door/mo&quot;,
+    10824
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;HOPA age-verification program (biennial survey, transfer certificates, records)&quot;,
+    &quot;41 units \u00f7 2 yr + 3 transfers&quot;,
+    &quot;$18/unit + $150/transfer&quot;,
+    1719
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Insurance \u2014 property, GL, D&amp;O, crime, umbrella&quot;,
+    &quot;41 units + clubhouse&quot;,
+    &quot;$13,500/yr&quot;,
+    13500
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Financial review and Form 1120-H&quot;,
+    &quot;1/yr&quot;,
+    &quot;$1,600/yr&quot;,
+    1600
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Legal \u2014 counsel and covenant enforcement&quot;,
+    &quot;allowance&quot;,
+    &quot;$2,500/yr&quot;,
+    2500
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Reserve study (update every 3 years, annualised)&quot;,
+    &quot;1 \u00f7 3 yr&quot;,
+    &quot;$3,500/study&quot;,
+    1167
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Banking, software, portal, postage, meetings, state registration&quot;,
+    &quot;1/yr&quot;,
+    &quot;$1,900/yr&quot;,
+    1900
+   ]
+  ],
+  &quot;operating&quot;: 123356,
+  &quot;reserves&quot;: [
+   [
+    &quot;Lane and entry-drive asphalt \u2014 mill and overlay&quot;,
+    48430,
+    &quot;SF&quot;,
+    4.0,
+    193720,
+    20,
+    9686,
+    &quot;overlay $3.50\u20135.50/SF and mill-and-overlay $4.50\u20138.00/SF in 2026 (Buildcalchub; Wright Construction; Paving Estimator); $4.00 assumes a single mobilisation for the whole lane&quot;
+   ],
+   [
+    &quot;Lane crack sealing and surface treatment&quot;,
+    48430,
+    &quot;SF&quot;,
+    0.3,
+    14529,
+    7,
+    2076,
+    &quot;crack seal + fog/seal coat between overlays&quot;
+   ],
+   [
+    &quot;Concrete sidewalk \u2014 25 % panel replacement per cycle&quot;,
+    3655,
+    &quot;SF&quot;,
+    9.0,
+    32895,
+    20,
+    1645,
+    &quot;4-in walk removal and replacement; 25 % of panels per 20-year cycle (root heave, settlement, ADA cross-slope corrections)&quot;
+   ],
+   [
+    &quot;Curb, gutter and valley-gutter repair allowance&quot;,
+    1754.0,
+    &quot;LF&quot;,
+    4.0,
+    7016,
+    25,
+    281,
+    &quot;10 % of the curb line replaced per 25-year cycle at ~$40/LF&quot;
+   ],
+   [
+    &quot;Detention pond sediment removal&quot;,
+    2,
+    &quot;pond&quot;,
+    18000.0,
+    36000,
+    10,
+    3600,
+    &quot;dry basins of 0.24 ac each holding 77,863 cf between them (2026-09-03 re-sizing); Southeast stormwater dredging $25\u201375/CY and $25,000\u201375,000 for a half-acre HOA pond (Angi 2026; AUE Land; Landshore 2026) \u2014 the allowance predates the enlargement and is to be re-priced before the first reserve study&quot;
+   ],
+   [
+    &quot;Pond outlet structures, trash racks, rip-rap, emergency spillway&quot;,
+    2,
+    &quot;pond&quot;,
+    12000.0,
+    24000,
+    30,
+    800,
+    &quot;outlet control structure and headwall rehabilitation&quot;
+   ],
+   [
+    &quot;Storm sewer pipe and structure rehabilitation&quot;,
+    1754.0,
+    &quot;LF of lane&quot;,
+    68.5,
+    120149,
+    50,
+    2403,
+    &quot;lane storm drainage \u2014 pipe, inlets and junction boxes at end of service life, priced per foot of lane so the Phase-1 case scales&quot;
+   ],
+   [
+    &quot;Clubhouse roof \u2014 architectural asphalt shingles&quot;,
+    3000,
+    &quot;SF&quot;,
+    6.5,
+    19500,
+    25,
+    780,
+    &quot;clubhouse footprint \u00d7 1.25 slope factor; tear-off and replacement&quot;
+   ],
+   [
+    &quot;Clubhouse HVAC (2 split systems)&quot;,
+    2,
+    &quot;each&quot;,
+    11000.0,
+    22000,
+    15,
+    1467,
+    &quot;3-ton systems, replacement including duct repairs&quot;
+   ],
+   [
+    &quot;Clubhouse exterior repaint&quot;,
+    1,
+    &quot;LS&quot;,
+    9000.0,
+    9000,
+    8,
+    1125,
+    &quot;docs/12 \u00a709 91 13 2.03 sets the HOA repaint cycle at 8\u201310 years&quot;
+   ],
+   [
+    &quot;Clubhouse interior \u2014 flooring, paint, kitchen, restrooms, furnishings&quot;,
+    1,
+    &quot;LS&quot;,
+    60000.0,
+    60000,
+    15,
+    4000,
+    &quot;$25/SF of clubhouse for finishes and FF&amp;E&quot;
+   ],
+   [
+    &quot;Clubhouse water heater, appliances, fitness equipment&quot;,
+    1,
+    &quot;LS&quot;,
+    14000.0,
+    14000,
+    12,
+    1167,
+    &quot;allowance&quot;
+   ],
+   [
+    &quot;Pickleball court resurfacing&quot;,
+    2,
+    &quot;court&quot;,
+    8000.0,
+    16000,
+    6,
+    2667,
+    &quot;acrylic resurface of a 30&#x27; \u00d7 60&#x27; pad; 5\u20138-year cycle&quot;
+   ],
+   [
+    &quot;Pickleball fencing&quot;,
+    360,
+    &quot;LF&quot;,
+    28.0,
+    10080,
+    20,
+    504,
+    &quot;4-ft black vinyl-coated chain link on the pad perimeter&quot;
+   ],
+   [
+    &quot;Lane and amenity light poles and fixtures&quot;,
+    16,
+    &quot;each&quot;,
+    3800.0,
+    60800,
+    25,
+    2432,
+    &quot;14-ft full-cutoff post-top \u22643000 K (voluntary condition 11); assumes association-owned fixtures \u2014 if they are on the Georgia Power tariff this component drops out&quot;
+   ],
+   [
+    &quot;Mail kiosk \u2014 cluster box units and shelter&quot;,
+    1,
+    &quot;LS&quot;,
+    28000.0,
+    28000,
+    25,
+    1120,
+    &quot;4 USPS-approved CBUs at ~$2,600 plus a 16&#x27; \u00d7 10&#x27; shelter (checklist \u00a74.r, &#x27;protection from the elements&#x27;)&quot;
+   ],
+   [
+    &quot;Monument entry sign, wall and landscape lighting&quot;,
+    1,
+    &quot;LS&quot;,
+    28000.0,
+    28000,
+    20,
+    1400,
+    &quot;\u226432-SF monument sign (voluntary condition 14), masonry base, external lighting&quot;
+   ],
+   [
+    &quot;Site furnishings \u2014 benches, tables, trash receptacles, kiosk board&quot;,
+    1,
+    &quot;LS&quot;,
+    16000.0,
+    16000,
+    15,
+    1067,
+    &quot;village green and pocket greens&quot;
+   ],
+   [
+    &quot;Irrigation system replacement (amenity block)&quot;,
+    1,
+    &quot;LS&quot;,
+    18000.0,
+    18000,
+    20,
+    900,
+    &quot;controller, valves, heads and mainline&quot;
+   ],
+   [
+    &quot;Landscape renovation and buffer re-planting fund&quot;,
+    1,
+    &quot;LS&quot;,
+    20000.0,
+    20000,
+    15,
+    1333,
+    &quot;periodic renovation of common beds and the supplemental evergreen buffer planting; also the fund behind the re-planting remedy in Article 6 of the declaration&quot;
+   ]
+  ],
+  &quot;reserve_annual&quot;: 40451,
+  &quot;contingency&quot;: 6168,
+  &quot;bad_debt&quot;: 3399,
+  &quot;total&quot;: 173374,
+  &quot;per_lot_year&quot;: 4229,
+  &quot;per_lot_month&quot;: 352,
+  &quot;operating_per_lot_month&quot;: 251,
+  &quot;reserve_per_lot_month&quot;: 82,
+  &quot;waste_option_per_lot_month&quot;: 22.0
+ },
+ &quot;phase1_only&quot;: {
+  &quot;scenario&quot;: &quot;phase1&quot;,
+  &quot;lots&quot;: 24,
+  &quot;quantities&quot;: {
+   &quot;lots_total&quot;: 24,
+   &quot;lots_phase1&quot;: 24,
+   &quot;lots_phase2&quot;: 17,
+   &quot;plan_A_lots&quot;: 12,
+   &quot;plan_B_lots&quot;: 12,
+   &quot;lane_cl_ft&quot;: 1551.5,
+   &quot;entry_drive_ft&quot;: 204.0,
+   &quot;lane_length_ft&quot;: 1034.5,
+   &quot;pavement_width_ft&quot;: 22.0,
+   &quot;pavement_lane_sf&quot;: 34111,
+   &quot;pavement_entry_sf&quot;: 4865,
+   &quot;pavement_hammerhead_sf&quot;: 7200,
+   &quot;pavement_bay_sf&quot;: 2070,
+   &quot;pavement_curb_return_sf&quot;: 184,
+   &quot;pavement_sf_computed&quot;: 48430,
+   &quot;pavement_sf_published&quot;: 25536,
+   &quot;sidewalk_sf_computed&quot;: 14619,
+   &quot;sidewalk_sf_published&quot;: 5173,
+   &quot;lane_tract_sf&quot;: 71085,
+   &quot;lane_verge_sf&quot;: 4740,
+   &quot;hammerheads&quot;: 3,
+   &quot;open_space_tracts&quot;: {
+    &quot;Pocket green (u 530-580)&quot;: 10000,
+    &quot;Pocket green (u 1080-1130)&quot;: 10000,
+    &quot;Terminus green + rear buffer&quot;: 9312,
+    &quot;Pond 1 (dry detention / WQ) tract&quot;: 20000,
+    &quot;Pond 2 (dry detention / WQ) tract&quot;: 20000,
+    &quot;Creek woods (stream head + 50/75-ft buffers) \u2014 preserved&quot;: 20000,
+    &quot;Stream-setback open-space tract (SW side, u 1230-1280) \u2014 unlotted, no impervious&quot;: 5000,
+    &quot;Front amenity tract (clubhouse, village green, courts, landscape strip)&quot;: 46777
+   },
+   &quot;greens_sf&quot;: 10000,
+   &quot;pond_tract_sf&quot;: 20000,
+   &quot;creek_woods_sf&quot;: 0,
+   &quot;amenity_tract_sf&quot;: 46777,
+   &quot;ponds&quot;: 1,
+   &quot;pond_water_area_sf&quot;: 20970,
+   &quot;pond_storage_cf&quot;: 77863,
+   &quot;buffer_easement_on_lots_sf&quot;: 24000.0,
+   &quot;open_space_sf&quot;: 141089,
+   &quot;amenity_hard_sf&quot;: 8262,
+   &quot;amenity_soft_sf&quot;: 38515,
+   &quot;clubhouse_sf&quot;: 2400,
+   &quot;guest_spaces&quot;: 8,
+   &quot;kiosk_spaces&quot;: 4,
+   &quot;pickleball_courts&quot;: 2,
+   &quot;pickleball_pad_perimeter_lf&quot;: 360,
+   &quot;plan_A_lot_impervious_sf&quot;: 2635,
+   &quot;plan_A_yard_sf&quot;: 1365,
+   &quot;plan_B_lot_impervious_sf&quot;: 2780,
+   &quot;plan_B_yard_sf&quot;: 1220,
+   &quot;yard_total_sf&quot;: 31020,
+   &quot;yard_avg_sf&quot;: 1294,
+   &quot;street_trees&quot;: 25,
+   &quot;frontage_strip_trees&quot;: 10,
+   &quot;frontage_strip_shrubs&quot;: 10,
+   &quot;parking_lot_trees&quot;: 2,
+   &quot;trees_total&quot;: 37,
+   &quot;light_poles&quot;: 11,
+   &quot;common_landscape_sf&quot;: 73255,
+   &quot;common_landscape_ac&quot;: 1.68,
+   &quot;natural_area_sf&quot;: 24000.0,
+   &quot;natural_area_ac&quot;: 0.55
+  },
+  &quot;lines&quot;: [
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Lot yard care \u2014 mow, edge, trim, blow&quot;,
+    &quot;24 lots \u00d7 34 visits&quot;,
+    &quot;$22/lot/visit&quot;,
+    17952
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Lot beds \u2014 pruning, pre-emergent, mulch, leaf removal&quot;,
+    &quot;24 lots \u00d7 2 visits&quot;,
+    &quot;$120/lot/yr&quot;,
+    2880
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Common-area turf and beds (lane verge, greens, amenity, pond tracts)&quot;,
+    &quot;1.68 ac&quot;,
+    &quot;$4,500/ac/yr&quot;,
+    7560
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Buffer easement and creek-woods stewardship (undisturbed areas)&quot;,
+    &quot;0.55 ac&quot;,
+    &quot;$900/ac/yr&quot;,
+    495
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Street- and strip-tree pruning (3-year cycle, annualised)&quot;,
+    &quot;37 trees \u00f7 3&quot;,
+    &quot;$65/tree&quot;,
+    802
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Tree, shrub and turf replacement (3 % of stock per year)&quot;,
+    &quot;37 trees \u00d7 3 %&quot;,
+    &quot;$450/tree&quot;,
+    499
+   ],
+   [
+    &quot;1 Grounds&quot;,
+    &quot;Irrigation operation, backflow testing and repair (amenity block)&quot;,
+    &quot;1 system&quot;,
+    &quot;$1,400/yr&quot;,
+    1400
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Lane sweeping and gutter cleaning&quot;,
+    &quot;2 events/yr&quot;,
+    &quot;$650/event&quot;,
+    1300
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Pavement crack fill and pothole patching (operating)&quot;,
+    &quot;25,536 SF&quot;,
+    &quot;$0.05/SF/yr&quot;,
+    1277
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Fire-lane and traffic signs, pavement markings&quot;,
+    &quot;lane inventory&quot;,
+    &quot;$900/yr&quot;,
+    900
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Storm inlet, pipe and outlet-structure cleaning&quot;,
+    &quot;1 vacuum-truck day&quot;,
+    &quot;$1,400/yr&quot;,
+    1400
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Pond annual inspection and report to the City&quot;,
+    &quot;1 pond&quot;,
+    &quot;$900/pond/yr&quot;,
+    900
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Pond routine maintenance (racks, forebay, rip-rap, erosion)&quot;,
+    &quot;1 pond&quot;,
+    &quot;$1,300/pond/yr&quot;,
+    1300
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Lane and common lighting \u2014 energy and fixture maintenance&quot;,
+    &quot;11 fixtures \u00d7 12 mo&quot;,
+    &quot;$23/fixture/mo&quot;,
+    3036
+   ],
+   [
+    &quot;2 Lane and stormwater&quot;,
+    &quot;Snow and ice event allowance&quot;,
+    &quot;0.5 event/yr&quot;,
+    &quot;$600/yr&quot;,
+    600
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Clubhouse electricity&quot;,
+    &quot;2,400 SF&quot;,
+    &quot;$1.85/SF/yr&quot;,
+    4440
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Clubhouse water and sewer, amenity irrigation water&quot;,
+    &quot;1 meter&quot;,
+    &quot;$2,600/yr&quot;,
+    2600
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Clubhouse gas&quot;,
+    &quot;1 service&quot;,
+    &quot;$700/yr&quot;,
+    700
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Clubhouse janitorial and supplies&quot;,
+    &quot;104 visits/yr&quot;,
+    &quot;$65/visit&quot;,
+    6760
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Clubhouse repairs, HVAC contract, pest, alarm and NFPA 13 sprinkler ITM&quot;,
+    &quot;1 building&quot;,
+    &quot;$3,900/yr&quot;,
+    3900
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Internet, cameras, access control, Knox box&quot;,
+    &quot;1 building&quot;,
+    &quot;$1,700/yr&quot;,
+    1700
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Pickleball court cleaning, nets and screens&quot;,
+    &quot;2 courts&quot;,
+    &quot;$900/yr&quot;,
+    900
+   ],
+   [
+    &quot;3 Amenity&quot;,
+    &quot;Mail kiosk cleaning, lighting and locks&quot;,
+    &quot;1 kiosk&quot;,
+    &quot;$500/yr&quot;,
+    500
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Professional community management&quot;,
+    &quot;24 doors \u00d7 12 mo&quot;,
+    &quot;$22/door/mo&quot;,
+    6336
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;HOPA age-verification program (biennial survey, transfer certificates, records)&quot;,
+    &quot;24 units \u00f7 2 yr + 3 transfers&quot;,
+    &quot;$18/unit + $150/transfer&quot;,
+    1566
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Insurance \u2014 property, GL, D&amp;O, crime, umbrella&quot;,
+    &quot;24 units + clubhouse&quot;,
+    &quot;$13,500/yr&quot;,
+    13500
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Financial review and Form 1120-H&quot;,
+    &quot;1/yr&quot;,
+    &quot;$1,600/yr&quot;,
+    1600
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Legal \u2014 counsel and covenant enforcement&quot;,
+    &quot;allowance&quot;,
+    &quot;$2,500/yr&quot;,
+    2500
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Reserve study (update every 3 years, annualised)&quot;,
+    &quot;1 \u00f7 3 yr&quot;,
+    &quot;$3,500/study&quot;,
+    1167
+   ],
+   [
+    &quot;4 Administration&quot;,
+    &quot;Banking, software, portal, postage, meetings, state registration&quot;,
+    &quot;1/yr&quot;,
+    &quot;$1,900/yr&quot;,
+    1900
+   ]
+  ],
+  &quot;operating&quot;: 92370,
+  &quot;reserves&quot;: [
+   [
+    &quot;Lane and entry-drive asphalt \u2014 mill and overlay&quot;,
+    25536,
+    &quot;SF&quot;,
+    4.0,
+    102144,
+    20,
+    5107,
+    &quot;overlay $3.50\u20135.50/SF and mill-and-overlay $4.50\u20138.00/SF in 2026 (Buildcalchub; Wright Construction; Paving Estimator); $4.00 assumes a single mobilisation for the whole lane&quot;
+   ],
+   [
+    &quot;Lane crack sealing and surface treatment&quot;,
+    25536,
+    &quot;SF&quot;,
+    0.3,
+    7661,
+    7,
+    1094,
+    &quot;crack seal + fog/seal coat between overlays&quot;
+   ],
+   [
+    &quot;Concrete sidewalk \u2014 25 % panel replacement per cycle&quot;,
+    1293,
+    &quot;SF&quot;,
+    9.0,
+    11637,
+    20,
+    582,
+    &quot;4-in walk removal and replacement; 25 % of panels per 20-year cycle (root heave, settlement, ADA cross-slope corrections)&quot;
+   ],
+   [
+    &quot;Curb, gutter and valley-gutter repair allowance&quot;,
+    1034.5,
+    &quot;LF&quot;,
+    4.0,
+    4138,
+    25,
+    166,
+    &quot;10 % of the curb line replaced per 25-year cycle at ~$40/LF&quot;
+   ],
+   [
+    &quot;Detention pond sediment removal&quot;,
+    1,
+    &quot;pond&quot;,
+    18000.0,
+    18000,
+    10,
+    1800,
+    &quot;dry basins of 0.24 ac each holding 77,863 cf between them (2026-09-03 re-sizing); Southeast stormwater dredging $25\u201375/CY and $25,000\u201375,000 for a half-acre HOA pond (Angi 2026; AUE Land; Landshore 2026) \u2014 the allowance predates the enlargement and is to be re-priced before the first reserve study&quot;
+   ],
+   [
+    &quot;Pond outlet structures, trash racks, rip-rap, emergency spillway&quot;,
+    1,
+    &quot;pond&quot;,
+    12000.0,
+    12000,
+    30,
+    400,
+    &quot;outlet control structure and headwall rehabilitation&quot;
+   ],
+   [
+    &quot;Storm sewer pipe and structure rehabilitation&quot;,
+    1034.5,
+    &quot;LF of lane&quot;,
+    68.5,
+    70863,
+    50,
+    1417,
+    &quot;lane storm drainage \u2014 pipe, inlets and junction boxes at end of service life, priced per foot of lane so the Phase-1 case scales&quot;
+   ],
+   [
+    &quot;Clubhouse roof \u2014 architectural asphalt shingles&quot;,
+    3000,
+    &quot;SF&quot;,
+    6.5,
+    19500,
+    25,
+    780,
+    &quot;clubhouse footprint \u00d7 1.25 slope factor; tear-off and replacement&quot;
+   ],
+   [
+    &quot;Clubhouse HVAC (2 split systems)&quot;,
+    2,
+    &quot;each&quot;,
+    11000.0,
+    22000,
+    15,
+    1467,
+    &quot;3-ton systems, replacement including duct repairs&quot;
+   ],
+   [
+    &quot;Clubhouse exterior repaint&quot;,
+    1,
+    &quot;LS&quot;,
+    9000.0,
+    9000,
+    8,
+    1125,
+    &quot;docs/12 \u00a709 91 13 2.03 sets the HOA repaint cycle at 8\u201310 years&quot;
+   ],
+   [
+    &quot;Clubhouse interior \u2014 flooring, paint, kitchen, restrooms, furnishings&quot;,
+    1,
+    &quot;LS&quot;,
+    60000.0,
+    60000,
+    15,
+    4000,
+    &quot;$25/SF of clubhouse for finishes and FF&amp;E&quot;
+   ],
+   [
+    &quot;Clubhouse water heater, appliances, fitness equipment&quot;,
+    1,
+    &quot;LS&quot;,
+    14000.0,
+    14000,
+    12,
+    1167,
+    &quot;allowance&quot;
+   ],
+   [
+    &quot;Pickleball court resurfacing&quot;,
+    2,
+    &quot;court&quot;,
+    8000.0,
+    16000,
+    6,
+    2667,
+    &quot;acrylic resurface of a 30&#x27; \u00d7 60&#x27; pad; 5\u20138-year cycle&quot;
+   ],
+   [
+    &quot;Pickleball fencing&quot;,
+    360,
+    &quot;LF&quot;,
+    28.0,
+    10080,
+    20,
+    504,
+    &quot;4-ft black vinyl-coated chain link on the pad perimeter&quot;
+   ],
+   [
+    &quot;Lane and amenity light poles and fixtures&quot;,
+    11,
+    &quot;each&quot;,
+    3800.0,
+    41800,
+    25,
+    1672,
+    &quot;14-ft full-cutoff post-top \u22643000 K (voluntary condition 11); assumes association-owned fixtures \u2014 if they are on the Georgia Power tariff this component drops out&quot;
+   ],
+   [
+    &quot;Mail kiosk \u2014 cluster box units and shelter&quot;,
+    1,
+    &quot;LS&quot;,
+    28000.0,
+    28000,
+    25,
+    1120,
+    &quot;4 USPS-approved CBUs at ~$2,600 plus a 16&#x27; \u00d7 10&#x27; shelter (checklist \u00a74.r, &#x27;protection from the elements&#x27;)&quot;
+   ],
+   [
+    &quot;Monument entry sign, wall and landscape lighting&quot;,
+    1,
+    &quot;LS&quot;,
+    28000.0,
+    28000,
+    20,
+    1400,
+    &quot;\u226432-SF monument sign (voluntary condition 14), masonry base, external lighting&quot;
+   ],
+   [
+    &quot;Site furnishings \u2014 benches, tables, trash receptacles, kiosk board&quot;,
+    1,
+    &quot;LS&quot;,
+    16000.0,
+    16000,
+    15,
+    1067,
+    &quot;village green and pocket greens&quot;
+   ],
+   [
+    &quot;Irrigation system replacement (amenity block)&quot;,
+    1,
+    &quot;LS&quot;,
+    18000.0,
+    18000,
+    20,
+    900,
+    &quot;controller, valves, heads and mainline&quot;
+   ],
+   [
+    &quot;Landscape renovation and buffer re-planting fund&quot;,
+    1,
+    &quot;LS&quot;,
+    20000.0,
+    20000,
+    15,
+    1333,
+    &quot;periodic renovation of common beds and the supplemental evergreen buffer planting; also the fund behind the re-planting remedy in Article 6 of the declaration&quot;
+   ]
+  ],
+  &quot;reserve_annual&quot;: 29767,
+  &quot;contingency&quot;: 4618,
+  &quot;bad_debt&quot;: 2535,
+  &quot;total&quot;: 129291,
+  &quot;per_lot_year&quot;: 5387,
+  &quot;per_lot_month&quot;: 449,
+  &quot;operating_per_lot_month&quot;: 321,
+  &quot;reserve_per_lot_month&quot;: 103,
+  &quot;waste_option_per_lot_month&quot;: 22.0
+ }
+}</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/data/hoa-budget-derived.json</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

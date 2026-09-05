@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Dimension-locked rendering prompt generator — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> Python</div>
+    
+    <h1>Dimension-locked rendering prompt generator</h1><p class="src-note">Python · 720 lines · <a href="/data-room/src/submission/tools/prompts.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Dimension-locked image-generation prompts — The Cottages at Arcado Springs.
+
+    python3 tools/prompts.py            # writes renderings/PROMPTS.md and renderings/prompts.json
+
+WHY THIS IS A GENERATOR AND NOT A HAND-WRITTEN DOCUMENT
+The owner&#x27;s instruction was: &quot;when making prompts to Higgsfield make sure they are specific… make sure the
+images match the layouts and specific dimensions of the property.&quot; A prompt typed by hand goes stale the
+moment a plan changes. Every number in every prompt below is therefore READ AT RUN TIME from the same files
+that generate the drawings — data/plans.json (the house plans and their roof geometry), data/layout.json
+(the site layout), and the constants and colour schemes in tools/elevations.py — so a prompt cannot state a
+dimension the drawings do not show. Re-run this script after any design change and re-generate the images.
+
+Each shot names the reference drawing that must be attached to the generation as an image reference. The
+reference is a furniture-free coloured elevation or a crop of a sheet, produced by
+tools/elevations.py make_ref_image(); it is what holds the massing, the openings and the proportions.
+
+&gt; **Disclaimer:** This is an AI-generated analysis for preliminary planning purposes. All findings must be verified by a licensed professional before use in design, permitting, or regulatory submissions.
+
+&lt;!-- architecture-studio:requires-disclaimer --&gt;
+&quot;&quot;&quot;
+import json, os, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+ROOT = os.path.dirname(HERE)
+DATA = os.path.join(ROOT, &#x27;data&#x27;)
+REND = os.path.join(ROOT, &#x27;renderings&#x27;)
+os.makedirs(REND, exist_ok=True)
+
+import elevations as ev                                            # noqa: E402
+import floorplans as fp                                            # noqa: E402
+
+fti = fp.fti
+PLANS = json.load(open(os.path.join(DATA, &#x27;plans.json&#x27;)))[&#x27;plans&#x27;]
+LAY = json.load(open(os.path.join(DATA, &#x27;layout.json&#x27;)))
+M = LAY[&#x27;metrics&#x27;]
+LANE = LAY[&#x27;lane&#x27;]
+AM = LAY[&#x27;amenity&#x27;]
+
+NEG_COMMON = (&#x27;no text, no lettering, no watermark, no logo, no signage other than what is described, no &#x27;
+              &#x27;house numbers, no dimension lines, no drawing annotations, no people, no cars unless &#x27;
+              &#x27;described, no second story, no dormer, no basement, no walk-out, no raised crawl-space &#x27;
+              &#x27;foundation, no vinyl shutters, no gable-end decorative trusses beyond the brackets described, &#x27;
+              &#x27;no palm trees, no desert or coastal vegetation, no snow&#x27;)
+
+
+def geo(pid):
+    &quot;&quot;&quot;Everything a prompt needs about one house plan, read from the drawings&#x27; own data.&quot;&quot;&quot;
+    p = PLANS[pid]
+    m = ev.build_model(pid)
+    blocks = {b[&#x27;name&#x27;]: b for b in m[&#x27;blocks&#x27;]}
+    _f, roof2roof, body_w = ev.check_width(m)
+    a = p[&#x27;areas&#x27;]
+    porch = [r for r in p.get(&#x27;porch_rects&#x27;, [])]
+    porch_w = (porch[0][2] - porch[0][0]) if porch else 0.0
+    porch_d = (porch[0][3] - porch[0][1]) if porch else 0.0
+    rear = p.get(&#x27;rear_porch_rects&#x27;) or p.get(&#x27;patio_rects&#x27;) or []
+    rear_w = (rear[0][2] - rear[0][0]) if rear else 0.0
+    rear_d = (rear[0][3] - rear[0][1]) if rear else 0.0
+    return {
+        &#x27;id&#x27;: pid, &#x27;name&#x27;: p[&#x27;name&#x27;].title(),
+        &#x27;body_w&#x27;: body_w, &#x27;body_d&#x27;: m[&#x27;an&#x27;][&#x27;body_bbox&#x27;][3] - m[&#x27;an&#x27;][&#x27;body_bbox&#x27;][1],
+        &#x27;roof2roof&#x27;: roof2roof,
+        &#x27;plate&#x27;: m[&#x27;plate&#x27;], &#x27;ridge&#x27;: m[&#x27;max_ridge&#x27;], &#x27;ridge_grade&#x27;: m[&#x27;max_ridge_grade&#x27;],
+        &#x27;ff&#x27;: ev.FF,
+        &#x27;main&#x27;: blocks[&#x27;MAIN BLOCK&#x27;], &#x27;wing&#x27;: blocks[&#x27;FRONT WING&#x27;], &#x27;garage&#x27;: blocks[&#x27;GARAGE&#x27;],
+        &#x27;cond&#x27;: a[&#x27;conditioned_sf&#x27;], &#x27;garage_sf&#x27;: a[&#x27;garage_sf&#x27;],
+        &#x27;porch_w&#x27;: porch_w, &#x27;porch_d&#x27;: porch_d, &#x27;porch_sf&#x27;: a[&#x27;front_porch_sf&#x27;],
+        &#x27;rear_w&#x27;: rear_w, &#x27;rear_d&#x27;: rear_d,
+        &#x27;rear_kind&#x27;: &#x27;covered rear porch&#x27; if a.get(&#x27;rear_porch_covered_sf&#x27;) else &#x27;uncovered rear patio&#x27;,
+        &#x27;lawn_behind_house_ft&#x27;: max(0.0, (p[&#x27;lot_siting&#x27;][&#x27;rear_wall_from_rear_line_ft&#x27;] or 0) - 20.0),
+        &#x27;lawn_behind_rear_edge_ft&#x27;: max(0.0, ((p[&#x27;lot_siting&#x27;][&#x27;rear_porch_edge_from_rear_line_ft&#x27;]
+                                               or p[&#x27;lot_siting&#x27;][&#x27;patio_edge_from_rear_line_ft&#x27;] or 0) - 20.0)),
+        &#x27;rear_sf&#x27;: a.get(&#x27;rear_porch_covered_sf&#x27;) or a.get(&#x27;rear_patio_uncovered_sf&#x27;) or 0,
+        &#x27;program&#x27;: p[&#x27;program&#x27;],
+        &#x27;openings&#x27;: p[&#x27;exterior_openings&#x27;],
+    }
+
+
+def sch(key):
+    S = ev.SCHEMES[key]
+    return S
+
+
+SCHEME_WORDS = {
+    &#x27;1&#x27;: dict(name=&#x27;Scheme 1 &quot;Warm White&quot;&#x27;,
+              wall=&#x27;fiber-cement vertical panel with 12-inch-on-center battens (board-and-batten), warm white&#x27;,
+              base=&#x27;an adhered ledge-stone veneer in a gray-tan Appalachian blend, laid dry-stack with tight joints&#x27;,
+              roofc=&#x27;charcoal&#x27;, trim=&#x27;warm white&#x27;, door=&#x27;deep green&#x27;, gdoor=&#x27;painted warm white to match the trim&#x27;),
+    &#x27;2&#x27;: dict(name=&#x27;Scheme 2 &quot;Sage&quot;&#x27;,
+              wall=&#x27;fiber-cement lap siding, 7-1/4-inch plank at 6-inch exposure, sage green&#x27;,
+              base=&#x27;a modular red-brown brick veneer laid in running bond with a rowlock sill cap&#x27;,
+              roofc=&#x27;weathered wood brown&#x27;, trim=&#x27;soft white&#x27;, door=&#x27;oxblood red&#x27;,
+              gdoor=&#x27;painted sage to match the siding&#x27;),
+    &#x27;3&#x27;: dict(name=&#x27;Scheme 3 &quot;Clay&quot;&#x27;,
+              wall=&#x27;fiber-cement lap siding, 7-1/4-inch plank at 6-inch exposure, clay beige&#x27;,
+              base=&#x27;an adhered ledge-stone veneer in a buff-tan blend, laid dry-stack with tight joints&#x27;,
+              roofc=&#x27;driftwood brown&#x27;, trim=&#x27;cream&#x27;, door=&#x27;navy blue&#x27;,
+              gdoor=&#x27;painted cream to match the trim&#x27;),
+}
+
+CAMERA = {
+    &#x27;front34&#x27;: (&#x27;three-quarter view from the far side of the lane, camera 5 feet 6 inches above the pavement, &#x27;
+                &#x27;35 mm lens, the house filling the frame with the driveway leading in from the lower left&#x27;),
+    &#x27;frontflat&#x27;: (&#x27;straight-on eye-level view from the far side of the lane, 50 mm lens, camera 5 feet 6 inches &#x27;
+                  &#x27;above the pavement, no perspective distortion, the whole house in frame with a little sky &#x27;
+                  &#x27;above the ridge&#x27;),
+    &#x27;street&#x27;: (&#x27;eye-level view standing on the sidewalk looking north-west down the lane, 35 mm lens, camera &#x27;
+               &#x27;5 feet 6 inches above the walk, the lane receding to a vanishing point slightly left of centre&#x27;),
+    &#x27;aerial&#x27;: (&#x27;aerial oblique from about 400 feet above the Arcado Road frontage looking north-west along the &#x27;
+               &#x27;long axis of the property, 24 mm lens, the whole property in frame from the road at the bottom &#x27;
+               &#x27;to the wooded rear boundary at the top&#x27;),
+    &#x27;garden&#x27;: (&#x27;eye-level view from the middle of the rear yard looking back at the house, 35 mm lens, camera &#x27;
+               &#x27;5 feet 6 inches above the lawn&#x27;),
+    &#x27;neighbour&#x27;: (&#x27;eye-level view standing in a neighbouring back yard looking through the tree buffer toward &#x27;
+                  &#x27;the new house, 50 mm lens, camera 5 feet 6 inches above the ground&#x27;),
+    &#x27;flat&#x27;: (&#x27;flat overhead view straight down on a light neutral surface, evenly lit, no shadows, product-&#x27;
+             &#x27;photography style&#x27;),
+}
+
+LIGHT = (&#x27;late-summer afternoon in Piedmont Georgia, warm soft daylight about two hours before sunset, light &#x27;
+         &#x27;haze, gentle shadows, high-quality architectural photography&#x27;)
+
+
+def house_facts(g, s):
+    &quot;&quot;&quot;The paragraph of locked building facts shared by every exterior shot of a dwelling.&quot;&quot;&quot;
+    w = SCHEME_WORDS[s]
+    return (
+        &#x27;The house is Plan {id} &quot;{name}&quot; of this community: ONE STORY ONLY, no second floor and no dormers. &#x27;
+        &#x27;Body {bw} wide and {bd} deep; roof-to-roof width across the front {r2r}; eave line {plate} above the &#x27;
+        &#x27;finished floor (a 9-foot wall plate on a 6-inch raised-heel truss); highest roof ridge {ridge} above &#x27;
+        &#x27;the finished floor and {rg} above finished &#x27;
+        &#x27;grade; finished floor only {ff} above finished grade, so the walk from the lane rises to a flush, &#x27;
+        &#x27;step-free landing at the porch. Massing seen from the lane, left to right: a two-car garage wing &#x27;
+        &#x27;{gw} wide under a front-facing {gp} gable whose ridge is {gr} above the floor, its front wall set back &#x27;
+        &#x27;{recess} behind the front wall of the house; then the living wing {ww} wide under a front-facing {wp} &#x27;
+        &#x27;gable whose ridge is {wr} above the floor; and behind both of them the main body roof, an {mp} gable &#x27;
+        &#x27;whose ridge runs left to right at {mr} above the floor. A single rectangular louvered gable vent, 24 &#x27;
+        &#x27;inches wide by 16 inches high, is centred in each front-facing gable, and a cedar knee-brace bracket &#x27;
+        &#x27;sits under each end of the living-wing rake. The living-wing gable is carried forward {pd} over a &#x27;
+        &#x27;covered front porch {pw} wide and {pd} deep with a flat white beadboard ceiling at 9 feet 0 inches, &#x27;
+        &#x27;carried on 8x8 nominal Western Red Cedar posts with a natural semi-transparent stain, each standing on &#x27;
+        &#x27;a 20-inch-square masonry pier 2 feet 0 inches tall with a sloped cast-stone cap, with a painted header &#x27;
+        &#x27;beam spanning between them. Roof overhangs are 8 inches at the two side walls and 12 inches front and &#x27;
+        &#x27;rear. MATERIALS AND COLOURS, exactly and only these: {wall}; {base}, forming a water table 30 inches tall above &#x27;
+        &#x27;the finished floor wrapping the base of every wall and every porch pier, finished with a sloped &#x27;
+        &#x27;cast-stone cap; architectural asphalt shingles in {roofc}; painted 4-inch flat window casings, corner &#x27;
+        &#x27;boards and frieze in {trim}; white 5-inch K-style aluminium gutters and round downspouts. Windows are &#x27;
+        &#x27;white vinyl single-hung units with a flat sill; window sills sit 2 feet 8 inches above the finished &#x27;
+        &#x27;floor, just above the cap of the masonry water table.&#x27;
+    ).format(
+        id=g[&#x27;id&#x27;], name=g[&#x27;name&#x27;],
+        bw=fti(g[&#x27;body_w&#x27;]), bd=fti(g[&#x27;body_d&#x27;]), r2r=fti(g[&#x27;roof2roof&#x27;]),
+        plate=fti(g[&#x27;plate&#x27;]), ridge=fti(g[&#x27;ridge&#x27;]), rg=fti(g[&#x27;ridge_grade&#x27;]), ff=fti(g[&#x27;ff&#x27;]),
+        gw=fti(g[&#x27;garage&#x27;][&#x27;rect&#x27;][2] - g[&#x27;garage&#x27;][&#x27;rect&#x27;][0]),
+        gp=&#x27;%d:%d&#x27; % tuple(g[&#x27;garage&#x27;][&#x27;pitch&#x27;]), gr=fti(g[&#x27;garage&#x27;][&#x27;ridge_h&#x27;]),
+        recess=fti(g[&#x27;garage&#x27;][&#x27;rect&#x27;][1] - g[&#x27;wing&#x27;][&#x27;rect&#x27;][1] - g[&#x27;porch_d&#x27;]),
+        ww=fti(g[&#x27;wing&#x27;][&#x27;rect&#x27;][2] - g[&#x27;wing&#x27;][&#x27;rect&#x27;][0]),
+        wp=&#x27;%d:%d&#x27; % tuple(g[&#x27;wing&#x27;][&#x27;pitch&#x27;]), wr=fti(g[&#x27;wing&#x27;][&#x27;ridge_h&#x27;]),
+        mp=&#x27;%d:%d&#x27; % tuple(g[&#x27;main&#x27;][&#x27;pitch&#x27;]), mr=fti(g[&#x27;main&#x27;][&#x27;ridge_h&#x27;]),
+        pw=fti(g[&#x27;porch_w&#x27;]), pd=fti(g[&#x27;porch_d&#x27;]),
+        ohs=&#x27;%d inches&#x27; % round(ev.OH_SIDE * 12), ohf=&#x27;%d inches&#x27; % round(ev.OH_FR * 12),
+        wall=w[&#x27;wall&#x27;], base=w[&#x27;base&#x27;], roofc=w[&#x27;roofc&#x27;], trim=w[&#x27;trim&#x27;])
+
+
+def lot_setting(side=&#x27;NE&#x27;):
+    walk = (&#x27;a 5-foot-wide concrete sidewalk set 2 feet behind the curb on this side of the lane&#x27;
+            if side == &#x27;NE&#x27; else &#x27;no sidewalk on this side of the lane&#x27;)
+    return (
+        &#x27;SETTING: a brand-new 55-and-over cottage community on a long narrow property in Lilburn, Gwinnett &#x27;
+        &#x27;County, Georgia, Piedmont hardwood country. The house sits on a level lot 50 feet 0 inches wide by &#x27;
+        &#x27;100 feet 0 inches deep, its porch face 15 feet 0 inches back from the lane right of way, with 5-foot &#x27;
+        &#x27;side yards to the neighbouring cottages. In front of it runs a private lane 22 feet 0 inches wide &#x27;
+        &#x27;face-to-face of vertical concrete curb, freshly paved dark asphalt, with {walk}. A plain gray &#x27;
+        &#x27;concrete driveway 20 feet 0 inches wide runs 26 feet from the lane to the garage door. Landscaping is &#x27;
+        &#x27;new and modest: clipped fescue lawn, a bed of low evergreen shrubs against the water table, one young &#x27;
+        &#x27;shade tree in the front yard, and a continuous wall of tall mature existing hardwood trees standing &#x27;
+        &#x27;well behind the houses in the 20-foot undisturbed perimeter buffer. All utilities are underground; &#x27;
+        &#x27;there are no overhead poles or wires anywhere.&#x27;
+    ).format(walk=walk)
+
+
+def openings_front(g):
+    fr = [o for o in g[&#x27;openings&#x27;] if o[&#x27;wall&#x27;] == &#x27;front&#x27;]
+    door = [o for o in fr if o[&#x27;type&#x27;] == &#x27;door&#x27;]
+    gar = [o for o in fr if o[&#x27;type&#x27;] == &#x27;garage&#x27;]
+    win = [o for o in fr if o[&#x27;type&#x27;] == &#x27;window&#x27;]
+    bits = []
+    if gar:
+        o = gar[0]
+        bits.append(&#x27;one carriage-style sectional garage door %s wide by %s tall with a single top row of small &#x27;
+                    &#x27;square windows&#x27; % (fti(o[&#x27;width_ft&#x27;]), fti(o[&#x27;height_ft&#x27;])))
+    if door:
+        o = door[0]
+        bits.append(&#x27;one insulated fiberglass entry door %s by %s with a glazed upper panel, at the left end of &#x27;
+                    &#x27;the porch&#x27; % (fti(o[&#x27;width_ft&#x27;]), fti(o[&#x27;height_ft&#x27;])))
+    for o in win:
+        bits.append(&#x27;one white vinyl twin single-hung window unit %s wide by %s tall under the porch&#x27;
+                    % (fti(o[&#x27;width_ft&#x27;]), fti(o[&#x27;height_ft&#x27;])))
+    return (&#x27;OPENINGS ON THIS ELEVATION, exactly this many and no more: &#x27; + &#x27;; &#x27;.join(bits) + &#x27;.&#x27;)
+
+
+def openings_rear(g):
+    rr = [o for o in g[&#x27;openings&#x27;] if o[&#x27;wall&#x27;] == &#x27;rear&#x27;]
+    bits = []
+    for o in rr:
+        if o[&#x27;type&#x27;] == &#x27;french&#x27;:
+            bits.append(&#x27;one white French patio door %s wide by %s tall&#x27; % (fti(o[&#x27;width_ft&#x27;]), fti(o[&#x27;height_ft&#x27;])))
+        else:
+            bits.append(&#x27;one white vinyl window %s wide by %s tall&#x27; % (fti(o[&#x27;width_ft&#x27;]), fti(o[&#x27;height_ft&#x27;])))
+    return &#x27;OPENINGS ON THE REAR WALL, exactly: &#x27; + &#x27;; &#x27;.join(bits) + &#x27;.&#x27;
+
+
+# --------------------------------------------------------------------------- the twelve shots
+def shots():
+    A, B = geo(&#x27;A&#x27;), geo(&#x27;B&#x27;)
+    out = []
+
+    out.append(dict(
+        id=&#x27;R-01&#x27;, file=&#x27;R-01_plan-a-front-scheme1.jpg&#x27;, aspect=&#x27;3:2&#x27;,
+        refs=[&#x27;renderings/reference/ref-plan-a-front-scheme1.png&#x27;],
+        must_ref=True,
+        shows=&#x27;Plan A &quot;The Springbrook&quot; front (lane) elevation in perspective, Scheme 1 Warm White&#x27;,
+        why=&#x27;Application Instructions item (11) — the street-visible front of the more common dwelling type; &#x27;
+            &#x27;shows one story, the 5-foot garage recess of Ordinance 2023-603 Table 4.2, and scheme 1 colours&#x27;,
+        prompt=(&#x27;Photorealistic architectural rendering of a single detached cottage home, matching the attached &#x27;
+                &#x27;measured front elevation drawing EXACTLY — same proportions, same roof forms, same openings, &#x27;
+                &#x27;same left-to-right composition. &#x27; + house_facts(A, &#x27;1&#x27;) + &#x27; &#x27; + openings_front(A) +
+                &#x27; The entry door is &#x27; + SCHEME_WORDS[&#x27;1&#x27;][&#x27;door&#x27;] + &#x27; and the garage door is &#x27; +
+                SCHEME_WORDS[&#x27;1&#x27;][&#x27;gdoor&#x27;] + &#x27;. &#x27; + lot_setting(&#x27;SW&#x27;) +
+                &#x27; CAMERA: &#x27; + CAMERA[&#x27;front34&#x27;] + &#x27;. &#x27; + LIGHT + &#x27;. NEGATIVE — do not include: any porch &#x27;
+                &#x27;railing; any change to the number, size or position of the windows and doors; more than one &#x27;
+                &#x27;house in the frame; &#x27; + NEG_COMMON + &#x27;.&#x27;),
+        checklist=[
+            &#x27;One story only; no dormer; roof ridge no higher than about %s above grade&#x27; % fti(A[&#x27;ridge_grade&#x27;]),
+            &#x27;Garage door face clearly set back behind the front wall of the house&#x27;,
+            &#x27;Front porch spans the full living wing and is covered by the wing gable — not a separate shed roof&#x27;,
+            &#x27;Three cedar posts on masonry piers; no railing&#x27;,
+            &#x27;Board-and-batten siding, warm white; ledge-stone water table about 30 inches tall; charcoal shingles&#x27;,
+            &#x27;Exactly one entry door and one twin window under the porch; one garage door&#x27;,
+            &#x27;Louvered vent centred in each front gable&#x27;,
+            &#x27;No text, no house number, no people, no cars&#x27;,
+        ]))
+
+    out.append(dict(
+        id=&#x27;R-02&#x27;, file=&#x27;R-02_plan-b-front-scheme2.jpg&#x27;, aspect=&#x27;3:2&#x27;,
+        refs=[&#x27;renderings/reference/ref-plan-b-front-scheme2.png&#x27;],
+        must_ref=True,
+        shows=&#x27;Plan B &quot;The Laurel&quot; front (lane) elevation in perspective, Scheme 2 Sage over brick&#x27;,
+        why=&#x27;Item (11) — the second dwelling type and the second approved colour scheme, with the brick base&#x27;,
+        prompt=(&#x27;Photorealistic architectural rendering of a single detached cottage home, matching the attached &#x27;
+                &#x27;measured front elevation drawing EXACTLY — same proportions, same roof forms, same openings, &#x27;
+                &#x27;same left-to-right composition. &#x27; + house_facts(B, &#x27;2&#x27;) + &#x27; &#x27; + openings_front(B) +
+                &#x27; The entry door is &#x27; + SCHEME_WORDS[&#x27;2&#x27;][&#x27;door&#x27;] + &#x27; and the garage door is &#x27; +
+                SCHEME_WORDS[&#x27;2&#x27;][&#x27;gdoor&#x27;] + &#x27;. &#x27; + lot_setting(&#x27;NE&#x27;) +
+                &#x27; CAMERA: &#x27; + CAMERA[&#x27;front34&#x27;] + &#x27;. &#x27; + LIGHT + &#x27;. NEGATIVE — do not include: any porch &#x27;
+                &#x27;railing; any change to the number, size or position of the windows and doors; more than one &#x27;
+                &#x27;house in the frame; &#x27; + NEG_COMMON + &#x27;.&#x27;),
+        checklist=[
+            &#x27;One story only; ridge no higher than about %s above grade&#x27; % fti(B[&#x27;ridge_grade&#x27;]),
+            &#x27;Sage lap siding at a 6-inch exposure with a red-brown brick water table and a cast-stone cap&#x27;,
+            &#x27;Garage face recessed behind the front wall; carriage-style door with one row of lites&#x27;,
+            &#x27;Porch under the wing gable, cedar posts on brick piers, no railing&#x27;,
+            &#x27;Sidewalk present on this side of the lane (this is a north-east-side lot)&#x27;,
+            &#x27;No text, no people, no cars&#x27;,
+        ]))
+
+    out.append(dict(
+        id=&#x27;R-03&#x27;, file=&#x27;R-03_plan-b-rear-garden-scheme3.jpg&#x27;, aspect=&#x27;3:2&#x27;,
+        refs=[&#x27;renderings/reference/ref-plan-b-rear-scheme2.png&#x27;],
+        must_ref=True,
+        shows=&#x27;Plan B rear / garden view, Scheme 3 Clay, with the %s and the rear yard running into the &#x27;
+              &#x27;20-foot undisturbed buffer&#x27; % B[&#x27;rear_kind&#x27;],
+        why=&#x27;Item (11) — on perimeter lots the rear elevation is what the adjoining R-1 neighbours see; and it &#x27;
+            &#x27;answers the &quot;what will I look at from my back yard&quot; question directly&#x27;,
+        prompt=(&#x27;Photorealistic architectural rendering of the REAR of a single-story detached cottage home, &#x27;
+                &#x27;matching the attached measured rear elevation drawing EXACTLY. &#x27; + house_facts(B, &#x27;3&#x27;) + &#x27; &#x27; +
+                openings_rear(B) + &#x27; At the rear there is a %s %s wide and %s deep, %d square feet, recessed &#x27;
+                &#x27;under the main roof with the same flat beadboard ceiling and cedar posts as the front porch. &#x27;
+                % (B[&#x27;rear_kind&#x27;], fti(B[&#x27;rear_w&#x27;]), fti(B[&#x27;rear_d&#x27;]), round(B[&#x27;rear_sf&#x27;])) +
+                &#x27;SETTING: the rear yard of a lot 50 feet 0 inches wide by 100 feet 0 inches deep in a new &#x27;
+                &#x27;55-and-over cottage community in Lilburn, Georgia. EVERY LOT IN THIS COMMUNITY BACKS ONTO A &#x27;
+                &#x27;20-FOOT-DEEP UNDISTURBED WOODED BUFFER, and this covered porch looks straight into it: a dense &#x27;
+                &#x27;standing wall of mature existing Piedmont hardwoods with their understory intact, untouched, no &#x27;
+                &#x27;fence, no clearing, no grading, beginning barely &#x27;
+                + fti(B[&#x27;lawn_behind_rear_edge_ft&#x27;]) + &#x27; beyond the edge of the porch slab. A narrow strip of new &#x27;
+                &#x27;fescue, and two simple chairs on the porch. CAMERA: eye-level three-quarter view from the rear &#x27;
+                &#x27;corner of the lot, looking back along the side of the house at the covered porch with the trees &#x27;
+                &#x27;standing close behind it, 35 mm lens, camera 5 feet 6 inches above the lawn. &#x27; + LIGHT +
+                &#x27;. NEGATIVE — do not include: any deck, any railing, any second story, any basement or &#x27;
+                &#x27;walk-out, any privacy fence, any cleared or graded ground inside the tree buffer; &#x27; +
+                NEG_COMMON + &#x27;.&#x27;),
+        checklist=[
+            &#x27;One story; rear roof is one continuous gable slope, no dormer, no bonus room&#x27;,
+            &#x27;Covered rear porch recessed under the main roof, not added on&#x27;,
+            &#x27;Undisturbed mature tree buffer immediately behind the lawn, no fence, no clearing&#x27;,
+            &#x27;Clay-beige lap siding, buff ledge stone base, driftwood shingles&#x27;,
+            &#x27;No walk-out, no basement windows, no retaining wall&#x27;,
+        ]))
+
+    lane_w = LANE.get(&#x27;pavement_width_ft&#x27;, 22)
+    out.append(dict(
+        id=&#x27;R-04&#x27;, file=&#x27;R-04_lane-streetscape-nw.jpg&#x27;, aspect=&#x27;16:9&#x27;,
+        refs=[&#x27;renderings/reference/ref-plan-a-front-scheme2.png&#x27;, &#x27;drawings/mcp-front.png&#x27;],
+        must_ref=True,
+        shows=&#x27;Streetscape looking north-west down the private lane: the %s pavement, the sidewalk on one &#x27;
+              &#x27;side, and the 50-foot lot rhythm with alternating plans and rotating colour schemes&#x27;
+              % fti(lane_w),
+        why=&#x27;Item (11) &quot;proper perspective&quot; for the street-visible sides collectively, and the most direct &#x27;
+            &#x27;answer to the 2025 neighbourhood objection about single-family character&#x27;,
+        prompt=(&#x27;Photorealistic architectural rendering of a residential street in a brand-new 55-and-over &#x27;
+                &#x27;cottage community, matching the attached front elevation drawing for the design of every &#x27;
+                &#x27;house. Looking north-west along a private lane exactly %s wide face-to-face of vertical &#x27;
+                &#x27;6-inch concrete curb and gutter, freshly paved dark asphalt with a 2 percent crown, with a &#x27;
+                &#x27;5-foot-wide concrete sidewalk set 2 feet behind the curb on the right-hand side only and no &#x27;
+                &#x27;sidewalk on the left. There is no parking on the street and no parked cars. Along both sides &#x27;
+                &#x27;stand ONE-STORY detached cottage homes on lots 50 feet 0 inches wide, each set back 15 feet &#x27;
+                &#x27;0 inches from the lane, so the front porches make a steady rhythm about 50 feet apart. Every &#x27;
+                &#x27;house is one story with a front-facing gable over a covered front porch carried on cedar &#x27;
+                &#x27;posts on masonry piers, a two-car garage wing whose door is set back 5 feet behind the front &#x27;
+                &#x27;wall of the house, architectural asphalt shingles, a masonry water table 30 inches tall, and &#x27;
+                &#x27;a plain gray concrete driveway 20 feet wide. The colours alternate down the street among only &#x27;
+                &#x27;three schemes and no two neighbouring houses share one: warm white board-and-batten with &#x27;
+                &#x27;gray-tan ledge stone and charcoal shingles; sage lap siding with red-brown brick and &#x27;
+                &#x27;weathered-wood shingles; clay-beige lap siding with buff ledge stone and driftwood shingles. &#x27;
+                &#x27;Young street trees stand at about 40 feet on centre in the strip between curb and walk, new &#x27;
+                &#x27;lawns, low foundation shrubs, and a continuous wall of tall mature hardwoods closing the view &#x27;
+                &#x27;behind the houses. All utilities underground; no poles, no wires. CAMERA: %s. %s. NEGATIVE — &#x27;
+                &#x27;do not include: any two-story house, townhouse, duplex or apartment building; any garage door &#x27;
+                &#x27;flush with or in front of the house front wall; any parked car or moving car; any porch &#x27;
+                &#x27;railing; any cul-de-sac bulb; any sidewalk on the left side; &#x27; % (fti(lane_w), CAMERA[&#x27;street&#x27;],
+                                                                                  LIGHT) + NEG_COMMON + &#x27;.&#x27;),
+        checklist=[
+            &#x27;Every house is one story&#x27;,
+            &#x27;Lane reads about %s wide with curb and gutter, sidewalk on one side only&#x27; % fti(lane_w),
+            &#x27;Front porches repeat at roughly 50-foot intervals&#x27;,
+            &#x27;Every garage door is visibly recessed behind the house front wall&#x27;,
+            &#x27;Only the three approved colour schemes appear, and no two adjacent houses match&#x27;,
+            &#x27;No parked cars on the street; no overhead wires&#x27;,
+        ]))
+
+    hh = LAY[&#x27;hammerheads&#x27;][0] if LAY.get(&#x27;hammerheads&#x27;) else None
+    out.append(dict(
+        id=&#x27;R-05&#x27;, file=&#x27;R-05_hammerhead-pocket-green.jpg&#x27;, aspect=&#x27;16:9&#x27;,
+        refs=[&#x27;drawings/mcp-sheet.png&#x27;],
+        must_ref=False,
+        shows=&#x27;A hammerhead (T) turnaround with the pocket greens either side&#x27;,
+        why=&#x27;Shows the Table 4.2 position — hammerhead turnarounds instead of a cul-de-sac bulb — and the fire &#x27;
+            &#x27;apparatus turnaround that the single-access analysis under IFC 2024 (GA) Appendix D103.4 depends on&#x27;,
+        prompt=(&#x27;Photorealistic architectural rendering of a T-shaped hammerhead turnaround on a private &#x27;
+                &#x27;residential lane in a new one-story 55-and-over cottage community in Piedmont Georgia. The &#x27;
+                &#x27;lane is %s wide face-to-face of vertical concrete curb; at the turnaround two paved legs, &#x27;
+                &#x27;each 20 feet 0 inches wide and 60 feet 0 inches long, run out at right angles, one to each &#x27;
+                &#x27;side, forming a T, with 25-foot curb returns — THERE IS NO CIRCULAR CUL-DE-SAC BULB AND NO &#x27;
+                &#x27;ISLAND. Beside the turnaround, on each side, is a pocket green 50 feet 0 inches by 100 feet &#x27;
+                &#x27;0 inches: mown lawn, a young shade tree or two, a simple bench, and a 5-foot concrete walk &#x27;
+                &#x27;across it. One-story cottage homes with front-facing gables and covered porches face the &#x27;
+                &#x27;green from both sides, in warm white, sage and clay colour schemes. Mature hardwoods stand &#x27;
+                &#x27;behind everything. CAMERA: eye-level from the lane looking into the turnaround, 35 mm lens, &#x27;
+                &#x27;camera 5 feet 6 inches above the pavement. %s. NEGATIVE — do not include: any circular &#x27;
+                &#x27;cul-de-sac, any turning circle, any island, any two-story building, any parked cars, any &#x27;
+                &#x27;playground equipment; &#x27; % (fti(lane_w), LIGHT) + NEG_COMMON + &#x27;.&#x27;),
+        checklist=[
+            &#x27;A T-shaped hammerhead, NOT a circular cul-de-sac or a bulb&#x27;,
+            &#x27;Two paved legs at right angles to the lane&#x27;,
+            &#x27;Pocket green with lawn and trees beside it&#x27;,
+            &#x27;All houses one story&#x27;,
+        ]))
+
+    sign = AM.get(&#x27;entry_sign&#x27;)
+    out.append(dict(
+        id=&#x27;R-06&#x27;, file=&#x27;R-06_entrance-arcado-monument.jpg&#x27;, aspect=&#x27;16:9&#x27;,
+        refs=[&#x27;drawings/mcp-front.png&#x27;],
+        must_ref=False,
+        shows=&#x27;The single Arcado Road entrance with the monument sign, the landscape strip and the frontage walk&#x27;,
+        why=&#x27;Item (11) — the sign is a structure whose size and location must be shown; and this is the exhibit &#x27;
+            &#x27;for the access-spacing case and for the commitment that the community is not gated&#x27;,
+        prompt=(&#x27;Photorealistic architectural rendering of the single entrance to a new 55-and-over cottage &#x27;
+                &#x27;community, seen from a two-lane county road. The entrance drive is 24 feet 0 inches wide with &#x27;
+                &#x27;25-foot curb returns and vertical concrete curb, and it curves gently away to the left as it &#x27;
+                &#x27;enters the property. THERE IS NO GATE AND NO GATEHOUSE. On the right of the drive stands a &#x27;
+                &#x27;low ground-mounted monument sign: a masonry base of gray-tan ledge stone matching the houses, &#x27;
+                &#x27;a cast-stone cap, a sign face 8 feet 0 inches wide and 4 feet 0 inches tall (32 square feet) &#x27;
+                &#x27;with dimensional metal letters, the whole structure not more than 6 feet 0 inches tall, set &#x27;
+                &#x27;in a planted bed of low shrubs and seasonal colour, lit by two small shielded ground-mounted &#x27;
+                &#x27;flood lights aimed upward at the face only. Along the road frontage runs a 10-foot-wide &#x27;
+                &#x27;landscaped strip planted with canopy trees and shrubs, and a new 5-foot-wide concrete &#x27;
+                &#x27;sidewalk. Beyond the entrance the drive opens onto a mown village green with a one-story &#x27;
+                &#x27;clubhouse in the distance. Mature hardwoods frame both sides. CAMERA: eye-level from the &#x27;
+                &#x27;opposite shoulder of the county road, 35 mm lens, camera 5 feet 6 inches above the road. %s. &#x27;
+                &#x27;NEGATIVE — do not include: any gate, gate arm, guardhouse, fence across the drive, brick &#x27;
+                &#x27;entry walls taller than the monument sign, any illuminated or internally lit sign box, any &#x27;
+                &#x27;changeable-copy or digital sign, any flag pole, any two-story building; %s.&#x27;
+                % (LIGHT, NEG_COMMON)),
+        checklist=[
+            &#x27;No gate and no guardhouse&#x27;,
+            &#x27;One monument sign, low, masonry base, externally lit, clearly under about 6 feet tall&#x27;,
+            &#x27;Entrance drive reads about 24 feet wide with curb returns&#x27;,
+            &#x27;Landscape strip and a frontage sidewalk along the county road&#x27;,
+            &#x27;The clubhouse in the distance is one story&#x27;,
+        ]))
+
+    cl = AM.get(&#x27;clubhouse&#x27;)
+    cl_w = abs(cl[2][0] - cl[0][0]) if cl and isinstance(cl, list) and len(cl) &gt;= 3 else 60.0
+    cl_d = abs(cl[2][1] - cl[0][1]) if cl and isinstance(cl, list) and len(cl) &gt;= 3 else 40.0
+    out.append(dict(
+        id=&#x27;R-07&#x27;, file=&#x27;R-07_clubhouse-village-green.jpg&#x27;, aspect=&#x27;3:2&#x27;,
+        refs=[&#x27;drawings/mcp-front.png&#x27;],
+        must_ref=False,
+        shows=&#x27;The one-story clubhouse of about %d square feet across the village green, with the mail kiosk&#x27;
+              % round(AM.get(&#x27;clubhouse_sf&#x27;, 2400)),
+        why=&#x27;Item (11) — the clubhouse and the mail kiosk are structures visible from the street and need &#x27;
+            &#x27;colour and material imagery like the dwellings&#x27;,
+        prompt=(&#x27;Photorealistic architectural rendering of a small one-story neighbourhood clubhouse in a new &#x27;
+                &#x27;55-and-over cottage community in Piedmont Georgia. The building is a simple rectangle about &#x27;
+                &#x27;%s long and %s deep, about %d square feet, ONE STORY, with a gabled architectural-shingle &#x27;
+                &#x27;roof, a deep covered porch across the long side facing a lawn, 8x8 cedar posts on masonry &#x27;
+                &#x27;piers, and the same materials as the cottages: fiber-cement lap siding in warm white, a &#x27;
+                &#x27;gray-tan ledge-stone water table 30 inches tall, soft-white trim, and weathered-wood &#x27;
+                &#x27;shingles. Large windows face the lawn; the entry is step-free from a concrete walk. In front &#x27;
+                &#x27;of it lies a mown village green of about a third of an acre with young shade trees, a walking &#x27;
+                &#x27;path and two benches. To one side stands a small open mail shelter about 16 feet by 10 feet &#x27;
+                &#x27;with the same roof and materials, sheltering a bank of USPS cluster mailboxes and parcel &#x27;
+                &#x27;lockers, with four marked parking spaces beside it. Mature hardwood trees stand behind. &#x27;
+                &#x27;CAMERA: eye-level from the far side of the green looking at the porch, 35 mm lens, camera 5 &#x27;
+                &#x27;feet 6 inches above the lawn. %s. NEGATIVE — do not include: any second story, any pool, any &#x27;
+                &#x27;clock tower or cupola larger than a small vent, any commercial signage, any two-story &#x27;
+                &#x27;building anywhere in frame, any individual curbside mailboxes; %s.&#x27;
+                % (fti(cl_w), fti(cl_d), round(AM.get(&#x27;clubhouse_sf&#x27;, 2400)), LIGHT, NEG_COMMON)),
+        checklist=[
+            &#x27;Clubhouse is one story and reads about the right size, not a big civic building&#x27;,
+            &#x27;Same palette as the cottages: warm white siding, ledge-stone base, weathered-wood shingles&#x27;,
+            &#x27;Covered porch facing the green; step-free entry&#x27;,
+            &#x27;A mail shelter with cluster boxes, and no individual curbside mailboxes anywhere&#x27;,
+        ]))
+
+    pads = AM.get(&#x27;pickleball&#x27;) or []
+    crt = AM.get(&#x27;courts&#x27;) or []
+    def _wh(poly):
+        xs=[q[0] for q in poly]; ys=[q[1] for q in poly]
+        return (max(xs)-min(xs), max(ys)-min(ys))
+    pad_w, pad_d = _wh(pads[0]) if pads else (60.0, 30.0)
+    ct_w, ct_d = _wh(crt[0]) if crt else (44.0, 20.0)
+    # do the pads abut (one enclosure) or stand apart (separate enclosures)?
+    if len(pads) &gt; 1:
+        ys0 = sorted(q[1] for q in pads[0]); ys1 = sorted(q[1] for q in pads[1])
+        gap = abs(min(ys1) - max(ys0))
+        together = gap &lt; 0.5
+    else:
+        together = True
+    encl_w = pad_w
+    encl_d = pad_d * max(1, len(pads)) if together else pad_d
+    fence_txt = ((&#x27;ONE single fenced enclosure %s by %s containing BOTH courts side by side, with no gap &#x27;
+                  &#x27;and no fence between them&#x27;) % (fti(encl_w), fti(encl_d))
+                 if together else
+                 (&#x27;TWO separate fenced enclosures, each %s by %s, standing apart with mown grass between &#x27;
+                  &#x27;them&#x27;) % (fti(pad_w), fti(pad_d)))
+    out.append(dict(
+        id=&#x27;R-08&#x27;, file=&#x27;R-08_pickleball-courts.jpg&#x27;, aspect=&#x27;3:2&#x27;,
+        refs=[],
+        must_ref=False,
+        shows=&#x27;The two pickleball courts at their real size, unlit&#x27;,
+        why=&#x27;Shows the amenity actually proposed at its actual size, and shows the voluntary condition that &#x27;
+            &#x27;the courts are not lit&#x27;,
+        prompt=(&#x27;Photorealistic rendering of a pickleball facility in a new 55-and-over cottage community in &#x27;
+                &#x27;Piedmont Georgia. There are exactly TWO courts, each exactly %s long by %s wide, painted blue &#x27;
+                &#x27;inside the lines with a green surround, crisp white lines and a low pickleball net 34 inches &#x27;
+                &#x27;high at the centre. They sit side by side with their long axes parallel, inside %s. The fence &#x27;
+                &#x27;is 10-foot-tall black PVC-coated chain link on all sides. THERE ARE NO LIGHT POLES, NO LIGHT &#x27;
+                &#x27;FIXTURES AND NO FLOODLIGHTS ANYWHERE. Around the enclosure: mown fescue lawn, a wooden bench, &#x27;
+                &#x27;a young shade tree, and beyond it a row of small ONE-STORY cottage homes with front-facing &#x27;
+                &#x27;gables, covered porches on cedar posts and fiber-cement siding in warm white, sage and clay. &#x27;
+                &#x27;Tall mature hardwood trees behind. CAMERA: eye-level three-quarter view from an outside corner &#x27;
+                &#x27;so the whole enclosure and both courts are visible, 35 mm lens, camera 5 feet 6 inches above &#x27;
+                &#x27;the ground. %s. NEGATIVE — do not include: any tennis court, tennis net or tennis court &#x27;
+                &#x27;markings; more than two courts; any light pole, light fixture or floodlight; any bleachers, &#x27;
+                &#x27;grandstand, shade canopy or scoreboard; any two-story building; %s.&#x27;
+                % (fti(ct_w), fti(ct_d), fence_txt, LIGHT, NEG_COMMON)),
+        checklist=[
+            &#x27;Exactly two courts, side by side, long axes parallel&#x27;,
+            &#x27;The enclosure matches the drawing: %s&#x27; % fence_txt,
+            &#x27;Black chain-link fence, no light poles anywhere&#x27;,
+            &#x27;Court proportions read as pickleball (%s by %s), not tennis&#x27; % (fti(ct_w), fti(ct_d)),
+            &#x27;Surrounding houses are one story&#x27;,
+        ]))
+
+    out.append(dict(
+        id=&#x27;R-09&#x27;, file=&#x27;R-09_aerial-oblique-nw.jpg&#x27;, aspect=&#x27;16:9&#x27;,
+        refs=[&#x27;drawings/mcp-sheet.png&#x27;],
+        must_ref=True,
+        shows=&#x27;Aerial oblique along the whole strip: one entrance in the south-west third, %d one-story roofs &#x27;
+              &#x27;in two rows, one lane, the turnarounds, greens, two dry basins, creek woods and the buffer&#x27;
+              % M.get(&#x27;lots&#x27;, 43),
+        why=&#x27;Item (11) &quot;proper perspective&quot; at site scale — the exhibit that shows the real proportion of the &#x27;
+            &#x27;property and that nothing crowds the neighbouring lots&#x27;,
+        prompt=(&#x27;Photorealistic aerial rendering of a new 55-and-over cottage community on a LONG NARROW &#x27;
+                &#x27;property in Lilburn, Gwinnett County, Georgia. THE PROPORTION IS THE POINT: the property is a &#x27;
+                &#x27;straight strip only about 240 feet wide but about 1,750 feet long, running away from the road &#x27;
+                &#x27;toward the upper left; it must read as narrow and very deep, roughly seven times longer than &#x27;
+                &#x27;it is wide. A single entrance drive leaves the two-lane county road at the bottom of the &#x27;
+                &#x27;frame, positioned in the south-western third of the road frontage, not centred, and curves to &#x27;
+                &#x27;the centreline of one private lane that runs the whole length of the property. %d ONE-STORY &#x27;
+                &#x27;cottage homes with gabled shingle roofs line that single lane, about %d in the longer row on &#x27;
+                &#x27;the right and about %d on the left, every one of them a small one-story house with a &#x27;
+                &#x27;front-facing gable and a covered porch, roofs in charcoal, weathered wood and driftwood &#x27;
+                &#x27;brown. Near the road end: a mown village green, a small one-story clubhouse, two fenced &#x27;
+                &#x27;pickleball courts, and a small parking bay. Along the lane: %d T-shaped hammerhead &#x27;
+                &#x27;turnarounds and %d open lawn pocket greens. On the left-hand side toward the far end: two &#x27;
+                &#x27;grassed DRY detention basins with mown side slopes and no standing water, and a preserved &#x27;
+                &#x27;block of untouched hardwood woods around a small stream head. A continuous 20-foot-deep band &#x27;
+                &#x27;of mature untouched hardwood trees runs along both long sides and the far end, separating the &#x27;
+                &#x27;community from the existing single-family subdivisions of larger two-story houses that &#x27;
+                &#x27;surround it on every side. CAMERA: %s. %s. NEGATIVE — do not include: any second entrance or &#x27;
+                &#x27;any connection to a street at the far end; any cul-de-sac circle; any two-story house inside &#x27;
+                &#x27;the community; any apartment or townhouse building; any pond with open water; any construction &#x27;
+                &#x27;equipment; any wide or square site shape — the site must read as a long narrow strip; %s.&#x27;
+                % (M.get(&#x27;lots&#x27;, 43), M.get(&#x27;lots_ne&#x27;, 27), M.get(&#x27;lots_sw&#x27;, 16),
+                   len(LAY.get(&#x27;hammerheads&#x27;, [])), len(LAY.get(&#x27;greens&#x27;, [])),
+                   CAMERA[&#x27;aerial&#x27;], LIGHT, NEG_COMMON)),
+        checklist=[
+            &#x27;The site reads as a long narrow strip about seven times longer than wide&#x27;,
+            &#x27;Exactly one entrance, and it is off-centre toward one side of the frontage&#x27;,
+            &#x27;One lane down the middle; houses on both sides; no second street and no through connection&#x27;,
+            &#x27;Every house inside the community is one story&#x27;,
+            &#x27;Two grassed dry basins with no standing water; preserved woods at the far end&#x27;,
+            &#x27;A continuous treed buffer on both long sides and the rear&#x27;,
+        ]))
+
+    out.append(dict(
+        id=&#x27;R-10&#x27;, file=&#x27;R-10_buffer-from-neighbour.jpg&#x27;, aspect=&#x27;3:2&#x27;,
+        refs=[&#x27;renderings/reference/ref-plan-a-rear-scheme2.png&#x27;],
+        must_ref=False,
+        shows=&#x27;Eye-level view from an adjoining back yard, across the 20-foot undisturbed buffer, to the rear &#x27;
+              &#x27;of a cottage beyond&#x27;,
+        why=&#x27;The adjoining owners\&#x27; objection is about what they will see; this is the exhibit that answers it&#x27;,
+        prompt=(&#x27;Photorealistic view from the back yard of an existing single-family house, looking across the &#x27;
+                &#x27;rear property line into a new 55-and-over cottage community. In the near foreground is mown &#x27;
+                &#x27;lawn and the corner of an existing older brick-and-siding house. Immediately beyond the &#x27;
+                &#x27;property line stands a 20-foot-deep band of UNDISTURBED existing Piedmont hardwood forest — &#x27;
+                &#x27;mature oaks, hickories and poplars with their understory intact, not cleared, not thinned, &#x27;
+                &#x27;not graded, no fence and no wall. Through and above the trees, only about &#x27;
+                + fti(A[&#x27;lawn_behind_house_ft&#x27;]) + &#x27; beyond the far &#x27;
+                &#x27;edge of that buffer, is glimpsed the rear of a ONE-STORY cottage home: a single continuous &#x27;
+                &#x27;gable roof of architectural shingles with its ridge only about %s above the ground, a couple &#x27;
+                &#x27;of windows and a small covered porch, sage lap siding and a brick water table. The cottage &#x27;
+                &#x27;roof sits BELOW the canopy of the buffer trees. CAMERA: %s. %s. NEGATIVE — do not include: &#x27;
+                &#x27;any two-story building; any building that towers over the trees; any cleared, graded or &#x27;
+                &#x27;thinned ground inside the tree buffer; any privacy fence, retaining wall or berm; any &#x27;
+                &#x27;construction equipment; %s.&#x27; % (fti(A[&#x27;ridge_grade&#x27;]), CAMERA[&#x27;neighbour&#x27;], LIGHT, NEG_COMMON)),
+        checklist=[
+            &#x27;The tree buffer is dense and clearly undisturbed, with understory intact&#x27;,
+            &#x27;The new cottage is one story and its ridge sits below the tree canopy&#x27;,
+            &#x27;No fence, wall or berm on the line&#x27;,
+            &#x27;No grading or clearing visible inside the buffer&#x27;,
+        ]))
+
+    p2 = LAY[&#x27;ponds&#x27;][1] if len(LAY.get(&#x27;ponds&#x27;, [])) &gt; 1 else None
+    out.append(dict(
+        id=&#x27;R-11&#x27;, file=&#x27;R-11_creek-woods-dry-basin.jpg&#x27;, aspect=&#x27;16:9&#x27;,
+        refs=[&#x27;drawings/mcp-sheet.png&#x27;],
+        must_ref=False,
+        shows=&#x27;The preserved creek-woods tract at the stream head with its undisturbed buffer, and the rear &#x27;
+              &#x27;basin as a grassed DRY basin&#x27;,
+        why=&#x27;Answers the stormwater, erosion and downstream water-quality objection, and shows that the stream &#x27;
+            &#x27;head and its buffer are preserved rather than piped&#x27;,
+        prompt=(&#x27;Photorealistic rendering of the stormwater and stream-protection area at the rear of a new &#x27;
+                &#x27;one-story 55-and-over cottage community in Piedmont Georgia. On the right, a preserved block &#x27;
+                &#x27;of untouched mature hardwood woods around the head of a small seasonal stream, with a &#x27;
+                &#x27;50-foot-wide undisturbed wooded buffer along it, leaf litter and understory intact and no &#x27;
+                &#x27;clearing at all. On the left, a shallow grassed DRY detention basin: mown fescue side slopes &#x27;
+                &#x27;at about 3 to 1, a flat grassed bottom with NO STANDING WATER, a small concrete outlet &#x27;
+                &#x27;structure with a trash rack at the low end, a riprap outfall apron, and a mown maintenance &#x27;
+                &#x27;access strip running down to it. No fence around the basin. Behind, the rear row of &#x27;
+                &#x27;one-story cottage homes with gabled shingle roofs, and beyond them the 20-foot undisturbed &#x27;
+                &#x27;tree buffer along the property line. CAMERA: eye-level from the maintenance access looking &#x27;
+                &#x27;across the basin toward the woods, 35 mm lens, camera 5 feet 6 inches above the ground. %s. &#x27;
+                &#x27;NEGATIVE — do not include: any pond, lake or standing water; any fountain; any concrete-lined &#x27;
+                &#x27;channel; any cleared ground inside the wooded buffer; any two-story building; any chain-link &#x27;
+                &#x27;fence around the basin; %s.&#x27; % (LIGHT, NEG_COMMON)),
+        checklist=[
+            &#x27;The basin is grassed and DRY — no standing water, no pond&#x27;,
+            &#x27;Outlet structure and riprap apron visible&#x27;,
+            &#x27;The stream-head woods are untouched, with understory&#x27;,
+            &#x27;Houses in the background are one story&#x27;,
+        ]))
+
+    out.append(dict(
+        id=&#x27;R-12&#x27;, file=&#x27;R-12_materials-colour-board.jpg&#x27;, aspect=&#x27;4:3&#x27;,
+        refs=[],
+        must_ref=False,
+        shows=&#x27;A flat-lay materials and colour board, three columns, one per approved scheme&#x27;,
+        why=&#x27;Item (11)\&#x27;s literal requirement — &quot;the color and materials of all structures and roofing&quot; — as &#x27;
+            &#x27;one filable exhibit&#x27;,
+        prompt=(&#x27;Photorealistic flat-lay architectural materials and finishes board, photographed straight down &#x27;
+                &#x27;on a light neutral background, arranged as THREE CLEAN VERTICAL COLUMNS with an even gap &#x27;
+                &#x27;between them and generous empty margins. Each column holds the same seven samples stacked &#x27;
+                &#x27;neatly in the same order, slightly overlapping: a large square of exterior wall cladding, a &#x27;
+                &#x27;painted trim board, a rectangle of architectural asphalt roof shingles, a piece of masonry &#x27;
+                &#x27;veneer, a small piece of buff cast stone, a short square section of natural-stained cedar &#x27;
+                &#x27;post, and a small painted door-colour chip. COLUMN ONE: warm white fiber-cement &#x27;
+                &#x27;board-and-batten panel with 12-inch battens; warm white painted trim; charcoal-gray &#x27;
+                &#x27;architectural shingles; gray-tan dry-stack ledge stone; buff cast stone; natural cedar; a deep &#x27;
+                &#x27;green chip. COLUMN TWO: sage green fiber-cement lap siding with a 6-inch exposure; soft white &#x27;
+                &#x27;trim; weathered-wood brown shingles; red-brown modular brick; buff cast stone; natural cedar; &#x27;
+                &#x27;an oxblood red chip. COLUMN THREE: clay-beige fiber-cement lap siding with a 6-inch exposure; &#x27;
+                &#x27;cream trim; driftwood brown shingles; buff-tan dry-stack ledge stone; buff cast stone; &#x27;
+                &#x27;natural cedar; a navy blue chip. Soft even studio light, true colour, sharp texture on every &#x27;
+                &#x27;sample. NEGATIVE — do not include: any text, label, letter, number or handwriting anywhere; &#x27;
+                &#x27;any tools, pencils, hands, plants, coffee cups or props; any fourth column; any colour not &#x27;
+                &#x27;listed; any glossy or metallic finish.&#x27;),
+        checklist=[
+            &#x27;Exactly three columns, clearly separated&#x27;,
+            &#x27;Column one is warm white board-and-batten; column two sage lap; column three clay lap&#x27;,
+            &#x27;Roof samples read charcoal / weathered wood / driftwood&#x27;,
+            &#x27;Masonry: gray-tan stone / red-brown brick / buff-tan stone&#x27;,
+            &#x27;No text or labels anywhere in the image (labels are typeset onto the sheet afterwards)&#x27;,
+        ]))
+
+    return out
+
+
+HEADER = &quot;&quot;&quot;---
+title: &quot;Dimension-locked image prompts — The Cottages at Arcado Springs&quot;
+date: {date}
+status: &quot;GENERATED by tools/prompts.py from data/plans.json, data/layout.json and tools/elevations.py — do not hand-edit; change the design and re-run&quot;
+purpose: &quot;City of Lilburn 2026 Application Instructions item (11) — architectural renderings&quot;
+---
+
+# Image prompts — {n} shots
+
+Item (11) of the City of Lilburn 2026 Application Instructions: *&quot;An architectural rendering or elevation of
+each side of the structure visible from the street shall be submitted. The drawings shall be to scale or in
+proper perspective and shall include the color and materials of all structures and roofing and location and
+size of wall signs. Visual imagery may be used.&quot;*
+
+**Every dimension in every prompt below is read at run time from the files that generate the drawings**, so
+no prompt can state a dimension the drawings do not show. Re-run `python3 tools/prompts.py` after any design
+change, then re-generate the affected images.
+
+**Model and settings.** `nano_banana_pro` (Google), resolution `2k`, the aspect ratio given per shot. Where a
+shot lists a reference drawing, attach it in the `image_references` role — that is what holds the massing,
+the openings and the proportions. Shots marked *reference required* must not be generated text-only.
+
+**Accepting an image.** Check it against its fidelity checklist before it goes in the package. If it fails,
+do not retouch the prompt&#x27;s dimensions to match the image — re-generate, and if it fails twice, tighten the
+negative list on the specific error. The scaled drawings govern; the images illustrate.
+
+**The locked design basis these prompts carry** (all from the current drawings):
+
+| Item | Value |
+|---|---|
+{basis}
+
+---
+&quot;&quot;&quot;
+
+
+def basis_rows():
+    A, B = geo(&#x27;A&#x27;), geo(&#x27;B&#x27;)
+    r = []
+    for g in (A, B):
+        r.append(&#x27;| Plan %s &quot;%s&quot; body | %s wide x %s deep; roof to roof %s; %d SF conditioned |&#x27;
+                 % (g[&#x27;id&#x27;], g[&#x27;name&#x27;], fti(g[&#x27;body_w&#x27;]), fti(g[&#x27;body_d&#x27;]), fti(g[&#x27;roof2roof&#x27;]), round(g[&#x27;cond&#x27;])))
+        r.append(&#x27;| Plan %s heights | plate %s; highest ridge %s above the floor, %s above grade; finished &#x27;
+                 &#x27;floor %s above grade |&#x27; % (g[&#x27;id&#x27;], fti(g[&#x27;plate&#x27;]), fti(g[&#x27;ridge&#x27;]), fti(g[&#x27;ridge_grade&#x27;]),
+                                             fti(g[&#x27;ff&#x27;])))
+        r.append(&#x27;| Plan %s roofs | main %d:%d, living wing %d:%d, garage %d:%d; front porch under the wing &#x27;
+                 &#x27;gable, %s x %s (%d SF) |&#x27;
+                 % (g[&#x27;id&#x27;], g[&#x27;main&#x27;][&#x27;pitch&#x27;][0], g[&#x27;main&#x27;][&#x27;pitch&#x27;][1], g[&#x27;wing&#x27;][&#x27;pitch&#x27;][0],
+                    g[&#x27;wing&#x27;][&#x27;pitch&#x27;][1], g[&#x27;garage&#x27;][&#x27;pitch&#x27;][0], g[&#x27;garage&#x27;][&#x27;pitch&#x27;][1],
+                    fti(g[&#x27;porch_w&#x27;]), fti(g[&#x27;porch_d&#x27;]), round(g[&#x27;porch_sf&#x27;])))
+    r.append(&#x27;| Lots | %d lots, %s x %s = %d SF; density %s du/ac on 9.44 ac |&#x27;
+             % (M.get(&#x27;lots&#x27;, 0), fti(M.get(&#x27;lot_width_min_ft&#x27;, 50)), fti(M.get(&#x27;lot_depth_min_ft&#x27;, 100)),
+                round(M.get(&#x27;lot_area_min_sf&#x27;, 5000)), M.get(&#x27;density_du_ac_deeded&#x27;, 0)))
+    r.append(&#x27;| Lane | %s pavement, %s tract minimum, %s long; 5-ft sidewalk one side |&#x27;
+             % (fti(LANE.get(&#x27;pavement_width_ft&#x27;, 22)), fti(M.get(&#x27;lane_tract_width_ft_min&#x27;, 0)),
+                fti(M.get(&#x27;lane_length_ft&#x27;, 0))))
+    r.append(&#x27;| Turnarounds | %d hammerheads, no cul-de-sac bulb |&#x27; % len(LAY.get(&#x27;hammerheads&#x27;, [])))
+    r.append(&#x27;| Open space | %d SF = %s ac = %s%% of the GIS area |&#x27;
+             % (round(M.get(&#x27;open_space_sf&#x27;, 0)), M.get(&#x27;open_space_ac&#x27;, 0), M.get(&#x27;open_space_pct_gis&#x27;, 0)))
+    r.append(&#x27;| Perimeter buffer | %s undisturbed on the two long sides and the rear |&#x27;
+             % fti(LAY[&#x27;buffers&#x27;].get(&#x27;perimeter_buffer_ft&#x27;, 20)))
+    r.append(&#x27;| Entrance | one only, %s wide, %s from the Arcadia Place centreline, no gate |&#x27;
+             % (fti(LANE[&#x27;entrance&#x27;].get(&#x27;drive_width_ft&#x27;, 24)),
+                fti(LANE[&#x27;entrance&#x27;].get(&#x27;separation_chord_ft&#x27;, 0))))
+    return &#x27;\n&#x27;.join(r)
+
+
+def main():
+    sh = shots()
+    md = [HEADER.format(date=&#x27;2026-09-03&#x27;, n=len(sh), basis=basis_rows())]
+    for s in sh:
+        md.append(&#x27;## %s — `%s`\n&#x27; % (s[&#x27;id&#x27;], s[&#x27;file&#x27;]))
+        md.append(&#x27;**Shows.** %s\n&#x27; % s[&#x27;shows&#x27;])
+        md.append(&#x27;**Why the application needs it.** %s\n&#x27; % s[&#x27;why&#x27;])
+        md.append(&#x27;**Aspect ratio** `%s` · **model** `nano_banana_pro` · **resolution** `2k` · **reference &#x27;
+                  &#x27;drawing%s** %s\n&#x27;
+                  % (s[&#x27;aspect&#x27;], &#x27; (REQUIRED)&#x27; if s[&#x27;must_ref&#x27;] else &#x27;&#x27;,
+                     &#x27;, &#x27;.join(&#x27;`%s`&#x27; % r for r in s[&#x27;refs&#x27;]) if s[&#x27;refs&#x27;] else &#x27;*none — text only*&#x27;))
+        md.append(&#x27;**Prompt** — paste verbatim:\n&#x27;)
+        md.append(&#x27;```\n%s\n```\n&#x27; % s[&#x27;prompt&#x27;])
+        md.append(&#x27;**Fidelity checklist** — verify every line before the image goes in the package:\n&#x27;)
+        for c in s[&#x27;checklist&#x27;]:
+            md.append(&#x27;- [ ] %s&#x27; % c)
+        md.append(&#x27;\n---\n&#x27;)
+    md.append(&#x27;&gt; **Disclaimer:** This is an AI-generated analysis for preliminary planning purposes. All &#x27;
+              &#x27;findings must be verified by a licensed professional before use in design, permitting, or &#x27;
+              &#x27;regulatory submissions.\n&#x27;)
+    md.append(&#x27;&lt;!-- architecture-studio:requires-disclaimer --&gt;&#x27;)
+    open(os.path.join(REND, &#x27;PROMPTS.md&#x27;), &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;).write(&#x27;\n&#x27;.join(md) + &#x27;\n&#x27;)
+    json.dump({&#x27;generated&#x27;: &#x27;2026-09-03&#x27;, &#x27;generator&#x27;: &#x27;tools/prompts.py&#x27;, &#x27;model&#x27;: &#x27;nano_banana_pro&#x27;,
+               &#x27;shots&#x27;: sh}, open(os.path.join(REND, &#x27;prompts.json&#x27;), &#x27;w&#x27;), indent=1, ensure_ascii=False)
+    print(&#x27;wrote renderings/PROMPTS.md (%d shots) and renderings/prompts.json&#x27; % len(sh))
+    for s in sh:
+        print(&#x27;   %-6s %-42s %5d chars  refs=%d&#x27; % (s[&#x27;id&#x27;], s[&#x27;file&#x27;], len(s[&#x27;prompt&#x27;]), len(s[&#x27;refs&#x27;])))
+
+
+if __name__ == &#x27;__main__&#x27;:
+    main()
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/prompts.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

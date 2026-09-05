@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Filing transmittal and index generator (docs/00) — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> Python</div>
+    
+    <h1>Filing transmittal and index generator (docs/00)</h1><p class="src-note">Python · 231 lines · <a href="/data-room/src/submission/tools/transmittal.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Filing transmittal and index — The Cottages at Arcado Springs (R-1 -&gt; R-2 rezoning, Lilburn GA).
+
+    python3 tools/transmittal.py        # writes docs/00-transmittal-and-index.md
+
+The transmittal is generated rather than typed so its index can never claim a sheet or a document the
+package does not actually contain: the tables below are built by scanning drawings/ and docs/ at run time
+and matching them against the intended set. Anything intended but not yet issued is printed as
+NOT YET ISSUED rather than silently omitted.
+
+&gt; **Disclaimer:** This is an AI-generated analysis for preliminary planning purposes. All findings must be verified by a licensed professional before use in design, permitting, or regulatory submissions.
+
+&lt;!-- architecture-studio:requires-disclaimer --&gt;
+&quot;&quot;&quot;
+import json, os, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+DOCS = os.path.join(ROOT, &#x27;docs&#x27;)
+DRAW = os.path.join(ROOT, &#x27;drawings&#x27;)
+REND = os.path.join(ROOT, &#x27;renderings&#x27;)
+DATE = &#x27;2026-09-03&#x27;
+
+# The sheet register has ONE home: tools/cover.py, which draws the sheet index on Sheet C-0.0.
+# Importing it here means the transmittal, the cover sheet and verify/check_sheet_refs.py can never
+# disagree about what sheet a number refers to. A None source file means the sheet is intended but
+# not yet issued (an LDP-stage sheet, or one still to be drawn).
+import cover as _cover                                       # noqa: E402
+SHEETS = [(no, title, f, size, scale) for no, title, f, size, scale in _cover.SHEETS]
+
+# instruction item, what it is, the file that answers it
+ITEMS = [
+    (&#x27;1&#x27;, &#x27;Application Form&#x27;, &#x27;docs/01-application-form-data.md&#x27;,
+     &#x27;Every field of the City form with its entry and its basis. The form itself is transcribed and signed &#x27;
+     &#x27;by the applicant.&#x27;),
+    (&#x27;2&#x27;, &#x27;Application Fee&#x27;, &#x27;docs/01-application-form-data.md&#x27;,
+     &#x27;Rezoning fee for a 5.0-9.9 acre property, per the fee schedule in force on the filing date. &#x27;
+     &#x27;Check payable to City of Lilburn. CONFIRM THE CURRENT AMOUNT WITH THE PLANNING DEPARTMENT ON THE &#x27;
+     &#x27;FILING DATE — the FY2026-2027 schedule (Resolution No. 2026-08, adopted 2026-08-31) supersedes the &#x27;
+     &#x27;FY25-26 schedule still posted online.&#x27;),
+    (&#x27;3&#x27;, &#x27;Standards Governing the Exercise of the Zoning Power&#x27;, &#x27;docs/04-standards-governing-zoning-power.md&#x27;,
+     &#x27;The six criteria of Ordinance 2023-603 section 1003-7, answered in full; &quot;see attached&quot; on the form.&#x27;),
+    (&#x27;4&#x27;, &#x27;Conflict of Interest Form&#x27;, &#x27;docs/07-conflict-of-interest-and-certifications.md&#x27;,
+     &#x27;Campaign-contribution and gift disclosure under O.C.G.A. section 36-67A-3, filed WITH the application &#x27;
+     &#x27;so the ten-day clock is never at issue. Only the signer can declare the contribution history.&#x27;),
+    (&#x27;5&#x27;, &#x27;Notarized Signatures&#x27;, &#x27;docs/07-conflict-of-interest-and-certifications.md&#x27;,
+     &#x27;Applicant certification plus an owner certification for each owner of record, before a Georgia notary. &#x27;
+     &#x27;Two ownership groups: PINs 033 and 015 (Awad) and PINs 014 and 162 (Mendez / Roblero de Leon).&#x27;),
+    (&#x27;6&#x27;, &#x27;Letter of Intent&#x27;, &#x27;docs/03-letter-of-intent.md&#x27;,
+     &#x27;Describes the request and its justification, states whether any buffer reduction is requested, and &#x27;
+     &#x27;offers the voluntary zoning conditions. The conditions are listed separately at &#x27;
+     &#x27;`data/voluntary-conditions.md` and reproduced in the letter.&#x27;),
+    (&#x27;7&#x27;, &#x27;Legal Description&#x27;, &#x27;docs/05-legal-description-DRAFT.md&#x27;,
+     &#x27;Typed metes and bounds of the property to be rezoned. **DRAFT — derived from the Gwinnett County GIS &#x27;
+     &#x27;parcel fabric. The sealed description from a Georgia registered land surveyor replaces it and governs.**&#x27;),
+    (&#x27;8&#x27;, &#x27;Site Plan&#x27;, &#x27;drawings/&#x27;,
+     &#x27;One full-size copy drawn to scale, plus the PDF e-mailed to returner@cityoflilburn.com. The C-series &#x27;
+     &#x27;sheets listed below answer this item; sheet C-2.0 is the site plan proper and the others support it.&#x27;),
+    (&#x27;9&#x27;, &#x27;Boundary Survey&#x27;, &#x27;—&#x27;,
+     &#x27;**NOT INCLUDED — must be commissioned.** A survey sealed by a Georgia registered land surveyor. &#x27;
+     &#x27;Section 1003-4.4 permits the Director to accept a Tax Assessor map where no survey is available but &#x27;
+     &#x27;does not oblige him to; the 236-246 ft site width that the entire 50 x 100-ft lot section depends on &#x27;
+     &#x27;is unverified without it. This is the critical-path item.&#x27;),
+    (&#x27;10&#x27;, &#x27;List of Adjoining Property Owners&#x27;, &#x27;docs/06-adjoining-property-owners.md&#x27;,
+     &#x27;All adjoining owners with mailing addresses, from the Gwinnett County Tax Assessor ownership file. &#x27;
+     &#x27;Re-pull on the filing date.&#x27;),
+    (&#x27;11&#x27;, &#x27;Architectural Renderings and Elevations&#x27;, &#x27;docs/09-architectural-character-elevations-and-renderings.md&#x27;,
+     &#x27;All four elevations of each dwelling type, the clubhouse, the mail kiosk and the monument entry sign, &#x27;
+     &#x27;to scale, with the colour and material schedule; plus illustrative perspectives. No wall signs are &#x27;
+     &#x27;proposed on any structure.&#x27;),
+]
+
+SUPPORTING = [
+    (&#x27;Development Summary&#x27;, &#x27;docs/02-development-summary.md&#x27;,
+     &#x27;Site data in the order staff read it, with the Table 4.1 required-versus-provided matrix.&#x27;),
+    (&#x27;Technical Memoranda&#x27;, &#x27;docs/08-technical-memoranda.md&#x27;,
+     &#x27;Traffic, sanitary sewer, water, stormwater, fire, schools and environmental screening.&#x27;),
+    (&#x27;HOA, HOPA and Covenant Outline&#x27;, &#x27;docs/13-hoa-hopa-and-covenant-outline.md&#x27;,
+     &#x27;How the 55+ restriction and the buffer easement are actually enforced, with a line-item association budget.&#x27;),
+    (&#x27;Outline Specifications&#x27;, &#x27;docs/12-outline-specifications.md&#x27;,
+     &#x27;CSI-format outline specifications establishing the materials and colours shown on the elevations.&#x27;),
+    (&#x27;Site Context Brief&#x27;, &#x27;docs/11-site-context-brief.md&#x27;,
+     &#x27;Environmental, mobility, demographic, market and precedent context for the site.&#x27;),
+    (&#x27;Submittal Checklist and Roadmap&#x27;, &#x27;docs/10-submittal-checklist-and-roadmap.md&#x27;,
+     &#x27;Item-by-item status, the filing calendar, the legal-notice audit and the pre-application agenda.&#x27;),
+]
+
+BODY = &quot;&quot;&quot;---
+title: &quot;Transmittal and Index — Application for Rezoning, The Cottages at Arcado Springs&quot;
+date: {date}
+to: &quot;Reid Turner, Planning Director, City of Lilburn, 340 Main Street, Lilburn, Georgia 30047&quot;
+status: &quot;DRAFT — owner-prepared. Items marked NOT INCLUDED or DRAFT require a licensed professional before filing.&quot;
+generator: &quot;tools/transmittal.py (index built by scanning drawings/ and docs/)&quot;
+---
+
+# Transmittal and Index
+
+**To:** Reid Turner, Planning Director — Department of Planning and Zoning, City of Lilburn, 340 Main
+Street, Lilburn, Georgia 30047 · returner@cityoflilburn.com · (770) 279-3715
+
+**From:** Mohammed Awad, applicant and owner of record of PINs R6123 033 and R6123 015 —
+4541 Arcado Road SW, Lilburn, Georgia 30047
+
+**Date:** ____________________  **Zoning case no.:** RZ-2026-______ *(assigned by the City)*
+
+**Re: Application to rezone 9.44 acres from R-1 to R-2 — The Cottages at Arcado Springs**
+4535, 4537, 4539 and 4541 Arcado Road SW · Land Lot 123, 6th District, Gwinnett County ·
+PINs R6123 033, R6123 015, R6123 014 and R6123 162
+
+---
+
+## 1. The request
+
+The applicant asks the City to rezone the 9.44-acre assemblage from **R-1, Single-Family Residential** to
+**R-2, Medium-Density Residential** (Lilburn Zoning Ordinance No. 2023-603, section 402) for **{lots} one-story
+detached cottage homes on fee-simple lots**, served by one private lane from Arcado Road, restricted to
+housing for older persons under 42 U.S.C. section 3607(b)(2)(C) by voluntary condition. The proposed use,
+&quot;Single-family (cluster-cottage, creative lot configuration)&quot;, is permitted in R-2 by the section 602 Use
+Table; no special use permit is requested. The proposed density is **{dens} dwelling units per acre**
+against the {maxdens} units per acre that Table 4.1 allows in R-2.
+
+## 2. What is enclosed — the eleven required items
+
+| Item | Requirement (2026 Application Instructions) | Provided | Notes |
+|---|---|---|---|
+{items}
+
+## 3. Drawing set
+
+| Sheet | Title | Size | Scale | Status |
+|---|---|---|---|---|
+{sheets}
+
+## 4. Supporting material (not required by the Instructions; provided so staff and the Commission have the
+basis for every number)
+
+| Document | File | What it is |
+|---|---|---|
+{supporting}
+
+## 5. Illustrative perspectives
+
+{rend}
+
+Each is an illustrative perspective prepared by the owner-applicant from the scaled elevations and the
+master concept plan. Where an image and a drawing differ, the drawing governs. Item (11) permits imagery:
+&quot;The drawings shall be to scale or in proper perspective … Visual imagery may be used.&quot;
+
+## 6. Copies and delivery
+
+| What | How delivered |
+|---|---|
+| One full-size copy of the site plan drawn to scale | Delivered to the counter at 340 Main Street, printed at ARCH D 36 x 24 in at 1&quot; = 60&#x27; |
+| PDF of the site plan | E-mailed to returner@cityoflilburn.com on the filing date |
+| Complete application in Instruction-item order | One bound copy at the counter, and `submission/RZ-2026_cottages-at-arcado-springs.pdf` by e-mail |
+| Application fee | Check payable to &quot;City of Lilburn&quot;, amount confirmed with the Department on the filing date |
+| Conflict-of-interest disclosure | Filed herewith, so the ten-day period of O.C.G.A. section 36-67A-3(b) is not relied upon |
+
+## 7. Requests to the Department
+
+1. **Completeness review.** The applicant asks the Director to confirm in writing that the application is
+   complete under section 1003-3, or to identify what is missing, before the legal advertisement is placed.
+2. **Confirmation on RZ-2025-01.** The applicant asks the Department to confirm in writing that
+   RZ-2025-01 was **tabled** on 2025-08-28 because of a defect in the legal advertisement, was never heard
+   and was **not denied**, so that the twelve-month bar of section 1003-11 does not apply; and to advise
+   whether that application should be formally withdrawn before this one is accepted.
+3. **Draft advertisement text.** Because RZ-2025-01 was lost to a notice defect, the applicant asks to
+   review the draft legal advertisement and the sign copy before they are placed, and to be told the dates
+   on which the advertisement runs, the letters are mailed and the sign is posted.
+4. **Pre-application conference.** The applicant requests a conference at least one week before filing, on
+   the agenda at `docs/10-submittal-checklist-and-roadmap.md` section 3.
+
+## 8. Statements the applicant makes plainly
+
+- **Nothing in this package is sealed.** The boundary survey and legal description require a Georgia
+  registered land surveyor; the site, grading, utility and stormwater work require a Georgia professional
+  engineer; the architectural drawings require a Georgia registered architect; the landscape plan requires
+  a registered landscape architect. Every drawing and document is labelled DRAFT accordingly.
+- **The boundary is from the Gwinnett County GIS parcel fabric, not a survey**, and the survey governs.
+- Statements of consistency are written as &quot;appears consistent with&quot;, never as a compliance certification.
+
+---
+
+&gt; **Disclaimer:** This is an AI-generated analysis for preliminary planning purposes. All findings must be verified by a licensed professional before use in design, permitting, or regulatory submissions.
+
+&lt;!-- architecture-studio:requires-disclaimer --&gt;
+&quot;&quot;&quot;
+
+
+def main():
+    lay = {}
+    p = os.path.join(ROOT, &#x27;data&#x27;, &#x27;layout.json&#x27;)
+    if os.path.exists(p):
+        lay = json.load(open(p)).get(&#x27;metrics&#x27;, {})
+    rows_i = []
+    for num, name, path, note in ITEMS:
+        if path in (&#x27;—&#x27;, &#x27;drawings/&#x27;):
+            provided = &#x27;(see the drawing set below)&#x27; if path == &#x27;drawings/&#x27; else &#x27;**NOT INCLUDED**&#x27;
+        else:
+            ok = os.path.exists(os.path.join(ROOT, path))
+            provided = (&#x27;`%s`&#x27; % path) if ok else &#x27;**NOT YET ISSUED** (`%s`)&#x27; % path
+        rows_i.append(&#x27;| %s | %s | %s | %s |&#x27; % (num, name, provided, note))
+    rows_s = []
+    for no, title, f, size, scale in SHEETS:
+        ok = bool(f) and os.path.exists(os.path.join(DRAW, f))
+        rows_s.append(&#x27;| **%s** | %s | %s | %s | %s |&#x27;
+                      % (no, title, size, scale, &#x27;Issued&#x27; if ok else &#x27;**NOT YET ISSUED**&#x27;))
+    rows_sup = []
+    for title, f, what in SUPPORTING:
+        ok = os.path.exists(os.path.join(ROOT, f))
+        rows_sup.append(&#x27;| %s | %s | %s |&#x27; % (title, (&#x27;`%s`&#x27; % f) if ok else &#x27;**NOT YET ISSUED**&#x27;, what))
+    rend = sorted(f for f in os.listdir(REND) if f.startswith(&#x27;R-&#x27;) and f.endswith((&#x27;.jpg&#x27;, &#x27;.png&#x27;))) \
+        if os.path.isdir(REND) else []
+    if rend:
+        rend_txt = &#x27;\n&#x27;.join(&#x27;- `%s`&#x27; % r for r in rend)
+    else:
+        rend_txt = &#x27;*No perspectives issued yet.*&#x27;
+    out = BODY.format(
+        date=DATE,
+        lots=lay.get(&#x27;lots&#x27;, 43),
+        dens=lay.get(&#x27;density_du_ac_deeded&#x27;, &#x27;4.56&#x27;),
+        maxdens=&#x27;8&#x27;,
+        items=&#x27;\n&#x27;.join(rows_i), sheets=&#x27;\n&#x27;.join(rows_s), supporting=&#x27;\n&#x27;.join(rows_sup), rend=rend_txt)
+    dst = os.path.join(DOCS, &#x27;00-transmittal-and-index.md&#x27;)
+    open(dst, &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;).write(out)
+    issued = sum(1 for no, t, f, s, sc in SHEETS if f and os.path.exists(os.path.join(DRAW, f)))
+    print(&#x27;wrote %s  (%d of %d sheets issued, %d perspectives)&#x27; % (dst, issued, len(SHEETS), len(rend)))
+
+
+if __name__ == &#x27;__main__&#x27;:
+    main()
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/transmittal.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

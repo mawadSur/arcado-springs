@@ -1,0 +1,2294 @@
+{
+ "generated_by": "tools/floorplans.py",
+ "date": "2026-08-28",
+ "plans": {
+  "A": {
+   "id": "A",
+   "name": "THE SPRINGBROOK",
+   "title": "PLAN A — THE SPRINGBROOK — ILLUSTRATIVE ARCHITECTURAL PLAN — NOT FOR CONSTRUCTION — 2026-08-28",
+   "date": "2026-08-28",
+   "program": "2 BR / 2 BA, 1 story, 2-car front-loaded garage recessed 5'-0\", covered front porch, rear patio",
+   "status": "ILLUSTRATIVE — NOT FOR CONSTRUCTION — DRAFT, to be superseded by sealed architectural drawings",
+   "coordinate_system": "feet; origin = front-left corner of the body bounding box; x to the right seen from the lane; y toward the rear (front = lane side = y 0)",
+   "nominal_body": "38'-0\" × 38'-0\"",
+   "target_cond_sf": 1444,
+   "overall_body_dims": {
+    "width_ft": 38,
+    "depth_ft": 51.83,
+    "label": "38'-0\" × 51'-10\"",
+    "basis": "bounding box of conditioned + garage (outside face); porch and patio excluded",
+    "note": "program body 38 × 38 nominal; actual envelope is L-shaped because the 2-car garage must be a front wing under the 40-ft width cap"
+   },
+   "footprint_polygon_ft": [
+    [
+     0,
+     26.83
+    ],
+    [
+     21,
+     26.83
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     38,
+     0
+    ],
+    [
+     38,
+     51.83
+    ],
+    [
+     0,
+     51.83
+    ]
+   ],
+   "footprint_polygon_basis": "conditioned envelope, outside face of exterior walls (garage separate)",
+   "garage_rect": [
+    0,
+    5,
+    21,
+    26.83
+   ],
+   "porch_rects": [
+    [
+     21,
+     -6,
+     38,
+     0
+    ]
+   ],
+   "rear_porch_rects": [],
+   "patio_rects": [
+    [
+     21,
+     51.83,
+     33,
+     57.83
+    ]
+   ],
+   "rooms": [
+    {
+     "name": "2-CAR GARAGE",
+     "kind": "garage",
+     "polygon": [
+      [
+       0,
+       5
+      ],
+      [
+       21,
+       5
+      ],
+      [
+       21,
+       26.83
+      ],
+      [
+       0,
+       26.83
+      ]
+     ],
+     "clear_polygon": [
+      [
+       0.5,
+       5.5
+      ],
+      [
+       20.833,
+       5.5
+      ],
+      [
+       20.833,
+       26.663
+      ],
+      [
+       0.5,
+       26.663
+      ]
+     ],
+     "area_sf": 430.3,
+     "label_dims": "20'-4\" × 21'-2\""
+    },
+    {
+     "name": "HALL",
+     "kind": "cond",
+     "polygon": [
+      [
+       21,
+       0
+      ],
+      [
+       25.17,
+       0
+      ],
+      [
+       25.17,
+       26.83
+      ],
+      [
+       21,
+       26.83
+      ]
+     ],
+     "clear_polygon": [
+      [
+       21.5,
+       0.5
+      ],
+      [
+       25.003,
+       0.5
+      ],
+      [
+       25.003,
+       26.83
+      ],
+      [
+       21.5,
+       26.83
+      ]
+     ],
+     "area_sf": 92.2,
+     "label_dims": "3'-6\" × 26'-4\""
+    },
+    {
+     "name": "BEDROOM 2",
+     "kind": "cond",
+     "polygon": [
+      [
+       25.17,
+       0
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       38,
+       14
+      ],
+      [
+       31,
+       14
+      ],
+      [
+       31,
+       11.5
+      ],
+      [
+       25.17,
+       11.5
+      ]
+     ],
+     "clear_polygon": [
+      [
+       25.337,
+       0.5
+      ],
+      [
+       37.5,
+       0.5
+      ],
+      [
+       37.5,
+       13.833
+      ],
+      [
+       31.167,
+       13.833
+      ],
+      [
+       31.167,
+       11.333
+      ],
+      [
+       25.337,
+       11.333
+      ]
+     ],
+     "area_sf": 147.6,
+     "label_dims": "12'-2\" × 10'-10\""
+    },
+    {
+     "name": "CLOSET",
+     "kind": "cond",
+     "polygon": [
+      [
+       25.17,
+       11.5
+      ],
+      [
+       31,
+       11.5
+      ],
+      [
+       31,
+       14
+      ],
+      [
+       25.17,
+       14
+      ]
+     ],
+     "clear_polygon": [
+      [
+       25.337,
+       11.667
+      ],
+      [
+       30.833,
+       11.667
+      ],
+      [
+       30.833,
+       13.833
+      ],
+      [
+       25.337,
+       13.833
+      ]
+     ],
+     "area_sf": 11.9,
+     "label_dims": "5'-6\" × 2'-2\""
+    },
+    {
+     "name": "BATH 2",
+     "kind": "cond",
+     "polygon": [
+      [
+       25.17,
+       14
+      ],
+      [
+       38,
+       14
+      ],
+      [
+       38,
+       22.17
+      ],
+      [
+       25.17,
+       22.17
+      ]
+     ],
+     "clear_polygon": [
+      [
+       25.337,
+       14.167
+      ],
+      [
+       37.5,
+       14.167
+      ],
+      [
+       37.5,
+       22.003
+      ],
+      [
+       25.337,
+       22.003
+      ]
+     ],
+     "area_sf": 95.3,
+     "label_dims": "12'-2\" × 7'-10\""
+    },
+    {
+     "name": "COAT",
+     "kind": "cond",
+     "polygon": [
+      [
+       25.17,
+       22.17
+      ],
+      [
+       28.17,
+       22.17
+      ],
+      [
+       28.17,
+       26.83
+      ],
+      [
+       25.17,
+       26.83
+      ]
+     ],
+     "clear_polygon": [
+      [
+       25.337,
+       22.337
+      ],
+      [
+       28.003,
+       22.337
+      ],
+      [
+       28.003,
+       26.663
+      ],
+      [
+       25.337,
+       26.663
+      ]
+     ],
+     "area_sf": 11.5,
+     "label_dims": "2'-8\" × 4'-4\""
+    },
+    {
+     "name": "PANTRY",
+     "kind": "cond",
+     "polygon": [
+      [
+       28.17,
+       22.17
+      ],
+      [
+       38,
+       22.17
+      ],
+      [
+       38,
+       26.83
+      ],
+      [
+       28.17,
+       26.83
+      ]
+     ],
+     "clear_polygon": [
+      [
+       28.337,
+       22.337
+      ],
+      [
+       37.5,
+       22.337
+      ],
+      [
+       37.5,
+       26.663
+      ],
+      [
+       28.337,
+       26.663
+      ]
+     ],
+     "area_sf": 39.6,
+     "label_dims": "9'-2\" × 4'-4\""
+    },
+    {
+     "name": "LAUNDRY / MUD",
+     "kind": "cond",
+     "polygon": [
+      [
+       14,
+       26.83
+      ],
+      [
+       21,
+       26.83
+      ],
+      [
+       21,
+       37.5
+      ],
+      [
+       14,
+       37.5
+      ]
+     ],
+     "clear_polygon": [
+      [
+       14.167,
+       26.997
+      ],
+      [
+       20.833,
+       26.997
+      ],
+      [
+       20.833,
+       37.333
+      ],
+      [
+       14.167,
+       37.333
+      ]
+     ],
+     "area_sf": 68.9,
+     "label_dims": "6'-8\" × 10'-4\""
+    },
+    {
+     "name": "KITCHEN / DINING",
+     "kind": "cond",
+     "polygon": [
+      [
+       21,
+       26.83
+      ],
+      [
+       38,
+       26.83
+      ],
+      [
+       38,
+       37.5
+      ],
+      [
+       21,
+       37.5
+      ]
+     ],
+     "clear_polygon": [
+      [
+       21.167,
+       26.997
+      ],
+      [
+       37.5,
+       26.997
+      ],
+      [
+       37.5,
+       37.5
+      ],
+      [
+       21.167,
+       37.5
+      ]
+     ],
+     "area_sf": 171.6,
+     "label_dims": "16'-4\" × 10'-6\""
+    },
+    {
+     "name": "W.I.C.",
+     "kind": "cond",
+     "polygon": [
+      [
+       0,
+       26.83
+      ],
+      [
+       14,
+       26.83
+      ],
+      [
+       14,
+       32.5
+      ],
+      [
+       0,
+       32.5
+      ]
+     ],
+     "clear_polygon": [
+      [
+       0.5,
+       26.997
+      ],
+      [
+       13.833,
+       26.997
+      ],
+      [
+       13.833,
+       32.333
+      ],
+      [
+       0.5,
+       32.333
+      ]
+     ],
+     "area_sf": 71.2,
+     "label_dims": "13'-4\" × 5'-4\""
+    },
+    {
+     "name": "PRIMARY BATH",
+     "kind": "cond",
+     "polygon": [
+      [
+       0,
+       32.5
+      ],
+      [
+       14,
+       32.5
+      ],
+      [
+       14,
+       41
+      ],
+      [
+       0,
+       41
+      ]
+     ],
+     "clear_polygon": [
+      [
+       0.5,
+       32.667
+      ],
+      [
+       13.833,
+       32.667
+      ],
+      [
+       13.833,
+       40.833
+      ],
+      [
+       0.5,
+       40.833
+      ]
+     ],
+     "area_sf": 108.9,
+     "label_dims": "13'-4\" × 8'-2\""
+    },
+    {
+     "name": "PRIMARY BEDROOM",
+     "kind": "cond",
+     "polygon": [
+      [
+       0,
+       41
+      ],
+      [
+       14,
+       41
+      ],
+      [
+       14,
+       51.83
+      ],
+      [
+       0,
+       51.83
+      ]
+     ],
+     "clear_polygon": [
+      [
+       0.5,
+       41.167
+      ],
+      [
+       13.833,
+       41.167
+      ],
+      [
+       13.833,
+       51.33
+      ],
+      [
+       0.5,
+       51.33
+      ]
+     ],
+     "area_sf": 135.5,
+     "label_dims": "13'-4\" × 10'-2\""
+    },
+    {
+     "name": "SUITE HALL",
+     "kind": "cond",
+     "polygon": [
+      [
+       14,
+       37.5
+      ],
+      [
+       18.17,
+       37.5
+      ],
+      [
+       18.17,
+       45
+      ],
+      [
+       14,
+       45
+      ]
+     ],
+     "clear_polygon": [
+      [
+       14.167,
+       37.667
+      ],
+      [
+       18.17,
+       37.667
+      ],
+      [
+       18.17,
+       44.833
+      ],
+      [
+       14.167,
+       44.833
+      ]
+     ],
+     "area_sf": 28.7,
+     "label_dims": "4'-0\" × 7'-2\""
+    },
+    {
+     "name": "GREAT ROOM",
+     "kind": "cond",
+     "polygon": [
+      [
+       18.17,
+       37.5
+      ],
+      [
+       38,
+       37.5
+      ],
+      [
+       38,
+       51.83
+      ],
+      [
+       14,
+       51.83
+      ],
+      [
+       14,
+       45
+      ],
+      [
+       18.17,
+       45
+      ]
+     ],
+     "clear_polygon": [
+      [
+       18.17,
+       37.667
+      ],
+      [
+       37.5,
+       37.667
+      ],
+      [
+       37.5,
+       51.33
+      ],
+      [
+       14.167,
+       51.33
+      ],
+      [
+       14.167,
+       45.167
+      ],
+      [
+       18.17,
+       45.167
+      ]
+     ],
+     "area_sf": 288.8,
+     "label_dims": "19'-4\" × 13'-10\""
+    },
+    {
+     "name": "COVERED PORCH",
+     "kind": "porch",
+     "polygon": [
+      [
+       21,
+       -6
+      ],
+      [
+       38,
+       -6
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       21,
+       0
+      ]
+     ],
+     "clear_polygon": [
+      [
+       21,
+       -6
+      ],
+      [
+       38,
+       -6
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       21,
+       0
+      ]
+     ],
+     "area_sf": 102.0,
+     "label_dims": "17'-0\" × 6'-0\""
+    },
+    {
+     "name": "PATIO (UNCOVERED)",
+     "kind": "patio",
+     "polygon": [
+      [
+       21,
+       51.83
+      ],
+      [
+       33,
+       51.83
+      ],
+      [
+       33,
+       57.83
+      ],
+      [
+       21,
+       57.83
+      ]
+     ],
+     "clear_polygon": [
+      [
+       21,
+       51.83
+      ],
+      [
+       33,
+       51.83
+      ],
+      [
+       33,
+       57.83
+      ],
+      [
+       21,
+       57.83
+      ]
+     ],
+     "area_sf": 72.0,
+     "label_dims": "12'-0\" × 6'-0\""
+    }
+   ],
+   "exterior_openings": [
+    {
+     "wall": "front",
+     "wall_line_ft": 0,
+     "type": "door",
+     "offset_ft": 0.58,
+     "width_ft": 3.0,
+     "height_ft": 6.67,
+     "sill_ft": 0.0,
+     "tag": "entry",
+     "at": [
+      23.08,
+      0
+     ]
+    },
+    {
+     "wall": "front",
+     "wall_line_ft": 5,
+     "type": "garage",
+     "offset_ft": 2.5,
+     "width_ft": 16.0,
+     "height_ft": 7.0,
+     "sill_ft": 0.0,
+     "tag": "garage 16x7",
+     "at": [
+      10.5,
+      5
+     ]
+    },
+    {
+     "wall": "rear",
+     "wall_line_ft": 51.83,
+     "type": "french",
+     "offset_ft": 8.0,
+     "width_ft": 6.0,
+     "height_ft": 6.67,
+     "sill_ft": 0.0,
+     "tag": "patio french door",
+     "at": [
+      27.0,
+      51.83
+     ]
+    },
+    {
+     "wall": "front",
+     "wall_line_ft": 0,
+     "type": "window",
+     "offset_ft": 9.0,
+     "width_ft": 6.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "BR2 front twin 3-0x5-0 (egress)",
+     "at": [
+      33.0,
+      0
+     ]
+    },
+    {
+     "wall": "right",
+     "wall_line_ft": 38,
+     "type": "window",
+     "offset_ft": 9.0,
+     "width_ft": 3.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "BR2 side",
+     "at": [
+      38,
+      10.5
+     ]
+    },
+    {
+     "wall": "right",
+     "wall_line_ft": 38,
+     "type": "window",
+     "offset_ft": 19.5,
+     "width_ft": 2.0,
+     "height_ft": 2.5,
+     "sill_ft": 4.5,
+     "tag": "bath 2",
+     "at": [
+      38,
+      20.5
+     ]
+    },
+    {
+     "wall": "right",
+     "wall_line_ft": 38,
+     "type": "window",
+     "offset_ft": 32.5,
+     "width_ft": 3.5,
+     "height_ft": 3.0,
+     "sill_ft": 3.5,
+     "tag": "kitchen over sink",
+     "at": [
+      38,
+      34.25
+     ]
+    },
+    {
+     "wall": "right",
+     "wall_line_ft": 38,
+     "type": "window",
+     "offset_ft": 41.0,
+     "width_ft": 6.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "great room twin",
+     "at": [
+      38,
+      44.0
+     ]
+    },
+    {
+     "wall": "rear",
+     "wall_line_ft": 51.83,
+     "type": "window",
+     "offset_ft": 0.5,
+     "width_ft": 5.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "great room rear",
+     "at": [
+      35.0,
+      51.83
+     ]
+    },
+    {
+     "wall": "rear",
+     "wall_line_ft": 51.83,
+     "type": "window",
+     "offset_ft": 31.0,
+     "width_ft": 5.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "primary rear (egress)",
+     "at": [
+      4.5,
+      51.83
+     ]
+    },
+    {
+     "wall": "left",
+     "wall_line_ft": 0,
+     "type": "window",
+     "offset_ft": 2.33,
+     "width_ft": 6.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "primary side twin",
+     "at": [
+      0,
+      46.5
+     ]
+    },
+    {
+     "wall": "left",
+     "wall_line_ft": 0,
+     "type": "window",
+     "offset_ft": 15.33,
+     "width_ft": 2.5,
+     "height_ft": 2.5,
+     "sill_ft": 4.5,
+     "tag": "primary bath",
+     "at": [
+      0,
+      35.25
+     ]
+    },
+    {
+     "wall": "left",
+     "wall_line_ft": 0,
+     "type": "window",
+     "offset_ft": 35.33,
+     "width_ft": 3.0,
+     "height_ft": 3.0,
+     "sill_ft": 4.0,
+     "tag": "garage",
+     "at": [
+      0,
+      15.0
+     ]
+    }
+   ],
+   "exterior_openings_convention": "offset_ft measured from the wall's left end looking at that wall from outside; wall_line_ft = the grid line (y for front/rear, x for left/right); front has two lines (0 = front wing, 5 = garage face)",
+   "roof": {
+    "plate_ft": 9.0,
+    "heel_ft": 0.5,
+    "elements": [
+     {
+      "name": "main gable (rear block)",
+      "span_ft": 25.0,
+      "pitch": [
+       8,
+       12
+      ],
+      "ridge": "x",
+      "rise_ft": 8.33,
+      "ridge_height_ft": 17.83,
+      "basis": "plate 9.0 ft + heel 0.50 ft + (span/2)·pitch"
+     },
+     {
+      "name": "front-wing gable (extended over the porch)",
+      "span_ft": 17.0,
+      "pitch": [
+       8,
+       12
+      ],
+      "ridge": "y",
+      "rise_ft": 5.67,
+      "ridge_height_ft": 15.17,
+      "basis": "plate 9.0 ft + heel 0.50 ft + (span/2)·pitch"
+     },
+     {
+      "name": "garage gable",
+      "span_ft": 21.0,
+      "pitch": [
+       6,
+       12
+      ],
+      "ridge": "y",
+      "rise_ft": 5.25,
+      "ridge_height_ft": 14.75,
+      "basis": "plate 9.0 ft + heel 0.50 ft + (span/2)·pitch"
+     }
+    ],
+    "max_ridge_ft": 17.83,
+    "ridge_direction": "main ridge parallel to the lane (x) over the 25-ft rear block; a front-facing 8:12 gable over the 17-ft front wing, carried 6 ft forward over the covered porch; a subordinate front-facing 6:12 gable over the 21-ft garage"
+   },
+   "areas": {
+    "conditioned_sf": 1406.1,
+    "conditioned_basis": "outside face of exterior walls / centreline of garage separation wall (grid union of conditioned rooms)",
+    "garage_sf": 458.4,
+    "front_porch_sf": 102.0,
+    "rear_porch_covered_sf": 0,
+    "rear_patio_uncovered_sf": 72.0,
+    "total_under_roof_sf": 1966.5,
+    "total_under_roof_basis": "conditioned + garage + covered porch(es) (patio uncovered, excluded)",
+    "sum_of_room_clear_sf": 1271.7
+   },
+   "accessibility_checklist": [
+    {
+     "item": "Zero-step entries",
+     "provided": "front porch (slab flush with finished floor) and garage-to-mud-room door; patio door ≤ 1/2-in threshold",
+     "status": "design intent"
+    },
+    {
+     "item": "Door clear width",
+     "provided": "all passage doors 36 in (3'-0\"); closets 30 in; french door 6'-0\"",
+     "status": "design intent"
+    },
+    {
+     "item": "Hall width",
+     "provided": "main hall 3'-6\" clear (42 in); suite hall 4'-0\" clear",
+     "status": "design intent"
+    },
+    {
+     "item": "Turning circles",
+     "provided": "5'-0\" (60 in) circle drawn and checked clear in both baths",
+     "status": "checked by script"
+    },
+    {
+     "item": "Curbless shower",
+     "provided": "primary bath 5'-0\" × 3'-10\" curbless (recessed slab per 03 30 00 §2.05)",
+     "status": "design intent"
+    },
+    {
+     "item": "Grab-bar blocking",
+     "provided": "2×10 solid blocking 33–36 in AFF at all toilets, tub and showers (2024 IRC (GA 2026) — voluntary; ANSI A117.1 Type C-type)",
+     "status": "design intent — VERIFY blocking heights with architect"
+    },
+    {
+     "item": "Plate height / vaulted",
+     "provided": "9'-0\" plate; great room vaulted",
+     "status": "design intent"
+    },
+    {
+     "item": "Single-level living",
+     "provided": "1 story; no interior steps; laundry on the living level",
+     "status": "design intent"
+    },
+    {
+     "item": "Lever hardware, rocker switches, 48-in max reach",
+     "provided": "to be specified (Division 08 / 26)",
+     "status": "later stage"
+    },
+    {
+     "item": "Lilburn §734 visitability",
+     "provided": "applies to attached dwellings only; voluntarily exceeded (100% zero-step)",
+     "status": "appears consistent with Ord. 2023-603 §734 (not applicable)"
+    }
+   ],
+   "materials_by_scheme": {
+    "1": {
+     "name": "Warm White",
+     "siding": "fiber-cement board-and-batten (12-in o.c. battens), warm white",
+     "base": "stacked/ledge stone water table (30 in) and porch piers",
+     "roof": "architectural asphalt shingle, weathered wood / charcoal",
+     "trim": "painted fiber-cement trim, soft white; 8×8 cedar porch posts + brackets",
+     "door": "front door deep green or black; garage door carriage-style, painted to match trim"
+    },
+    "2": {
+     "name": "Sage",
+     "siding": "fiber-cement lap siding, 6-in exposure, sage green",
+     "base": "brick veneer water table (30 in), red-brown blend; brick porch piers",
+     "roof": "architectural asphalt shingle, charcoal",
+     "trim": "painted trim, soft white; 8×8 cedar posts",
+     "door": "front door natural stain or oxblood; garage door painted to match siding"
+    },
+    "3": {
+     "name": "Clay",
+     "siding": "fiber-cement lap siding, 6-in exposure, clay/beige",
+     "base": "ledge stone water table (30 in) and porch piers, buff blend",
+     "roof": "architectural asphalt shingle, weathered wood",
+     "trim": "painted trim, cream; 8×8 cedar posts",
+     "door": "front door navy; garage door painted to match trim"
+    },
+    "source": "docs/12-outline-specifications.md (04 20 00, 04 40 00, 07 31 00, 07 46 46, 09 91 13); FACTS §4 \"three color schemes (warm white / sage / clay)\""
+   },
+   "lot_siting": {
+    "lot_w_ft": 50.0,
+    "lot_d_ft": 100.0,
+    "house_origin_on_lot_ft": [
+     6.0,
+     21.667
+    ],
+    "garage_door_from_lot_line_ft": 26.67,
+    "rear_wall_from_rear_line_ft": 26.5,
+    "patio_edge_from_rear_line_ft": 20.5,
+    "rear_porch_edge_from_rear_line_ft": null,
+    "side_yard_ft": 6.0,
+    "building_coverage_pct": 39.3,
+    "impervious_pct_est": 52.7,
+    "impervious_basis": "roof 1966 + patio 72 + driveway 533 + walk 63 SF"
+   },
+   "notes": [
+    "Illustrative architectural plan for the rezoning application (Lilburn Zoning Ordinance 2023-603 §1003-4 renderings/elevations item). NOT FOR CONSTRUCTION. DRAFT — to be superseded by sealed drawings by a Georgia-registered architect.",
+    "Dimensions are to the outside face of exterior walls (2×6, 6 in nominal) and to the centreline of interior partitions (2×4, 4 in). Plate height 9'-0\"; great room vaulted; roof 8:12 main gables, 4:12 porch shed, architectural shingles.",
+    "Accessibility (voluntary — Ord. 2023-603 §734 applies to attached dwellings only): zero-step entries at the porch and garage/mud room; 36-in passage doors; 42-in halls; 5'-0\" turning circles in both baths; curbless primary shower; 2×10 blocking for grab bars at all toilets, tub and showers.",
+    "Garage door 16'-0\" × 7'-0\" recessed 5'-0\" behind the front wall of the dwelling — appears consistent with Ord. 2023-603 Table 4.2 (front-loaded garages recessed ≥ 5 ft). Garage clear 20'-4\" × 21'-2\" ≥ 20 × 21 program minimum.",
+    "Life safety: NFPA 13D residential sprinklers (mitigation for the single access road, IFC 2024 (GA) App. D107.1); smoke/CO alarms per 2024 IRC (GA 2026) R314/R315; bedroom egress windows per 2024 IRC (GA 2026) R310 — VERIFY net clear opening at unit selection.",
+    "Program body is nominally 38'-0\" × 38'-0\" (1,444 SF). With the 2-car garage as a front wing (the only way to keep the 40-ft width cap), the conditioned envelope is an L: 17'-0\" × 26'-10\" front wing + 38'-0\" × 25'-0\" rear block = 1,406 SF conditioned (−2.6%); overall body 38'-0\" × 51'-10\" plus porch and patio.",
+    "Rear patio drawn 12'-0\" × 7'-0\": the program 12 × 8 slab would end 10 in inside the 20-ft rear buffer easement on a 100-ft lot (15 + 6 + 5 + 21'-10\" + 25 + 8 = 80'-10\"). VERIFY with Planning staff whether an at-grade uncovered slab is a buffer encroachment; otherwise hold the patio at 7 ft.",
+    "Areas are computed by tools/floorplans.py from the wall-face polygons (conditioned = outside face of exterior walls; total under roof = conditioned + garage + covered porch; the uncovered patio is excluded)."
+   ],
+   "verify": [
+    "Rear patio depth 8 ft vs 20-ft buffer easement (drawn 7 ft) — Planning staff / Dev. Regs. App. B",
+    "Egress window net clear opening — 2024 IRC (GA 2026) R310 at unit selection",
+    "Grab-bar blocking heights and ANSI A117.1 references — architect of record",
+    "Max impervious / lot coverage for R-2 — Lilburn Development Regulations App. B §5.9 (not retrievable online)",
+    "data/layout.json house_rect assumes a 38 × 38 footprint; the actual envelope is 38 × 51'-10\" + porch/patio — the site-plan agent must re-check lot fit (rear wall 27 ft from the rear line on a 100-ft lot)"
+   ]
+  },
+  "B": {
+   "id": "B",
+   "name": "THE LAUREL",
+   "title": "PLAN B — THE LAUREL — ILLUSTRATIVE ARCHITECTURAL PLAN — NOT FOR CONSTRUCTION — 2026-08-28",
+   "date": "2026-08-28",
+   "program": "2 BR + den / 2 BA, 1 story, 2-car front-loaded garage recessed 5'-0\", covered front porch, covered rear porch 14'×6' (recessed), fireplace, walk-in pantry, laundry/mud room off the garage",
+   "status": "ILLUSTRATIVE — NOT FOR CONSTRUCTION — DRAFT, to be superseded by sealed architectural drawings",
+   "coordinate_system": "feet; origin = front-left corner of the body bounding box; x to the right seen from the lane; y toward the rear (front = lane side = y 0)",
+   "nominal_body": "38'-0\" × 40'-0\"",
+   "target_cond_sf": 1520,
+   "overall_body_dims": {
+    "width_ft": 38,
+    "depth_ft": 57.5,
+    "label": "38'-0\" × 57'-6\"",
+    "basis": "bounding box of conditioned + garage (outside face); porch and patio excluded",
+    "note": "body 38'-0\" wide (re-proportioned 2026-09-03 from the 40'-0\" FACTS §4 nominal so that the roof, not just the walls, fits the 40'-0\" buildable width); actual envelope is L-shaped (garage front wing) with the 14 × 6 covered rear porch recessed under the main roof"
+   },
+   "footprint_polygon_ft": [
+    [
+     0,
+     29
+    ],
+    [
+     21,
+     29
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     38,
+     0
+    ],
+    [
+     38,
+     51.5
+    ],
+    [
+     24,
+     51.5
+    ],
+    [
+     24,
+     57.5
+    ],
+    [
+     0,
+     57.5
+    ]
+   ],
+   "footprint_polygon_basis": "conditioned envelope, outside face of exterior walls (garage separate)",
+   "garage_rect": [
+    0,
+    5,
+    21,
+    29
+   ],
+   "porch_rects": [
+    [
+     21,
+     -6,
+     38,
+     0
+    ]
+   ],
+   "rear_porch_rects": [
+    [
+     24,
+     51.5,
+     38,
+     57.5
+    ]
+   ],
+   "patio_rects": [],
+   "rooms": [
+    {
+     "name": "2-CAR GARAGE",
+     "kind": "garage",
+     "polygon": [
+      [
+       0,
+       5
+      ],
+      [
+       21,
+       5
+      ],
+      [
+       21,
+       29
+      ],
+      [
+       0,
+       29
+      ]
+     ],
+     "clear_polygon": [
+      [
+       0.5,
+       5.5
+      ],
+      [
+       20.833,
+       5.5
+      ],
+      [
+       20.833,
+       28.833
+      ],
+      [
+       0.5,
+       28.833
+      ]
+     ],
+     "area_sf": 474.4,
+     "label_dims": "20'-4\" × 23'-4\""
+    },
+    {
+     "name": "FOYER / HALL",
+     "kind": "cond",
+     "polygon": [
+      [
+       21,
+       0
+      ],
+      [
+       25.17,
+       0
+      ],
+      [
+       25.17,
+       29
+      ],
+      [
+       21,
+       29
+      ]
+     ],
+     "clear_polygon": [
+      [
+       21.5,
+       0.5
+      ],
+      [
+       25.003,
+       0.5
+      ],
+      [
+       25.003,
+       29.0
+      ],
+      [
+       21.5,
+       29.0
+      ]
+     ],
+     "area_sf": 99.8,
+     "label_dims": "3'-6\" × 28'-6\""
+    },
+    {
+     "name": "DEN",
+     "kind": "cond",
+     "polygon": [
+      [
+       25.17,
+       0
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       38,
+       9.5
+      ],
+      [
+       25.17,
+       9.5
+      ]
+     ],
+     "clear_polygon": [
+      [
+       25.337,
+       0.5
+      ],
+      [
+       37.5,
+       0.5
+      ],
+      [
+       37.5,
+       9.333
+      ],
+      [
+       25.337,
+       9.333
+      ]
+     ],
+     "area_sf": 107.4,
+     "label_dims": "12'-2\" × 8'-10\""
+    },
+    {
+     "name": "BEDROOM 2",
+     "kind": "cond",
+     "polygon": [
+      [
+       25.17,
+       9.5
+      ],
+      [
+       38,
+       9.5
+      ],
+      [
+       38,
+       21
+      ],
+      [
+       30,
+       21
+      ],
+      [
+       30,
+       18.5
+      ],
+      [
+       25.17,
+       18.5
+      ]
+     ],
+     "clear_polygon": [
+      [
+       25.337,
+       9.667
+      ],
+      [
+       37.5,
+       9.667
+      ],
+      [
+       37.5,
+       20.833
+      ],
+      [
+       30.167,
+       20.833
+      ],
+      [
+       30.167,
+       18.333
+      ],
+      [
+       25.337,
+       18.333
+      ]
+     ],
+     "area_sf": 123.7,
+     "label_dims": "12'-2\" × 11'-2\""
+    },
+    {
+     "name": "CLOSET",
+     "kind": "cond",
+     "polygon": [
+      [
+       25.17,
+       18.5
+      ],
+      [
+       30,
+       18.5
+      ],
+      [
+       30,
+       21
+      ],
+      [
+       25.17,
+       21
+      ]
+     ],
+     "clear_polygon": [
+      [
+       25.337,
+       18.667
+      ],
+      [
+       29.833,
+       18.667
+      ],
+      [
+       29.833,
+       20.833
+      ],
+      [
+       25.337,
+       20.833
+      ]
+     ],
+     "area_sf": 9.7,
+     "label_dims": "4'-6\" × 2'-2\""
+    },
+    {
+     "name": "BATH 2",
+     "kind": "cond",
+     "polygon": [
+      [
+       25.17,
+       21
+      ],
+      [
+       38,
+       21
+      ],
+      [
+       38,
+       29
+      ],
+      [
+       25.17,
+       29
+      ]
+     ],
+     "clear_polygon": [
+      [
+       25.337,
+       21.167
+      ],
+      [
+       37.5,
+       21.167
+      ],
+      [
+       37.5,
+       28.833
+      ],
+      [
+       25.337,
+       28.833
+      ]
+     ],
+     "area_sf": 93.3,
+     "label_dims": "12'-2\" × 7'-8\""
+    },
+    {
+     "name": "LAUNDRY / MUD",
+     "kind": "cond",
+     "polygon": [
+      [
+       14,
+       29
+      ],
+      [
+       21,
+       29
+      ],
+      [
+       21,
+       40
+      ],
+      [
+       14,
+       40
+      ]
+     ],
+     "clear_polygon": [
+      [
+       14.167,
+       29.167
+      ],
+      [
+       20.833,
+       29.167
+      ],
+      [
+       20.833,
+       39.833
+      ],
+      [
+       14.167,
+       39.833
+      ]
+     ],
+     "area_sf": 71.1,
+     "label_dims": "6'-8\" × 10'-8\""
+    },
+    {
+     "name": "PANTRY",
+     "kind": "cond",
+     "polygon": [
+      [
+       21,
+       34
+      ],
+      [
+       25.17,
+       34
+      ],
+      [
+       25.17,
+       40
+      ],
+      [
+       21,
+       40
+      ]
+     ],
+     "clear_polygon": [
+      [
+       21.167,
+       34.167
+      ],
+      [
+       25.003,
+       34.167
+      ],
+      [
+       25.003,
+       39.833
+      ],
+      [
+       21.167,
+       39.833
+      ]
+     ],
+     "area_sf": 21.7,
+     "label_dims": "3'-10\" × 5'-8\""
+    },
+    {
+     "name": "KITCHEN",
+     "kind": "cond",
+     "polygon": [
+      [
+       21,
+       29
+      ],
+      [
+       38,
+       29
+      ],
+      [
+       38,
+       40
+      ],
+      [
+       25.17,
+       40
+      ],
+      [
+       25.17,
+       34
+      ],
+      [
+       21,
+       34
+      ]
+     ],
+     "clear_polygon": [
+      [
+       21.167,
+       29.167
+      ],
+      [
+       37.5,
+       29.167
+      ],
+      [
+       37.5,
+       40.0
+      ],
+      [
+       25.337,
+       40.0
+      ],
+      [
+       25.337,
+       33.833
+      ],
+      [
+       21.167,
+       33.833
+      ]
+     ],
+     "area_sf": 151.2,
+     "label_dims": "12'-2\" × 10'-10\""
+    },
+    {
+     "name": "W.I.C.",
+     "kind": "cond",
+     "polygon": [
+      [
+       0,
+       29
+      ],
+      [
+       14,
+       29
+      ],
+      [
+       14,
+       35
+      ],
+      [
+       0,
+       35
+      ]
+     ],
+     "clear_polygon": [
+      [
+       0.5,
+       29.167
+      ],
+      [
+       13.833,
+       29.167
+      ],
+      [
+       13.833,
+       34.833
+      ],
+      [
+       0.5,
+       34.833
+      ]
+     ],
+     "area_sf": 75.6,
+     "label_dims": "13'-4\" × 5'-8\""
+    },
+    {
+     "name": "PRIMARY BATH",
+     "kind": "cond",
+     "polygon": [
+      [
+       0,
+       35
+      ],
+      [
+       14,
+       35
+      ],
+      [
+       14,
+       43.5
+      ],
+      [
+       0,
+       43.5
+      ]
+     ],
+     "clear_polygon": [
+      [
+       0.5,
+       35.167
+      ],
+      [
+       13.833,
+       35.167
+      ],
+      [
+       13.833,
+       43.333
+      ],
+      [
+       0.5,
+       43.333
+      ]
+     ],
+     "area_sf": 108.9,
+     "label_dims": "13'-4\" × 8'-2\""
+    },
+    {
+     "name": "PRIMARY BEDROOM",
+     "kind": "cond",
+     "polygon": [
+      [
+       0,
+       43.5
+      ],
+      [
+       14,
+       43.5
+      ],
+      [
+       14,
+       57.5
+      ],
+      [
+       0,
+       57.5
+      ]
+     ],
+     "clear_polygon": [
+      [
+       0.5,
+       43.667
+      ],
+      [
+       13.833,
+       43.667
+      ],
+      [
+       13.833,
+       57.0
+      ],
+      [
+       0.5,
+       57.0
+      ]
+     ],
+     "area_sf": 177.8,
+     "label_dims": "13'-4\" × 13'-4\""
+    },
+    {
+     "name": "GREAT ROOM",
+     "kind": "cond",
+     "polygon": [
+      [
+       14,
+       40
+      ],
+      [
+       38,
+       40
+      ],
+      [
+       38,
+       51.5
+      ],
+      [
+       24,
+       51.5
+      ],
+      [
+       24,
+       57.5
+      ],
+      [
+       14,
+       57.5
+      ]
+     ],
+     "clear_polygon": [
+      [
+       14.167,
+       40.167
+      ],
+      [
+       37.5,
+       40.167
+      ],
+      [
+       37.5,
+       51.0
+      ],
+      [
+       23.5,
+       51.0
+      ],
+      [
+       23.5,
+       57.0
+      ],
+      [
+       14.167,
+       57.0
+      ]
+     ],
+     "area_sf": 308.8,
+     "label_dims": "23'-4\" × 11'-10\" + 9'-4\" × 6'-0\""
+    },
+    {
+     "name": "COVERED PORCH",
+     "kind": "porch",
+     "polygon": [
+      [
+       21,
+       -6
+      ],
+      [
+       38,
+       -6
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       21,
+       0
+      ]
+     ],
+     "clear_polygon": [
+      [
+       21,
+       -6
+      ],
+      [
+       38,
+       -6
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       21,
+       0
+      ]
+     ],
+     "area_sf": 102.0,
+     "label_dims": "17'-0\" × 6'-0\""
+    },
+    {
+     "name": "COVERED REAR PORCH",
+     "kind": "porch",
+     "polygon": [
+      [
+       24,
+       51.5
+      ],
+      [
+       38,
+       51.5
+      ],
+      [
+       38,
+       57.5
+      ],
+      [
+       24,
+       57.5
+      ]
+     ],
+     "clear_polygon": [
+      [
+       24,
+       51.5
+      ],
+      [
+       38,
+       51.5
+      ],
+      [
+       38,
+       57.5
+      ],
+      [
+       24,
+       57.5
+      ]
+     ],
+     "area_sf": 84.0,
+     "label_dims": "14'-0\" × 6'-0\""
+    }
+   ],
+   "exterior_openings": [
+    {
+     "wall": "front",
+     "wall_line_ft": 0,
+     "type": "door",
+     "offset_ft": 0.58,
+     "width_ft": 3.0,
+     "height_ft": 6.67,
+     "sill_ft": 0.0,
+     "tag": "entry",
+     "at": [
+      23.08,
+      0
+     ]
+    },
+    {
+     "wall": "front",
+     "wall_line_ft": 5,
+     "type": "garage",
+     "offset_ft": 2.5,
+     "width_ft": 16.0,
+     "height_ft": 7.0,
+     "sill_ft": 0.0,
+     "tag": "garage 16x7",
+     "at": [
+      10.5,
+      5
+     ]
+    },
+    {
+     "wall": "rear",
+     "wall_line_ft": 51.5,
+     "type": "french",
+     "offset_ft": 6.5,
+     "width_ft": 6.0,
+     "height_ft": 6.67,
+     "sill_ft": 0.0,
+     "tag": "rear porch french door",
+     "at": [
+      28.5,
+      51.5
+     ]
+    },
+    {
+     "wall": "front",
+     "wall_line_ft": 0,
+     "type": "window",
+     "offset_ft": 9.6,
+     "width_ft": 6.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "den front twin 3-0x5-0",
+     "at": [
+      33.6,
+      0
+     ]
+    },
+    {
+     "wall": "right",
+     "wall_line_ft": 38,
+     "type": "window",
+     "offset_ft": 3.25,
+     "width_ft": 3.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "den side",
+     "at": [
+      38,
+      4.75
+     ]
+    },
+    {
+     "wall": "right",
+     "wall_line_ft": 38,
+     "type": "window",
+     "offset_ft": 12.0,
+     "width_ft": 6.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "BR2 side twin (egress — casement leaf)",
+     "at": [
+      38,
+      15.0
+     ]
+    },
+    {
+     "wall": "right",
+     "wall_line_ft": 38,
+     "type": "window",
+     "offset_ft": 22.83,
+     "width_ft": 2.0,
+     "height_ft": 2.5,
+     "sill_ft": 4.5,
+     "tag": "bath 2 (obscure, over tub)",
+     "at": [
+      38,
+      23.83
+     ]
+    },
+    {
+     "wall": "right",
+     "wall_line_ft": 38,
+     "type": "window",
+     "offset_ft": 32.5,
+     "width_ft": 3.5,
+     "height_ft": 3.0,
+     "sill_ft": 3.5,
+     "tag": "kitchen over sink",
+     "at": [
+      38,
+      34.25
+     ]
+    },
+    {
+     "wall": "right",
+     "wall_line_ft": 38,
+     "type": "window",
+     "offset_ft": 43.0,
+     "width_ft": 6.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "great room twin",
+     "at": [
+      38,
+      46.0
+     ]
+    },
+    {
+     "wall": "rear",
+     "wall_line_ft": 51.5,
+     "type": "window",
+     "offset_ft": 1.0,
+     "width_ft": 4.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "great room to rear porch",
+     "at": [
+      35.0,
+      51.5
+     ]
+    },
+    {
+     "wall": "rear",
+     "wall_line_ft": 57.5,
+     "type": "window",
+     "offset_ft": 7.5,
+     "width_ft": 2.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "fireplace flank L",
+     "at": [
+      15.5,
+      57.5
+     ]
+    },
+    {
+     "wall": "rear",
+     "wall_line_ft": 57.5,
+     "type": "window",
+     "offset_ft": 0.5,
+     "width_ft": 2.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "fireplace flank R",
+     "at": [
+      22.5,
+      57.5
+     ]
+    },
+    {
+     "wall": "rear",
+     "wall_line_ft": 57.5,
+     "type": "window",
+     "offset_ft": 14.5,
+     "width_ft": 5.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "primary rear (egress — casement leaf)",
+     "at": [
+      7.0,
+      57.5
+     ]
+    },
+    {
+     "wall": "left",
+     "wall_line_ft": 0,
+     "type": "window",
+     "offset_ft": 3.5,
+     "width_ft": 6.0,
+     "height_ft": 5.0,
+     "sill_ft": 2.67,
+     "tag": "primary side twin",
+     "at": [
+      0,
+      51.0
+     ]
+    },
+    {
+     "wall": "left",
+     "wall_line_ft": 0,
+     "type": "window",
+     "offset_ft": 17.75,
+     "width_ft": 2.5,
+     "height_ft": 2.5,
+     "sill_ft": 4.5,
+     "tag": "primary bath",
+     "at": [
+      0,
+      38.5
+     ]
+    },
+    {
+     "wall": "left",
+     "wall_line_ft": 0,
+     "type": "window",
+     "offset_ft": 40.0,
+     "width_ft": 3.0,
+     "height_ft": 3.0,
+     "sill_ft": 4.0,
+     "tag": "garage",
+     "at": [
+      0,
+      16.0
+     ]
+    }
+   ],
+   "exterior_openings_convention": "offset_ft measured from the wall's left end looking at that wall from outside; wall_line_ft = the grid line (y for front/rear, x for left/right); front has two lines (0 = front wing, 5 = garage face)",
+   "roof": {
+    "plate_ft": 9.0,
+    "heel_ft": 0.5,
+    "elements": [
+     {
+      "name": "main gable (rear block)",
+      "span_ft": 28.5,
+      "pitch": [
+       8,
+       12
+      ],
+      "ridge": "x",
+      "rise_ft": 9.5,
+      "ridge_height_ft": 19.0,
+      "basis": "plate 9.0 ft + heel 0.50 ft + (span/2)·pitch"
+     },
+     {
+      "name": "front-wing gable (extended over the porch)",
+      "span_ft": 17.0,
+      "pitch": [
+       8,
+       12
+      ],
+      "ridge": "y",
+      "rise_ft": 5.67,
+      "ridge_height_ft": 15.17,
+      "basis": "plate 9.0 ft + heel 0.50 ft + (span/2)·pitch"
+     },
+     {
+      "name": "garage gable",
+      "span_ft": 21.0,
+      "pitch": [
+       6,
+       12
+      ],
+      "ridge": "y",
+      "rise_ft": 5.25,
+      "ridge_height_ft": 14.75,
+      "basis": "plate 9.0 ft + heel 0.50 ft + (span/2)·pitch"
+     }
+    ],
+    "max_ridge_ft": 19.0,
+    "ridge_direction": "main ridge parallel to the lane (x) over the rear block (rear porch recessed under it); a front-facing 8:12 gable over the 17-ft front wing, carried 6 ft forward over the covered porch; a subordinate front-facing 6:12 gable over the 21-ft garage"
+   },
+   "areas": {
+    "conditioned_sf": 1492.0,
+    "conditioned_basis": "outside face of exterior walls / centreline of garage separation wall (grid union of conditioned rooms)",
+    "garage_sf": 504.0,
+    "front_porch_sf": 102.0,
+    "rear_porch_covered_sf": 84.0,
+    "rear_patio_uncovered_sf": 0,
+    "total_under_roof_sf": 2182.0,
+    "total_under_roof_basis": "conditioned + garage + covered porch(es) (patio uncovered, excluded)",
+    "sum_of_room_clear_sf": 1349.0
+   },
+   "accessibility_checklist": [
+    {
+     "item": "Zero-step entries",
+     "provided": "front porch (slab flush with finished floor), garage-to-laundry/mud-room door and recessed rear porch (french door ≤ 1/2-in threshold)",
+     "status": "design intent"
+    },
+    {
+     "item": "Door clear width",
+     "provided": "all passage doors 36 in (3'-0\"); closets/pantry 30–32 in; french doors 5'-0\" (den) and 6'-0\" (porch)",
+     "status": "design intent"
+    },
+    {
+     "item": "Hall width",
+     "provided": "foyer/hall 3'-6\" clear (42 in); kitchen corridor 3'-10\" clear",
+     "status": "design intent"
+    },
+    {
+     "item": "Turning circles",
+     "provided": "5'-0\" (60 in) circle drawn and checked clear in both baths",
+     "status": "checked by script"
+    },
+    {
+     "item": "Curbless shower",
+     "provided": "primary bath 5'-0\" × 3'-10\" curbless (recessed slab per 03 30 00 §2.05)",
+     "status": "design intent"
+    },
+    {
+     "item": "Out-swinging bath door",
+     "provided": "primary bath door swings into the bedroom (fall-rescue clearance)",
+     "status": "design intent"
+    },
+    {
+     "item": "Grab-bar blocking",
+     "provided": "2×10 solid blocking 33–36 in AFF at all toilets, tub and showers (2024 IRC (GA 2026) — voluntary; ANSI A117.1 Type C-type)",
+     "status": "design intent — VERIFY blocking heights with architect"
+    },
+    {
+     "item": "Plate height / vaulted",
+     "provided": "9'-0\" plate; great room vaulted",
+     "status": "design intent"
+    },
+    {
+     "item": "Single-level living",
+     "provided": "1 story; no interior steps; laundry/mud room on the living level off the garage",
+     "status": "design intent"
+    },
+    {
+     "item": "Lever hardware, rocker switches, 48-in max reach",
+     "provided": "to be specified (Division 08 / 26)",
+     "status": "later stage"
+    },
+    {
+     "item": "Lilburn §734 visitability",
+     "provided": "applies to attached dwellings only; voluntarily exceeded (100% zero-step)",
+     "status": "appears consistent with Ord. 2023-603 §734 (not applicable)"
+    }
+   ],
+   "materials_by_scheme": {
+    "1": {
+     "name": "Warm White",
+     "siding": "fiber-cement board-and-batten (12-in o.c. battens), warm white",
+     "base": "stacked/ledge stone water table (30 in) and porch piers",
+     "roof": "architectural asphalt shingle, weathered wood / charcoal",
+     "trim": "painted fiber-cement trim, soft white; 8×8 cedar porch posts + brackets",
+     "door": "front door deep green or black; garage door carriage-style, painted to match trim"
+    },
+    "2": {
+     "name": "Sage",
+     "siding": "fiber-cement lap siding, 6-in exposure, sage green",
+     "base": "brick veneer water table (30 in), red-brown blend; brick porch piers",
+     "roof": "architectural asphalt shingle, charcoal",
+     "trim": "painted trim, soft white; 8×8 cedar posts",
+     "door": "front door natural stain or oxblood; garage door painted to match siding"
+    },
+    "3": {
+     "name": "Clay",
+     "siding": "fiber-cement lap siding, 6-in exposure, clay/beige",
+     "base": "ledge stone water table (30 in) and porch piers, buff blend",
+     "roof": "architectural asphalt shingle, weathered wood",
+     "trim": "painted trim, cream; 8×8 cedar posts",
+     "door": "front door navy; garage door painted to match trim"
+    },
+    "source": "docs/12-outline-specifications.md (04 20 00, 04 40 00, 07 31 00, 07 46 46, 09 91 13); FACTS §4 \"three color schemes (warm white / sage / clay)\""
+   },
+   "lot_siting": {
+    "lot_w_ft": 50.0,
+    "lot_d_ft": 100.0,
+    "house_origin_on_lot_ft": [
+     6.0,
+     21.667
+    ],
+    "garage_door_from_lot_line_ft": 26.67,
+    "rear_wall_from_rear_line_ft": 20.83,
+    "patio_edge_from_rear_line_ft": null,
+    "rear_porch_edge_from_rear_line_ft": 20.83,
+    "side_yard_ft": 6.0,
+    "building_coverage_pct": 43.6,
+    "impervious_pct_est": 55.6,
+    "impervious_basis": "roof 2182 + patio 0 + driveway 533 + walk 63 SF"
+   },
+   "notes": [
+    "Illustrative architectural plan for the rezoning application (Lilburn Zoning Ordinance 2023-603 §1003-4 renderings/elevations item). NOT FOR CONSTRUCTION. DRAFT — to be superseded by sealed drawings by a Georgia-registered architect.",
+    "Dimensions are to the outside face of exterior walls (2×6, 6 in nominal) and to the centreline of interior partitions (2×4, 4 in). Plate height 9'-0\"; great room vaulted; roof 8:12 main gables, 4:12 front-porch shed, architectural shingles; the rear porch is recessed under the main roof.",
+    "Accessibility (voluntary — Ord. 2023-603 §734 applies to attached dwellings only): zero-step entries at the front porch, garage/mud room and rear porch; 36-in passage doors; 3'-6\" (42-in) clear foyer/hall; 5'-0\" turning circles drawn and checked clear in both baths; curbless primary shower; out-swinging primary bath door; 2×10 blocking for grab bars at all toilets, tub and showers.",
+    "Garage door 16'-0\" × 7'-0\" recessed 5'-0\" behind the front wall of the dwelling — appears consistent with Ord. 2023-603 Table 4.2 (front-loaded garages recessed ≥ 5 ft). Garage clear 20'-4\" × 23'-4\" ≥ the 20'-0\" × 20'-0\" program minimum (extra bay depth for storage / golf cart).",
+    "Life safety: smoke and CO alarms per 2024 IRC (GA 2026) R314/R315; bedroom emergency escape and rescue openings per 2024 IRC (GA 2026) R310 (note 9). NFPA 13D residential sprinklers are offered as a VOLUNTARY condition, not as code-required mitigation: IFC 2024 as adopted and modified by Ga. Comp. R. & Regs. R. 120-3-3-.04 replaces Appendix D107.1's 30-unit trigger with 120 dwelling units, so at 43 units a second fire-apparatus access road is not required and no sprinkler exception is being relied on. (The 1,754-ft dead-end lane still needs IFC 2024 (GA) Appendix D103.4 special approval — a site-plan issue, not a house-plan issue.)",
+    "BODY WIDTH — why 38'-0\" and not the 40'-0\" of the program brief. A 50'-0\" lot less two 5'-0\" side yards (Ord. 2023-603 Table 4.1, R-2) leaves 40'-0\" of buildable width, and the ROOF has to fit inside it, not just the walls: at an 8-in overhang on each side wall a 40'-0\" body measures 41'-4\" roof to roof and does not fit. Ord. 2023-603 was searched and contains no provision permitting a projection or encroachment into a required yard (VERIFY at pre-application). The body is therefore 38'-0\" wide — 38'-0\" + 2 × 0'-8\" = 39'-4\" roof to roof, 4 in of clearance to each side-yard line — and the depth was increased 1'-0\" to 58'-6\" to recover floor area. Conditioned area 1,530 SF, against 1,595 SF for the superseded 40'-0\" × 57'-6\" version (−4.1%).",
+    "BODY DEPTH — why 58'-6\" is the maximum. On the typical 50'-0\" × 100'-0\" lot the front porch face sits on the 15-ft front setback, the porch is 6'-0\" deep and the rear 20'-0\" of the lot is the undisturbed buffer easement (Ord. 2023-603 Table 4.1 rear yard; §313(1) buffer-in-lot reading): 100 − 15 − 6 − 20 = 59'-0\" of available body depth. At 58'-6\" the rear wall stands 20'-6\" from the rear lot line — 6 in outside the buffer easement (the ROOF is a separate question: see the first VERIFY item — the drawn 12-in rear eave reaches 19'-6\" from the rear line). Verified against data/layout.json (Plan B lot 2: lot 50 × 100, setback envelope 15 ft front / 20 ft rear, porch rect 6 ft deep).",
+    "Rear porch: recessing the 14'-0\" × 6'-0\" covered porch under the main roof keeps the roof edge on the line of the rear wall, so nothing projects past 58'-6\" and the 20-ft buffer easement is not touched. No uncovered patio is proposed (an added at-grade slab would reach the buffer line — VERIFY with Planning staff).",
+    "EGRESS. Both bedrooms have an emergency escape and rescue opening in an exterior wall: BEDROOM 2 a 6'-0\" × 5'-0\" twin on the right side wall, the PRIMARY BEDROOM a 5'-0\" × 5'-0\" unit on the rear wall; sills at 2'-8\" (32 in) above the finished floor, well under the 44-in maximum (2024 IRC (GA 2026) R310.2.2). The egress leaf of each unit is specified as a 3'-0\" × 5'-0\" CASEMENT: taking a 3-in allowance all round for frame, sash and hardware, net clear opening = 2'-6\" × 4'-6\" = 30 in × 54 in = 11.25 SF ≥ 5.7 SF, net clear width 30 in ≥ 20 in, net clear height 54 in ≥ 24 in — appears consistent with 2024 IRC (GA 2026) R310.2.1. A 3'-0\" × 5'-0\" single-hung is NOT relied on: its net clear height is roughly half the unit height and the resulting area is marginal against 5.7 SF. Companion leaves and all other windows may be single-hung.",
+    "Program body is nominally 38'-0\" × 40'-0\" = 1,520 SF (re-proportioned 2026-09-03 from the FACTS §4 nominal 40'-0\" × 40'-0\" = 1,600 SF — see note 6). With the 2-car garage as a front wing and the 14'-0\" × 6'-0\" rear porch recessed under the main roof, the conditioned envelope is a 17'-0\" × 29'-0\" front wing + a 38'-0\" × 29'-6\" rear block less the 84-SF porch notch = 1,530 SF conditioned (+0.7% on the 1,520-SF nominal); overall body 38'-0\" × 58'-6\" plus the front porch. 1,530 SF exceeds the ≥ 1,400-SF voluntary condition (docs/10 item 14) and the 1,000-SF minimum heated floor area for a cottage home in R-2 (Ord. 2023-603 Table 4.1).",
+    "Areas are computed by tools/floorplans.py from the wall-face polygons (conditioned = outside face of exterior walls; total under roof = conditioned + garage + both covered porches)."
+   ],
+   "verify": [
+    "REAR-YARD EAVE — the same question as the side yards, unresolved: the roof carries a 12-in eave front and rear (tools/elevations.py OH_FR), so at a 58'-6\" body the rear roof edge sits 19'-6\" from the rear lot line, 6 in INSIDE the 20-ft rear yard / buffer easement, while the side eaves were held 4 in outside the side-yard lines (note 6). Ord. 2023-603 has no projections/encroachments provision either way, and the front porch roof likewise projects 1'-0\" past the porch face into the 15-ft front setback (Plan A the same). If staff require the rear eave outside the line too, hold the body at 58'-0\" (rear wall 21'-0\" from the rear line; 8-in rear eave -> roof edge 20'-4\"; conditioned 1,511 SF) or at 57'-6\" with the 12-in eave (conditioned 1,492 SF). Resolve at the pre-application conference — this is a lot-fit decision, not a floor-plan decision",
+    "Side-yard eave projection: Ord. 2023-603 was searched and contains no projections/encroachments provision permitting an eave in a required yard, so the 8-in overhangs are held inside the 40'-0\" buildable width. CONFIRM with the Planning Director at the pre-application conference — if eaves may project, the body could return to 40'-0\" and the plan to ~1,595 SF",
+    "Fireplace type/venting (direct-vent gas assumed; no masonry chimney drawn) — architect of record / 2024 IRC (GA 2026) Ch. 10",
+    "Egress leaf type and net clear opening at unit selection — 2024 IRC (GA 2026) R310.2.1 (see note 9): a 3'-0\" × 5'-0\" single-hung does NOT reliably deliver 5.7 SF; the egress leaf at each bedroom is specified as a casement",
+    "Grab-bar blocking heights and ANSI A117.1 references — architect of record",
+    "Max impervious / lot coverage for R-2 — Lilburn Development Regulations App. B §5.9 is \"Recreation Areas\" and does not apply to this 9.44-ac subdivision (audit 2026-09-03), so no App. B coverage limit has been located — confirm at the pre-application conference",
+    "data/layout.json house_rect for Plan B lots is a 40 × 40 box; the actual envelope is 38'-0\" × 58'-6\" plus the 17' × 6' front porch — the site-plan agent must re-cut the house/driveway/rear rectangles (rear wall 20'-6\" from the rear line on a 100-ft lot, i.e. 6 in outside the 20-ft buffer easement)",
+    "tools/elevations.py MASSING['B'] must be conformed to this spec (blocks (0,29,38,57.5) / (21,−6,38,29) / (0,5,21,29); footprint_deduct (24,51.5,38,57.5); porch_sf 102) or check_massing() and check_width() will fail",
+    "Front wall at 21 ft from the lot line (porch face on the 15-ft setback + 6-ft porch), not the 20 ft assumed in the program brief — confirm the siting convention with the site-plan agent"
+   ]
+  }
+ }
+}

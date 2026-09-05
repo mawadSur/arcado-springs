@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Sheet C-6.0 phasing, block and open-space exhibit — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Sheet C-6.0 phasing, block and open-space exhibit</h1><p class="src-note">Python · 890 lines · <a href="/data-room/src/submission/tools/phasing.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Sheet C-6.0 &quot;PHASING, BLOCK AND OPEN SPACE EXHIBIT&quot; — The Cottages at Arcado Springs.
+
+    python3 tools/phasing.py     -&gt;  drawings/phasing-openspace.svg + .png
+
+ARCH D 36 x 24 in at 1&quot; = 60&#x27;, drawn by tools/sitebase.py in the same site-local (u, v)
+system, at the same scale and off the same origin as Sheets C-0, C-2.0 and C-4.0.  Every
+number on the sheet is read from data/layout.json (and data/plans.json for the two plan
+names) at run time; nothing is transcribed.
+
+WHY THIS SHEET EXISTS
+`docs/03-letter-of-intent.md` offers voluntary condition 15 (phasing) and condition 16
+(sanitary sewer) and cites THIS SHEET BY NUMBER for the phase line, so the filed set must
+carry it.  The governing clause is the City of Lilburn Site Development Plan Review Checklist
+section 4.i — &quot;Subdivision — add number of lots/units by type, calculated site density, Unit
+Numbers, Lot and Block Numbers if applicable.  **Phasing is not permitted unless platted in
+Blocks.**&quot; — with section 4.o, which requires the maintenance responsibility of every
+dedicated or common area to be noted.  The 2026-09-03 drawing audit records both as open
+defects (D-02: the old phase line at u = 1,000 bisected two lots and no Blocks were platted).
+
+WHAT THE SHEET SETTLES
+  * Block A (Phase 1) and Block B (Phase 2), their boundaries drawn ONLY on lot lines and
+    tract lines, with the phase line called out at its station along the travelled way and at
+    its local u station, and the lot count of each phase on the plan and in the schedules.
+  * A lot schedule by block and phase — block-lot number, the Sheet C-2.0 lot number, side,
+    station, area, width, depth and plan type.
+  * An open-space tract table: every common tract with its area, its percentage of the GIS
+    area AND of the deeded 9.44 ac, WHAT THE TRACT ACTUALLY CONTAINS (the built and paved area
+    inside the amenity tract stated in plain figures rather than left for staff to find), its
+    phase and its maintenance.
+  * The 20-ft buffer easement held inside private lots reported SEPARATELY and never added
+    into the common-tract total.
+  * Maintenance responsibility — homeowners association versus public — for every tract, every
+    easement and the right-of-way.
+
+Dwelling footprints, driveways, setback envelopes, contours and boundary bearings are NOT
+repeated here; they are on Sheets C-1.0, C-2.0, C-2.1, C-2.2 and C-3.0.  Omitting them is what
+lets the block, phase and tract lines read at this scale.
+
+DRAFT — NOT SEALED.  Not a plat.  A Georgia RLS must prepare the boundary survey, the block
+and lot platting and every easement description; a Georgia PE the utility and stormwater
+design.
+&quot;&quot;&quot;
+import json
+import math
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import sitebase as sb                                      # noqa: E402
+
+L = sb.LAYOUT
+M = L[&#x27;metrics&#x27;]
+GIS_SF = sb.BOUNDARY_SF                                    # 417,174 sf  (9.577 ac)
+DEEDED_AC = M[&#x27;acreage_deeded_ac&#x27;]
+DEEDED_SF = DEEDED_AC * 43560.0                            # 411,206 sf  (9.44 ac)
+PLANS = json.load(open(os.path.join(sb.DATA, &#x27;plans.json&#x27;)))[&#x27;plans&#x27;]
+
+# --------------------------------------------------------------------------- sheet geometry
+# The plan window keeps the u-range, the scale, the origin and the plan-window position of
+# Sheets C-0 / C-2.0, so those sheets still overlay this one.  It is cropped ACROSS the strip
+# (v -440 to +40 instead of -430 to +240): this exhibit needs the schedules more than it needs
+# the King David Manor lot labels, and the schedules have to be lettered at 1/8-in cap height.
+WIN = (-150.0, 1840.0, -440.0, 40.0)
+PLAN_H = (WIN[3] - WIN[2]) * sb.SCALE60                    # 576 pt
+BAND_Y0 = sb.PLAN_Y0 + PLAN_H + 28                         # 656 pt
+BAND_Y1 = sb.BAND_Y1                                       # 1530 pt
+
+# House rule: minimum lettering 1/8 in (0.125 in) cap height at full size.  Liberation Sans /
+# Arial cap height is 0.716 em, so 0.125 in x 72 pt/in / 0.716 = 12.57 pt is the smallest font
+# size allowed on this sheet.  TXT is used for every table cell, note and legend entry, and
+# nothing on the sheet is set smaller; plan labels and titles are larger.
+TXT = 12.6
+LEAD = 15.6
+CAP_IN = TXT * 0.716 / 72.0
+
+# --------------------------------------------------------------------------- palette
+CA, CB = &#x27;#b26a00&#x27;, &#x27;#5e35b1&#x27;                              # Block A / Block B
+FILL_A, FILL_B = &#x27;#fdefd8&#x27;, &#x27;#ece4f7&#x27;                      # Phase 1 / Phase 2 lot tint
+C_OS, C_OSLINE = &#x27;#dff0d8&#x27;, &#x27;#4a7c3a&#x27;                      # common open-space tract
+C_BUILT = &#x27;#f2c58a&#x27;                                        # clubhouse / court pads / kiosk
+C_GREEN = &#x27;#cfe8bd&#x27;                                        # village green
+
+
+# --------------------------------------------------------------------------- small geometry
+def clip_convex(subject, clipper):
+    &quot;&quot;&quot;Sutherland-Hodgman clip of `subject` by the CONVEX polygon `clipper`.&quot;&quot;&quot;
+    out = [tuple(p) for p in subject]
+    cl = [tuple(p) for p in clipper]
+    if sb.poly_area(cl) &lt; 0:
+        cl = cl[::-1]
+    for i in range(len(cl)):
+        a, b = cl[i], cl[(i + 1) % len(cl)]
+        ex, ey = b[0] - a[0], b[1] - a[1]
+
+        def inside(p):
+            return ex * (p[1] - a[1]) - ey * (p[0] - a[0]) &gt;= 0
+
+        src, out = out, []
+        for k in range(len(src)):
+            p, q = src[k], src[(k + 1) % len(src)]
+            ip, iq = inside(p), inside(q)
+            if ip:
+                out.append(p)
+            if ip != iq:
+                dx, dy = q[0] - p[0], q[1] - p[1]
+                den = ex * dy - ey * dx
+                if abs(den) &gt; 1e-12:
+                    t = (ex * (p[1] - a[1]) - ey * (p[0] - a[0])) / den
+                    out.append((p[0] - t * dx, p[1] - t * dy))
+        if not out:
+            return []
+    return out
+
+
+def clip_area(subject, clipper):
+    p = clip_convex(subject, clipper)
+    return abs(sb.poly_area(p)) if len(p) &gt; 2 else 0.0
+
+
+def clip_halfplane(poly, u_cut, keep_low=True):
+    &quot;&quot;&quot;The part of a polygon on one side of the line u = u_cut — the phase gross areas.&quot;&quot;&quot;
+    out = []
+    n = len(poly)
+    for i in range(n):
+        p, q = poly[i], poly[(i + 1) % n]
+        ip = (p[0] &lt;= u_cut) if keep_low else (p[0] &gt;= u_cut)
+        iq = (q[0] &lt;= u_cut) if keep_low else (q[0] &gt;= u_cut)
+        if ip:
+            out.append(p)
+        if ip != iq and abs(q[0] - p[0]) &gt; 1e-12:
+            t = (u_cut - p[0]) / (q[0] - p[0])
+            out.append((u_cut, p[1] + t * (q[1] - p[1])))
+    return out
+
+
+def sw_band(a, b):
+    &quot;&quot;&quot;The 100-ft-deep lot band on the SW side between stations a and b — the geometry the two
+    unlotted tracts (creek woods, stream setback) occupy (tools/siteplan.py `sw_tract`).&quot;&quot;&quot;
+    return [(a, sb.SW(a)), (b, sb.SW(b)), (b, sb.SW(b) + 100.0), (a, sb.SW(a) + 100.0)]
+
+
+def arclen(path, u0=-1e9, u1=1e9):
+    s = 0.0
+    for p, q in zip(path, path[1:]):
+        if q[0] &lt;= u0 or p[0] &gt;= u1:
+            continue
+        s += math.hypot(q[0] - p[0], q[1] - p[1])
+    return s
+
+
+def sta(ft):
+    return &#x27;%d+%05.2f&#x27; % (int(ft // 100), ft % 100)
+
+
+def sf(x):
+    return format(int(round(x)), &#x27;,&#x27;)
+
+
+# --------------------------------------------------------------------------- blocks and lots
+LOTS = L[&#x27;lots&#x27;]
+PHASE_U = float(L[&#x27;phase_line_u&#x27;])
+BLOCKS = sorted({l[&#x27;block&#x27;] for l in LOTS})
+PHASE_OF_BLOCK = {b: min(l[&#x27;phase&#x27;] for l in LOTS if l[&#x27;block&#x27;] == b) for b in BLOCKS}
+BLOCK_OF_PHASE = {PHASE_OF_BLOCK[b]: b for b in BLOCKS}
+BLOCK_LOTS = {b: sorted([l for l in LOTS if l[&#x27;block&#x27;] == b], key=lambda l: l[&#x27;block_lot&#x27;]) for b in BLOCKS}
+N_PHASE = {p: sum(1 for l in LOTS if l[&#x27;phase&#x27;] == p) for p in sorted({l[&#x27;phase&#x27;] for l in LOTS})}
+B1, B2 = BLOCK_OF_PHASE[1], BLOCK_OF_PHASE[2]
+
+
+def lot_u(l):
+    us = [p[0] for p in l[&#x27;polygon&#x27;]]
+    return min(us), max(us)
+
+
+def block_runs(block, side):
+    &quot;&quot;&quot;Contiguous runs of lots (same block, same side), so the block boundary can be drawn as a
+    heavy line ON LOT LINES and never across a lot.&quot;&quot;&quot;
+    ls = sorted([l for l in LOTS if l[&#x27;block&#x27;] == block and l[&#x27;side&#x27;] == side], key=lambda l: lot_u(l)[0])
+    runs, cur = [], []
+    for l in ls:
+        if cur and abs(lot_u(l)[0] - lot_u(cur[-1])[1]) &gt; 1e-6:
+            runs.append(cur)
+            cur = []
+        cur.append(l)
+    if cur:
+        runs.append(cur)
+    return runs
+
+
+def run_polygon(run):
+    &quot;&quot;&quot;Outline of a run of lots, taken from the member lots&#x27; own corners.&quot;&quot;&quot;
+    u0, u1 = lot_u(run[0])[0], lot_u(run[-1])[1]
+    a = sorted([p for p in run[0][&#x27;polygon&#x27;] if abs(p[0] - u0) &lt; 1e-6], key=lambda p: p[1])
+    b = sorted([p for p in run[-1][&#x27;polygon&#x27;] if abs(p[0] - u1) &lt; 1e-6], key=lambda p: p[1])
+    return [tuple(a[0]), tuple(b[0]), tuple(b[1]), tuple(a[1])]
+
+
+# ---- the phase line, stationed along the travelled way from the Arcado Rd right-of-way
+LANE_CL = [tuple(p) for p in L[&#x27;lane&#x27;][&#x27;centerline&#x27;]]
+ENTRY_CL = [tuple(p) for p in L[&#x27;lane&#x27;][&#x27;entry_drive&#x27;][&#x27;centerline&#x27;]]
+ENTRY_LEN = arclen(ENTRY_CL)
+STA_PHASE = ENTRY_LEN + arclen(LANE_CL, LANE_CL[0][0], PHASE_U)
+STA_END = ENTRY_LEN + arclen(LANE_CL)
+
+# ---- what the phase line actually runs between, and how many lots it divides (checked here,
+#      not asserted: the count is printed on the sheet)
+NE_PAIR = (max([l for l in LOTS if l[&#x27;side&#x27;] == &#x27;NE&#x27; and lot_u(l)[1] &lt;= PHASE_U + 1e-6], key=lambda l: lot_u(l)[1]),
+           min([l for l in LOTS if l[&#x27;side&#x27;] == &#x27;NE&#x27; and lot_u(l)[0] &gt;= PHASE_U - 1e-6], key=lambda l: lot_u(l)[0]))
+SW_NEXT = min([l for l in LOTS if l[&#x27;side&#x27;] == &#x27;SW&#x27; and lot_u(l)[0] &gt;= PHASE_U - 1e-6], key=lambda l: lot_u(l)[0])
+CROSSED = [l for l in LOTS if lot_u(l)[0] &lt; PHASE_U &lt; lot_u(l)[1]]
+
+# ---- gross land area of each phase: the boundary cut at the phase line
+GROSS = {1: abs(sb.poly_area(clip_halfplane(sb.BOUNDARY, PHASE_U, True))),
+         2: abs(sb.poly_area(clip_halfplane(sb.BOUNDARY, PHASE_U, False)))}
+
+# --------------------------------------------------------------------------- open-space tracts
+AM = L[&#x27;amenity&#x27;]
+HH = L[&#x27;hammerheads&#x27;]
+GREENS = L[&#x27;greens&#x27;]
+PONDS = L[&#x27;ponds&#x27;]
+OS_SUM = L[&#x27;open_space_summary&#x27;]
+BUILT_BD = OS_SUM[&#x27;built_or_paved_breakdown_sf&#x27;]
+TRACT_AREA = {t[&#x27;name&#x27;]: t[&#x27;area_sf&#x27;] for t in L[&#x27;open_space_tracts&#x27;]}
+
+
+def named(key):
+    for n, a in TRACT_AREA.items():
+        if key.lower() in n.lower():
+            return n, a
+    raise KeyError(key)
+
+
+CLUB_SF = AM[&#x27;clubhouse_sf&#x27;]
+PAD_SF = sum(abs(sb.poly_area([tuple(q) for q in p])) for p in AM[&#x27;pickleball&#x27;])
+KIOSK_SF = abs(sb.poly_area([tuple(q) for q in AM[&#x27;mail_kiosk&#x27;]]))
+WALKS_SF = BUILT_BD.get(&#x27;amenity walks (allowance)&#x27;, 0)
+AM_BUILT = CLUB_SF + PAD_SF + KIOSK_SF + WALKS_SF
+BAY_SF = (abs(sb.poly_area([tuple(q) for q in AM[&#x27;parking_bay&#x27;]]))
+          + abs(sb.poly_area([tuple(q) for q in AM[&#x27;kiosk_bay&#x27;]])))
+N_GUEST = AM[&#x27;guest_spaces&#x27;] + AM[&#x27;kiosk_spaces&#x27;]
+HH_LEG_SF = abs(sb.poly_area([tuple(p) for p in HH[0][&#x27;legs&#x27;][0]]))
+HH_PER = 2 * HH_LEG_SF                                     # 2,400 sf per turnaround, as published
+
+
+def _hh_in(polys):
+    &quot;&quot;&quot;How much of the turnaround legs really falls inside the greens.  The published breakdown
+    counts the whole leg; the honest figure is quoted in general note 9.&quot;&quot;&quot;
+    return sum(clip_area([tuple(p) for p in leg], [tuple(q) for q in g])
+               for h in HH for leg in h[&#x27;legs&#x27;] for g in polys)
+
+
+def _amenity_split():
+    &quot;&quot;&quot;The published 46,777 sf amenity tract is the tract polygon LESS the entry drive and the
+    widened lane tract that cross it.  Measured on a 1-ft raster so the sheet can say so.&quot;&quot;&quot;
+    tract = [tuple(p) for p in AM[&#x27;tract_polygons&#x27;][0]]
+    lane = [tuple(p) for p in L[&#x27;lane&#x27;][&#x27;tract_polygon&#x27;]]
+    entry = [tuple(p) for p in L[&#x27;lane&#x27;][&#x27;entry_drive&#x27;][&#x27;tract_polygon&#x27;]]
+    us = [p[0] for p in tract]
+    vs = [p[1] for p in tract]
+    gross = crossed = 0
+    u = min(us) + 0.5
+    while u &lt; max(us):
+        v = min(vs) + 0.5
+        while v &lt; max(vs):
+            if sb.point_in_poly((u, v), tract):
+                gross += 1
+                if sb.point_in_poly((u, v), lane) or sb.point_in_poly((u, v), entry):
+                    crossed += 1
+            v += 1.0
+        u += 1.0
+    return float(gross), float(crossed)
+
+
+AM_GROSS, AM_CROSSED = _amenity_split()
+
+TRACTS = [
+    {&#x27;id&#x27;: &#x27;A&#x27;, &#x27;key&#x27;: &#x27;amenity&#x27;, &#x27;phase&#x27;: 1,
+     &#x27;polys&#x27;: [[tuple(q) for q in p] for p in AM[&#x27;tract_polygons&#x27;]],
+     &#x27;where&#x27;: &#x27;Front amenity tract, Arcado Rd frontage to u 230&#x27;,
+     &#x27;maint&#x27;: &#x27;HOA&#x27;},
+    {&#x27;id&#x27;: &#x27;B&#x27;, &#x27;key&#x27;: &#x27;Pocket green (u 530&#x27;, &#x27;phase&#x27;: 1,
+     &#x27;polys&#x27;: [[tuple(q) for q in p] for p in GREENS[0][&#x27;polygons&#x27;]],
+     &#x27;where&#x27;: &#x27;Pocket green, both sides, u 530–580&#x27;,
+     &#x27;contains&#x27;: &#x27;Lawn and plantings. Hammerhead turnaround 1 — %s SF of pavement in two legs.&#x27; % sf(HH_PER),
+     &#x27;maint&#x27;: &#x27;HOA&#x27;},
+    {&#x27;id&#x27;: &#x27;C&#x27;, &#x27;key&#x27;: &#x27;Pocket green (u 1080&#x27;, &#x27;phase&#x27;: 2,
+     &#x27;polys&#x27;: [[tuple(q) for q in p] for p in GREENS[1][&#x27;polygons&#x27;]],
+     &#x27;where&#x27;: &#x27;Pocket green, both sides, u 1,080–1,130&#x27;,
+     &#x27;contains&#x27;: &#x27;Lawn and plantings. Hammerhead turnaround 2 — %s SF of pavement in two legs.&#x27; % sf(HH_PER),
+     &#x27;maint&#x27;: &#x27;HOA&#x27;},
+    {&#x27;id&#x27;: &#x27;D&#x27;, &#x27;key&#x27;: &#x27;Terminus green&#x27;, &#x27;phase&#x27;: 2,
+     &#x27;polys&#x27;: [[tuple(q) for q in p] for p in GREENS[2][&#x27;polygons&#x27;]],
+     &#x27;where&#x27;: &#x27;Terminus green + rear buffer, u 1,680–1,722&#x27;,
+     &#x27;contains&#x27;: (&#x27;Lawn; rear 20-ft buffer in common ownership. Hammerhead turnaround 3 — %s SF of &#x27;
+                  &#x27;pavement in two legs.&#x27; % sf(HH_PER)),
+     &#x27;maint&#x27;: &#x27;HOA&#x27;},
+    {&#x27;id&#x27;: &#x27;E&#x27;, &#x27;key&#x27;: &#x27;Pond 1&#x27;, &#x27;phase&#x27;: 1,
+     &#x27;polys&#x27;: [[tuple(q) for q in PONDS[0][&#x27;tract_polygon&#x27;]]],
+     &#x27;where&#x27;: &#x27;Pond 1 tract, SW side, u 780–980&#x27;,
+     &#x27;contains&#x27;: (&#x27;Dry detention / water-quality basin, %s SF at top of bank — earthen, NOT impervious. &#x27;
+                  &#x27;Buffer, drainage and BMP access easements inside the tract.&#x27; % sf(PONDS[0][&#x27;area_sf&#x27;])),
+     &#x27;maint&#x27;: &#x27;HOA&#x27;},
+    {&#x27;id&#x27;: &#x27;F&#x27;, &#x27;key&#x27;: &#x27;Pond 2&#x27;, &#x27;phase&#x27;: 2,
+     &#x27;polys&#x27;: [[tuple(q) for q in PONDS[1][&#x27;tract_polygon&#x27;]]],
+     &#x27;where&#x27;: &#x27;Pond 2 tract, SW side, u 1,480–1,680&#x27;,
+     &#x27;contains&#x27;: (&#x27;Dry detention / water-quality basin, %s SF at top of bank — earthen, NOT impervious. &#x27;
+                  &#x27;Buffer, drainage and BMP access easements inside the tract.&#x27; % sf(PONDS[1][&#x27;area_sf&#x27;])),
+     &#x27;maint&#x27;: &#x27;HOA&#x27;},
+    {&#x27;id&#x27;: &#x27;G&#x27;, &#x27;key&#x27;: &#x27;Creek woods&#x27;, &#x27;phase&#x27;: 2,
+     &#x27;polys&#x27;: [sw_band(1280.0, 1480.0)],
+     &#x27;where&#x27;: &#x27;Creek woods, SW side, u 1,280–1,480&#x27;,
+     &#x27;contains&#x27;: (&#x27;Stream head, 50-ft undisturbed buffer and 75-ft impervious setback, preserved. &#x27;
+                  &#x27;NOTHING BUILT OR PAVED.&#x27;),
+     &#x27;maint&#x27;: &#x27;HOA&#x27;},
+    {&#x27;id&#x27;: &#x27;H&#x27;, &#x27;key&#x27;: &#x27;Stream-setback&#x27;, &#x27;phase&#x27;: 2,
+     &#x27;polys&#x27;: [sw_band(1230.0, 1280.0)],
+     &#x27;where&#x27;: &#x27;Stream-setback tract, SW, u 1,230–1,280&#x27;,
+     &#x27;contains&#x27;: (&#x27;The one 50 x 100-ft lot slot that fails the 75-ft screen, left unlotted. &#x27;
+                  &#x27;NOTHING BUILT OR PAVED.&#x27;),
+     &#x27;maint&#x27;: &#x27;HOA&#x27;},
+]
+for t in TRACTS:
+    t[&#x27;name&#x27;], t[&#x27;area&#x27;] = named(t[&#x27;key&#x27;])
+    t[&#x27;shoelace&#x27;] = sum(abs(sb.poly_area(p)) for p in t[&#x27;polys&#x27;])
+    t[&#x27;built&#x27;] = (AM_BUILT if t[&#x27;id&#x27;] == &#x27;A&#x27; else (HH_PER if t[&#x27;id&#x27;] in (&#x27;B&#x27;, &#x27;C&#x27;, &#x27;D&#x27;) else 0.0))
+TRACTS[0][&#x27;contains&#x27;] = (
+    &#x27;Clubhouse %s SF + two court pads %s SF + mail kiosk %s SF + walks %s SF = %s SF BUILT OR PAVED, &#x27;
+    &#x27;%.1f%% of the tract. Also the village green, landscape strip and monument sign. The %d guest and &#x27;
+    &#x27;kiosk spaces (%s SF of bays) are NOT in it — note 8.&#x27;
+    % (sf(CLUB_SF), sf(PAD_SF), sf(KIOSK_SF), sf(WALKS_SF), sf(AM_BUILT),
+       100.0 * AM_BUILT / TRACTS[0][&#x27;area&#x27;], N_GUEST, sf(BAY_SF)))
+
+OS_TOTAL = sum(t[&#x27;area&#x27;] for t in TRACTS)
+OS_BUILT = sum(t[&#x27;built&#x27;] for t in TRACTS)
+PHASE_OS = {p: sum(t[&#x27;area&#x27;] for t in TRACTS if t[&#x27;phase&#x27;] == p) for p in (1, 2)}
+HH_REAL = _hh_in([g for t in TRACTS if t[&#x27;id&#x27;] in (&#x27;B&#x27;, &#x27;C&#x27;, &#x27;D&#x27;) for g in t[&#x27;polys&#x27;]])
+BUF_SF = sum(abs(sb.poly_area([tuple(p) for p in l[&#x27;buffer_easement&#x27;]])) for l in LOTS)
+PH1_SEWER_FT = arclen([tuple(p) for p in L[&#x27;sewer&#x27;][&#x27;proposed_phase1_gravity&#x27;]])
+OFFSITE_FT = L[&#x27;sewer&#x27;][&#x27;extension_offsite_ft&#x27;]
+
+
+# --------------------------------------------------------------------------- table rows
+LOT_COLS = [&#x27;LOT&#x27;, &#x27;C-2.0&#x27;, &#x27;SIDE&#x27;, &#x27;STATION u, ft&#x27;, &#x27;AREA SF&#x27;, &#x27;WIDTH&#x27;, &#x27;DEPTH&#x27;, &#x27;PLAN&#x27;]
+LOT_W = [46, 42, 44, 106, 60, 56, 62, 34]
+
+
+def lot_rows(block):
+    out = []
+    for l in BLOCK_LOTS[block]:
+        u0, u1 = lot_u(l)
+        out.append([&#x27;%s-%d&#x27; % (block, l[&#x27;block_lot&#x27;]), str(l[&#x27;id&#x27;]), l[&#x27;side&#x27;],
+                    &#x27;%s – %s&#x27; % (sf(u0), sf(u1)), sf(l[&#x27;area_sf&#x27;]),
+                    &#x27;%d\&#x27;-0&quot;&#x27; % round(l[&#x27;width_ft&#x27;]), &#x27;%d\&#x27;-0&quot;&#x27; % round(l[&#x27;depth_ft&#x27;]), l[&#x27;plan&#x27;]])
+    return out
+
+
+def tract_rows():
+    rows = []
+    for t in TRACTS:
+        rows.append([t[&#x27;id&#x27;], t[&#x27;where&#x27;], sf(t[&#x27;area&#x27;]),
+                     &#x27;%.2f%%&#x27; % (100.0 * t[&#x27;area&#x27;] / GIS_SF),
+                     &#x27;%.2f%%&#x27; % (100.0 * t[&#x27;area&#x27;] / DEEDED_SF),
+                     &#x27;%d / %s&#x27; % (t[&#x27;phase&#x27;], BLOCK_OF_PHASE[t[&#x27;phase&#x27;]]),
+                     t[&#x27;contains&#x27;], t[&#x27;maint&#x27;]])
+    rows.append([&#x27;&#x27;, &#x27;TOTAL — EIGHT TRACTS&#x27;, sf(OS_TOTAL),
+                 &#x27;%.1f%%&#x27; % OS_SUM[&#x27;pct_of_gis_area&#x27;], &#x27;%.1f%%&#x27; % OS_SUM[&#x27;pct_of_deeded_area&#x27;], &#x27;BOTH&#x27;,
+                 &#x27;Of which %s SF is built or paved (note 8); %s SF, %.1f%% of the GIS area, is green. &#x27;
+                 &#x27;NO open space is required here — note 5.&#x27;
+                 % (sf(OS_BUILT), sf(OS_SUM[&#x27;green_only_sf&#x27;]), OS_SUM[&#x27;green_only_pct_of_gis_area&#x27;]),
+                 &#x27;HOA&#x27;])
+    return rows
+
+
+def easement_rows():
+    return [
+        [&#x27;Private lane tract, including the entry drive&#x27;, &#x27;%s SF&#x27; % sf(M[&#x27;lane_tract_sf&#x27;]), &#x27;1 and 2&#x27;,
+         &#x27;HOA in fee&#x27;, &#x27;HOA — pavement, sidewalks, curb, drainage, lighting and street trees. &#x27;
+         &#x27;Private street (§4.s), built to public-street standards.&#x27;, &#x27;NO&#x27;],
+        [&#x27;20-ft buffer easement on the rear of all %d lots&#x27; % len(LOTS), &#x27;%s SF&#x27; % sf(BUF_SF), &#x27;1 and 2&#x27;,
+         &#x27;Lot owner in fee, subject to a recorded buffer easement (§313(1))&#x27;,
+         &#x27;HOA maintains and enforces it; the owner may not clear, grade, fence or build in it.&#x27;,
+         &#x27;NO — separate, note 7&#x27;],
+        [&#x27;Existing 20-ft sanitary sewer easement (Arcado Rd Townhomes outfall)&#x27;,
+         &quot;20&#x27; wide, u −42 to 272; width to be confirmed from the recorded plat&quot;, &#x27;existing&#x27;,
+         &#x27;Gwinnett County (DWR)&#x27;, &#x27;PUBLIC — DWR maintains the main; HOA mows the surface.&#x27;, &#x27;NO&#x27;],
+        [&#x27;Phase 1 sanitary sewer easement, on site, to MH inv 927.13&#x27;,
+         &quot;20&#x27; wide, ≈ %d ft; area by survey&quot; % round(PH1_SEWER_FT), &#x27;1&#x27;,
+         &#x27;To be dedicated to Gwinnett County (DWR)&#x27;,
+         &#x27;PUBLIC — DWR maintains the main after acceptance; HOA the surface.&#x27;, &#x27;NO&#x27;],
+        [&#x27;Phase 2 sanitary sewer easement, off site, to the Legends at Parkview main (MH inv 919.58)&#x27;,
+         &quot;20&#x27; wide, ≈ %.0f ft of it OFF SITE; to be acquired&quot; % OFFSITE_FT, &#x27;2&#x27;,
+         &#x27;To be dedicated to Gwinnett County (DWR)&#x27;,
+         &#x27;PUBLIC — DWR maintains the main. MUST BE RECORDED BEFORE ANY PHASE 2 WORK &#x27;
+         &#x27;(condition 16).&#x27;, &#x27;NO&#x27;],
+        [&#x27;Drainage and 30-ft BMP access easements at each pond&#x27;,
+         &#x27;Within Tracts E and F; Sheet C-3.0&#x27;, &#x27;1 and 2&#x27;, &#x27;HOA in fee&#x27;,
+         &#x27;HOA under a recorded Storm Water BMP Maintenance Agreement with the City (§9.g.3).&#x27;, &#x27;NO&#x27;],
+        [&#x27;Arcado Road right-of-way&#x27;, &#x27;R/W width varies — Sheet C-1.0&#x27;, &#x27;existing&#x27;, &#x27;Gwinnett County&#x27;,
+         &#x27;PUBLIC — Gwinnett County DOT. Nothing here is offered for dedication to the City.&#x27;, &#x27;NO&#x27;],
+    ]
+
+
+def phase_rows():
+    l1 = [l for l in LOTS if l[&#x27;phase&#x27;] == 1]
+    l2 = [l for l in LOTS if l[&#x27;phase&#x27;] == 2]
+    tr = {p: &#x27;, &#x27;.join(t[&#x27;id&#x27;] for t in TRACTS if t[&#x27;phase&#x27;] == p) for p in (1, 2)}
+
+    def blk(b, ls):
+        return &#x27;%s — %d lots (%d SW, %d NE), numbered %s-1 to %s-%d&#x27; % (
+            b, len(ls), sum(1 for l in ls if l[&#x27;side&#x27;] == &#x27;SW&#x27;),
+            sum(1 for l in ls if l[&#x27;side&#x27;] == &#x27;NE&#x27;), b, b, len(ls))
+
+    return [
+        [&#x27;Block and lots&#x27;, blk(B1, l1), blk(B2, l2)],
+        [&#x27;Station; gross area; density&#x27;, &#x27;STA %s–%s; %s SF = %.2f ac; %.2f du/ac&#x27;
+         % (sta(0), sta(STA_PHASE), sf(GROSS[1]), GROSS[1] / 43560.0, len(l1) / (GROSS[1] / 43560.0)),
+         &#x27;STA %s–%s; %s SF = %.2f ac; %.2f du/ac&#x27;
+         % (sta(STA_PHASE), sta(STA_END), sf(GROSS[2]), GROSS[2] / 43560.0, len(l2) / (GROSS[2] / 43560.0))],
+        [&#x27;Open space; turnarounds; pond&#x27;, &#x27;Tracts %s — %s SF; hammerhead 1; Pond 1, %s cf&#x27;
+         % (tr[1], sf(PHASE_OS[1]), sf(PONDS[0][&#x27;est_storage_cf&#x27;])),
+         &#x27;Tracts %s — %s SF; hammerheads 2 and 3; Pond 2, %s cf&#x27;
+         % (tr[2], sf(PHASE_OS[2]), sf(PONDS[1][&#x27;est_storage_cf&#x27;]))],
+        [&#x27;Amenities&#x27;, &#x27;The whole amenity block — clubhouse, green, two courts, kiosk, guest parking, &#x27;
+                      &#x27;monument sign&#x27;, &#x27;None deferred to Phase 2&#x27;],
+        [&#x27;Sanitary sewer&#x27;, &#x27;Gravity to the existing 8-in county main already on the property (MH inv &#x27;
+                           &#x27;927.13). NO EXTENSION.&#x27;,
+         &#x27;Gravity only, ≈ %.0f ft of it off site, to MH inv 919.58. Conditions 15 and 16.&#x27; % OFFSITE_FT],
+        [&#x27;Demolition&#x27;, &#x27;Dwelling at 4541 Arcado Rd (u ≈ 203)&#x27;,
+         &#x27;Dwelling at 4535 Arcado Rd (u ≈ 1,202) — stands ON the lane; remove before any Phase 2 &#x27;
+         &#x27;disturbance&#x27;],
+        [&#x27;Does the phase stand alone?&#x27;, &#x27;YES — entrance, all amenities, Pond 1, a turnaround and gravity &#x27;
+                                        &#x27;sewer; no off-site easement, no second access needed&#x27;,
+         &#x27;NO — needs a recorded off-site easement and a Gwinnett DWR capacity certification&#x27;],
+    ]
+
+
+# --------------------------------------------------------------------------- legend and notes
+LEGEND = [
+    (&#x27;line&#x27;, &#x27;#000&#x27;, 1.8, &#x27;&#x27;, &#x27;Assemblage boundary (Gwinnett GIS — DRAFT)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;adj_fill&#x27;], 0, &#x27;&#x27;, &#x27;Adjoining tax parcel — zoned R-1, Lilburn&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;rw&#x27;], 0.9, &#x27;&#x27;, &#x27;Arcado Rd right-of-way line (Gwinnett County)&#x27;),
+    (&#x27;line&#x27;, &#x27;#333&#x27;, 0.6, &#x27;14 3 3 3&#x27;, &#x27;Existing street centreline&#x27;),
+    (&#x27;rect&#x27;, FILL_A, 0, &#x27;&#x27;, &#x27;Lot in Block A — Phase 1 (fee simple, private)&#x27;),
+    (&#x27;rect&#x27;, FILL_B, 0, &#x27;&#x27;, &#x27;Lot in Block B — Phase 2 (fee simple, private)&#x27;),
+    (&#x27;line&#x27;, CA, 2.8, &#x27;&#x27;, &#x27;Block A boundary — drawn on lot lines only&#x27;),
+    (&#x27;line&#x27;, CB, 2.8, &#x27;&#x27;, &#x27;Block B boundary — drawn on lot lines only&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;phase&#x27;], 3.4, &#x27;18 5 4 5&#x27;, &#x27;Phase line = Block A – Block B boundary&#x27;),
+    (&#x27;rect&#x27;, C_OS, 0, &#x27;&#x27;, &#x27;Common open-space tract, HOA-owned&#x27;),
+    (&#x27;key&#x27;, C_OS, 0, &#x27;&#x27;, &#x27;Open-space tract key — see the tract table&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;tract&#x27;], 0, &#x27;&#x27;, &#x27;Private lane tract, HOA-owned — NOT open space&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;pave&#x27;], 0, &#x27;&#x27;, &#x27;Pavement — lane, entry drive, turnarounds, bays&#x27;),
+    (&#x27;rect&#x27;, &#x27;#f7f7f7&#x27;, 0, &#x27;&#x27;, &quot;Sidewalk, 5&#x27;-0\&quot;&quot;),
+    (&#x27;line&#x27;, &#x27;#666&#x27;, 0.35, &#x27;&#x27;, &#x27;Parking stall (12 guest and mail-kiosk spaces)&#x27;),
+    (&#x27;line&#x27;, &#x27;#444&#x27;, 0.4, &#x27;12 3 2 3&#x27;, &#x27;Private lane centreline&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#bufhatch)&#x27;, 0, &#x27;&#x27;, &quot;20&#x27; buffer easement in a lot (reported separately)&quot;),
+    (&#x27;rect&#x27;, C_GREEN, 0, &#x27;&#x27;, &#x27;Village green (within Tract A)&#x27;),
+    (&#x27;rect&#x27;, C_BUILT, 0, &#x27;&#x27;, &#x27;Clubhouse, court pads, kiosk — built, Tract A&#x27;),
+    (&#x27;rect&#x27;, &#x27;#333&#x27;, 0, &#x27;&#x27;, &#x27;Monument entry sign (permitted separately)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;pond&#x27;], 0, &#x27;&#x27;, &#x27;Dry detention / water-quality basin (earthen)&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#exhatch)&#x27;, 0, &#x27;&#x27;, &#x27;Existing dwelling — to be removed&#x27;),
+    (&#x27;rect&#x27;, &#x27;#efe6dc&#x27;, 0, &#x27;&#x27;, &#x27;Existing drive — to be removed&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;stream&#x27;], 1.6, &#x27;&#x27;, &#x27;Stream — state waters (top of bank approximate)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.5, &#x27;3 2&#x27;, &quot;25&#x27; state (GA EPD) stream buffer&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.8, &#x27;6 2&#x27;, &quot;50&#x27; undisturbed stream buffer (Lilburn)&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.8, &#x27;8 2 2 2&#x27;, &quot;75&#x27; impervious setback&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;sewer&#x27;], 1.0, &#x27;&#x27;, &#x27;Existing 8-in sanitary sewer and manhole&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;sewer&#x27;], 2.2, &#x27;9 4&#x27;, &#x27;Phase 2 gravity sewer — easement to be recorded&#x27;),
+]
+
+
+def notes():
+    return [
+        &#x27;BLOCKS. Site Development Plan Review Checklist §4.i: &quot;Subdivision — add number of lots/units … &#x27;
+        &#x27;Lot and Block Numbers if applicable. Phasing is not permitted unless platted in Blocks.&quot; Block &#x27;
+        &#x27;%s (Phase 1, %d lots) and Block %s (Phase 2, %d lots) are platted as blocks, and every block &#x27;
+        &#x27;boundary drawn here lies on a lot line or a tract line. Numbers %s-1…%s-%d and %s-1…%s-%d carry &#x27;
+        &#x27;to the plat; column 2 of each schedule gives the C-2.0 lot number.&#x27;
+        % (B1, N_PHASE[1], B2, N_PHASE[2], B1, B1, len(BLOCK_LOTS[B1]), B2, B2, len(BLOCK_LOTS[B2])),
+
+        &#x27;PHASE LINE. STA %s along the travelled way from the Arcado Rd right-of-way (%.0f-ft entry drive &#x27;
+        &#x27;plus lane) = local station u %.0f. NE side: the common lot line of Lots %s-%d and %s-%d. SW &#x27;
+        &#x27;side: the tract line between Tract E (Pond 1) and Lot %s-%d. Between them it crosses only the &#x27;
+        &#x27;private lane tract. IT DIVIDES %d LOTS.&#x27;
+        % (sta(STA_PHASE), ENTRY_LEN, PHASE_U, NE_PAIR[0][&#x27;block&#x27;], NE_PAIR[0][&#x27;block_lot&#x27;],
+           NE_PAIR[1][&#x27;block&#x27;], NE_PAIR[1][&#x27;block_lot&#x27;], SW_NEXT[&#x27;block&#x27;], SW_NEXT[&#x27;block_lot&#x27;],
+           len(CROSSED)),
+
+        &#x27;PHASE 1 IS DESIGNED TO STAND ALONE. Block %s carries the entrance, the entire amenity block &#x27;
+        &#x27;(Tract A), Pond 1 (Tract E), the first turnaround (Tract B) and %d of the %d lots, served by &#x27;
+        &#x27;gravity to the existing 8-in county main already crossing the property (MH inv 927.13). No &#x27;
+        &#x27;sewer extension, no off-site easement, no second access; complete whether or not Phase 2 is &#x27;
+        &#x27;built.&#x27; % (B1, N_PHASE[1], len(LOTS)),
+
+        &#x27;PHASE 2 CONDITION. No Phase 2 work and no land-disturbance permit until (a) the off-site &#x27;
+        &#x27;sewer easement for the ≈ %.0f-ft gravity tie to the Legends at Parkview main (MH inv 919.58) is &#x27;
+        &#x27;RECORDED and (b) Gwinnett County DWR has issued its SEWER CAPACITY CERTIFICATION (condition &#x27;
+        &#x27;16). Gravity only: no private pump station, force main, private gravity sewer, grinder pump or &#x27;
+        &#x27;low-pressure system (Gwinnett DWR Standard Policy for Private Developments, rev. 9/2018; &#x27;
+        &#x27;WSR-24 §1.3.1(A)). If either fails, Phase 2 is not built, and 4535 Arcado Rd — which stands on &#x27;
+        &#x27;the lane alignment — comes down under permit first (condition 15).&#x27; % OFFSITE_FT,
+
+        &#x27;OPEN SPACE IS VOLUNTARY. Table 4.1 refers the R-2 open-space requirement to §5.9 of the &#x27;
+        &#x27;Development Regulations; §5.9.1 &quot;Recreation Areas&quot; reaches detached subdivisions &quot;having a &#x27;
+        &#x27;gross area of 50 acres or more.&quot; At %.2f ac it is not engaged: none of the %s SF is required.&#x27;
+        % (DEEDED_AC, sf(OS_TOTAL)),
+
+        &#x27;BUFFER EASEMENT — REPORTED SEPARATELY. The rear 20 ft of each of the %d lots is undisturbed &#x27;
+        &#x27;buffer in a recorded easement inside the private lot (Ord. 2023-603 §313(1)): %s SF. It is not &#x27;
+        &#x27;a common tract, is not in the %s SF total, and is in no percentage on this sheet.&#x27;
+        % (len(LOTS), sf(BUF_SF), sf(OS_TOTAL)),
+
+        &#x27;AREA BASIS. %s SF = %.3f ac GIS; %s SF = %.2f ac deeded; percentages given against both. Tract &#x27;
+        &#x27;areas are the published residual — GIS area less lots less the lane and entry-drive tracts — so &#x27;
+        &#x27;the eight sum exactly. Tract A is NET: its outline encloses ≈ %s SF, of which ≈ %s SF is entry &#x27;
+        &#x27;drive and lane tract.&#x27;
+        % (sf(GIS_SF), GIS_SF / 43560.0, sf(DEEDED_SF), DEEDED_AC, sf(AM_GROSS), sf(AM_CROSSED)),
+
+        &#x27;BUILT AND PAVED INSIDE THE OPEN SPACE. %s SF of %s SF; the balance, %s SF (%.1f%% of the GIS &#x27;
+        &#x27;area), is green. Turnaround legs are counted at the full %s SF each although only ≈ %s SF of &#x27;
+        &#x27;the %s SF really falls inside the greens, so the figure is conservative. The %d guest and kiosk &#x27;
+        &#x27;spaces (%s SF of bays) lie in the lane tract and are not counted at all.&#x27;
+        % (sf(OS_BUILT), sf(OS_TOTAL), sf(OS_SUM[&#x27;green_only_sf&#x27;]), OS_SUM[&#x27;green_only_pct_of_gis_area&#x27;],
+           sf(HH_LEG_SF), sf(HH_REAL), sf(6 * HH_LEG_SF), N_GUEST, sf(BAY_SF)),
+
+        &#x27;MAINTENANCE (§4.o). A mandatory HOA owns and maintains Tracts A–H, the lane tract and its &#x27;
+        &#x27;sidewalks, both ponds, the buffers and buffer easements, the entry sign and the lighting, and &#x27;
+        &#x27;provides yard maintenance to every lot (condition 10). NOTHING IS OFFERED FOR DEDICATION TO &#x27;
+        &#x27;THE CITY; only the sanitary mains and their easements become public, to Gwinnett DWR.&#x27;,
+
+        &#x27;NOT SHOWN, AND SOURCES. Dwellings, driveways and setback envelopes — Sheets C-2.0/2.1/2.2; &#x27;
+        &#x27;bearings and topography — C-1.0; grading — C-3.0; utilities — C-4.0/4.1. Only the sewer &#x27;
+        &#x27;reaches on or adjoining the property are drawn. Every area, count and station here is read at &#x27;
+        &#x27;run time from data/layout.json (%s) and data/plans.json.&#x27; % sb.DATE,
+    ]
+
+
+def flow_notes(D, x, y, w, ncols, hmax, texts, size=TXT, lead=LEAD, gap=18.0):
+    &quot;&quot;&quot;Balanced multi-column note block at a FIXED type size (the 1/8-in minimum is a house
+    rule, so the block is never shrunk to fit — it reports overflow instead).&quot;&quot;&quot;
+    cw = (w - gap * (ncols - 1)) / ncols
+    chars = max(int((cw - 14) / (0.56 * size)), 8)
+    blocks = [sb.wrap(&#x27;%d. %s&#x27; % (i, t), chars) for i, t in enumerate(texts, 1)]
+    total = sum(len(b) + 1 for b in blocks) - 1
+    target = math.ceil(total / float(ncols))
+    cols, cur, used = [], [], 0
+    for b in blocks:
+        if cur and used + len(b) &gt; target and len(cols) &lt; ncols - 1:
+            cols.append(cur)
+            cur, used = [], 0
+        cur.append(b)
+        used += len(b) + 1
+    cols.append(cur)
+    tallest = 0.0
+    for ci, col in enumerate(cols):
+        yy = y
+        for b in col:
+            for j, ln in enumerate(b):
+                D.stext(x + ci * (cw + gap) + (0 if j == 0 else 13), yy, ln, size=size)
+                yy += lead
+            yy += lead * 0.35
+        tallest = max(tallest, yy - y)
+    return tallest, (y + tallest &lt;= hmax), chars
+
+
+# --------------------------------------------------------------------------- plan layers
+def tract_layer(c):
+    &quot;&quot;&quot;Common open-space tract fills — drawn first, under the lane, amenity and ponds.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;open-space-tracts&quot;&gt;&#x27;)
+    for t in TRACTS:
+        for p in t[&#x27;polys&#x27;]:
+            c.poly(p, fill=C_OS, stroke=C_OSLINE, stroke_width=1.2, stroke_dasharray=&#x27;9 3&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def tract_keys(c):
+    &quot;&quot;&quot;The keyed tract symbols A-H, drawn last so nothing buries them.&quot;&quot;&quot;
+    for t in TRACTS:
+        for p in t[&#x27;polys&#x27;]:
+            if abs(sb.poly_area(p)) &lt; 1800:
+                continue
+            ctr = sb.poly_centroid(p)
+            if t[&#x27;id&#x27;] == &#x27;A&#x27;:
+                ctr = (108.0, -60.0)
+            c.circle(ctr, 13.0, fill=&#x27;#fff&#x27;, stroke=C_OSLINE, stroke_width=1.8)
+            c.text(ctr[0], ctr[1], t[&#x27;id&#x27;], size=16, bold=True, fill=&#x27;#1b5e20&#x27;, dy=6)
+
+
+def amenity_layer(c):
+    c.add(&#x27;&lt;g id=&quot;amenity&quot;&gt;&#x27;)
+    c.poly([tuple(p) for p in AM[&#x27;village_green&#x27;]], fill=C_GREEN, stroke=C_OSLINE, stroke_width=0.5)
+    for k in (&#x27;parking_bay&#x27;, &#x27;kiosk_bay&#x27;):
+        c.poly([tuple(p) for p in AM[k]], fill=sb.C[&#x27;pave&#x27;], stroke=&#x27;#333&#x27;, stroke_width=0.6)
+    for st in AM[&#x27;stalls&#x27;] + AM[&#x27;kiosk_stalls&#x27;]:
+        c.poly([tuple(p) for p in st], fill=&#x27;none&#x27;, stroke=&#x27;#666&#x27;, stroke_width=0.35)
+    for pad in AM[&#x27;pickleball&#x27;]:
+        c.poly([tuple(p) for p in pad], fill=C_BUILT, stroke=&#x27;#222&#x27;, stroke_width=0.7)
+    c.poly([tuple(p) for p in AM[&#x27;clubhouse&#x27;]], fill=C_BUILT, stroke=&#x27;#222&#x27;, stroke_width=1.0)
+    c.poly([tuple(p) for p in AM[&#x27;mail_kiosk&#x27;]], fill=C_BUILT, stroke=&#x27;#222&#x27;, stroke_width=0.7)
+    c.poly([tuple(p) for p in AM[&#x27;entry_sign&#x27;]], fill=&#x27;#333&#x27;, stroke=&#x27;none&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def pond_layer(c):
+    c.add(&#x27;&lt;g id=&quot;ponds&quot;&gt;&#x27;)
+    for p in PONDS:
+        c.poly([tuple(q) for q in p[&#x27;polygon&#x27;]], fill=sb.C[&#x27;pond&#x27;], stroke=sb.C[&#x27;buf_line&#x27;],
+               stroke_width=0.9, stroke_dasharray=&#x27;5 2&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def lot_layer(c, numbers=True):
+    c.add(&#x27;&lt;g id=&quot;lots&quot;&gt;&#x27;)
+    for l in LOTS:
+        c.poly([tuple(p) for p in l[&#x27;polygon&#x27;]], fill=(FILL_A if l[&#x27;phase&#x27;] == 1 else FILL_B),
+               stroke=&#x27;#333&#x27;, stroke_width=0.7)
+        c.poly([tuple(p) for p in l[&#x27;buffer_easement&#x27;]], fill=&#x27;url(#bufhatch)&#x27;, stroke=&#x27;none&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if numbers:
+        lot_numbers(c)
+
+
+def lot_numbers(c):
+    &quot;&quot;&quot;Block-lot numbers, drawn last so the existing-dwelling hatch cannot bury them.&quot;&quot;&quot;
+    for l in LOTS:
+        u0, u1 = lot_u(l)
+        ctr = sb.poly_centroid([tuple(p) for p in l[&#x27;polygon&#x27;]])
+        v = ctr[1] + (24.0 if l[&#x27;side&#x27;] == &#x27;SW&#x27; else -24.0)   # toward the lane, clear of the hatch
+        c.text((u0 + u1) / 2.0, v, &#x27;%s-%d&#x27; % (l[&#x27;block&#x27;], l[&#x27;block_lot&#x27;]), size=13.5, bold=True,
+               fill=(CA if l[&#x27;block&#x27;] == &#x27;A&#x27; else CB), halo=True, dy=4)
+
+
+def block_layer(c):
+    &quot;&quot;&quot;Block boundaries — heavy, and every segment lies on a lot line.&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;blocks&quot;&gt;&#x27;)
+    for b in BLOCKS:
+        col = CA if b == B1 else CB
+        for side in (&#x27;SW&#x27;, &#x27;NE&#x27;):
+            for run in block_runs(b, side):
+                c.poly(run_polygon(run), fill=&#x27;none&#x27;, stroke=col, stroke_width=2.8)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+
+
+def phase_line(c, labels=True):
+    c.line((PHASE_U, sb.SW(PHASE_U) - 16.0), (PHASE_U, sb.NE(PHASE_U) + 16.0),
+           stroke=sb.C[&#x27;phase&#x27;], stroke_width=3.4, stroke_dasharray=&#x27;18 5 4 5&#x27;)
+    if labels:
+        c.text(PHASE_U - 9, -248, &#x27;PHASE LINE — STA %s (u = %.0f)&#x27; % (sta(STA_PHASE), PHASE_U),
+               size=13, bold=True, rot=-90, fill=sb.C[&#x27;phase&#x27;], halo=True, anchor=&#x27;start&#x27;)
+
+
+def sewer_layer(c, labels=True):
+    &quot;&quot;&quot;Only the reaches on or adjoining the property; the off-site downstream leg of the Arcado
+    outfall is not part of this exhibit and is omitted (general note 11).&quot;&quot;&quot;
+    c.add(&#x27;&lt;g id=&quot;sewer&quot;&gt;&#x27;)
+    for run in L[&#x27;sewer&#x27;][&#x27;existing_on_site&#x27;]:
+        path = [tuple(p) for p in run[&#x27;path&#x27;]]
+        if (path[0][1] + path[-1][1]) / 2.0 &lt; -260.0:
+            continue
+        c.pline(path, fill=&#x27;none&#x27;, stroke=sb.C[&#x27;sewer&#x27;], stroke_width=1.0)
+        for p in path:
+            c.circle(p, 2.4, fill=&#x27;#fff&#x27;, stroke=sb.C[&#x27;sewer&#x27;], stroke_width=0.8)
+    ext = [tuple(p) for p in L[&#x27;sewer&#x27;][&#x27;phase2_alternative_extension&#x27;]]
+    c.pline(ext, fill=&#x27;none&#x27;, stroke=sb.C[&#x27;sewer&#x27;], stroke_width=2.2, stroke_dasharray=&#x27;9 4&#x27;)
+    for p in (ext[0], ext[-1]):
+        c.circle(p, 2.8, fill=&#x27;#fff&#x27;, stroke=sb.C[&#x27;sewer&#x27;], stroke_width=1.0)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    c.circle((271.7, -224.0), 6.0, fill=&#x27;none&#x27;, stroke=sb.C[&#x27;sewer_txt&#x27;], stroke_width=1.2)
+    c.text(950, -244, &#x27;PHASE 1 POINT OF CONNECTION — EX. MH INV 927.13 (GIS ATTRIBUTE, UNSURVEYED) — &#x27;
+           &#x27;NO SEWER EXTENSION IN PHASE 1&#x27;, size=12.6, bold=True, fill=sb.C[&#x27;sewer_txt&#x27;], halo=True,
+           anchor=&#x27;end&#x27;)
+    c.text(1372, -388, &#x27;PHASE 2 — 8-in GRAVITY SEWER TO THE LEGENDS AT PARKVIEW MAIN, MH INV 919.58;&#x27;,
+           size=12.6, bold=True, fill=sb.C[&#x27;sewer_txt&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    c.text(1372, -403, &#x27;≈ %.0f FT OF IT OFF SITE. EASEMENT TO BE RECORDED AND DWR CAPACITY&#x27;
+           % OFFSITE_FT, size=12.6, fill=sb.C[&#x27;sewer_txt&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    c.text(1372, -418, &#x27;CERTIFICATION ISSUED BEFORE ANY PHASE 2 WORK (CONDITION 16)&#x27;, size=12.6,
+           fill=sb.C[&#x27;sewer_txt&#x27;], halo=True, anchor=&#x27;start&#x27;)
+
+
+def callout(D, x, y, w, lines, title, col=&#x27;#000&#x27;, lead=15.4, pad=9.0):
+    h = pad * 2 + 17 + lead * len(lines)
+    D.srect(x, y, w, h, fill=&#x27;#fff&#x27;, stroke=col, stroke_width=1.4)
+    D.stext(x + pad, y + pad + 12, title, size=13.6, bold=True, fill=col)
+    for i, ln in enumerate(lines):
+        D.stext(x + pad, y + pad + 17 + lead * (i + 1) - 3, ln, size=TXT)
+    return y + h
+
+
+# --------------------------------------------------------------------------- build
+def build():
+    scale_note = &#x27;Scale 1&quot; = 60\&#x27; (ARCH D 36 × 24 in)&#x27;
+    D, F = sb.sheet(
+        &#x27;PHASING, BLOCK AND OPEN SPACE EXHIBIT&#x27;, &#x27;C-6.0&#x27;,
+        &#x27;Blocks, phases, common open-space tracts, easements and maintenance responsibility — Site &#x27;
+        &#x27;Development Plan Review Checklist §4.i and §4.o; Ord. 2023-603 §313(1)&#x27;,
+        scale_note, generator=&#x27;tools/sitebase.py + tools/phasing.py&#x27;, win=WIN,
+        north_at=(sb.PLAN_X0 + 2328.0, sb.PLAN_Y0 + 38.0),
+        scale_at=(sb.PLAN_X0 + 1360.0, sb.PLAN_Y0 + PLAN_H - 62.0),
+        status_lines=[
+            &#x27;Phasing, block and open-space CONCEPT compiled from public records&#x27;,
+            &#x27;for pre-application review. NOT A PLAT. Block and lot platting, tract&#x27;,
+            &#x27;and easement descriptions and every area shown are to be prepared and&#x27;,
+            &#x27;sealed by a Georgia RLS; utilities and stormwater by a Georgia PE.&#x27;])
+    px, py, pw, ph = F[&#x27;plan&#x27;]
+
+    # the base sheet&#x27;s watermark names existing conditions; this sheet needs its own
+    D.late[1] = (lambda: D.add(
+        &#x27;&lt;text x=&quot;%.1f&quot; y=&quot;%.1f&quot; font-size=&quot;38&quot; fill=&quot;#c00&quot; fill-opacity=&quot;0.09&quot; font-weight=&quot;bold&quot; &#x27;
+        &#x27;text-anchor=&quot;middle&quot; transform=&quot;rotate(-6 %.1f %.1f)&quot;&gt;DRAFT — NOT SEALED — PHASING, BLOCK AND &#x27;
+        &#x27;OPEN-SPACE CONCEPT — NOT A PLAT&lt;/text&gt;&#x27;
+        % (px + pw / 2, py + ph * 0.24, px + pw / 2, py + ph * 0.24)))
+    # a white backing for the graphic scale, painted before the scale bar itself
+    D.late.insert(3, lambda: D.srect(px + 1342, py + ph - 84, 330, 52, fill=&#x27;#fff&#x27;, stroke=&#x27;#888&#x27;,
+                                     stroke_width=0.8))
+
+    # ---------------------------------------------------------------- plan
+    D.clip_open(fill=&#x27;#fff&#x27;)
+    sb.adjoiners(D, labels=False, zoning=False)
+    sb.arcado_row(D, labels=False)
+    tract_layer(D)
+    sb.lane(D, labels=False)
+    amenity_layer(D)
+    pond_layer(D)
+    lot_layer(D, numbers=False)
+    sb.streams_and_buffers(D, labels=False)
+    sewer_layer(D)
+    sb.existing_structures(D, labels=False)
+    lot_numbers(D)
+    sb.boundary(D, bearings=False, label=False)
+    tract_keys(D)
+    block_layer(D)
+    phase_line(D)
+
+    D.text(600, 24, &#x27;◄  PHASE 1 — BLOCK %s — %d LOTS   (STA %s TO %s)&#x27;
+           % (B1, N_PHASE[1], sta(0), sta(STA_PHASE)), size=17, bold=True, fill=CA, halo=True)
+    D.text(1330, 24, &#x27;PHASE 2 — BLOCK %s — %d LOTS   (STA %s TO %s)  ►&#x27;
+           % (B2, N_PHASE[2], sta(STA_PHASE), sta(STA_END)), size=17, bold=True, fill=CB, halo=True)
+    D.text(-104, -140, &#x27;ARCADO ROAD — PUBLIC R/W&#x27;, size=12.6, bold=True, rot=-81, fill=&#x27;#444&#x27;, halo=True)
+    D.text(-126, -140, &#x27;GWINNETT CO. MINOR COLLECTOR&#x27;, size=12.6, rot=-81, fill=&#x27;#444&#x27;, halo=True)
+    D.text(-64, 24, &#x27;KING DAVID MANOR — ZONED R-1 (LILBURN)&#x27;, size=12.6, bold=True, fill=&#x27;#555&#x27;,
+           halo=True, anchor=&#x27;start&#x27;)
+    D.text(0, -244, &#x27;LEGENDS AT PARKVIEW — ZONED R-1 (LILBURN)&#x27;, size=12.6, bold=True, fill=&#x27;#555&#x27;,
+           halo=True, anchor=&#x27;start&#x27;)
+    D.text(1790, -244, &#x27;TRACTS G AND H — CREEK WOODS AND STREAM SETBACK, PRESERVED, NOTHING BUILT OR &#x27;
+                       &#x27;PAVED&#x27;, size=12.6, bold=True, fill=&#x27;#1b5e20&#x27;, halo=True, anchor=&#x27;end&#x27;)
+    D.text(203, -104, &#x27;EX. DWELLING 4541 — REMOVE IN PHASE 1&#x27;, size=12.6, bold=True,
+           fill=sb.C[&#x27;exist&#x27;], halo=True)
+    for k, ln in enumerate([&#x27;EX. DWELLING 4535 — STANDS ON THE LANE ALIGNMENT;&#x27;,
+                            &#x27;REMOVE UNDER PERMIT BEFORE ANY PHASE 2 LAND&#x27;,
+                            &#x27;DISTURBANCE (VOLUNTARY CONDITION 15)&#x27;]):
+        D.text(1256, -22 - 14 * k, ln, size=12.6, bold=True, fill=sb.C[&#x27;exist&#x27;], halo=True,
+               anchor=&#x27;start&#x27;)
+    D.clip_close()
+
+    # ---------------------------------------------------------------- legend, on the plan
+    # Placed over the Legends at Parkview parcels at u 0-800, which carry nothing this sheet
+    # needs; the stream, its buffers, the Phase 2 sewer tie and their notes stay clear to the
+    # right of it.
+    lx, ly, lw, lh = px + 180, py + ph - 230, 1140.0, 230.0
+    D.srect(lx, ly, lw, lh, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1.2)
+    D.stext(lx + 10, ly + 18, &#x27;LEGEND — every symbol drawn on this sheet appears here, and no entry is &#x27;
+                              &#x27;unused&#x27;, size=13.6, bold=True)
+    ncol, per = 3, int(math.ceil(len(LEGEND) / 3.0))
+    for i, (kind, col, wd, dash, txt) in enumerate(LEGEND):
+        cx = lx + 10 + (i // per) * (lw - 20) / ncol
+        yy = ly + 38 + (i % per) * 18.9
+        if kind == &#x27;line&#x27;:
+            D.sline(cx, yy - 4, cx + 34, yy - 4, stroke=col, stroke_width=wd, stroke_dasharray=dash)
+        elif kind == &#x27;key&#x27;:
+            D.scircle(cx + 17, yy - 4.5, 8.5, fill=&#x27;#fff&#x27;, stroke=C_OSLINE, stroke_width=1.5)
+            D.stext(cx + 17, yy - 0.5, &#x27;A&#x27;, size=10.5, bold=True, fill=&#x27;#1b5e20&#x27;, anchor=&#x27;middle&#x27;)
+        else:
+            D.srect(cx, yy - 12, 34, 14, fill=col, stroke=&#x27;#555&#x27;, stroke_width=0.5)
+        D.stext(cx + 41, yy, txt, size=TXT)
+
+    # ---------------------------------------------------------------- band, column 1: lot schedules
+    x1, w1 = F[&#x27;inner_l&#x27;] + 20, float(sum(LOT_W))
+    y = sb.table(D, x1, BAND_Y0, LOT_COLS, lot_rows(B1), size=TXT, widths=LOT_W,
+                 title=&#x27;LOT SCHEDULE — BLOCK %s (PHASE 1), %d LOTS&#x27; % (B1, N_PHASE[1]))
+    y = sb.table(D, x1, y + 30, LOT_COLS, lot_rows(B2), size=TXT, widths=LOT_W,
+                 title=&#x27;LOT SCHEDULE — BLOCK %s (PHASE 2), %d LOTS&#x27; % (B2, N_PHASE[2]))
+    ends = {1: y}
+
+    # ---------------------------------------------------------------- band, column 2: general notes
+    x2, w2 = x1 + w1 + 20, 692.0
+    D.stext(x2, BAND_Y0 + 2, &#x27;GENERAL NOTES — PHASING, BLOCKS AND OPEN SPACE&#x27;, size=15, bold=True)
+    nh, fits, nchars = flow_notes(D, x2, BAND_Y0 + 24, w2, 1, BAND_Y1, notes())
+    tr = {p: &#x27;, &#x27;.join(t[&#x27;id&#x27;] for t in TRACTS if t[&#x27;phase&#x27;] == p) for p in (1, 2)}
+    ends[2] = callout(
+        D, x2, BAND_Y0 + 22 + nh, w2,
+        [&#x27;PHASE 1 · BLOCK %s · STA %s–%s · %d lots · %s SF (%.2f ac) · %.2f du/ac&#x27;
+         % (B1, sta(0), sta(STA_PHASE), N_PHASE[1], sf(GROSS[1]), GROSS[1] / 43560.0,
+            N_PHASE[1] / (GROSS[1] / 43560.0)),
+         &#x27;Tracts %s = %s SF · Pond 1, %s cf · turnaround 1 · gravity to the on-site main&#x27;
+         % (tr[1], sf(PHASE_OS[1]), sf(PONDS[0][&#x27;est_storage_cf&#x27;])),
+         &#x27;PHASE 2 · BLOCK %s · STA %s–%s · %d lots · %s SF (%.2f ac) · %.2f du/ac&#x27;
+         % (B2, sta(STA_PHASE), sta(STA_END), N_PHASE[2], sf(GROSS[2]), GROSS[2] / 43560.0,
+            N_PHASE[2] / (GROSS[2] / 43560.0)),
+         &#x27;Tracts %s = %s SF · Pond 2, %s cf · turnarounds 2, 3 · ≈ %.0f ft off-site sewer tie&#x27;
+         % (tr[2], sf(PHASE_OS[2]), sf(PONDS[1][&#x27;est_storage_cf&#x27;]), OFFSITE_FT),
+         &#x27;Every lot %s SF · %.0f ft × %.0f ft · %.0f ft of frontage on the private lane (§319 requires &#x27;
+         &#x27;30 ft)&#x27; % (sf(M[&#x27;lot_area_min_sf&#x27;]), M[&#x27;lot_width_min_ft&#x27;], M[&#x27;lot_depth_min_ft&#x27;], 50.0),
+         &#x27;PLAN A = &quot;%s&quot;, %s SF conditioned · PLAN B = &quot;%s&quot;, %s SF conditioned (data/plans.json)&#x27;
+         % (PLANS[&#x27;A&#x27;][&#x27;name&#x27;].title(), sf(PLANS[&#x27;A&#x27;][&#x27;areas&#x27;][&#x27;conditioned_sf&#x27;]),
+            PLANS[&#x27;B&#x27;][&#x27;name&#x27;].title(), sf(PLANS[&#x27;B&#x27;][&#x27;areas&#x27;][&#x27;conditioned_sf&#x27;]))],
+        &#x27;PHASE DATA — %d LOTS IN TWO BLOCKS, %.2f DU/AC ON THE DEEDED %.2f AC&#x27;
+        % (len(LOTS), M[&#x27;density_du_ac_deeded&#x27;], DEEDED_AC), col=sb.C[&#x27;phase&#x27;], lead=14.4, pad=7.0)
+
+    # ------------------------------------------- band, column 3: tract table, easements, condition
+    x3, w3 = x2 + w2 + 20, 1180.0
+    y3 = sb.table(D, x3, BAND_Y0,
+                  [&#x27;TR.&#x27;, &#x27;NAME AND LOCATION&#x27;, &#x27;AREA SF&#x27;, &#x27;% GIS&#x27;, &#x27;% 9.44 AC&#x27;, &#x27;PH./BLK&#x27;,
+                   &#x27;WHAT THE TRACT CONTAINS — BUILT AND PAVED AREA STATED&#x27;, &#x27;MAINT.&#x27;],
+                  tract_rows(), size=TXT, widths=[36, 190, 72, 58, 72, 58, 548, 146],
+                  title=&#x27;COMMON OPEN-SPACE TRACT TABLE — %s SF = %.3f AC = %.1f%% OF THE %s-SF GIS AREA &#x27;
+                        &#x27;/ %.1f%% OF THE DEEDED %.2f AC&#x27;
+                        % (sf(OS_TOTAL), OS_SUM[&#x27;total_ac&#x27;], OS_SUM[&#x27;pct_of_gis_area&#x27;], sf(GIS_SF),
+                           OS_SUM[&#x27;pct_of_deeded_area&#x27;], DEEDED_AC))
+    D.stext(x3, y3 + 13, &#x27;TRACT A HOLDS %s SF OF BUILT AND PAVED AREA — %.1f%% OF THE TRACT — AND ITS &#x27;
+            &#x27;%s SF IS NET OF THE ≈ %s SF OF ENTRY DRIVE AND LANE TRACT CROSSING IT;&#x27;
+            % (sf(AM_BUILT), 100.0 * AM_BUILT / TRACTS[0][&#x27;area&#x27;], sf(TRACTS[0][&#x27;area&#x27;]), sf(AM_CROSSED)),
+            size=13.2, bold=True, fill=C_OSLINE)
+    D.stext(x3, y3 + 30, &#x27;THE %d GUEST AND MAIL-KIOSK PARKING SPACES (%s SF OF BAYS) ARE NOT IN IT — &#x27;
+            &#x27;THEY LIE IN THE PRIVATE LANE TRACT. SEE NOTE 8.&#x27; % (N_GUEST, sf(BAY_SF)),
+            size=13.2, bold=True, fill=C_OSLINE)
+    y3 = sb.table(D, x3, y3 + 48,
+                  [&#x27;ITEM&#x27;, &#x27;AREA / DIMENSION&#x27;, &#x27;PHASE&#x27;, &#x27;OWNERSHIP&#x27;, &#x27;MAINTENANCE — HOA OR PUBLIC&#x27;],
+                  [r[:5] for r in easement_rows()], size=TXT, widths=[316, 186, 62, 228, 388],
+                  title=&#x27;OTHER COMMON PROPERTY AND EASEMENTS — MAINTENANCE RESPONSIBILITY (CHECKLIST &#x27;
+                        &#x27;§4.o). NONE OF IT IS COUNTED AS COMMON OPEN SPACE&#x27;)
+    D.srect(x3, y3 + 10, w3, 42, fill=&#x27;#f7f0fa&#x27;, stroke=sb.C[&#x27;phase&#x27;], stroke_width=1.4)
+    D.stext(x3 + 9, y3 + 26, &#x27;PHASE 1 STANDS ALONE. PHASE 2 SHALL NOT COMMENCE UNTIL THE OFF-SITE &#x27;
+                             &#x27;SANITARY SEWER EASEMENT IS RECORDED AND GWINNETT COUNTY DWR HAS&#x27;,
+            size=13.2, bold=True, fill=sb.C[&#x27;phase&#x27;])
+    D.stext(x3 + 9, y3 + 43, &#x27;ISSUED ITS SEWER CAPACITY CERTIFICATION (LETTER OF INTENT, VOLUNTARY &#x27;
+                             &#x27;CONDITIONS 15 AND 16 — SEE NOTES 3 AND 4).&#x27;,
+            size=13.2, bold=True, fill=sb.C[&#x27;phase&#x27;])
+    ends[3] = y3 + 52
+    return D, ends, fits, nchars
+
+
+def _check_note_refs():
+    &quot;&quot;&quot;The tract table and the emphasis lines cross-reference general notes by number; keep the
+    references honest if the note list is ever re-ordered.&quot;&quot;&quot;
+    want = {&#x27;PHASE 1 IS DESIGNED&#x27;: 3, &#x27;PHASE 2 CONDITION&#x27;: 4, &#x27;OPEN SPACE IS VOLUNTARY&#x27;: 5,
+            &#x27;BUFFER EASEMENT&#x27;: 6, &#x27;BUILT AND PAVED&#x27;: 8}
+    got = {}
+    for i, t in enumerate(notes(), 1):
+        for k in want:
+            if t.startswith(k):
+                got[k] = i
+    bad = {k: (want[k], got.get(k)) for k in want if got.get(k) != want[k]}
+    return bad
+
+
+if __name__ == &#x27;__main__&#x27;:
+    bad = _check_note_refs()
+    if bad:
+        raise SystemExit(&#x27;note cross-references are stale: %s&#x27; % bad)
+    D, ends, fits, nchars = build()
+    svg, png = sb.save(D, &#x27;phasing-openspace&#x27;, dpi=150)
+    print(&#x27;wrote %s\n      %s&#x27; % (svg, png))
+    print(&#x27;  lettering : %.1f pt minimum = %.4f in cap height at full size (%.4f in on 11 × 17)&#x27;
+          % (TXT, CAP_IN, CAP_IN * 11.0 / 24.0))
+    print(&#x27;  blocks    : &#x27; + &#x27;; &#x27;.join(
+        &#x27;%s = phase %d, %d lots [%s]&#x27; % (b, PHASE_OF_BLOCK[b], len(BLOCK_LOTS[b]),
+                                         &#x27;, &#x27;.join(&#x27;%s %.0f–%.0f&#x27; % (r[0][&#x27;side&#x27;], lot_u(r[0])[0], lot_u(r[-1])[1])
+                                                   for s in (&#x27;SW&#x27;, &#x27;NE&#x27;) for r in block_runs(b, s)))
+        for b in BLOCKS))
+    print(&#x27;  phase line: u = %.1f = STA %s of a %s travelled way; lots divided by it: %d&#x27;
+          % (PHASE_U, sta(STA_PHASE), sta(STA_END), len(CROSSED)))
+    print(&#x27;  tracts    : &#x27; + &#x27;; &#x27;.join(&#x27;%s %s SF (shoelace %s)&#x27; % (t[&#x27;id&#x27;], sf(t[&#x27;area&#x27;]), sf(t[&#x27;shoelace&#x27;]))
+                                       for t in TRACTS))
+    print(&#x27;  open space: %s SF = %.3f ac = %.1f%% GIS / %.1f%% deeded; built or paved %s SF; &#x27;
+          &#x27;buffer easement on lots %s SF (reported separately)&#x27;
+          % (sf(OS_TOTAL), OS_SUM[&#x27;total_ac&#x27;], OS_SUM[&#x27;pct_of_gis_area&#x27;], OS_SUM[&#x27;pct_of_deeded_area&#x27;],
+             sf(OS_BUILT), sf(BUF_SF)))
+    print(&#x27;  amenity   : gross %s SF less %s SF of lane/entry = %s SF net (published %s SF)&#x27;
+          % (sf(AM_GROSS), sf(AM_CROSSED), sf(AM_GROSS - AM_CROSSED), sf(TRACTS[0][&#x27;area&#x27;])))
+    print(&#x27;  turnaround: legs counted %s SF, actually inside the greens %s SF&#x27;
+          % (sf(6 * HH_LEG_SF), sf(HH_REAL)))
+    print(&#x27;  gross area: phase 1 %s SF, phase 2 %s SF, sum %s SF vs boundary %s SF&#x27;
+          % (sf(GROSS[1]), sf(GROSS[2]), sf(GROSS[1] + GROSS[2]), sf(GIS_SF)))
+    print(&#x27;  band fit  : columns end at %s (limit %.0f); notes %d chars/line, fits=%s&#x27;
+          % (&#x27;, &#x27;.join(&#x27;%d:%.0f&#x27; % (k, v) for k, v in sorted(ends.items())), BAND_Y1, nchars, fits))
+    print(&#x27;  notes     : %d notes, cross-references checked (phase 1 = 3, phase 2 = 4, open space = 5, &#x27;
+          &#x27;buffer = 6, built/paved = 8)&#x27; % len(notes()))
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/phasing.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

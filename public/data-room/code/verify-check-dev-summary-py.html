@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Development Summary Checker — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">qa audit</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> Python</div>
+    
+    <h1>Development Summary Checker</h1><p class="src-note">Python · 176 lines · <a href="/data-room/src/submission/verify/check_dev_summary.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Check docs/02-development-summary.md against the FACTS section 6 house rules and, crucially, against the
+DATA — data/layout.json and data/dev-summary-derived.json — rather than against a list of numbers frozen
+into this script.
+
+    python3 verify/check_dev_summary.py
+
+Why it works this way. The previous version of this file hard-coded the values it expected (&quot;32.2 %&quot;,
+&quot;160,167 sf&quot;, &quot;1,722&quot;, &quot;727 / 550 / 435&quot;). Every one of those went stale the first time the site-plan
+generator was re-run, and the script then failed for the wrong reason — or crashed, because the derived
+JSON had grown new keys. So this version asks the opposite question: for each metric the package tracks,
+does the number the DOCUMENT prints match the number the DATA holds? A value is accepted if any of its
+plausible printed forms (1,234 / 1234 / 1,234.0 / 1.2 / 1.23) appears in the document. That means the
+check keeps working after any regeneration, and it fails exactly when a document and the data disagree —
+which is the failure that matters.
+
+Exit status 0 = PASS, 1 = FAIL.
+&quot;&quot;&quot;
+import json, os, re, sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DOC = os.path.join(ROOT, &#x27;docs&#x27;, &#x27;02-development-summary.md&#x27;)
+doc = open(DOC, encoding=&#x27;utf-8&#x27;).read()
+M = json.load(open(os.path.join(ROOT, &#x27;data&#x27;, &#x27;layout.json&#x27;), encoding=&#x27;utf-8&#x27;))[&#x27;metrics&#x27;]
+D = json.load(open(os.path.join(ROOT, &#x27;data&#x27;, &#x27;dev-summary-derived.json&#x27;), encoding=&#x27;utf-8&#x27;))
+P = json.load(open(os.path.join(ROOT, &#x27;data&#x27;, &#x27;plans.json&#x27;), encoding=&#x27;utf-8&#x27;))[&#x27;plans&#x27;]
+
+fails, notes = [], []
+lines = doc.rstrip(&#x27;\n&#x27;).split(&#x27;\n&#x27;)
+
+
+def norm(t):
+    &quot;&quot;&quot;Normalise the document for numeric matching: strip thin/hard spaces and unify separators.&quot;&quot;&quot;
+    return (t.replace(&#x27; &#x27;, &#x27; &#x27;).replace(&#x27; &#x27;, &#x27; &#x27;).replace(&#x27;–&#x27;, &#x27;-&#x27;).replace(&#x27;—&#x27;, &#x27;-&#x27;))
+
+
+NDOC = norm(doc)
+
+
+def forms(v):
+    &quot;&quot;&quot;Every plausible printed form of a number.&quot;&quot;&quot;
+    out = set()
+    if isinstance(v, bool):
+        return out
+    if isinstance(v, int) or (isinstance(v, float) and abs(v - round(v)) &lt; 1e-9):
+        n = int(round(v))
+        out |= {&#x27;{:,}&#x27;.format(n), str(n)}
+        if abs(n) &gt;= 1000:
+            out.add(&#x27;{:,}&#x27;.format(n).replace(&#x27;,&#x27;, &#x27; &#x27;))
+        out.add(&#x27;{:,.1f}&#x27;.format(n))
+    if isinstance(v, float):
+        out |= {&#x27;{:.1f}&#x27;.format(v), &#x27;{:.2f}&#x27;.format(v), &#x27;{:,.1f}&#x27;.format(v), &#x27;{:,.2f}&#x27;.format(v)}
+        out.add(&#x27;{:,.0f}&#x27;.format(v))
+    return {f for f in out if f}
+
+
+def has(v):
+    return any(f in NDOC for f in forms(v))
+
+
+def check_value(label, v, required=True):
+    if v is None:
+        notes.append(&#x27;%s: not present in the data&#x27; % label)
+        return
+    if not has(v):
+        msg = &#x27;%s: the data says %s but no such figure appears in the document&#x27; % (label, v)
+        (fails if required else notes).append(msg)
+
+
+# ----------------------------------------------------------------- house rules (FACTS section 6)
+if lines[-1] != &#x27;&lt;!-- architecture-studio:requires-disclaimer --&gt;&#x27;:
+    fails.append(&#x27;the architecture-studio marker is not the last line&#x27;)
+if lines[-2] != &#x27;&#x27;:
+    fails.append(&#x27;no blank line before the marker&#x27;)
+if not lines[-3].startswith(&#x27;&gt; **Disclaimer:** This is an AI-generated analysis for preliminary planning purposes.&#x27;):
+    fails.append(&#x27;the canonical disclaimer is not the last block before the marker&#x27;)
+for i, ln in enumerate(lines, 1):
+    if re.search(r&#x27;\bcompl(y|ies|iant|iance)\b&#x27;, ln, re.I) and &#x27;compliance matrix&#x27; not in ln.lower() \
+            and &#x27;Zoning compliance&#x27; not in ln and &#x27;not a compliance&#x27; not in ln.lower():
+        fails.append(&#x27;line %d says comply/complies (house rule: &quot;appears consistent with&quot;): %s&#x27; % (i, ln[:90]))
+    if re.search(r&#x27;IFC\s+(?!2024)\d{4}&#x27;, ln):
+        fails.append(&#x27;line %d cites a non-2024 IFC edition: %s&#x27; % (i, ln[:90]))
+    if re.search(r&#x27;IRC\s+(?!2024)\d{4}&#x27;, ln):
+        fails.append(&#x27;line %d cites a non-2024 IRC edition: %s&#x27; % (i, ln[:90]))
+
+# ----------------------------------------------------------------- structure
+HEADS = {n: h for n, h in
+         (m.groups() for m in re.finditer(r&#x27;^## (\d+)\.\s*(.*)$&#x27;, doc, re.M))}
+for n, words in [(&#x27;1&#x27;, (&#x27;property&#x27;, &#x27;overview&#x27;)), (&#x27;2&#x27;, (&#x27;existing&#x27;,)), (&#x27;3&#x27;, (&#x27;proposed&#x27;,)),
+                 (&#x27;4&#x27;, (&#x27;matrix&#x27;,)), (&#x27;5&#x27;, (&#x27;utilit&#x27;,)), (&#x27;6&#x27;, (&#x27;traffic&#x27;,)), (&#x27;7&#x27;, (&#x27;school&#x27;,)),
+                 (&#x27;8&#x27;, (&#x27;fiscal&#x27;,)), (&#x27;9&#x27;, (&#x27;condition&#x27;,)), (&#x27;10&#x27;, (&#x27;open item&#x27;, &#x27;verify&#x27;))]:
+    h = HEADS.get(n, &#x27;&#x27;)
+    if not h:
+        fails.append(&#x27;missing section %s&#x27; % n)
+    elif not any(w in h.lower() for w in words):
+        fails.append(&#x27;section %s is &quot;%s&quot; — expected it to be about %s&#x27; % (n, h, &#x27; / &#x27;.join(words)))
+
+for row in [&#x27;Minimum lot size&#x27;, &#x27;Minimum lot width&#x27;, &#x27;Minimum lot depth&#x27;, &#x27;Maximum gross density&#x27;,
+            &#x27;Minimum heated floor area&#x27;, &#x27;Maximum height&#x27;, &#x27;Buffer abutting R-1&#x27;, &#x27;Front setback&#x27;,
+            &#x27;Side setback&#x27;, &#x27;Rear setback&#x27;, &#x27;Accessory building setbacks&#x27;, &#x27;602 Use Table&#x27;, &#x27;Table 8.1&#x27;,
+            &#x27;319&#x27;, &#x27;313(1)&#x27;, &#x27;Stream buffer&#x27;, &#x27;ul-de-sac&#x27;, &#x27;600 ft&#x27;, &#x27;D103.4&#x27;, &#x27;D107.1&#x27;]:
+    if row not in doc:
+        fails.append(&#x27;zoning matrix row missing: %s&#x27; % row)
+
+# ----------------------------------------------------------------- the numbers, read from the data
+SITE = [
+    (&#x27;lot count&#x27;, M.get(&#x27;lots&#x27;)),
+    (&#x27;density on the deeded acreage&#x27;, M.get(&#x27;density_du_ac_deeded&#x27;)),
+    (&#x27;density on the GIS acreage&#x27;, M.get(&#x27;density_du_ac_gis&#x27;)),
+    (&#x27;open space, SF&#x27;, M.get(&#x27;open_space_sf&#x27;)),
+    (&#x27;open space, percent of GIS area&#x27;, M.get(&#x27;open_space_pct_gis&#x27;)),
+    (&#x27;impervious area, SF&#x27;, M.get(&#x27;impervious_sf&#x27;)),
+    (&#x27;impervious, percent of GIS area&#x27;, M.get(&#x27;impervious_pct_gis&#x27;)),
+    (&#x27;travelled way / lane length&#x27;, M.get(&#x27;lane_length_ft&#x27;)),
+    (&#x27;lane pavement, SF&#x27;, M.get(&#x27;pavement_sf&#x27;)),
+    (&#x27;sidewalk, SF&#x27;, M.get(&#x27;sidewalk_sf&#x27;)),
+    (&#x27;buffer easement on lots, SF&#x27;, M.get(&#x27;buffer_easement_on_lots_sf&#x27;)),
+    (&#x27;parking required&#x27;, M.get(&#x27;parking_required&#x27;)),
+    (&#x27;parking provided on lot&#x27;, M.get(&#x27;parking_provided_on_lot&#x27;)),
+    (&#x27;lots in phase 1&#x27;, M.get(&#x27;lots_phase1&#x27;)),
+    (&#x27;lots in phase 2&#x27;, M.get(&#x27;lots_phase2&#x27;)),
+    (&#x27;PM peak-hour trips (ITE LUC 251)&#x27;, M.get(&#x27;pm_peak_trips_ite_251&#x27;)),
+]
+DERIVED = [
+    (&#x27;detention required, CF&#x27;, D.get(&#x27;detention_required_cf&#x27;)),
+    (&#x27;detention provided, CF&#x27;, D.get(&#x27;detention_provided_cf&#x27;)),
+    (&#x27;disturbed area, acres&#x27;, D.get(&#x27;disturbed_ac&#x27;)),
+    (&#x27;water-quality volume, CF&#x27;, D.get(&#x27;WQv_cf&#x27;)),
+    (&#x27;average daily sewer flow, GPD&#x27;, D.get(&#x27;adf_total_gpd&#x27;)),
+    (&#x27;Phase 1 gravity length, ft&#x27;, D.get(&#x27;phase1_gravity_len_ft&#x27;)),
+    (&#x27;total conditioned floor area, SF&#x27;, D.get(&#x27;conditioned_sf_total&#x27;)),
+]
+PLANS = []
+for pid in (&#x27;A&#x27;, &#x27;B&#x27;):
+    p = P.get(pid)
+    if not p:
+        continue
+    a = p[&#x27;areas&#x27;]
+    PLANS += [
+        (&#x27;Plan %s conditioned area&#x27; % pid, a[&#x27;conditioned_sf&#x27;]),
+        (&#x27;Plan %s garage area&#x27; % pid, a[&#x27;garage_sf&#x27;]),
+        (&#x27;Plan %s front porch area&#x27; % pid, a[&#x27;front_porch_sf&#x27;]),
+        (&#x27;Plan %s maximum ridge above the floor&#x27; % pid, p[&#x27;roof&#x27;][&#x27;max_ridge_ft&#x27;]),
+    ]
+
+for label, v in SITE + DERIVED + PLANS:
+    check_value(label, v)
+
+# the pond volumes, however many basins there are
+for i, cf in enumerate(M.get(&#x27;ponds_cf&#x27;, []) or [], 1):
+    check_value(&#x27;basin %d volume, CF&#x27; % i, cf)
+
+# the hammerhead stations, however many there are
+for i, st in enumerate(M.get(&#x27;hammerhead_spacing_ft&#x27;, []) or [], 1):
+    check_value(&#x27;turnaround spacing %d&#x27; % i, st, required=False)
+
+# ----------------------------------------------------------------- statements that must be present
+for phrase, why in [
+    (&#x27;appears consistent with&#x27;, &#x27;the house rule requires &quot;appears consistent with&quot; language&#x27;),
+    (&#x27;VERIFY&#x27;, &#x27;open items must be flagged&#x27;),
+    (&#x27;DRAFT&#x27;, &#x27;the document must be labelled DRAFT&#x27;),
+]:
+    if phrase not in doc:
+        fails.append(&#x27;the document never says &quot;%s&quot; — %s&#x27; % (phrase, why))
+if doc.count(&#x27;VERIFY&#x27;) &lt; 15:
+    notes.append(&#x27;only %d VERIFY flags; the earlier revision carried more than 30&#x27; % doc.count(&#x27;VERIFY&#x27;))
+
+print(&#x27;document: %d lines, %d words, %d tables, %d VERIFY flags&#x27;
+      % (len(lines), len(doc.split()), sum(1 for l in lines if l.startswith(&#x27;|---&#x27;)), doc.count(&#x27;VERIFY&#x27;)))
+print(&#x27;checked %d data-driven values against the document&#x27; % (len(SITE) + len(DERIVED) + len(PLANS)))
+for n in notes:
+    print(&#x27;  note:&#x27;, n)
+print(&#x27;FAIL&#x27; if fails else &#x27;PASS&#x27;)
+for f in fails:
+    print(&#x27;  -&#x27;, f)
+sys.exit(1 if fails else 0)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/verify/check_dev_summary.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

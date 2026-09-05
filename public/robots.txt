@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
 
+# Unlisted working material — shared by link, deliberately kept out of search.
+Disallow: /data-room.html
+Disallow: /data-room/
+Disallow: /cottages.html
+Disallow: /cottages/
+Disallow: /decisions.html
+
 Sitemap: https://arcado-springs.vercel.app/sitemap.xml

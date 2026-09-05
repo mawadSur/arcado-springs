@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Technical memoranda verifier (docs/08) — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Technical memoranda verifier (docs/08)</h1><p class="src-note">Python · 74 lines · <a href="/data-room/src/submission/tools/verify_memo08.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;House-rule + number checks for docs/08-technical-memoranda.md. Exit 1 on any failure.
+
+Every expected figure is read from verify/memo-calcs.json, which tools/memo_calcs.py derives from
+data/layout.json — so this script fails whenever the document drifts from the drawing. Run
+tools/memo_calcs.py first if layout.json has changed.
+&quot;&quot;&quot;
+import json, math, os, re, sys
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+doc = open(os.path.join(ROOT, &#x27;docs&#x27;, &#x27;08-technical-memoranda.md&#x27;), encoding=&#x27;utf-8&#x27;).read()
+lines = doc.rstrip(&#x27;\n&#x27;).split(&#x27;\n&#x27;)
+fails = []
+
+
+def check(cond, msg):
+    (print(&quot;ok  &quot;, msg) if cond else (fails.append(msg), print(&quot;FAIL&quot;, msg)))
+
+
+check(lines[-1] == &#x27;&lt;!-- architecture-studio:requires-disclaimer --&gt;&#x27;, &#x27;marker is the last line&#x27;)
+check(lines[-2] == &#x27;&#x27; and lines[-3].startswith(&#x27;&gt; **Disclaimer:** This is an AI-generated analysis&#x27;), &#x27;disclaimer block then blank line before marker&#x27;)
+check(&#x27;IFC 2018&#x27; not in doc, &#x27;no &quot;IFC 2018&quot; citation&#x27;)
+check(not re.search(r&#x27;\bcomplies\b|\bcompliant\b&#x27;, doc, re.I), &#x27;never says &quot;complies&quot;&#x27;)
+check(all(y == &#x27;2024&#x27; for y in re.findall(r&#x27;IFC (\d{4})&#x27;, doc)), &#x27;every IFC citation that carries a year carries 2024&#x27;)
+check(len(re.findall(r&#x27;appears consistent&#x27;, doc, re.I)) &gt;= 5, &#x27;&quot;appears consistent with&quot; language present&#x27;)
+check(doc.count(&#x27;VERIFY&#x27;) &gt;= 15, &#x27;VERIFY markers present&#x27;)
+
+lay = json.load(open(os.path.join(ROOT, &#x27;data&#x27;, &#x27;layout.json&#x27;)))
+M = lay[&#x27;metrics&#x27;]
+N = M[&#x27;lots&#x27;]
+calc = json.load(open(os.path.join(ROOT, &#x27;verify&#x27;, &#x27;memo-calcs.json&#x27;)))
+check(calc[&#x27;units&#x27;] == N, f&#x27;verify/memo-calcs.json is current with layout.json (N = {N}) — else re-run tools/memo_calcs.py&#x27;)
+
+# every one of these is derived from the lot count, the basin sizes or the impervious area
+expect = {
+    &#x27;units&#x27;: f&#x27;N = {N}&#x27;,
+    &#x27;251 daily mid&#x27;: &#x27;177&#x27;, &#x27;251 daily lo&#x27;: &#x27;152&#x27;,
+    &#x27;251 PM lo/mid&#x27;: &#x27;12.3&#x27;, &#x27;251 AM mid&#x27;: &#x27;9.8&#x27;, &#x27;251 PM hi&#x27;: &#x27;16.0&#x27;, &#x27;251 PM @cap hi&#x27;: &#x27;18.3&#x27;,
+    &#x27;210 PM&#x27;: &#x27;34.8&#x27;, &#x27;2025 MU PM raw&#x27;: &#x27;214&#x27;,
+    &#x27;front reach length ft&#x27;: &#x27;814&#x27;, &#x27;available slope sag-&gt;MH&#x27;: &#x27;0.68 %&#x27;,
+    &#x27;rear-&gt;MH length ft&#x27;: &#x27;1,313&#x27;, &#x27;extension total length ft&#x27;: &#x27;478&#x27;, &#x27;extension slope&#x27;: &#x27;1.45 %&#x27;,
+    &#x27;AADF (DWR table)&#x27;: &#x27;10,670 gpd&#x27;, &#x27;peak (x4.0) DWR&#x27;: &#x27;29.6 gpm&#x27;,
+    &#x27;Phase 2 AADF DWR&#x27;: &#x27;4,250 gpd&#x27;, &#x27;Phase 2 peak&#x27;: &#x27;11.8 gpm&#x27;,
+    &#x27;avg day&#x27;: &#x27;10,250 gpd&#x27;, &#x27;hydrants @~400 ft&#x27;: &#x27;**6 hydrants**&#x27;,
+    &#x27;WQv&#x27;: &#x27;18,659&#x27;, &#x27;RRv (1.0-in basis)&#x27;: &#x27;15,549&#x27;,
+    &#x27;disturbed area&#x27;: &#x27;7.541&#x27;, &#x27;detention required&#x27;: &#x27;75,410&#x27;, &#x27;detention provided&#x27;: &#x27;77,863&#x27;,
+    &#x27;Pond 1 (dry detention / WQ)&#x27;: &#x27;33,129&#x27;, &#x27;Pond 2 (dry detention / WQ)&#x27;: &#x27;44,734&#x27;,
+    &#x27;impervious&#x27;: &#x27;184,148&#x27;, &#x27;units needing a 55+ resident&#x27;: &#x27;33 of the 41 units&#x27;,
+    &#x27;sprinkler offer&#x27;: &#x27;$123,000&#x27;, &#x27;steepest existing lane grade&#x27;: &#x27;10.9 %&#x27;,
+    &#x27;dead-end length&#x27;: &#x27;1,754&#x27;, &#x27;entrance to Arcadia Pl cl&#x27;: &#x27;251 ft&#x27;,
+}
+for k, s in expect.items():
+    check(s in doc, f&#x27;{k} = {calc.get(k)} appears in doc as &quot;{s}&quot;&#x27;)
+
+# Figures that must NOT survive from the 43-lot issues. Three kinds of line quote a superseded number on
+# purpose and are excluded: the revision notes at the head of the document (everything before Memo A), and
+# any sentence that marks the figure as superseded or withdrawn.
+body = [ln for ln in doc[doc.index(&#x27;## Memo A&#x27;):].split(&#x27;\n&#x27;)
+        if not re.search(r&#x27;supersed|withdraw|is retired|previously said|previously reported&#x27;, ln)]
+body = &#x27;\n&#x27;.join(body)
+for stale in [&#x27;11,170 gpd&#x27;, &#x27;10,750 gpd&#x27;, &#x27;188,483 SF&#x27;, &#x27;132,959&#x27;, &#x27;75,133&#x27;, &#x27;19,049 cf**&#x27;,
+              &#x27;**12.9&#x27;, &#x27;13.2 gpm&#x27;, &#x27;$129,000&#x27;, &#x27;35 of 43&#x27;, &#x27;4,750 gpd&#x27;, &#x27;44,680&#x27;]:
+    check(stale not in body, f&#x27;stale 43-lot figure removed from the body: {stale!r}&#x27;)
+stale_43 = re.findall(r&#x27;\b43[- ](?:lot|unit|home|dwelling)\w*&#x27;, body)
+check(not stale_43, f&#x27;no live &quot;43-lot&quot;/&quot;43 units&quot; phrasing in the body (found {stale_43})&#x27;)
+
+check(re.search(r&#x27;5\.9-ft deficit&#x27;, doc) is not None, &#x27;rear gravity deficit 5.9 ft stated&#x27;)
+check(&#x27;33 of the 41 units&#x27; in doc and &#x27;0.80 × 41 = 32.8&#x27; in doc, &#x27;HOPA 24 CFR §100.305(g) recomputation shown with its inputs&#x27;)
+check(&#x27;24 + 17&#x27; in doc, &#x27;phase split 24 + 17 stated&#x27;)
+check(&#x27;4535 Arcado Rd&#x27; in doc and &#x27;1,202&#x27; in doc, &#x27;the 4535 dwelling is placed 1,200 ft back on the lane alignment&#x27;)
+for edition in [&#x27;11th ed.&#x27;, &#x27;Zoning Ordinance 2023-603&#x27;, &#x27;NFPA 13D&#x27;, &#x27;O.C.G.A. §12-7-6&#x27;, &#x27;Ch. 109 Art. VII&#x27;, &#x27;Ch. 109 Art. V&#x27;]:
+    check(edition in doc, f&#x27;citation present: {edition}&#x27;)
+
+print(f&quot;\n{len(fails)} failure(s); {len(doc.split())} words, {len(lines)} lines&quot;)
+sys.exit(1 if fails else 0)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/verify_memo08.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

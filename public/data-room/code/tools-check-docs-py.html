@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>House-rule checker for the letter of intent and zoning-power standards — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>House-rule checker for the letter of intent and zoning-power standards</h1><p class="src-note">Python · 71 lines · <a href="/data-room/src/submission/tools/check_docs.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;House-rule checks for docs/03-letter-of-intent.md and docs/04-standards-governing-zoning-power.md.
+Run: python3 tools/check_docs.py   (exit 1 on any failure)&quot;&quot;&quot;
+import json, re, sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+DISCLAIMER = (&quot;&gt; **Disclaimer:** This is an AI-generated analysis for preliminary planning purposes. &quot;
+              &quot;All findings must be verified by a licensed professional before use in design, permitting, or regulatory submissions.&quot;)
+MARKER = &quot;&lt;!-- architecture-studio:requires-disclaimer --&gt;&quot;
+_metrics = json.load(open(ROOT / &quot;data/layout.json&quot;))[&quot;metrics&quot;]
+lots = _metrics[&quot;lots&quot;]
+dens = round(lots / 9.44, 2)
+# PM peak-hour trips (ITE Trip Generation 11th ed., LUC 251 at 0.30/unit) is derived from the lot count,
+# so read it from the layout rather than hard-coding it — it changed with the 2026-09-03 lot-count correction.
+trips = (&quot;%g&quot; % _metrics[&quot;pm_peak_trips_ite_251&quot;])
+# the data file carries a generated header and the canonical disclaimer; compare only the numbered list
+import re as _re
+_raw = (ROOT / &quot;data/voluntary-conditions.md&quot;).read_text()
+_m = _re.search(r&quot;^1\. .*?(?=\n\n&gt; \*\*Disclaimer|\Z)&quot;, _raw, _re.S | _re.M)
+conds = (_m.group(0) if _m else _raw).strip()
+fails = []
+def check(cond, msg):
+    if not cond: fails.append(msg)
+
+for name in [&quot;docs/03-letter-of-intent.md&quot;, &quot;docs/04-standards-governing-zoning-power.md&quot;]:
+    t = (ROOT / name).read_text()
+    lines = t.rstrip(&quot;\n&quot;).split(&quot;\n&quot;)
+    check(lines[-1] == MARKER, f&quot;{name}: last line is not the marker&quot;)
+    check(lines[-2] == &quot;&quot;, f&quot;{name}: no blank line before marker&quot;)
+    check(lines[-3] == DISCLAIMER, f&quot;{name}: disclaimer block is not the third-to-last line&quot;)
+    for bad in [r&quot;\bcompl(y|ies|iance|iant)\b&quot;, r&quot;IFC 2018&quot;, r&quot;329[- ]f&quot;, r&quot;1,250 ft&quot;, r&quot;9\.00 ac&quot;]:
+        for m in re.finditer(bad, t, re.I):
+            # allow &#x27;complies&#x27; only inside a direct ordinance quotation? none expected
+            fails.append(f&quot;{name}: banned phrase {bad!r} at ...{t[max(0,m.start()-40):m.end()+20]!r}&quot;)
+    check(&quot;appears consistent&quot; in t or name.endswith(&quot;power.md&quot;), f&quot;{name}: missing &#x27;appears consistent&#x27; phrasing&quot;)
+    check(f&quot;{lots} &quot; in t and str(dens) in t, f&quot;{name}: unit count {lots} / density {dens} not both present&quot;)
+    check(&quot;VERIFY&quot; in t, f&quot;{name}: no VERIFY flags&quot;)
+    check(&quot;2026-09-__&quot; in t, f&quot;{name}: date placeholder missing&quot;)
+
+# LOI: conditions verbatim, buffer statement, contract-status bracket
+loi = (ROOT / &quot;docs/03-letter-of-intent.md&quot;).read_text()
+check(conds in loi, &quot;LOI: voluntary conditions differ from data/voluntary-conditions.md&quot;)
+ds = (ROOT / &quot;docs/02-development-summary.md&quot;)
+if ds.exists():
+    m = re.search(r&quot;^## 9\. Voluntary zoning conditions.*?\n\n(.*?)\n\n---&quot;, ds.read_text(), re.S | re.M)
+    check(m is not None and m.group(1).strip() in loi, &quot;LOI: conditions drift from docs/02 §9 — run tools/sync_conditions.py&quot;)
+check(&quot;No buffer reduction is requested&quot; in loi or &quot;no buffer reduction is requested&quot; in loi, &quot;LOI: buffer-reduction statement missing&quot;)
+check(&quot;§313(1)&quot; in loi, &quot;LOI: §313(1) easement basis missing&quot;)
+check(&quot;[contract status: VERIFY before filing]&quot; in loi, &quot;LOI: contract-status bracket missing&quot;)
+for pin in [&quot;6123 033&quot;, &quot;6123 015&quot;, &quot;6123 014&quot;, &quot;6123 162&quot;]:
+    check(pin in loi, f&quot;LOI: PIN {pin} missing&quot;)
+for s in [&quot;§602&quot;, &quot;§402-1&quot;, &quot;§203&quot;, &quot;p. 37&quot;, &quot;RZ-2025-01&quot;, &quot;104&quot;, &quot;24,400&quot;, trips, &quot;Reid Turner&quot;, &quot;340 Main Street&quot;]:
+    check(s in loi, f&quot;LOI: expected token {s!r} missing&quot;)
+
+# Standards: six criteria, 150-300 words each
+std = (ROOT / &quot;docs/04-standards-governing-zoning-power.md&quot;).read_text()
+parts = re.split(r&quot;^### \(([A-F])\) .*?:\s*$&quot;, std, flags=re.M)
+# parts: [pre, &#x27;A&#x27;, bodyA, &#x27;B&#x27;, bodyB, ...]; last body runs to &#x27;---&#x27;
+letters = parts[1::2]; bodies = parts[2::2]
+check(letters == list(&quot;ABCDEF&quot;), f&quot;Standards: criteria found {letters}&quot;)
+for L, body in zip(letters, bodies):
+    body = body.split(&quot;\n---&quot;)[0]
+    words = len(re.findall(r&quot;\S+&quot;, body))
+    print(f&quot;  criterion {L}: {words} words&quot;)
+    check(150 &lt;= words &lt;= 300, f&quot;Standards ({L}): {words} words, outside 150-300&quot;)
+for s in [&quot;106 feet&quot;, &quot;Zone X&quot;, &quot;zero&quot;, &quot;gravity&quot;, &quot;Killian Hill&quot;, &quot;$349,200&quot;, &quot;$693,500&quot;, trips, &quot;Established Residential&quot;, &quot;Suburban-Low&quot;, &quot;Attorney-review note&quot;]:
+    check(s in std, f&quot;Standards: expected token {s!r} missing&quot;)
+
+print(f&quot;layout.json lots={lots}, density={dens}&quot;)
+if fails:
+    print(&quot;FAIL&quot;); [print(&quot; -&quot;, f) for f in fails]; sys.exit(1)
+print(&quot;PASS: all checks&quot;)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/check_docs.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

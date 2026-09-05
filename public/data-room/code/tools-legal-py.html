@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Draft metes-and-bounds legal description generator — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Draft metes-and-bounds legal description generator</h1><p class="src-note">Python · 430 lines · <a href="/data-room/src/submission/tools/legal.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;legal.py — DRAFT metes-and-bounds courses for the Arcado Road assemblage (one tract).
+
+Derives the OUTER boundary of the four Gwinnett GIS parcels in data/site-parcels-2240.json
+(SR 2240, NAD83 Georgia West, US survey feet) by cancelling the shared interior segments
+(033/015, 015/014, 015/162, 014/162), then walks the outer ring clockwise from the point of
+beginning (the 162 / Arcado Rd R/W corner, world 2310954.00 E, 1411431.50 N) and prints
+every course as a quadrant bearing (deg-min-sec, GRID bearing) and distance (0.01 ft),
+the closure computed from the typed (rounded) courses, and the area.
+
+This is NOT a survey.  It reproduces the county&#x27;s parcel fabric so that the application
+can carry a typed description until a Georgia RLS boundary survey replaces it
+(Lilburn Zoning Ordinance 2023-603 §1003-4.3 and 4.4).
+
+Usage:  python3 tools/legal.py            # markdown report to stdout
+        python3 tools/legal.py --json     # machine-readable courses
+&quot;&quot;&quot;
+import json, math, os, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+SRC = os.path.join(ROOT, &quot;data&quot;, &quot;site-parcels-2240.json&quot;)
+LAYOUT = os.path.join(ROOT, &quot;data&quot;, &quot;layout.json&quot;)
+
+POB = (2310954.0006996617, 1411431.499569498)      # 162 / R-W corner (local origin)
+AXIS_DEG = 28.72                                    # strip axis bears N 28°43&#x27; W (FACTS §1)
+TOL = 0.02                                          # ft — vertex/edge coincidence tolerance
+SF_PER_AC = 43560.0
+
+PIN_ORDER = [&quot;6123 033&quot;, &quot;6123 015&quot;, &quot;6123 014&quot;, &quot;6123 162&quot;]
+
+
+# ---------- geometry helpers ----------
+def key(p):
+    return (round(p[0], 3), round(p[1], 3))
+
+
+def dist(a, b):
+    return math.hypot(b[0] - a[0], b[1] - a[1])
+
+
+def on_segment(p, a, b, tol=TOL):
+    &quot;&quot;&quot;True if p lies on segment ab (strictly inside), within tol.&quot;&quot;&quot;
+    ab = dist(a, b)
+    if ab &lt; tol:
+        return False
+    # perpendicular distance
+    cross = abs((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) / ab
+    if cross &gt; tol:
+        return False
+    t = ((p[0] - a[0]) * (b[0] - a[0]) + (p[1] - a[1]) * (b[1] - a[1])) / (ab * ab)
+    return tol / ab &lt; t &lt; 1 - tol / ab
+
+
+def azimuth_deg(a, b):
+    &quot;&quot;&quot;Grid azimuth from north, clockwise, degrees 0–360.&quot;&quot;&quot;
+    az = math.degrees(math.atan2(b[0] - a[0], b[1] - a[1]))
+    return az % 360.0
+
+
+def quadrant_bearing(az):
+    &quot;&quot;&quot;Return (ns, deg, min, sec, ew) rounded to the second, carrying seconds→minutes→degrees.&quot;&quot;&quot;
+    if az &lt;= 90:
+        ns, ew, ang = &quot;N&quot;, &quot;E&quot;, az
+    elif az &lt;= 180:
+        ns, ew, ang = &quot;S&quot;, &quot;E&quot;, 180 - az
+    elif az &lt;= 270:
+        ns, ew, ang = &quot;S&quot;, &quot;W&quot;, az - 180
+    else:
+        ns, ew, ang = &quot;N&quot;, &quot;W&quot;, 360 - az
+    total_sec = int(round(ang * 3600))
+    d, rem = divmod(total_sec, 3600)
+    m, s = divmod(rem, 60)
+    return ns, d, m, s, ew
+
+
+def bearing_str(az):
+    ns, d, m, s, ew = quadrant_bearing(az)
+    return f&quot;{ns} {d:02d}°{m:02d}&#x27;{s:02d}\&quot; {ew}&quot;
+
+
+def bearing_to_az(ns, d, m, s, ew):
+    ang = d + m / 60 + s / 3600
+    if ns == &quot;N&quot; and ew == &quot;E&quot;:
+        return ang
+    if ns == &quot;S&quot; and ew == &quot;E&quot;:
+        return 180 - ang
+    if ns == &quot;S&quot; and ew == &quot;W&quot;:
+        return 180 + ang
+    return 360 - ang
+
+
+def shoelace(ring):
+    &quot;&quot;&quot;Signed area; positive = counter-clockwise in an E/N frame.&quot;&quot;&quot;
+    a = 0.0
+    n = len(ring)
+    for i in range(n):
+        x1, y1 = ring[i]
+        x2, y2 = ring[(i + 1) % n]
+        a += x1 * y2 - x2 * y1
+    return a / 2.0
+
+
+def to_local(p):
+    &quot;&quot;&quot;Site-local (u, v) feet: u along N 28.72° W from the POB, v positive toward the NE line.&quot;&quot;&quot;
+    th = math.radians(AXIS_DEG)
+    dE, dN = p[0] - POB[0], p[1] - POB[1]
+    u = -dE * math.sin(th) + dN * math.cos(th)
+    v = dE * math.cos(th) + dN * math.sin(th)
+    return u, v
+
+
+
+# ---------- adjoiner lookup (data/site-context-local.json + data/owners-found.json) ----------
+CTX_PATH = os.path.join(ROOT, &quot;data&quot;, &quot;site-context-local.json&quot;)
+OWN_PATH = os.path.join(ROOT, &quot;data&quot;, &quot;owners-found.json&quot;)
+SUBDIV = {&quot;NE&quot;: &quot;King David Manor Unit 1&quot;, &quot;NW&quot;: &quot;Nantucket&quot;, &quot;SW&quot;: &quot;Legends at Parkview&quot;}
+STREET = {&quot;ARCADO RD&quot;: &quot;Arcado Rd SW&quot;, &quot;KING DAVID DR&quot;: &quot;King David Dr SW&quot;, &quot;NANTUCKET DR&quot;: &quot;Nantucket Dr SW&quot;,
+          &quot;VILLAGE GREEN CT&quot;: &quot;Village Green Ct SW&quot;, &quot;FIELDHOUSE CIR&quot;: &quot;Fieldhouse Cir SW&quot;}
+
+
+def seg_dist(p, a, b):
+    ab2 = (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2
+    if ab2 == 0:
+        return dist(p, a)
+    t = max(0.0, min(1.0, ((p[0] - a[0]) * (b[0] - a[0]) + (p[1] - a[1]) * (b[1] - a[1])) / ab2))
+    return dist(p, (a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])))
+
+
+def load_adjoiners():
+    if not (os.path.exists(CTX_PATH) and os.path.exists(OWN_PATH)):
+        return []
+    with open(CTX_PATH) as f:
+        ctx = json.load(f)
+    with open(OWN_PATH) as f:
+        own = json.load(f)
+    out = []
+    for ap in ctx[&quot;adjoining_parcels&quot;]:
+        pin = ap[&quot;PIN&quot;]
+        if pin in PIN_ORDER:
+            continue
+        if pin == &quot;R/W&quot;:
+            out.append({&quot;pin&quot;: &quot;R/W&quot;, &quot;label&quot;: &quot;the northwesterly right-of-way line of Arcado Road (R/W width varies)&quot;,
+                        &quot;ring&quot;: ap[&quot;ring_local&quot;]})
+            continue
+        rec = own[pin][0]
+        st = rec[&quot;PROPERTYSTREET&quot;]
+        num, _, name = st.partition(&quot; &quot;)
+        addr = f&quot;{num} {STREET.get(name, name.title())}&quot;
+        vs = [q[1] for q in ap[&quot;ring_local&quot;]]
+        us = [q[0] for q in ap[&quot;ring_local&quot;]]
+        side = &quot;NE&quot; if min(vs) &gt; -50 else (&quot;SW&quot; if max(vs) &lt; -150 and max(us) &lt; 1760 else &quot;NW&quot;)
+        label = f&quot;Lot {ap[&#x27;LOT&#x27;]}, Block A, {SUBDIV[side]} — {addr} (PIN R{pin})&quot;
+        out.append({&quot;pin&quot;: pin, &quot;label&quot;: label, &quot;ring&quot;: ap[&quot;ring_local&quot;]})
+    return out
+
+
+def adjoiner_of(course, adjoiners, tol=1.5):
+    &quot;&quot;&quot;Adjoiner whose ring lies along the course (checked at 1/4, 1/2, 3/4 points, site-local).&quot;&quot;&quot;
+    a, b = to_local(course[&quot;from&quot;]), to_local(course[&quot;to&quot;])
+    best, bestd = None, 1e9
+    for adj in adjoiners:
+        r = adj[&quot;ring&quot;]
+        worst = 0.0
+        for t in (0.25, 0.5, 0.75):
+            p = (a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1]))
+            d = min(seg_dist(p, r[i], r[(i + 1) % len(r)]) for i in range(len(r)))
+            worst = max(worst, d)
+        if worst &lt; bestd:
+            best, bestd = adj, worst
+    return (best[&quot;label&quot;] if best and bestd &lt;= tol else &quot;VERIFY — no GIS adjoiner within 1.5 ft&quot;), bestd
+
+
+# ---------- build the outer ring ----------
+def load_parcels():
+    with open(SRC) as f:
+        return json.load(f)
+
+
+def outer_ring(parcels):
+    # 1. collect every vertex (for splitting edges that another ring subdivides)
+    verts = []
+    for pin in PIN_ORDER:
+        verts.extend(parcels[pin][&quot;ring&quot;])
+    # 2. directed edges, split at foreign vertices lying on them
+    edges = []  # (a, b, pin)
+    for pin in PIN_ORDER:
+        ring = parcels[pin][&quot;ring&quot;]
+        n = len(ring)
+        for i in range(n):
+            a, b = ring[i], ring[(i + 1) % n]
+            if dist(a, b) &lt; TOL:
+                continue
+            inside = [v for v in verts if on_segment(v, a, b)]
+            inside.sort(key=lambda v: dist(a, v))
+            chain = [a] + inside + [b]
+            for j in range(len(chain) - 1):
+                edges.append((chain[j], chain[j + 1], pin))
+    # 3. cancel shared interior segments (same segment, opposite direction)
+    from collections import Counter
+    count = Counter((key(a), key(b)) for a, b, _ in edges)
+    outer = []
+    for a, b, pin in edges:
+        if count[(key(b), key(a))] &gt; 0:
+            continue                      # interior: partner exists in the other ring
+        outer.append((a, b, pin))
+    # 4. chain into one loop
+    nxt = {key(a): (a, b, pin) for a, b, pin in outer}
+    if len(nxt) != len(outer):
+        raise SystemExit(&quot;branching boundary — vertex reused&quot;)
+    start = key(outer[0][0])
+    loop, k = [], start
+    while True:
+        a, b, pin = nxt[k]
+        loop.append((a, b, pin))
+        k = key(b)
+        if k == start:
+            break
+        if len(loop) &gt; len(outer):
+            raise SystemExit(&quot;boundary does not close&quot;)
+    if len(loop) != len(outer):
+        raise SystemExit(f&quot;outer boundary has {len(outer)} edges but the loop uses {len(loop)} — more than one ring?&quot;)
+    return loop
+
+
+def orient_and_rotate(loop):
+    &quot;&quot;&quot;Clockwise traverse (surveying convention) starting at the POB.&quot;&quot;&quot;
+    ring = [a for a, b, pin in loop]
+    if shoelace(ring) &gt; 0:                       # CCW → reverse
+        loop = [(b, a, pin) for a, b, pin in reversed(loop)]
+    i0 = min(range(len(loop)), key=lambda i: dist(loop[i][0], POB))
+    if dist(loop[i0][0], POB) &gt; 0.05:
+        raise SystemExit(&quot;POB is not a boundary vertex&quot;)
+    return loop[i0:] + loop[:i0]
+
+
+def classify(courses):
+    &quot;&quot;&quot;Label each course: frontage → SW → NW → NE, walking clockwise from the POB.&quot;&quot;&quot;
+    side = &quot;frontage&quot;
+    out = []
+    for c in courses:
+        az = c[&quot;az&quot;]
+        if side == &quot;frontage&quot; and 300 &lt;= az &lt;= 340:      # turns NW up the SW line
+            side = &quot;SW&quot;
+        elif side == &quot;SW&quot; and 40 &lt;= az &lt;= 80:            # turns NE across the rear
+            side = &quot;NW&quot;
+        elif side == &quot;NW&quot; and 140 &lt;= az &lt;= 170:          # turns SE down the NE line
+            side = &quot;NE&quot;
+        c[&quot;side&quot;] = side
+        out.append(c)
+    return out
+
+
+def build():
+    parcels = load_parcels()
+    loop = orient_and_rotate(outer_ring(parcels))
+    courses = []
+    for i, (a, b, pin) in enumerate(loop, 1):
+        az = azimuth_deg(a, b)
+        ns, d, m, s, ew = quadrant_bearing(az)
+        courses.append({
+            &quot;no&quot;: i, &quot;from&quot;: a, &quot;to&quot;: b, &quot;pin&quot;: pin, &quot;az&quot;: az,
+            &quot;bearing&quot;: bearing_str(az), &quot;qb&quot;: (ns, d, m, s, ew),
+            &quot;dist&quot;: round(dist(a, b), 2),
+        })
+    courses = classify(courses)
+    adjs = load_adjoiners()
+    for c in courses:
+        c[&quot;adjoiner&quot;], c[&quot;adjoiner_gap_ft&quot;] = adjoiner_of(c, adjs) if adjs else (&quot;n/a&quot;, 0.0)
+    ring = [c[&quot;from&quot;] for c in courses]
+    area_sf = abs(shoelace(ring))
+    # closure from the TYPED courses (bearing to 1&quot;, distance to 0.01 ft)
+    lat = dep = 0.0
+    for c in courses:
+        az = math.radians(bearing_to_az(*c[&quot;qb&quot;]))
+        lat += c[&quot;dist&quot;] * math.cos(az)
+        dep += c[&quot;dist&quot;] * math.sin(az)
+    perim = sum(c[&quot;dist&quot;] for c in courses)
+    err = math.hypot(lat, dep)
+    # area from the typed courses (coordinates re-derived from the rounded courses)
+    x = y = 0.0
+    typed = []
+    for c in courses:
+        typed.append((x, y))
+        az = math.radians(bearing_to_az(*c[&quot;qb&quot;]))
+        x += c[&quot;dist&quot;] * math.sin(az)
+        y += c[&quot;dist&quot;] * math.cos(az)
+    typed_area = abs(shoelace(typed))
+    sides = {}
+    for c in courses:
+        sides[c[&quot;side&quot;]] = sides.get(c[&quot;side&quot;], 0.0) + c[&quot;dist&quot;]
+    parcel_sum = sum(parcels[p][&quot;area_sf&quot;] for p in PIN_ORDER)
+    return {
+        &quot;courses&quot;: courses, &quot;area_sf&quot;: area_sf, &quot;typed_area_sf&quot;: typed_area,
+        &quot;perimeter_ft&quot;: perim, &quot;closure_lat&quot;: lat, &quot;closure_dep&quot;: dep, &quot;closure_err&quot;: err,
+        &quot;precision&quot;: (perim / err) if err &gt; 1e-9 else float(&quot;inf&quot;),
+        &quot;sides&quot;: sides, &quot;parcel_area_sum_sf&quot;: parcel_sum, &quot;ring&quot;: ring, &quot;parcels&quot;: parcels,
+    }
+
+
+# ---------- checks ----------
+def checks(r):
+    msgs = []
+    ok = True
+    # 1. union area equals the sum of the parcel areas (no interior edge survived, none dropped)
+    d = abs(r[&quot;area_sf&quot;] - r[&quot;parcel_area_sum_sf&quot;])
+    msgs.append(f&quot;union area {r[&#x27;area_sf&#x27;]:.1f} sf vs parcel sum {r[&#x27;parcel_area_sum_sf&#x27;]:.1f} sf (Δ {d:.2f} sf)&quot;)
+    ok &amp;= d &lt; 1.0
+    # 2. clockwise, starts at POB
+    ok &amp;= shoelace(r[&quot;ring&quot;]) &lt; 0
+    ok &amp;= dist(r[&quot;ring&quot;][0], POB) &lt; 0.05
+    msgs.append(f&quot;clockwise from POB: {shoelace(r[&#x27;ring&#x27;]) &lt; 0 and dist(r[&#x27;ring&#x27;][0], POB) &lt; 0.05}&quot;)
+    # 3. closure of the typed description
+    msgs.append(f&quot;typed-course closure {r[&#x27;closure_err&#x27;]:.3f} ft in {r[&#x27;perimeter_ft&#x27;]:.2f} ft (1:{r[&#x27;precision&#x27;]:,.0f})&quot;)
+    ok &amp;= r[&quot;closure_err&quot;] &lt; 0.10
+    # 4. four sides present in order
+    order = [c[&quot;side&quot;] for c in r[&quot;courses&quot;]]
+    seq = [s for i, s in enumerate(order) if i == 0 or order[i - 1] != s]
+    msgs.append(f&quot;side sequence: {&#x27; → &#x27;.join(seq)}&quot;)
+    ok &amp;= seq == [&quot;frontage&quot;, &quot;SW&quot;, &quot;NW&quot;, &quot;NE&quot;]
+    # 5. against layout.json local ring (site plan generator) if present
+    if os.path.exists(LAYOUT):
+        with open(LAYOUT) as f:
+            L = json.load(f)
+        lr = [tuple(p) for p in L[&quot;boundary_ring&quot;]]
+        mine = [to_local(p) for p in r[&quot;ring&quot;]]
+        worst = 0.0
+        for p in mine:
+            worst = max(worst, min(math.hypot(p[0] - q[0], p[1] - q[1]) for q in lr))
+        msgs.append(f&quot;layout.json boundary_ring: {len(lr)} vertices vs {len(mine)} here; worst vertex offset {worst:.2f} ft; &quot;
+                    f&quot;layout boundary_sf {L[&#x27;boundary_sf&#x27;]:.1f}&quot;)
+        ok &amp;= worst &lt; 0.15 and len(lr) == len(mine)
+    # 6. every course runs along exactly one GIS adjoiner ring (within 1.5 ft)
+    unk = [c[&quot;no&quot;] for c in r[&quot;courses&quot;] if c[&quot;adjoiner&quot;].startswith(&quot;VERIFY&quot;)]
+    gap = max(c[&quot;adjoiner_gap_ft&quot;] for c in r[&quot;courses&quot;])
+    msgs.append(f&quot;adjoiner identified for every course: {not unk} (unresolved: {unk}); worst gap to adjoiner ring {gap:.2f} ft&quot;)
+    ok &amp;= not unk
+    return ok, msgs
+
+
+# ---------- report ----------
+def report(r):
+    P = r[&quot;parcels&quot;]
+    out = []
+    out.append(&quot;Point of beginning: the 162 / Arcado Rd R/W corner, SR 2240 GA West (US ft) &quot;
+               f&quot;E {POB[0]:,.2f}  N {POB[1]:,.2f}  (site-local u 0.00, v 0.00)&quot;)
+    out.append(&quot;&quot;)
+    out.append(&quot;| No. | Side | Bearing (grid) | Distance (ft) | To: E | To: N | To: u | To: v | GIS parcel | Along (GIS adjoiner) |&quot;)
+    out.append(&quot;|---:|---|---|---:|---:|---:|---:|---:|---|---|&quot;)
+    for c in r[&quot;courses&quot;]:
+        u, v = to_local(c[&quot;to&quot;])
+        out.append(f&quot;| {c[&#x27;no&#x27;]} | {c[&#x27;side&#x27;]} | {c[&#x27;bearing&#x27;]} | {c[&#x27;dist&#x27;]:.2f} | {c[&#x27;to&#x27;][0]:,.2f} | {c[&#x27;to&#x27;][1]:,.2f} &quot;
+                   f&quot;| {u:.1f} | {v:.1f} | {c[&#x27;pin&#x27;]} | {c[&#x27;adjoiner&#x27;]} |&quot;)
+    out.append(&quot;&quot;)
+    s = r[&quot;sides&quot;]
+    out.append(f&quot;Side totals (ft): Arcado Rd frontage {s[&#x27;frontage&#x27;]:.2f} | SW line {s[&#x27;SW&#x27;]:.2f} | &quot;
+               f&quot;NW end {s[&#x27;NW&#x27;]:.2f} | NE line {s[&#x27;NE&#x27;]:.2f} | perimeter {r[&#x27;perimeter_ft&#x27;]:.2f}&quot;)
+    # widths
+    ring = r[&quot;ring&quot;]
+    front_sw = [c for c in r[&quot;courses&quot;] if c[&quot;side&quot;] == &quot;frontage&quot;][-1][&quot;to&quot;]
+    rear_sw = [c for c in r[&quot;courses&quot;] if c[&quot;side&quot;] == &quot;SW&quot;][-1][&quot;to&quot;]
+    rear_ne = [c for c in r[&quot;courses&quot;] if c[&quot;side&quot;] == &quot;NW&quot;][-1][&quot;to&quot;]
+    out.append(f&quot;Chord widths (ft): front (POB → SW front corner) {dist(POB, front_sw):.2f}; &quot;
+               f&quot;rear (SW rear corner → NE rear corner) {dist(rear_sw, rear_ne):.2f}&quot;)
+    out.append(f&quot;Closure of the typed courses: ΔN {r[&#x27;closure_lat&#x27;]:+.3f} ft, ΔE {r[&#x27;closure_dep&#x27;]:+.3f} ft, &quot;
+               f&quot;linear error {r[&#x27;closure_err&#x27;]:.3f} ft in {r[&#x27;perimeter_ft&#x27;]:.2f} ft = 1 : {r[&#x27;precision&#x27;]:,.0f}&quot;)
+    out.append(f&quot;Area (coordinate/shoelace, GIS fabric): {r[&#x27;area_sf&#x27;]:,.1f} sf = {r[&#x27;area_sf&#x27;]/SF_PER_AC:.3f} ac; &quot;
+               f&quot;area from the typed courses: {r[&#x27;typed_area_sf&#x27;]:,.1f} sf = {r[&#x27;typed_area_sf&#x27;]/SF_PER_AC:.3f} ac&quot;)
+    out.append(&quot;Parcel check: &quot; + &quot; + &quot;.join(f&quot;{p} {P[p][&#x27;area_sf&#x27;]:,.1f}&quot; for p in PIN_ORDER) +
+               f&quot; = {r[&#x27;parcel_area_sum_sf&#x27;]:,.1f} sf (GIS CALCULATEDACREAGE sum &quot;
+               f&quot;{sum(P[p][&#x27;attributes&#x27;][&#x27;CALCULATEDACREAGE&#x27;] for p in PIN_ORDER):.3f} ac; &quot;
+               f&quot;DEEDEDACREAGE sum {sum(P[p][&#x27;attributes&#x27;][&#x27;DEEDEDACREAGE&#x27;] for p in PIN_ORDER):.2f} ac)&quot;)
+    return &quot;\n&quot;.join(out)
+
+
+def prose(r):
+    &quot;&quot;&quot;Legal-description prose: consecutive courses grouped by the adjoiner they run along.&quot;&quot;&quot;
+    groups = []
+    for c in r[&quot;courses&quot;]:
+        if groups and groups[-1][0] == c[&quot;adjoiner&quot;]:
+            groups[-1][1].append(c)
+        else:
+            groups.append((c[&quot;adjoiner&quot;], [c]))
+    corner_names = {&quot;frontage-&gt;SW&quot;: &quot;the southwesterly corner of the tract herein described&quot;,
+                    &quot;SW-&gt;NW&quot;: &quot;the westerly corner of the tract herein described&quot;,
+                    &quot;NW-&gt;NE&quot;: &quot;the northerly corner of the tract herein described&quot;}
+    paras = []
+    for gi, (adj, cs) in enumerate(groups):
+        along = adj if adj.startswith(&quot;the &quot;) else &quot;the common line with &quot; + adj
+        n = len(cs)
+        body = &quot;; thence &quot;.join(f&quot;{c[&#x27;bearing&#x27;]} a distance of {c[&#x27;dist&#x27;]:.2f} feet&quot; for c in cs)
+        if n == 1:
+            head = f&quot;thence along {along} {body}&quot;
+        else:
+            head = f&quot;thence along {along} the following {n} courses: {body}&quot;
+        # what the run ends at
+        last = cs[-1]
+        nxt = groups[gi + 1] if gi + 1 &lt; len(groups) else None
+        if nxt is None:
+            tail = &quot; to the northwesterly right-of-way line of Arcado Road and the POINT OF BEGINNING.&quot;
+        else:
+            key_ = f&quot;{last[&#x27;side&#x27;]}-&gt;{nxt[1][0][&#x27;side&#x27;]}&quot;
+            corner = corner_names.get(key_)
+            nxt_label = nxt[0]
+            if corner:
+                tail = f&quot; to a point at {corner}, being a corner common to {nxt_label};&quot;
+            else:
+                tail = f&quot; to a point, being a corner common to {nxt_label};&quot;
+        paras.append(head + tail)
+    return &quot;\n\n&quot;.join(paras)
+
+
+if __name__ == &quot;__main__&quot;:
+    r = build()
+    ok, msgs = checks(r)
+    if &quot;--json&quot; in sys.argv:
+        print(json.dumps({&quot;courses&quot;: [{k: v for k, v in c.items() if k != &quot;qb&quot;} for c in r[&quot;courses&quot;]],
+                          &quot;area_sf&quot;: r[&quot;area_sf&quot;], &quot;closure_err_ft&quot;: r[&quot;closure_err&quot;],
+                          &quot;perimeter_ft&quot;: r[&quot;perimeter_ft&quot;]}, indent=1, default=list))
+        sys.exit(0)
+    print(report(r))
+    print()
+    print(&quot;PROSE&quot;)
+    print(prose(r))
+    print()
+    print(&quot;CHECKS&quot;)
+    for m in msgs:
+        print(&quot; -&quot;, m)
+    print(&quot;RESULT:&quot;, &quot;PASS&quot; if ok else &quot;FAIL&quot;)
+    sys.exit(0 if ok else 1)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/legal.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

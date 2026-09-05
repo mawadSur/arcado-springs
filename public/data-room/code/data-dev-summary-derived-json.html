@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Development Summary — Derived Calculations — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">source data</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> JSON</div>
+    
+    <h1>Development Summary — Derived Calculations</h1><p class="src-note">JSON · 312 lines · <a href="/data-room/src/submission/data/dev-summary-derived.json">download the raw file</a></p><pre><code>{
+ &quot;acreage_deeded_ac&quot;: 9.44,
+ &quot;deeded_sf&quot;: 411206,
+ &quot;boundary_sf_gis&quot;: 417173.6,
+ &quot;acreage_gis_ac&quot;: 9.577,
+ &quot;lots&quot;: 41,
+ &quot;lots_sw&quot;: 14,
+ &quot;lots_ne&quot;: 27,
+ &quot;plan_A&quot;: 21,
+ &quot;plan_B&quot;: 20,
+ &quot;lots_phase1&quot;: 24,
+ &quot;lots_phase2&quot;: 17,
+ &quot;lot_area_min_sf&quot;: 5000.0,
+ &quot;lot_area_avg_sf&quot;: 5000.0,
+ &quot;lot_area_max_sf&quot;: 5000.0,
+ &quot;lot_width_min_ft&quot;: 50.0,
+ &quot;lot_depth_min_ft&quot;: 100.0,
+ &quot;lot_area_total_sf&quot;: 205000,
+ &quot;density_du_ac_deeded&quot;: 4.34,
+ &quot;density_du_ac_gis&quot;: 4.28,
+ &quot;buffer_easement_on_lots_sf&quot;: 41000,
+ &quot;planA_name&quot;: &quot;THE SPRINGBROOK&quot;,
+ &quot;planA_body_label&quot;: &quot;38&#x27;-0\&quot; \u00d7 51&#x27;-10\&quot;&quot;,
+ &quot;planA_body_w_ft&quot;: 38,
+ &quot;planA_body_d_ft&quot;: 51.83,
+ &quot;planA_conditioned_sf&quot;: 1406.1,
+ &quot;planA_target_conditioned_sf&quot;: 1444,
+ &quot;planA_garage_sf&quot;: 458.4,
+ &quot;planA_front_porch_sf&quot;: 102.0,
+ &quot;planA_rear_porch_covered_sf&quot;: 0,
+ &quot;planA_rear_patio_uncovered_sf&quot;: 72.0,
+ &quot;planA_under_roof_sf&quot;: 1966.5,
+ &quot;planA_max_ridge_ft&quot;: 17.83,
+ &quot;planA_side_yard_ft&quot;: 6.0,
+ &quot;planA_garage_door_from_lot_line_ft&quot;: 26.67,
+ &quot;planA_rear_structure_to_rear_line_ft&quot;: 20.5,
+ &quot;planA_rear_wall_from_rear_line_ft&quot;: 26.5,
+ &quot;planA_coverage_under_roof_pct&quot;: 39.3,
+ &quot;planB_name&quot;: &quot;THE LAUREL&quot;,
+ &quot;planB_body_label&quot;: &quot;38&#x27;-0\&quot; \u00d7 57&#x27;-6\&quot;&quot;,
+ &quot;planB_body_w_ft&quot;: 38,
+ &quot;planB_body_d_ft&quot;: 57.5,
+ &quot;planB_conditioned_sf&quot;: 1492.0,
+ &quot;planB_target_conditioned_sf&quot;: 1520,
+ &quot;planB_garage_sf&quot;: 504.0,
+ &quot;planB_front_porch_sf&quot;: 102.0,
+ &quot;planB_rear_porch_covered_sf&quot;: 84.0,
+ &quot;planB_rear_patio_uncovered_sf&quot;: 0,
+ &quot;planB_under_roof_sf&quot;: 2182.0,
+ &quot;planB_max_ridge_ft&quot;: 19.33,
+ &quot;planB_side_yard_ft&quot;: 6.0,
+ &quot;planB_garage_door_from_lot_line_ft&quot;: 26.67,
+ &quot;planB_rear_structure_to_rear_line_ft&quot;: 20.83,
+ &quot;planB_rear_wall_from_rear_line_ft&quot;: 20.83,
+ &quot;planB_coverage_under_roof_pct&quot;: 43.6,
+ &quot;conditioned_sf_total&quot;: 59368,
+ &quot;conditioned_sf_avg&quot;: 1448,
+ &quot;entry_drive_length_ft&quot;: 204.0,
+ &quot;lane_arc_ft&quot;: 1550.5,
+ &quot;travelled_way_ft&quot;: 1754.5,
+ &quot;pavement_width_ft&quot;: 22.0,
+ &quot;lane_tract_sf&quot;: 71085,
+ &quot;lane_tract_width_ft&quot;: [
+  35.9,
+  46.1
+ ],
+ &quot;sidewalk_widen_both_from_u&quot;: 530.0,
+ &quot;sidewalk_sf&quot;: 14619,
+ &quot;parking_bay_sf&quot;: 2070,
+ &quot;pavement_sf&quot;: 48461,
+ &quot;hammerheads_u&quot;: [
+  540.0,
+  1110.0,
+  1690.0
+ ],
+ &quot;hammerhead_stations_ft&quot;: [
+  594.5,
+  1164.5,
+  1744.5
+ ],
+ &quot;hammerhead_spacing_ft&quot;: [
+  594.5,
+  570.0,
+  580.0
+ ],
+ &quot;hammerhead_spacing_max_ft&quot;: 594.5,
+ &quot;dead_end_ft&quot;: 1754.5,
+ &quot;blocks_between_intersections_ft&quot;: [
+  594.5,
+  570.0,
+  580.0
+ ],
+ &quot;blocks_lot_frontage_runs_ft&quot;: [
+  300,
+  500,
+  550
+ ],
+ &quot;entrance_v_ft&quot;: -190.0,
+ &quot;entrance_separation_along_cl_ft&quot;: 251.2,
+ &quot;entrance_separation_chord_ft&quot;: 250.7,
+ &quot;entrance_drive_width_ft&quot;: 24.0,
+ &quot;entrance_join_u_ft&quot;: 149.5,
+ &quot;sw_curb_return_buffer_encroachment_ft&quot;: 2.0,
+ &quot;open_space_tracts&quot;: [
+  {
+   &quot;name&quot;: &quot;Pocket green (u 530-580)&quot;,
+   &quot;area_sf&quot;: 10000
+  },
+  {
+   &quot;name&quot;: &quot;Pocket green (u 1080-1130)&quot;,
+   &quot;area_sf&quot;: 10000
+  },
+  {
+   &quot;name&quot;: &quot;Terminus green + rear buffer&quot;,
+   &quot;area_sf&quot;: 9312
+  },
+  {
+   &quot;name&quot;: &quot;Pond 1 (dry detention / WQ) tract&quot;,
+   &quot;area_sf&quot;: 20000
+  },
+  {
+   &quot;name&quot;: &quot;Pond 2 (dry detention / WQ) tract&quot;,
+   &quot;area_sf&quot;: 20000
+  },
+  {
+   &quot;name&quot;: &quot;Creek woods (stream head + 50/75-ft buffers) \u2014 preserved&quot;,
+   &quot;area_sf&quot;: 20000
+  },
+  {
+   &quot;name&quot;: &quot;Stream-setback open-space tract (SW side, u 1230-1280) \u2014 unlotted, no impervious&quot;,
+   &quot;area_sf&quot;: 5000
+  },
+  {
+   &quot;name&quot;: &quot;Front amenity tract (clubhouse, village green, courts, landscape strip)&quot;,
+   &quot;area_sf&quot;: 46777
+  }
+ ],
+ &quot;open_space_sf&quot;: 141089,
+ &quot;open_space_ac&quot;: 3.239,
+ &quot;open_space_pct_gis&quot;: 33.82,
+ &quot;open_space_pct_deeded&quot;: 34.31,
+ &quot;amenity_built_paved_sf&quot;: 6760,
+ &quot;open_space_built_paved_sf&quot;: 13960,
+ &quot;open_space_green_only_sf&quot;: 127129,
+ &quot;open_space_green_only_pct_gis&quot;: 30.47,
+ &quot;open_space_residual_sf&quot;: 141089,
+ &quot;open_space_unallocated_slivers_sf&quot;: 0,
+ &quot;impervious_per_lot&quot;: {
+  &quot;A&quot;: {
+   &quot;under_roof_sf&quot;: 1966.5,
+   &quot;uncovered_patio_sf&quot;: 72.0,
+   &quot;driveway_sf_min&quot;: 653.4,
+   &quot;driveway_sf_max&quot;: 764.2,
+   &quot;walk_sf&quot;: 60.0,
+   &quot;avg_total_sf&quot;: 2804.0
+  },
+  &quot;B&quot;: {
+   &quot;under_roof_sf&quot;: 2182.0,
+   &quot;uncovered_patio_sf&quot;: 0,
+   &quot;driveway_sf_min&quot;: 656.0,
+   &quot;driveway_sf_max&quot;: 756.4,
+   &quot;walk_sf&quot;: 60.0,
+   &quot;avg_total_sf&quot;: 2947.7
+  }
+ },
+ &quot;impervious_components_sf&quot;: {
+  &quot;lots (41 x roof + patio + driveway + walk)&quot;: 117838,
+  &quot;lane pavement + entry drive + hammerheads + guest/kiosk bays + curb returns&quot;: 48461,
+  &quot;sidewalks&quot;: 14619,
+  &quot;amenity block (clubhouse roof, court pads, mail kiosk, walks)&quot;: 6760,
+  &quot;less driveway/sidewalk overlap&quot;: -3500
+ },
+ &quot;impervious_sf&quot;: 184178,
+ &quot;impervious_ac&quot;: 4.23,
+ &quot;impervious_pct_gis&quot;: 44.1,
+ &quot;impervious_pct_deeded&quot;: 44.8,
+ &quot;Rv&quot;: 0.4473,
+ &quot;WQr_in&quot;: 0.537,
+ &quot;WQv_cf&quot;: 18662,
+ &quot;RRv_cf&quot;: 15552,
+ &quot;preserved_sf&quot;: 89744,
+ &quot;disturbed_sf&quot;: 328484,
+ &quot;disturbed_ac&quot;: 7.541,
+ &quot;disturbed_sf_closed_form_check&quot;: 327472,
+ &quot;detention_rate_cf_per_disturbed_ac&quot;: 10000,
+ &quot;detention_required_cf&quot;: 75410,
+ &quot;detention_required_less_rrv_cf&quot;: 59858,
+ &quot;ponds&quot;: [
+  {
+   &quot;name&quot;: &quot;Pond 1 (dry detention / WQ)&quot;,
+   &quot;top_of_bank_ft&quot;: &quot;52 x 180&quot;,
+   &quot;area_sf&quot;: 9450,
+   &quot;est_storage_cf&quot;: 33129,
+   &quot;tract_sf&quot;: 20000
+  },
+  {
+   &quot;name&quot;: &quot;Pond 2 (dry detention / WQ)&quot;,
+   &quot;top_of_bank_ft&quot;: &quot;64 x 180&quot;,
+   &quot;area_sf&quot;: 11520,
+   &quot;est_storage_cf&quot;: 44734,
+   &quot;tract_sf&quot;: 20000
+  }
+ ],
+ &quot;detention_provided_cf&quot;: 77863,
+ &quot;detention_shortfall_cf&quot;: -2453,
+ &quot;detention_provided_pct_of_required&quot;: 103.3,
+ &quot;ponds_enlarged_6ft&quot;: [
+  {
+   &quot;name&quot;: &quot;Pond 1 (dry detention / WQ)&quot;,
+   &quot;basin_ft&quot;: &quot;52 x 180&quot;,
+   &quot;depth_ft&quot;: 6.0,
+   &quot;est_storage_cf&quot;: 33696
+  },
+  {
+   &quot;name&quot;: &quot;Pond 2 (dry detention / WQ)&quot;,
+   &quot;basin_ft&quot;: &quot;64 x 180&quot;,
+   &quot;depth_ft&quot;: 6.0,
+   &quot;est_storage_cf&quot;: 45360
+  }
+ ],
+ &quot;detention_provided_6ft_cf&quot;: 79056,
+ &quot;hydro2025&quot;: {
+  &quot;area_sf&quot;: 424548,
+  &quot;impervious_sf&quot;: 235388,
+  &quot;impervious_pct&quot;: 55.4,
+  &quot;WQv_cf&quot;: 23293,
+  &quot;detention_cf&quot;: 74167
+ },
+ &quot;impervious_reduction_vs_2025_pct&quot;: 21.8,
+ &quot;parking_required&quot;: 82,
+ &quot;parking_on_lot&quot;: 164,
+ &quot;parking_guest&quot;: 8,
+ &quot;parking_kiosk&quot;: 4,
+ &quot;parking_total&quot;: 176,
+ &quot;guest_ratio_lots_per_space&quot;: 3.4,
+ &quot;ite_251_rate_band&quot;: {
+  &quot;am_lo&quot;: 0.2,
+  &quot;am_hi&quot;: 0.34,
+  &quot;pm_lo&quot;: 0.26,
+  &quot;pm_hi&quot;: 0.39,
+  &quot;daily_lo&quot;: 3.7,
+  &quot;daily_hi&quot;: 4.31,
+  &quot;am_facts&quot;: 0.3,
+  &quot;pm_facts&quot;: 0.3
+ },
+ &quot;trips_251_am&quot;: [
+  8.2,
+  13.9
+ ],
+ &quot;trips_251_pm&quot;: [
+  10.7,
+  16.0
+ ],
+ &quot;trips_251_daily&quot;: [
+  152,
+  177
+ ],
+ &quot;trips_251_pm_facts&quot;: 12.3,
+ &quot;trips_251_pm_at_47_hi&quot;: 18.3,
+ &quot;trips_210_same_lots&quot;: {
+  &quot;daily&quot;: 387,
+  &quot;am&quot;: 28.7,
+  &quot;pm&quot;: 38.5
+ },
+ &quot;r1_theoretical_units&quot;: 37,
+ &quot;trips_210_r1_max&quot;: {
+  &quot;daily&quot;: 349,
+  &quot;am&quot;: 25.9,
+  &quot;pm&quot;: 34.8
+ },
+ &quot;trips_2025_MU&quot;: {
+  &quot;daily&quot;: 2030,
+  &quot;pm&quot;: 213.8
+ },
+ &quot;pm_share_of_2025_MU_pct&quot;: 5.8,
+ &quot;sewer_unit_flow_gpd&quot;: 250,
+ &quot;adf_total_gpd&quot;: 10670,
+ &quot;adf_gpm&quot;: 7.41,
+ &quot;peak_gpd&quot;: 42680,
+ &quot;peak_gpm&quot;: 29.6,
+ &quot;adf_phase1_gpd&quot;: 6420,
+ &quot;adf_phase2_gpd&quot;: 4250,
+ &quot;peak_phase2_gpm&quot;: 11.8,
+ &quot;phase1_gravity_len_ft&quot;: 814,
+ &quot;phase2_ext_total_len_ft&quot;: 478,
+ &quot;phase2_ext_offsite_ft&quot;: 178.0,
+ &quot;rear_lane_low_point&quot;: {
+  &quot;u&quot;: 1479,
+  &quot;ground_ft&quot;: 931.5
+ },
+ &quot;lane_ridge_ft&quot;: 953.5,
+ &quot;lane_ridge_u&quot;: 1179,
+ &quot;phase2_slope_pct&quot;: 1.45,
+ &quot;price_lo&quot;: 420000,
+ &quot;price_hi&quot;: 460000,
+ &quot;taxbase_lo&quot;: 17220000,
+ &quot;taxbase_hi&quot;: 18860000,
+ &quot;existing_fmv_2026&quot;: 1267600,
+ &quot;city_tax_lo&quot;: 37402,
+ &quot;county_school_tax_lo&quot;: 217661,
+ &quot;school_portion_lo&quot;: 138793,
+ &quot;city_tax_hi&quot;: 40964,
+ &quot;county_school_tax_hi&quot;: 238390,
+ &quot;school_portion_hi&quot;: 152012,
+ &quot;city_tax_existing&quot;: 2753,
+ &quot;city_tax_lo_all_senior_exempt&quot;: 24044,
+ &quot;taxbase_multiple_lo&quot;: 13.6,
+ &quot;taxbase_multiple_hi&quot;: 14.9,
+ &quot;hopa_units_needing_55plus&quot;: 33,
+ &quot;hopa_units_without_55plus_cap&quot;: 8,
+ &quot;_cross_check_notes&quot;: []
+}</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/data/dev-summary-derived.json</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

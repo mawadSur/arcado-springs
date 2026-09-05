@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Development summary derived-numbers generator — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> Python</div>
+    
+    <h1>Development summary derived-numbers generator</h1><p class="src-note">Python · 394 lines · <a href="/data-room/src/submission/tools/dev_summary_calcs.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Derived numbers for docs/02-development-summary.md.
+
+Rewritten 2026-09-03 against the three audits in `audit-2026-09-03/`.
+
+Inputs
+  data/layout.json  — RAW geometry (boundary_ring, lots, lane, hammerheads, greens, ponds,
+                      amenity, open_space_tracts). Every quantity below is recomputed here from
+                      that geometry and cross-checked against the file&#x27;s own `metrics` block
+                      (differences greater than 2 % are printed). The generator was corrected on
+                      2026-09-03 against `audit-2026-09-03/site-geometry.md` SG-01/02/06/14, so
+                      the two now agree; where the generator measures something this script can
+                      only approximate — the drawn curb-return fillets, and the rastered disturbed
+                      area, which has to subtract the stream buffers as a union — the drawn value
+                      is read from `layout.json` and the fact is noted at the point of use.
+  data/plans.json   — house envelopes and areas as the architectural sheets draw them
+                      (read at run time so a re-proportioned plan flows straight through).
+  constants below   — each carries its governing source inline.
+
+Output: data/dev-summary-derived.json  +  a printed table.
+Run:    python3 tools/dev_summary_calcs.py
+&quot;&quot;&quot;
+import json, math, os
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+L = json.load(open(os.path.join(ROOT, &quot;data&quot;, &quot;layout.json&quot;)))
+P = json.load(open(os.path.join(ROOT, &quot;data&quot;, &quot;plans.json&quot;)))[&quot;plans&quot;]
+M = L[&quot;metrics&quot;]
+
+out, notes = {}, []
+
+
+# ----------------------------------------------------------------- geometry helpers
+def shoelace(poly):
+    return abs(0.5 * sum(poly[i][0] * poly[(i + 1) % len(poly)][1]
+                         - poly[(i + 1) % len(poly)][0] * poly[i][1] for i in range(len(poly))))
+
+
+def rect_area(r):
+    xs = [p[0] for p in r]; ys = [p[1] for p in r]
+    return (max(xs) - min(xs)) * (max(ys) - min(ys))
+
+
+def plen(pts):
+    return sum(math.dist(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+
+
+def cross_check(key, computed, stated, tol=0.02):
+    &quot;&quot;&quot;Record where a recomputed value differs from layout.json&#x27;s own metrics block.&quot;&quot;&quot;
+    if stated in (None, 0):
+        return
+    if abs(computed - stated) &gt; tol * abs(stated):
+        notes.append(f&quot;{key}: recomputed {computed:,.0f} vs layout.json metrics {stated:,.0f}&quot;)
+
+
+# ----------------------------------------------------------------- 1. site
+AC_DEEDED = 9.44                                   # 0.99 + 2.00 + 2.00 + 4.45, Gwinnett 2026 digest
+SF_DEEDED = round(AC_DEEDED * 43560)
+BOUNDARY_SF = shoelace(L[&quot;boundary_ring&quot;])
+out[&quot;acreage_deeded_ac&quot;] = AC_DEEDED
+out[&quot;deeded_sf&quot;] = SF_DEEDED
+out[&quot;boundary_sf_gis&quot;] = round(BOUNDARY_SF, 1)
+out[&quot;acreage_gis_ac&quot;] = round(BOUNDARY_SF / 43560, 3)
+
+# ----------------------------------------------------------------- 2. lots
+lots = L[&quot;lots&quot;]
+n = len(lots)
+nA = sum(1 for l in lots if l[&quot;plan&quot;] == &quot;A&quot;)
+nB = sum(1 for l in lots if l[&quot;plan&quot;] == &quot;B&quot;)
+out[&quot;lots&quot;] = n
+out[&quot;lots_sw&quot;] = sum(1 for l in lots if l[&quot;side&quot;] == &quot;SW&quot;)
+out[&quot;lots_ne&quot;] = sum(1 for l in lots if l[&quot;side&quot;] == &quot;NE&quot;)
+out[&quot;plan_A&quot;] = nA
+out[&quot;plan_B&quot;] = nB
+out[&quot;lots_phase1&quot;] = sum(1 for l in lots if l[&quot;phase&quot;] == 1)
+out[&quot;lots_phase2&quot;] = sum(1 for l in lots if l[&quot;phase&quot;] == 2)
+out[&quot;lot_area_min_sf&quot;] = round(min(shoelace(l[&quot;polygon&quot;]) for l in lots), 1)
+out[&quot;lot_area_avg_sf&quot;] = round(sum(shoelace(l[&quot;polygon&quot;]) for l in lots) / n, 1)
+out[&quot;lot_area_max_sf&quot;] = round(max(shoelace(l[&quot;polygon&quot;]) for l in lots), 1)
+out[&quot;lot_width_min_ft&quot;] = round(min(l[&quot;width_ft&quot;] for l in lots), 2)
+out[&quot;lot_depth_min_ft&quot;] = round(min(l[&quot;depth_ft&quot;] for l in lots), 2)
+out[&quot;lot_area_total_sf&quot;] = round(sum(shoelace(l[&quot;polygon&quot;]) for l in lots))
+out[&quot;density_du_ac_deeded&quot;] = round(n / AC_DEEDED, 2)
+out[&quot;density_du_ac_gis&quot;] = round(n / (BOUNDARY_SF / 43560), 2)
+out[&quot;buffer_easement_on_lots_sf&quot;] = round(sum(shoelace(l[&quot;buffer_easement&quot;]) for l in lots))
+
+# ----------------------------------------------------------------- 3. houses (data/plans.json)
+for tag in (&quot;A&quot;, &quot;B&quot;):
+    p = P[tag]; a = p[&quot;areas&quot;]; s = p[&quot;lot_siting&quot;]; d = p[&quot;overall_body_dims&quot;]
+    out[f&quot;plan{tag}_name&quot;] = p[&quot;name&quot;]
+    out[f&quot;plan{tag}_body_label&quot;] = d[&quot;label&quot;]
+    out[f&quot;plan{tag}_body_w_ft&quot;] = d[&quot;width_ft&quot;]
+    out[f&quot;plan{tag}_body_d_ft&quot;] = d[&quot;depth_ft&quot;]
+    out[f&quot;plan{tag}_conditioned_sf&quot;] = a[&quot;conditioned_sf&quot;]
+    out[f&quot;plan{tag}_target_conditioned_sf&quot;] = p[&quot;target_cond_sf&quot;]
+    out[f&quot;plan{tag}_garage_sf&quot;] = a[&quot;garage_sf&quot;]
+    out[f&quot;plan{tag}_front_porch_sf&quot;] = a[&quot;front_porch_sf&quot;]
+    out[f&quot;plan{tag}_rear_porch_covered_sf&quot;] = a[&quot;rear_porch_covered_sf&quot;]
+    out[f&quot;plan{tag}_rear_patio_uncovered_sf&quot;] = a[&quot;rear_patio_uncovered_sf&quot;]
+    out[f&quot;plan{tag}_under_roof_sf&quot;] = a[&quot;total_under_roof_sf&quot;]
+    out[f&quot;plan{tag}_max_ridge_ft&quot;] = p[&quot;roof&quot;][&quot;max_ridge_ft&quot;]
+    out[f&quot;plan{tag}_side_yard_ft&quot;] = s[&quot;side_yard_ft&quot;]
+    out[f&quot;plan{tag}_garage_door_from_lot_line_ft&quot;] = s[&quot;garage_door_from_lot_line_ft&quot;]
+    rear = s[&quot;patio_edge_from_rear_line_ft&quot;] or s[&quot;rear_porch_edge_from_rear_line_ft&quot;] or s[&quot;rear_wall_from_rear_line_ft&quot;]
+    out[f&quot;plan{tag}_rear_structure_to_rear_line_ft&quot;] = rear
+    out[f&quot;plan{tag}_rear_wall_from_rear_line_ft&quot;] = s[&quot;rear_wall_from_rear_line_ft&quot;]
+    out[f&quot;plan{tag}_coverage_under_roof_pct&quot;] = round(100 * a[&quot;total_under_roof_sf&quot;] / 5000.0, 1)
+out[&quot;conditioned_sf_total&quot;] = round(nA * P[&quot;A&quot;][&quot;areas&quot;][&quot;conditioned_sf&quot;] + nB * P[&quot;B&quot;][&quot;areas&quot;][&quot;conditioned_sf&quot;])
+out[&quot;conditioned_sf_avg&quot;] = round(out[&quot;conditioned_sf_total&quot;] / n)
+
+# ----------------------------------------------------------------- 4. lane, blocks, turnarounds
+lane = L[&quot;lane&quot;]
+U_JOIN = lane[&quot;entrance&quot;][&quot;join_u&quot;]
+U_END = lane[&quot;pavement_end_u&quot;]
+ENTRY_LEN = lane[&quot;entry_drive&quot;][&quot;length_ft&quot;]
+CL = lane[&quot;centerline&quot;]
+
+
+def arc_to(u):
+    &quot;&quot;&quot;Arc length along the lane centreline from the join point to station u (interpolated).&quot;&quot;&quot;
+    pts = [p for p in CL if U_JOIN &lt;= p[0] &lt;= u]
+    d = plen(pts)
+    nxt = next((p for p in CL if p[0] &gt; u), None)
+    if nxt and pts:
+        last = pts[-1]
+        span = nxt[0] - last[0]
+        if span &gt; 0:
+            d += math.dist(last, nxt) * (u - last[0]) / span
+    return d
+
+
+LANE_ARC = arc_to(U_END)
+out[&quot;entry_drive_length_ft&quot;] = round(ENTRY_LEN, 1)
+out[&quot;lane_arc_ft&quot;] = round(LANE_ARC, 1)
+out[&quot;travelled_way_ft&quot;] = round(ENTRY_LEN + LANE_ARC, 1)          # Arcado R/W -&gt; end of pavement
+cross_check(&quot;travelled way&quot;, out[&quot;travelled_way_ft&quot;], M.get(&quot;lane_length_ft&quot;))
+out[&quot;pavement_width_ft&quot;] = lane[&quot;pavement_width_ft&quot;]
+out[&quot;lane_tract_sf&quot;] = round(shoelace(lane[&quot;tract_polygon&quot;]) + shoelace(lane[&quot;entry_drive&quot;][&quot;tract_polygon&quot;]))
+cross_check(&quot;lane tract area&quot;, out[&quot;lane_tract_sf&quot;], M.get(&quot;lane_tract_sf&quot;))
+out[&quot;lane_tract_width_ft&quot;] = lane[&quot;tract_width_ft&quot;]
+out[&quot;sidewalk_widen_both_from_u&quot;] = lane[&quot;widen_both_sidewalks_from_u&quot;]
+out[&quot;sidewalk_sf&quot;] = round(sum(shoelace(s[&quot;polygon&quot;]) for s in lane[&quot;sidewalks&quot;]))
+HH = L[&quot;hammerheads&quot;]
+HH_LEG_SF = sum(shoelace(leg) for h in HH for leg in h[&quot;legs&quot;])
+# The two entrance curb returns are drawn fillets (R = 25 ft NE, R = 15 ft SW), so their area is
+# read from the generator&#x27;s own take-off rather than allowed for; 270 SF is the fallback.
+CURB_RETURN_SF = next((c[&quot;area_sf&quot;] for c in L[&quot;impervious_summary&quot;][&quot;components_sf&quot;]
+                       if &quot;curb return&quot; in c[&quot;item&quot;].lower()), 270)
+# The lane tract widens to 60 ft through the amenity block so that the guest and mail-kiosk bays
+# lie wholly inside it (layout.json metrics.lane_tract_widened_through_amenity_block); the bays are
+# therefore lane pavement, not amenity-tract paving.
+BAY_SF = shoelace(am_bay := L[&quot;amenity&quot;][&quot;parking_bay&quot;]) + shoelace(L[&quot;amenity&quot;][&quot;kiosk_bay&quot;])
+out[&quot;parking_bay_sf&quot;] = round(BAY_SF)
+out[&quot;pavement_sf&quot;] = round(lane[&quot;pavement_width_ft&quot;] * (U_END - U_JOIN)
+                           + lane[&quot;entry_drive&quot;][&quot;width_ft&quot;] * ENTRY_LEN + HH_LEG_SF
+                           + BAY_SF + CURB_RETURN_SF)
+cross_check(&quot;pavement area&quot;, out[&quot;pavement_sf&quot;], M.get(&quot;pavement_sf&quot;))
+
+
+def station(u):
+    &quot;&quot;&quot;Travelled-way distance from the Arcado Rd R/W to lane station u.&quot;&quot;&quot;
+    return ENTRY_LEN + arc_to(u)
+
+
+out[&quot;hammerheads_u&quot;] = [h[&quot;u&quot;] for h in HH]
+out[&quot;hammerhead_stations_ft&quot;] = [round(station(h[&quot;u&quot;]), 1) for h in HH]
+st = [0.0] + out[&quot;hammerhead_stations_ft&quot;]
+out[&quot;hammerhead_spacing_ft&quot;] = [round(st[i + 1] - st[i], 1) for i in range(len(st) - 1)]
+out[&quot;hammerhead_spacing_max_ft&quot;] = max(out[&quot;hammerhead_spacing_ft&quot;])
+out[&quot;dead_end_ft&quot;] = out[&quot;travelled_way_ft&quot;]
+# Block length read two ways (audit SG-06): a pocket green is an open-space tract, not a street.
+out[&quot;blocks_between_intersections_ft&quot;] = out[&quot;hammerhead_spacing_ft&quot;]
+green_u = sorted([g[&quot;polygons&quot;][0][0][0] for g in L[&quot;greens&quot;][:2]] + [g[&quot;polygons&quot;][0][1][0] for g in L[&quot;greens&quot;][:2]])
+u_lot0 = min(l[&quot;polygon&quot;][0][0] for l in lots)
+u_lotN = max(max(p[0] for p in l[&quot;polygon&quot;]) for l in lots)
+brk = [u_lot0] + green_u + [u_lotN]
+out[&quot;blocks_lot_frontage_runs_ft&quot;] = [round(brk[i + 1] - brk[i]) for i in range(0, len(brk) - 1, 2)]
+ent = lane[&quot;entrance&quot;]
+out[&quot;entrance_v_ft&quot;] = ent[&quot;v_rw&quot;]
+out[&quot;entrance_separation_along_cl_ft&quot;] = ent[&quot;separation_along_cl_ft&quot;]
+out[&quot;entrance_separation_chord_ft&quot;] = ent[&quot;separation_chord_ft&quot;]
+out[&quot;entrance_drive_width_ft&quot;] = ent[&quot;drive_width_ft&quot;]
+out[&quot;entrance_join_u_ft&quot;] = ent[&quot;join_u&quot;]
+out[&quot;sw_curb_return_buffer_encroachment_ft&quot;] = M.get(&quot;sw_curb_return_buffer_encroachment_ft&quot;)
+
+# ----------------------------------------------------------------- 5. open space
+tracts = L[&quot;open_space_tracts&quot;]
+out[&quot;open_space_tracts&quot;] = tracts
+out[&quot;open_space_sf&quot;] = round(sum(t[&quot;area_sf&quot;] for t in tracts))            # enumerated, not residual
+out[&quot;open_space_ac&quot;] = round(out[&quot;open_space_sf&quot;] / 43560, 3)
+out[&quot;open_space_pct_gis&quot;] = round(100 * out[&quot;open_space_sf&quot;] / BOUNDARY_SF, 2)
+out[&quot;open_space_pct_deeded&quot;] = round(100 * out[&quot;open_space_sf&quot;] / SF_DEEDED, 2)
+am = L[&quot;amenity&quot;]
+AMEN_WALKS = 600                                                          # amenity-walk allowance, tools/siteplan.py
+AMEN_BUILT = (am[&quot;clubhouse_sf&quot;] + sum(shoelace(c) for c in am[&quot;pickleball&quot;])
+              + shoelace(am[&quot;mail_kiosk&quot;]) + AMEN_WALKS)                  # clubhouse roof, 2 court pads, kiosk, walks
+out[&quot;amenity_built_paved_sf&quot;] = round(AMEN_BUILT)
+# The hammerhead turnaround legs are pavement lying inside the pocket / terminus greens, so they are
+# built area inside open space too. The guest and kiosk bays are NOT: they sit in the lane tract.
+out[&quot;open_space_built_paved_sf&quot;] = round(AMEN_BUILT + HH_LEG_SF)
+out[&quot;open_space_green_only_sf&quot;] = round(out[&quot;open_space_sf&quot;] - AMEN_BUILT - HH_LEG_SF)
+out[&quot;open_space_green_only_pct_gis&quot;] = round(100 * out[&quot;open_space_green_only_sf&quot;] / BOUNDARY_SF, 2)
+out[&quot;open_space_residual_sf&quot;] = round(BOUNDARY_SF - out[&quot;lot_area_total_sf&quot;] - out[&quot;lane_tract_sf&quot;])
+out[&quot;open_space_unallocated_slivers_sf&quot;] = round(out[&quot;open_space_residual_sf&quot;] - out[&quot;open_space_sf&quot;])
+
+# ----------------------------------------------------------------- 6. impervious cover
+# Per-lot = total under roof (plans.json) + uncovered patio + the drawn driveway + a 60-SF entry walk.
+WALK_SF = 60.0
+per_lot, drive_tot = {}, 0.0
+for tag in (&quot;A&quot;, &quot;B&quot;):
+    a = P[tag][&quot;areas&quot;]
+    ex = [l for l in lots if l[&quot;plan&quot;] == tag]
+    drives = [rect_area(l[&quot;driveway_rect&quot;]) for l in ex]
+    per_lot[tag] = {
+        &quot;under_roof_sf&quot;: a[&quot;total_under_roof_sf&quot;],
+        &quot;uncovered_patio_sf&quot;: a[&quot;rear_patio_uncovered_sf&quot;],
+        &quot;driveway_sf_min&quot;: round(min(drives), 1), &quot;driveway_sf_max&quot;: round(max(drives), 1),
+        &quot;walk_sf&quot;: WALK_SF,
+        &quot;avg_total_sf&quot;: round(a[&quot;total_under_roof_sf&quot;] + a[&quot;rear_patio_uncovered_sf&quot;] + sum(drives) / len(drives) + WALK_SF, 1),
+    }
+    drive_tot += sum(drives)
+LOT_IMPERV = sum(P[l[&quot;plan&quot;]][&quot;areas&quot;][&quot;total_under_roof_sf&quot;]
+                 + P[l[&quot;plan&quot;]][&quot;areas&quot;][&quot;rear_patio_uncovered_sf&quot;]
+                 + rect_area(l[&quot;driveway_rect&quot;]) + WALK_SF for l in lots)
+out[&quot;impervious_per_lot&quot;] = per_lot
+# driveway/sidewalk double count: one 20 ft x 5 ft crossing per lot that has a walk on its side
+cross_lots = sum(1 for l in lots if l[&quot;side&quot;] == &quot;NE&quot; or min(p[0] for p in l[&quot;polygon&quot;]) &gt;= lane[&quot;widen_both_sidewalks_from_u&quot;])
+DOUBLE_COUNT = cross_lots * 100.0
+AMEN_PAVE = AMEN_BUILT                                                    # walks already included
+IMPERV = LOT_IMPERV + out[&quot;pavement_sf&quot;] + out[&quot;sidewalk_sf&quot;] + AMEN_PAVE - DOUBLE_COUNT
+out[&quot;impervious_components_sf&quot;] = {
+    f&quot;lots ({n} x roof + patio + driveway + walk)&quot;: round(LOT_IMPERV),
+    &quot;lane pavement + entry drive + hammerheads + guest/kiosk bays + curb returns&quot;: out[&quot;pavement_sf&quot;],
+    &quot;sidewalks&quot;: out[&quot;sidewalk_sf&quot;],
+    &quot;amenity block (clubhouse roof, court pads, mail kiosk, walks)&quot;: round(AMEN_PAVE),
+    &quot;less driveway/sidewalk overlap&quot;: -round(DOUBLE_COUNT),
+}
+out[&quot;impervious_sf&quot;] = round(IMPERV)
+out[&quot;impervious_ac&quot;] = round(IMPERV / 43560, 2)
+out[&quot;impervious_pct_gis&quot;] = round(100 * IMPERV / BOUNDARY_SF, 1)
+out[&quot;impervious_pct_deeded&quot;] = round(100 * IMPERV / SF_DEEDED, 1)
+cross_check(&quot;impervious&quot;, out[&quot;impervious_sf&quot;], M.get(&quot;impervious_sf&quot;))
+
+# ----------------------------------------------------------------- 7. stormwater
+# 2025 hydro basis (HYD-1, Parker Land Design 04-29-2025): detention = 10,000 cf per disturbed
+# acre LESS the required runoff-reduction volume RRv;  WQv = 1.2*(0.05+0.009*I)/12 * A.
+I = 100.0 * IMPERV / BOUNDARY_SF                                          # unrounded; do not round an intermediate
+Rv = 0.05 + 0.009 * I
+out[&quot;Rv&quot;] = round(Rv, 4)
+out[&quot;WQr_in&quot;] = round(1.2 * Rv, 3)
+out[&quot;WQv_cf&quot;] = round(1.2 * Rv / 12.0 * BOUNDARY_SF)
+out[&quot;RRv_cf&quot;] = round(Rv * 1.0 / 12.0 * BOUNDARY_SF)                      # 1.0-in runoff-reduction basis (GSMM)
+# Disturbed area. The generator rasters the site at 2 ft and subtracts the UNION of the 20-ft
+# perimeter buffer bands, the creek-woods tract and the 50-ft undisturbed stream buffer, so nothing
+# is counted twice; that is the figure of record. The closed-form band arithmetic below is kept as
+# an independent cross-check (it cannot do the union, so it runs a few thousand SF high on preserved).
+DA = L[&quot;stormwater&quot;][&quot;disturbed_area&quot;]
+out[&quot;preserved_sf&quot;] = DA[&quot;preserved_sf&quot;]
+out[&quot;disturbed_sf&quot;] = DA[&quot;disturbed_sf&quot;]
+out[&quot;disturbed_ac&quot;] = DA[&quot;disturbed_ac&quot;]
+SW_LEN, NE_LEN, NW_LEN = 1757.01, 1721.68, 246.41                         # docs/05 §5 (GIS boundary courses)
+BAND = (SW_LEN + NE_LEN + NW_LEN) * 20.0 - 2 * 20.0 * 20.0                # less the two rear corner overlaps
+WOODS_NET = 16000.0                                                       # 20,000-SF tract less its 200 ft x 20 ft inside the band
+out[&quot;disturbed_sf_closed_form_check&quot;] = round(BOUNDARY_SF - BAND - WOODS_NET)
+cross_check(&quot;disturbed area&quot;, out[&quot;disturbed_sf_closed_form_check&quot;], out[&quot;disturbed_sf&quot;])
+# Screening basis: 10,000 cf of detention per disturbed acre. The RRv credit is carried at ZERO at
+# concept stage, as the concept plan states; RRv is reported below as the credit that would reduce it.
+out[&quot;detention_rate_cf_per_disturbed_ac&quot;] = 10000
+out[&quot;detention_required_cf&quot;] = round(10000 * out[&quot;disturbed_ac&quot;])
+out[&quot;detention_required_less_rrv_cf&quot;] = round(10000 * out[&quot;disturbed_ac&quot;] - out[&quot;RRv_cf&quot;])
+ponds = L[&quot;ponds&quot;]
+out[&quot;ponds&quot;] = [{&quot;name&quot;: p[&quot;name&quot;], &quot;top_of_bank_ft&quot;: p[&quot;top_of_bank_ft&quot;], &quot;area_sf&quot;: p[&quot;area_sf&quot;],
+                 &quot;est_storage_cf&quot;: p[&quot;est_storage_cf&quot;], &quot;tract_sf&quot;: round(shoelace(p[&quot;tract_polygon&quot;]))} for p in ponds]
+out[&quot;detention_provided_cf&quot;] = sum(p[&quot;est_storage_cf&quot;] for p in ponds)
+out[&quot;detention_shortfall_cf&quot;] = out[&quot;detention_required_cf&quot;] - out[&quot;detention_provided_cf&quot;]
+out[&quot;detention_provided_pct_of_required&quot;] = round(100 * out[&quot;detention_provided_cf&quot;] / out[&quot;detention_required_cf&quot;], 1)
+
+
+def prismoidal(l_ft, w_ft, depth, slope=3.0):
+    &quot;&quot;&quot;Volume between top of bank and basin bottom, side slopes `slope`:1.&quot;&quot;&quot;
+    ins = slope * depth
+    top = l_ft * w_ft
+    mid = max(l_ft - ins, 0.0) * max(w_ft - ins, 0.0)
+    bot = max(l_ft - 2 * ins, 0.0) * max(w_ft - 2 * ins, 0.0)
+    return depth / 6.0 * (top + 4 * mid + bot)
+
+
+# what the drawn tracts can hold at 6-ft depth with a 10-ft offset inside each tract
+enl = []
+for p in ponds:
+    t = p[&quot;tract_polygon&quot;]
+    tl = max(q[0] for q in t) - min(q[0] for q in t) - 20.0
+    tw = max(q[1] for q in t) - min(q[1] for q in t) - 20.0
+    w = float(str(p[&quot;top_of_bank_ft&quot;]).split(&quot;x&quot;)[0].strip())             # keep the drawn basin width
+    w = min(w, tw)
+    enl.append({&quot;name&quot;: p[&quot;name&quot;], &quot;basin_ft&quot;: f&quot;{w:.0f} x {tl:.0f}&quot;, &quot;depth_ft&quot;: 6.0,
+                &quot;est_storage_cf&quot;: round(prismoidal(tl, w, 6.0))})
+out[&quot;ponds_enlarged_6ft&quot;] = enl
+out[&quot;detention_provided_6ft_cf&quot;] = sum(e[&quot;est_storage_cf&quot;] for e in enl)
+# 2025 filing comparison (HYD-1 basins)
+b2025 = [(51451, 25770, 2570, 9240), (215455, 122543, 12094, 37366), (157642, 87075, 8629, 27561)]
+out[&quot;hydro2025&quot;] = {&quot;area_sf&quot;: sum(b[0] for b in b2025), &quot;impervious_sf&quot;: sum(b[1] for b in b2025),
+                    &quot;impervious_pct&quot;: round(100 * sum(b[1] for b in b2025) / sum(b[0] for b in b2025), 1),
+                    &quot;WQv_cf&quot;: sum(b[2] for b in b2025), &quot;detention_cf&quot;: sum(b[3] for b in b2025)}
+out[&quot;impervious_reduction_vs_2025_pct&quot;] = round(100 * (1 - IMPERV / out[&quot;hydro2025&quot;][&quot;impervious_sf&quot;]), 1)
+
+# ----------------------------------------------------------------- 8. parking
+out[&quot;parking_required&quot;] = 2 * n                                           # Table 8.1, SF detached
+out[&quot;parking_on_lot&quot;] = 4 * n
+out[&quot;parking_guest&quot;] = am[&quot;guest_spaces&quot;]
+out[&quot;parking_kiosk&quot;] = am[&quot;kiosk_spaces&quot;]
+out[&quot;parking_total&quot;] = out[&quot;parking_on_lot&quot;] + out[&quot;parking_guest&quot;] + out[&quot;parking_kiosk&quot;]
+out[&quot;guest_ratio_lots_per_space&quot;] = round(n / (out[&quot;parking_guest&quot;] + out[&quot;parking_kiosk&quot;]), 1)
+
+# ----------------------------------------------------------------- 9. traffic
+# ITE 11th ed. LUC 251 is paywalled; audit-2026-09-03/external-facts.md §3.6 reconciles four
+# secondary compilations into a rate BAND. Every rate in the band lands in Gwinnett DOT&#x27;s 0-20 band.
+R251 = {&quot;am_lo&quot;: 0.20, &quot;am_hi&quot;: 0.34, &quot;pm_lo&quot;: 0.26, &quot;pm_hi&quot;: 0.39, &quot;daily_lo&quot;: 3.70, &quot;daily_hi&quot;: 4.31,
+        &quot;am_facts&quot;: 0.30, &quot;pm_facts&quot;: 0.30}
+out[&quot;ite_251_rate_band&quot;] = R251
+out[&quot;trips_251_am&quot;] = [round(R251[&quot;am_lo&quot;] * n, 1), round(R251[&quot;am_hi&quot;] * n, 1)]
+out[&quot;trips_251_pm&quot;] = [round(R251[&quot;pm_lo&quot;] * n, 1), round(R251[&quot;pm_hi&quot;] * n, 1)]
+out[&quot;trips_251_daily&quot;] = [round(R251[&quot;daily_lo&quot;] * n), round(R251[&quot;daily_hi&quot;] * n)]
+out[&quot;trips_251_pm_facts&quot;] = round(R251[&quot;pm_facts&quot;] * n, 1)
+out[&quot;trips_251_pm_at_47_hi&quot;] = round(R251[&quot;pm_hi&quot;] * 47, 1)
+R210 = (9.43, 0.70, 0.94)                                                 # LUC 210 Single-Family Detached
+out[&quot;trips_210_same_lots&quot;] = {&quot;daily&quot;: round(R210[0] * n), &quot;am&quot;: round(R210[1] * n, 1), &quot;pm&quot;: round(R210[2] * n, 1)}
+r1_max = math.floor(AC_DEEDED * 4)                                        # Table 4.1 R-1: 4 du/ac
+out[&quot;r1_theoretical_units&quot;] = r1_max
+out[&quot;trips_210_r1_max&quot;] = {&quot;daily&quot;: round(R210[0] * r1_max), &quot;am&quot;: round(R210[1] * r1_max, 1), &quot;pm&quot;: round(R210[2] * r1_max, 1)}
+R220 = (6.74, 0.40, 0.51)                                                 # LUC 220 Multifamily Low-Rise (Memo A)
+R822 = (54.45, None, 6.59)                                                # LUC 822 Strip Retail Plaza, per 1,000 SF
+out[&quot;trips_2025_MU&quot;] = {&quot;daily&quot;: round(104 * R220[0] + 24.4 * R822[0]),
+                        &quot;pm&quot;: round(104 * R220[2] + 24.4 * R822[2], 1)}
+out[&quot;pm_share_of_2025_MU_pct&quot;] = round(100 * out[&quot;trips_251_pm_facts&quot;] / out[&quot;trips_2025_MU&quot;][&quot;pm&quot;], 1)
+
+# ----------------------------------------------------------------- 10. sanitary sewer
+# Gwinnett DWR Wastewater Flow Estimation Guidelines (Rev. 10/2022): 250 gpd per single-family
+# unit; 175 gpd per 1,000 SF of clubhouse; peaking factor 4.0.
+GPD_DU, GPD_KSF, PF = 250, 175, 4.0
+club = am[&quot;clubhouse_sf&quot;] * GPD_KSF / 1000.0
+out[&quot;sewer_unit_flow_gpd&quot;] = GPD_DU
+out[&quot;adf_total_gpd&quot;] = round(n * GPD_DU + club)
+out[&quot;adf_gpm&quot;] = round(out[&quot;adf_total_gpd&quot;] / 1440.0, 2)
+out[&quot;peak_gpd&quot;] = round(out[&quot;adf_total_gpd&quot;] * PF)
+out[&quot;peak_gpm&quot;] = round(out[&quot;adf_total_gpd&quot;] * PF / 1440.0, 1)
+out[&quot;adf_phase1_gpd&quot;] = round(out[&quot;lots_phase1&quot;] * GPD_DU + club)
+out[&quot;adf_phase2_gpd&quot;] = out[&quot;lots_phase2&quot;] * GPD_DU
+out[&quot;peak_phase2_gpm&quot;] = round(out[&quot;adf_phase2_gpd&quot;] * PF / 1440.0, 1)
+sew = L[&quot;sewer&quot;]
+out[&quot;phase1_gravity_len_ft&quot;] = round(plen(sew[&quot;proposed_phase1_gravity&quot;]))
+out[&quot;phase2_ext_total_len_ft&quot;] = round(plen(sew[&quot;phase2_alternative_extension&quot;]))
+out[&quot;phase2_ext_offsite_ft&quot;] = sew[&quot;extension_offsite_ft&quot;]
+out[&quot;rear_lane_low_point&quot;] = M.get(&quot;rear_lane_low_point&quot;)
+prof = dict(L[&quot;lane&quot;][&quot;ground_profile&quot;])
+out[&quot;lane_ridge_ft&quot;] = max(prof.values())
+out[&quot;lane_ridge_u&quot;] = max(prof, key=prof.get)
+MH_INV = 927.13
+out[&quot;phase2_slope_pct&quot;] = round(100 * ((out[&quot;rear_lane_low_point&quot;][&quot;ground_ft&quot;] - 5.0) - 919.58)
+                                / out[&quot;phase2_ext_total_len_ft&quot;], 2)
+
+# ----------------------------------------------------------------- 11. fiscal (market figures VERIFY)
+PRICE_LO, PRICE_HI = 420_000, 460_000
+out[&quot;price_lo&quot;], out[&quot;price_hi&quot;] = PRICE_LO, PRICE_HI
+out[&quot;taxbase_lo&quot;] = n * PRICE_LO
+out[&quot;taxbase_hi&quot;] = n * PRICE_HI
+out[&quot;existing_fmv_2026&quot;] = 285000 + 87200 + 6800 + 888600
+ASSESS, CITY_MILLS, CS_MILLS, SCHOOL_MILLS = 0.40, 5.43, 31.6, 20.15
+for tag, v in ((&quot;lo&quot;, out[&quot;taxbase_lo&quot;]), (&quot;hi&quot;, out[&quot;taxbase_hi&quot;])):
+    out[f&quot;city_tax_{tag}&quot;] = round(v * ASSESS * CITY_MILLS / 1000)
+    out[f&quot;county_school_tax_{tag}&quot;] = round(v * ASSESS * CS_MILLS / 1000)
+    out[f&quot;school_portion_{tag}&quot;] = round(v * ASSESS * SCHOOL_MILLS / 1000)
+out[&quot;city_tax_existing&quot;] = round(out[&quot;existing_fmv_2026&quot;] * ASSESS * CITY_MILLS / 1000)
+out[&quot;city_tax_lo_all_senior_exempt&quot;] = round((out[&quot;taxbase_lo&quot;] * ASSESS - n * 60000) * CITY_MILLS / 1000)
+out[&quot;taxbase_multiple_lo&quot;] = round(out[&quot;taxbase_lo&quot;] / out[&quot;existing_fmv_2026&quot;], 1)
+out[&quot;taxbase_multiple_hi&quot;] = round(out[&quot;taxbase_hi&quot;] / out[&quot;existing_fmv_2026&quot;], 1)
+
+# ----------------------------------------------------------------- 12. HOPA
+out[&quot;hopa_units_needing_55plus&quot;] = math.ceil(0.80 * n)                    # 24 CFR §100.305(g): fraction rounds in
+out[&quot;hopa_units_without_55plus_cap&quot;] = n - out[&quot;hopa_units_needing_55plus&quot;]
+
+out[&quot;_cross_check_notes&quot;] = notes
+json.dump(out, open(os.path.join(ROOT, &quot;data&quot;, &quot;dev-summary-derived.json&quot;), &quot;w&quot;), indent=1)
+
+for k, v in out.items():
+    if k not in (&quot;open_space_tracts&quot;, &quot;impervious_per_lot&quot;, &quot;ponds&quot;, &quot;_cross_check_notes&quot;):
+        print(f&quot;{k}: {v}&quot;)
+print(&quot;\nopen_space_tracts:&quot;, json.dumps(out[&quot;open_space_tracts&quot;]))
+print(&quot;impervious_per_lot:&quot;, json.dumps(out[&quot;impervious_per_lot&quot;]))
+print(&quot;ponds:&quot;, json.dumps(out[&quot;ponds&quot;]))
+print(&quot;\nRecomputed vs layout.json metrics — differences &gt; 2 %:&quot;)
+for nte in notes:
+    print(&quot;  !&quot;, nte)
+print(&quot;wrote data/dev-summary-derived.json&quot;)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/dev_summary_calcs.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

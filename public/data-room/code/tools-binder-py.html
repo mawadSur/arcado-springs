@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Filing binder assembler (PDF) — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Filing binder assembler (PDF)</h1><p class="src-note">Python · 784 lines · <a href="/data-room/src/submission/tools/binder.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Assemble the filing binder — The Cottages at Arcado Springs (R-1 -&gt; R-2 rezoning, Lilburn GA).
+
+City of Lilburn 2026 Application Instructions, item (8): &quot;Include one (1) full size copy drawn to scale
+and email a pdf electronic file to returner@cityoflilburn.com.&quot;
+
+    python3 tools/binder.py            # everything
+    python3 tools/binder.py docs       # just the document PDFs
+    python3 tools/binder.py sheets     # just the drawing PDFs
+
+Outputs, under submission/:
+    submission/sheets/&lt;sheet&gt;.pdf              every drawing at its true sheet size (ARCH D 36x24 / ARCH C 24x18)
+    submission/docs/&lt;doc&gt;.pdf                  every markdown document typeset on US Letter
+    submission/RZ-2026_cottages-at-arcado-springs.pdf   the whole submittal, bookmarked, in Instruction-item order
+    submission/C-2-0_master-concept-plan_36x24.pdf      the full-size site plan for the e-mail
+
+Drawing PDFs come from the SVG sheets through cairosvg, which honours the SVG&#x27;s declared width/height in
+inches, so a 36 x 24 in sheet lands on a 36 x 24 in page at true scale — 1&quot; = 60&#x27; really measures.
+Documents are typeset with reportlab from the markdown the package already carries; the renderer below
+handles the subset of markdown these documents use (ATX headings, paragraphs, bullet and numbered lists,
+pipe tables, block quotes, fenced code, horizontal rules, and inline bold / italic / code / links).
+
+&gt; **Disclaimer:** This is an AI-generated analysis for preliminary planning purposes. All findings must be verified by a licensed professional before use in design, permitting, or regulatory submissions.
+
+&lt;!-- architecture-studio:requires-disclaimer --&gt;
+&quot;&quot;&quot;
+import io, os, re, sys, html
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+DOCS = os.path.join(ROOT, &#x27;docs&#x27;)
+DRAW = os.path.join(ROOT, &#x27;drawings&#x27;)
+OUT = os.path.join(ROOT, &#x27;submission&#x27;)
+OUT_S = os.path.join(OUT, &#x27;sheets&#x27;)
+OUT_D = os.path.join(OUT, &#x27;docs&#x27;)
+for d in (OUT, OUT_S, OUT_D):
+    os.makedirs(d, exist_ok=True)
+
+TITLE = &#x27;The Cottages at Arcado Springs — Application for Rezoning R-1 to R-2&#x27;
+SUBTITLE = (&#x27;4535, 4537, 4539 and 4541 Arcado Road SW, Lilburn, Georgia 30047 — Land Lot 123, 6th District, &#x27;
+            &#x27;Gwinnett County — PINs R6123 033, 015, 014 and 162 — 9.44 acres&#x27;)
+DATE = &#x27;2026-09-03&#x27;
+
+# ------------------------------------------------------------------ the binder order (Instruction items 1-11)
+# (key, tab label, path relative to ROOT, kind)
+ORDER = [
+    (&#x27;00&#x27;, &#x27;Transmittal and Index&#x27;,                                   &#x27;docs/00-transmittal-and-index.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;01&#x27;, &#x27;Item 1 — Application Form data&#x27;,                          &#x27;docs/01-application-form-data.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;04&#x27;, &#x27;Item 3 — Standards Governing the Zoning Power&#x27;,           &#x27;docs/04-standards-governing-zoning-power.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;07&#x27;, &#x27;Items 4 and 5 — Conflict of Interest and Certifications&#x27;, &#x27;docs/07-conflict-of-interest-and-certifications.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;03&#x27;, &#x27;Item 6 — Letter of Intent&#x27;,                               &#x27;docs/03-letter-of-intent.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;cond&#x27;, &#x27;Item 6 — Voluntary Zoning Conditions&#x27;,                  &#x27;data/voluntary-conditions.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;05&#x27;, &#x27;Item 7 — Legal Description (DRAFT)&#x27;,                      &#x27;docs/05-legal-description-DRAFT.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;C-0.0&#x27;, &#x27;Item 8 — Sheet C-0.0 Cover, Sheet Index and Vicinity Map&#x27;, &#x27;drawings/cover.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;C-1.0&#x27;, &#x27;Item 8 — Sheet C-1.0 Existing Conditions&#x27;,             &#x27;drawings/existing-conditions.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;C-2.0&#x27;, &#x27;Item 8 — Sheet C-2.0 Master Concept Plan&#x27;,             &#x27;drawings/mcp-sheet.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;C-2.3&#x27;, &#x27;Item 8 — Sheet C-2.3 Entry, Frontage and Amenity Enlargement&#x27;, &#x27;drawings/entry-enlargement.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;C-2.4&#x27;, &#x27;Item 8 — Sheet C-2.4 Fallback Lot-Depth Layout Exhibit&#x27;, &#x27;drawings/fallback-layout.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;C-3.0&#x27;, &#x27;Item 8 — Sheet C-3.0 Grading, Drainage and Stormwater Concept&#x27;, &#x27;drawings/grading-drainage.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;C-4.0&#x27;, &#x27;Item 8 — Sheet C-4.0 Utility and Phasing Concept&#x27;,     &#x27;drawings/utility-phasing.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;C-7.0&#x27;, &#x27;Item 8 — Sheet C-7.0 Landscape, Buffer and Tree Protection Concept&#x27;, &#x27;drawings/landscape-buffer.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;C-8.0&#x27;, &#x27;Item 8 — Sheet C-8.0 Civil Details&#x27;,                   &#x27;drawings/civil-details.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;02&#x27;, &#x27;Item 8 — Development Summary&#x27;,                            &#x27;docs/02-development-summary.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;08&#x27;, &#x27;Item 8 — Technical Memoranda&#x27;,                            &#x27;docs/08-technical-memoranda.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;06&#x27;, &#x27;Item 10 — Adjoining Property Owners&#x27;,                     &#x27;docs/06-adjoining-property-owners.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;09&#x27;, &#x27;Item 11 — Architectural Character, Elevations and Renderings&#x27;, &#x27;docs/09-architectural-character-elevations-and-renderings.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;A-1.1&#x27;, &#x27;Item 11 — Sheet A-1.1 Plan A Floor Plan&#x27;,              &#x27;drawings/plan-a-sheet.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;A-1.2&#x27;, &#x27;Item 11 — Sheet A-1.2 Plan B Floor Plan&#x27;,              &#x27;drawings/plan-b-sheet.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;A-2.1&#x27;, &#x27;Item 11 — Sheet A-2.1 Plan A Exterior Elevations&#x27;,     &#x27;drawings/plan-a-elev.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;A-2.2&#x27;, &#x27;Item 11 — Sheet A-2.2 Plan B Exterior Elevations&#x27;,     &#x27;drawings/plan-b-elev.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;A-2.3&#x27;, &#x27;Item 11 — Sheet A-2.3 Exterior Colour Schemes and Materials&#x27;, &#x27;drawings/plan-colors.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;A-3.0&#x27;, &#x27;Item 11 — Sheet A-3.0 Clubhouse, Mail Kiosk and Entry Sign&#x27;, &#x27;drawings/amenity-sheet.svg&#x27;, &#x27;sheet&#x27;),
+    (&#x27;R&#x27;, &#x27;Item 11 — Illustrative Renderings&#x27;,                        &#x27;renderings&#x27;, &#x27;renderings&#x27;),
+    (&#x27;12&#x27;, &#x27;Supporting — Outline Specifications&#x27;,                     &#x27;docs/12-outline-specifications.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;13&#x27;, &#x27;Supporting — HOA, HOPA and Covenant Outline&#x27;,             &#x27;docs/13-hoa-hopa-and-covenant-outline.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;11&#x27;, &#x27;Supporting — Site Context Brief&#x27;,                         &#x27;docs/11-site-context-brief.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;10&#x27;, &#x27;Supporting — Submittal Checklist and Roadmap&#x27;,            &#x27;docs/10-submittal-checklist-and-roadmap.md&#x27;, &#x27;doc&#x27;),
+]
+
+# ------------------------------------------------------------------ markdown -&gt; reportlab
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer, Table, TableStyle,
+                                KeepTogether, PageBreak, Image as RLImage)
+
+SS = getSampleStyleSheet()
+BODY = ParagraphStyle(&#x27;body&#x27;, parent=SS[&#x27;BodyText&#x27;], fontName=&#x27;Helvetica&#x27;, fontSize=8.6, leading=11.4,
+                      spaceBefore=0, spaceAfter=5, alignment=TA_LEFT)
+H = [ParagraphStyle(&#x27;h%d&#x27; % i, parent=BODY, fontName=&#x27;Helvetica-Bold&#x27;,
+                    fontSize=(15, 12.5, 10.6, 9.4, 8.8, 8.6)[i - 1],
+                    leading=(18.5, 15.5, 13.2, 11.8, 11.2, 11),
+                    spaceBefore=(13, 11, 9, 7, 6, 5)[i - 1], spaceAfter=(6, 5, 4, 3, 3, 3)[i - 1])
+     for i in range(1, 7)]
+for i, s in enumerate(H):
+    s.leading = (18.5, 15.5, 13.2, 11.8, 11.2, 11)[i]
+MONO = ParagraphStyle(&#x27;mono&#x27;, parent=BODY, fontName=&#x27;Courier&#x27;, fontSize=7.4, leading=9.2,
+                      backColor=colors.HexColor(&#x27;#F4F4F1&#x27;), borderPadding=3, spaceBefore=4, spaceAfter=6)
+QUOTE = ParagraphStyle(&#x27;quote&#x27;, parent=BODY, leftIndent=12, textColor=colors.HexColor(&#x27;#333333&#x27;),
+                       borderPadding=0, spaceBefore=4, spaceAfter=6, fontName=&#x27;Helvetica-Oblique&#x27;)
+CELL = ParagraphStyle(&#x27;cell&#x27;, parent=BODY, fontSize=7.2, leading=8.8, spaceAfter=0, spaceBefore=0)
+CELLH = ParagraphStyle(&#x27;cellh&#x27;, parent=CELL, fontName=&#x27;Helvetica-Bold&#x27;)
+LI = ParagraphStyle(&#x27;li&#x27;, parent=BODY, leftIndent=13, bulletIndent=3, spaceAfter=2.5)
+TITLE_S = ParagraphStyle(&#x27;t&#x27;, parent=BODY, fontName=&#x27;Helvetica-Bold&#x27;, fontSize=19, leading=23, spaceAfter=8)
+SUB_S = ParagraphStyle(&#x27;s&#x27;, parent=BODY, fontSize=9.6, leading=13, textColor=colors.HexColor(&#x27;#444444&#x27;),
+                       spaceAfter=16)
+
+INLINE = [
+    (re.compile(r&#x27;`([^`]+)`&#x27;), r&#x27;&lt;font face=&quot;Courier&quot; size=&quot;7.6&quot;&gt;\1&lt;/font&gt;&#x27;),
+    (re.compile(r&#x27;\*\*\*(.+?)\*\*\*&#x27;), r&#x27;&lt;b&gt;&lt;i&gt;\1&lt;/i&gt;&lt;/b&gt;&#x27;),
+    (re.compile(r&#x27;\*\*(.+?)\*\*&#x27;), r&#x27;&lt;b&gt;\1&lt;/b&gt;&#x27;),
+    (re.compile(r&#x27;(?&lt;![\w*])\*([^*\n]+)\*(?![\w*])&#x27;), r&#x27;&lt;i&gt;\1&lt;/i&gt;&#x27;),
+    (re.compile(r&#x27;\[([^\]]+)\]\((https?://[^)\s]+)\)&#x27;), r&#x27;&lt;link href=&quot;\2&quot; color=&quot;#1A5276&quot;&gt;\1&lt;/link&gt;&#x27;),
+    (re.compile(r&#x27;(?&lt;![\w/&quot;&gt;])(https?://[^\s&lt;&gt;()\]]+)&#x27;), r&#x27;&lt;link href=&quot;\1&quot; color=&quot;#1A5276&quot;&gt;\1&lt;/link&gt;&#x27;),
+]
+
+
+def inline(t):
+    t = html.escape(t, quote=False)
+    for rx, rep in INLINE:
+        t = rx.sub(rep, t)
+    return t
+
+
+def para(t, st=BODY):
+    return Paragraph(inline(t), st)
+
+
+def md_to_flowables(md, width):
+    &quot;&quot;&quot;Render the markdown subset these documents use.&quot;&quot;&quot;
+    out = []
+    lines = md.split(&#x27;\n&#x27;)
+    i, n = 0, len(lines)
+    # strip a YAML front-matter block into a small header table
+    if lines and lines[0].strip() == &#x27;---&#x27;:
+        j = 1
+        while j &lt; n and lines[j].strip() != &#x27;---&#x27;:
+            j += 1
+        fm = [l for l in lines[1:j] if l.strip()]
+        if fm:
+            rows = []
+            for l in fm:
+                if &#x27;:&#x27; in l:
+                    k, v = l.split(&#x27;:&#x27;, 1)
+                    rows.append([Paragraph(inline(k.strip()), CELLH), Paragraph(inline(v.strip().strip(&#x27;&quot;&#x27;)), CELL)])
+            if rows:
+                t = Table(rows, colWidths=[width * 0.17, width * 0.83])
+                t.setStyle(TableStyle([(&#x27;VALIGN&#x27;, (0, 0), (-1, -1), &#x27;TOP&#x27;),
+                                       (&#x27;BOTTOMPADDING&#x27;, (0, 0), (-1, -1), 2),
+                                       (&#x27;TOPPADDING&#x27;, (0, 0), (-1, -1), 2),
+                                       (&#x27;LINEBELOW&#x27;, (0, 0), (-1, -1), 0.25, colors.HexColor(&#x27;#DDDDDD&#x27;))]))
+                out += [t, Spacer(1, 8)]
+        i = j + 1
+    buf = []
+
+    def flush():
+        if buf:
+            out.append(para(&#x27; &#x27;.join(buf)))
+            del buf[:]
+
+    while i &lt; n:
+        ln = lines[i]
+        s = ln.strip()
+        if not s:
+            flush(); i += 1; continue
+        if s.startswith(&#x27;```&#x27;):
+            flush(); i += 1; code = []
+            while i &lt; n and not lines[i].strip().startswith(&#x27;```&#x27;):
+                code.append(lines[i]); i += 1
+            i += 1
+            txt = html.escape(&#x27;\n&#x27;.join(code)).replace(&#x27; &#x27;, &#x27;&amp;nbsp;&#x27;).replace(&#x27;\n&#x27;, &#x27;&lt;br/&gt;&#x27;)
+            out.append(Paragraph(txt, MONO)); continue
+        if re.match(r&#x27;^(-{3,}|\*{3,}|_{3,})$&#x27;, s):
+            flush()
+            out.append(Spacer(1, 3))
+            t = Table([[&#x27;&#x27;]], colWidths=[width], rowHeights=[0.6])
+            t.setStyle(TableStyle([(&#x27;LINEABOVE&#x27;, (0, 0), (-1, 0), 0.5, colors.HexColor(&#x27;#CCCCCC&#x27;))]))
+            out += [t, Spacer(1, 5)]; i += 1; continue
+        m = re.match(r&#x27;^(#{1,6})\s+(.*)$&#x27;, s)
+        if m:
+            flush()
+            out.append(Paragraph(inline(m.group(2)), H[len(m.group(1)) - 1])); i += 1; continue
+        if s.startswith(&#x27;|&#x27;) and i + 1 &lt; n and re.match(r&#x27;^\|[\s:|-]+\|?$&#x27;, lines[i + 1].strip()):
+            flush()
+            rows, i = _table(lines, i)
+            out.append(_mk_table(rows, width)); out.append(Spacer(1, 5)); continue
+        if s.startswith(&#x27;&gt;&#x27;):
+            flush(); q = []
+            while i &lt; n and lines[i].strip().startswith(&#x27;&gt;&#x27;):
+                q.append(lines[i].strip().lstrip(&#x27;&gt;&#x27;).strip()); i += 1
+            out.append(para(&#x27; &#x27;.join(q), QUOTE)); continue
+        m = re.match(r&#x27;^([-*+])\s+(.*)$&#x27;, s)
+        if m:
+            flush()
+            out.append(Paragraph(inline(m.group(2)), LI, bulletText=&#x27;•&#x27;)); i += 1; continue
+        m = re.match(r&#x27;^(\d+)[.)]\s+(.*)$&#x27;, s)
+        if m:
+            flush()
+            out.append(Paragraph(inline(m.group(2)), LI, bulletText=m.group(1) + &#x27;.&#x27;)); i += 1; continue
+        if s.startswith(&#x27;&lt;!--&#x27;):
+            i += 1; continue
+        buf.append(s); i += 1
+    flush()
+    return out
+
+
+def _table(lines, i):
+    def cells(l):
+        l = l.strip()
+        if l.startswith(&#x27;|&#x27;):
+            l = l[1:]
+        if l.endswith(&#x27;|&#x27;):
+            l = l[:-1]
+        return [c.strip() for c in re.split(r&#x27;(?&lt;!\\)\|&#x27;, l)]
+    rows = [cells(lines[i])]
+    i += 2
+    while i &lt; len(lines) and lines[i].strip().startswith(&#x27;|&#x27;):
+        rows.append(cells(lines[i])); i += 1
+    w = max(len(r) for r in rows)
+    rows = [r + [&#x27;&#x27;] * (w - len(r)) for r in rows]
+    return rows, i
+
+
+def _mk_table(rows, width):
+    ncol = len(rows[0])
+    weights = []
+    for c in range(ncol):
+        weights.append(max(6, max(len(r[c]) for r in rows) ** 0.72))
+    tot = sum(weights)
+    cw = [max(0.5 * inch, width * w / tot) for w in weights]
+    if sum(cw) &gt; width:
+        k = width / sum(cw)
+        cw = [c * k for c in cw]
+    data = [[Paragraph(inline(c), CELLH if ri == 0 else CELL) for c in r] for ri, r in enumerate(rows)]
+    t = Table(data, colWidths=cw, repeatRows=1)
+    t.setStyle(TableStyle([
+        (&#x27;VALIGN&#x27;, (0, 0), (-1, -1), &#x27;TOP&#x27;),
+        (&#x27;BACKGROUND&#x27;, (0, 0), (-1, 0), colors.HexColor(&#x27;#EFEDE7&#x27;)),
+        (&#x27;GRID&#x27;, (0, 0), (-1, -1), 0.25, colors.HexColor(&#x27;#CFCFCF&#x27;)),
+        (&#x27;LEFTPADDING&#x27;, (0, 0), (-1, -1), 3.5), (&#x27;RIGHTPADDING&#x27;, (0, 0), (-1, -1), 3.5),
+        (&#x27;TOPPADDING&#x27;, (0, 0), (-1, -1), 2.5), (&#x27;BOTTOMPADDING&#x27;, (0, 0), (-1, -1), 2.5),
+    ]))
+    return t
+
+
+class DocTpl(BaseDocTemplate):
+    def __init__(self, path, header, **kw):
+        BaseDocTemplate.__init__(self, path, pagesize=letter, leftMargin=0.72 * inch, rightMargin=0.72 * inch,
+                                 topMargin=0.78 * inch, bottomMargin=0.72 * inch, title=header, **kw)
+        fr = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id=&#x27;f&#x27;)
+        self.header = header
+        self.addPageTemplates([PageTemplate(id=&#x27;p&#x27;, frames=[fr], onPage=self._deco)])
+
+    def _deco(self, c, d):
+        c.saveState()
+        c.setFont(&#x27;Helvetica&#x27;, 6.8)
+        c.setFillColor(colors.HexColor(&#x27;#777777&#x27;))
+        c.drawString(self.leftMargin, letter[1] - 0.52 * inch,
+                     &#x27;THE COTTAGES AT ARCADO SPRINGS — &#x27; + self.header.upper())
+        c.drawRightString(letter[0] - self.rightMargin, letter[1] - 0.52 * inch,
+                          &#x27;DRAFT — NOT SEALED — &#x27; + DATE)
+        c.setStrokeColor(colors.HexColor(&#x27;#DDDDDD&#x27;)); c.setLineWidth(0.4)
+        c.line(self.leftMargin, letter[1] - 0.60 * inch, letter[0] - self.rightMargin, letter[1] - 0.60 * inch)
+        c.line(self.leftMargin, 0.60 * inch, letter[0] - self.rightMargin, 0.60 * inch)
+        c.drawString(self.leftMargin, 0.44 * inch,
+                     &#x27;Rezoning application R-1 to R-2 — City of Lilburn, Georgia — owner-prepared draft&#x27;)
+        c.drawRightString(letter[0] - self.rightMargin, 0.44 * inch, &#x27;Page %d&#x27; % d.page)
+        c.restoreState()
+
+
+def doc_pdf(md_path, pdf_path, header):
+    md = open(md_path, encoding=&#x27;utf-8&#x27;).read()
+    d = DocTpl(pdf_path, header)
+    d.build(md_to_flowables(md, d.width))
+    return pdf_path
+
+
+def sheet_pdf(svg_path, pdf_path):
+    import cairosvg
+    cairosvg.svg2pdf(url=svg_path, write_to=pdf_path)
+    return pdf_path
+
+
+def cover_pdf(pdf_path, index_rows):
+    d = DocTpl(pdf_path, &#x27;Cover and contents&#x27;)
+    f = [Spacer(1, 42), Paragraph(TITLE, TITLE_S), Paragraph(SUBTITLE, SUB_S),
+         para(&#x27;**Applicant and owner of record (PINs R6123 033 and 015):** Mohammed Awad, 4541 Arcado Road SW, &#x27;
+              &#x27;Lilburn, Georgia 30047.&#x27;),
+         para(&#x27;**Filed under:** City of Lilburn Zoning Ordinance No. 2023-603, Article 10, section 1003, and the &#x27;
+              &#x27;City of Lilburn 2026 Application Instructions — Rezoning / Special Use Permit / Change in Condition, &#x27;
+              &#x27;items (1) through (11).&#x27;),
+         para(&#x27;**Request:** rezone 9.44 acres from R-1 (Single-Family Residential) to R-2 (Medium-Density &#x27;
+              &#x27;Residential) for 43 one-story detached cottage homes on fee-simple lots, restricted to housing for &#x27;
+              &#x27;older persons under 42 U.S.C. section 3607(b)(2)(C) by voluntary condition.&#x27;),
+         Spacer(1, 14),
+         Paragraph(&#x27;Contents&#x27;, H[1])]
+    rows = [[&#x27;Tab&#x27;, &#x27;Document or sheet&#x27;, &#x27;Instruction item&#x27;]]
+    for key, label, _p, _k in index_rows:
+        item = &#x27;&#x27;
+        m = re.search(r&#x27;Item (\d+)&#x27;, label)
+        if m:
+            item = m.group(1)
+        elif label.startswith(&#x27;Supporting&#x27;):
+            item = &#x27;supporting&#x27;
+        elif label.startswith(&#x27;Transmittal&#x27;):
+            item = &#x27;—&#x27;
+        rows.append([key, re.sub(r&#x27;^Item \d+ — |^Supporting — &#x27;, &#x27;&#x27;, label), item])
+    f.append(_mk_table(rows, d.width))
+    f.append(Spacer(1, 14))
+    f.append(para(&#x27;&gt; **Disclaimer:** This is an AI-generated analysis for preliminary planning purposes. All &#x27;
+                  &#x27;findings must be verified by a licensed professional before use in design, permitting, or &#x27;
+                  &#x27;regulatory submissions.&#x27;, QUOTE))
+    d.build(f)
+    return pdf_path
+
+
+def renderings_pdf(pdf_path, folder):
+    &quot;&quot;&quot;One landscape-ish contact set of the illustrative perspectives, each captioned.&quot;&quot;&quot;
+    imgs = sorted(f for f in os.listdir(folder)
+                  if f.lower().endswith((&#x27;.jpg&#x27;, &#x27;.png&#x27;)) and f.startswith(&#x27;R-&#x27;))
+    if not imgs:
+        return None
+    d = DocTpl(pdf_path, &#x27;Illustrative renderings&#x27;)
+    f = [Paragraph(&#x27;Illustrative Renderings — Application Instructions item (11)&#x27;, H[0]),
+         para(&#x27;These are illustrative perspectives prepared by the owner-applicant. They are generated from the &#x27;
+              &#x27;scaled elevations in sheets A-2.1, A-2.2, A-2.3 and A-3.0 and from the master concept plan, and the &#x27;
+              &#x27;scaled drawings govern wherever an image and a drawing differ. Item (11) permits imagery: &#x27;
+              &#x27;&quot;The drawings shall be to scale or in proper perspective… Visual imagery may be used.&quot;&#x27;),
+         Spacer(1, 6)]
+    from PIL import Image as PILImage
+    small_dir = os.path.join(OUT_D, &#x27;_rend&#x27;)
+    os.makedirs(small_dir, exist_ok=True)
+    for name in imgs:
+        src = os.path.join(folder, name)
+        p = os.path.join(small_dir, os.path.splitext(name)[0] + &#x27;.jpg&#x27;)
+        with PILImage.open(src) as im:          # embed a print-resolution copy, not the 2K original
+            im = im.convert(&#x27;RGB&#x27;)
+            im.thumbnail((1700, 1700))
+            im.save(p, quality=82, optimize=True)
+        with PILImage.open(p) as im:
+            w, h = im.size
+        iw = d.width
+        ih = iw * h / float(w)
+        if ih &gt; 6.2 * inch:
+            ih = 6.2 * inch; iw = ih * w / float(h)
+        cap = os.path.splitext(name)[0].replace(&#x27;_&#x27;, &#x27; — &#x27;).replace(&#x27;-&#x27;, &#x27; &#x27;)
+        f.append(KeepTogether([RLImage(p, iw, ih), Spacer(1, 3),
+                               Paragraph(inline(&#x27;**%s**&#x27; % cap), CELL), Spacer(1, 12)]))
+    d.build(f)
+    return pdf_path
+
+
+def merge(parts, out_path):
+    from pypdf import PdfWriter, PdfReader
+    w = PdfWriter()
+    for label, path in parts:
+        r = PdfReader(path)
+        start = len(w.pages)
+        for pg in r.pages:
+            w.add_page(pg)
+        w.add_outline_item(label, start)
+    with open(out_path, &#x27;wb&#x27;) as fh:
+        w.write(fh)
+    return out_path
+
+
+def build(what=&#x27;all&#x27;):
+    made, missing = [], []
+    parts = []
+    index_rows = [r for r in ORDER if r[3] != &#x27;renderings&#x27; and os.path.exists(os.path.join(ROOT, r[2]))]
+    cov = os.path.join(OUT_D, &#x27;_cover.pdf&#x27;)
+    cover_pdf(cov, [r for r in ORDER if os.path.exists(os.path.join(ROOT, r[2]))])
+    parts.append((&#x27;Cover and contents&#x27;, cov))
+    for key, label, rel, kind in ORDER:
+        src = os.path.join(ROOT, rel)
+        if not os.path.exists(src):
+            missing.append(&#x27;%s  (%s)&#x27; % (rel, label)); continue
+        try:
+            if kind == &#x27;doc&#x27; and what in (&#x27;all&#x27;, &#x27;docs&#x27;):
+                p = os.path.join(OUT_D, os.path.splitext(os.path.basename(rel))[0] + &#x27;.pdf&#x27;)
+                doc_pdf(src, p, label); made.append(p); parts.append((label, p))
+            elif kind == &#x27;sheet&#x27; and what in (&#x27;all&#x27;, &#x27;sheets&#x27;):
+                p = os.path.join(OUT_S, key.replace(&#x27;.&#x27;, &#x27;-&#x27;) + &#x27;_&#x27; + os.path.basename(rel)[:-4] + &#x27;.pdf&#x27;)
+                sheet_pdf(src, p); made.append(p); parts.append((label, p))
+            elif kind == &#x27;renderings&#x27; and what == &#x27;all&#x27;:
+                p = os.path.join(OUT_D, &#x27;renderings.pdf&#x27;)
+                if renderings_pdf(p, src):
+                    made.append(p); parts.append((label, p))
+        except Exception as e:                                    # keep going; report at the end
+            missing.append(&#x27;%s  (FAILED: %s)&#x27; % (rel, e))
+    if what == &#x27;all&#x27; and len(parts) &gt; 1:
+        b = merge(parts, os.path.join(OUT, &#x27;RZ-2026_cottages-at-arcado-springs.pdf&#x27;))
+        made.append(b)
+        mcp = os.path.join(OUT_S, &#x27;C-2-0_mcp-sheet.pdf&#x27;)
+        if os.path.exists(mcp):
+            import shutil
+            t = os.path.join(OUT, &#x27;C-2-0_master-concept-plan_36x24.pdf&#x27;)
+            shutil.copyfile(mcp, t); made.append(t)
+    print(&#x27;BUILT %d file(s):&#x27; % len(made))
+    for m in made:
+        print(&#x27;   &#x27;, os.path.relpath(m, ROOT), &#x27;(%.0f KB)&#x27; % (os.path.getsize(m) / 1024.0))
+    if missing:
+        print(&#x27;NOT YET AVAILABLE (%d):&#x27; % len(missing))
+        for m in missing:
+            print(&#x27;   &#x27;, m)
+    return made, missing
+
+
+if __name__ == &#x27;__main__&#x27;:
+    build(sys.argv[1] if len(sys.argv) &gt; 1 else &#x27;all&#x27;)# The binder&#x27;s sheet tabs are DERIVED from the same register the cover sheet and the transmittal use
+# (tools/cover.py SHEETS), so a sheet that has been issued can never be left out of the filing PDF —
+# five were, before this was single-sourced. Documents keep their explicit order.
+import cover as _cover                                            # noqa: E402
+
+
+def _sheets(prefix):
+    out = []
+    for no, title, f, size, scale in _cover.SHEETS:
+        if not f or not no.startswith(prefix):
+            continue
+        if not os.path.exists(os.path.join(ROOT, &#x27;drawings&#x27;, f)):
+            continue
+        item = &#x27;8&#x27; if prefix == &#x27;C&#x27; else &#x27;11&#x27;
+        out.append((no, &#x27;Item %s — Sheet %s %s&#x27; % (item, no, title), &#x27;drawings/&#x27; + f, &#x27;sheet&#x27;))
+    return out
+
+
+ORDER = ([
+    (&#x27;00&#x27;, &#x27;Transmittal and Index&#x27;, &#x27;docs/00-transmittal-and-index.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;01&#x27;, &#x27;Item 1 — Application Form data&#x27;, &#x27;docs/01-application-form-data.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;04&#x27;, &#x27;Item 3 — Standards Governing the Zoning Power&#x27;, &#x27;docs/04-standards-governing-zoning-power.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;07&#x27;, &#x27;Items 4 and 5 — Conflict of Interest and Certifications&#x27;, &#x27;docs/07-conflict-of-interest-and-certifications.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;03&#x27;, &#x27;Item 6 — Letter of Intent&#x27;, &#x27;docs/03-letter-of-intent.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;cond&#x27;, &#x27;Item 6 — Voluntary Zoning Conditions&#x27;, &#x27;data/voluntary-conditions.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;05&#x27;, &#x27;Item 7 — Legal Description (DRAFT)&#x27;, &#x27;docs/05-legal-description-DRAFT.md&#x27;, &#x27;doc&#x27;),
+] + _sheets(&#x27;C&#x27;) + [
+    (&#x27;02&#x27;, &#x27;Item 8 — Development Summary&#x27;, &#x27;docs/02-development-summary.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;08&#x27;, &#x27;Item 8 — Technical Memoranda&#x27;, &#x27;docs/08-technical-memoranda.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;06&#x27;, &#x27;Item 10 — Adjoining Property Owners&#x27;, &#x27;docs/06-adjoining-property-owners.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;09&#x27;, &#x27;Item 11 — Architectural Character, Elevations and Renderings&#x27;,
+     &#x27;docs/09-architectural-character-elevations-and-renderings.md&#x27;, &#x27;doc&#x27;),
+] + _sheets(&#x27;A&#x27;) + [
+    (&#x27;R&#x27;, &#x27;Item 11 — Illustrative Renderings&#x27;, &#x27;renderings&#x27;, &#x27;renderings&#x27;),
+    (&#x27;12&#x27;, &#x27;Supporting — Outline Specifications&#x27;, &#x27;docs/12-outline-specifications.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;13&#x27;, &#x27;Supporting — HOA, HOPA and Covenant Outline&#x27;, &#x27;docs/13-hoa-hopa-and-covenant-outline.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;11&#x27;, &#x27;Supporting — Site Context Brief&#x27;, &#x27;docs/11-site-context-brief.md&#x27;, &#x27;doc&#x27;),
+    (&#x27;10&#x27;, &#x27;Supporting — Submittal Checklist and Roadmap&#x27;, &#x27;docs/10-submittal-checklist-and-roadmap.md&#x27;, &#x27;doc&#x27;),
+])
+
+# ------------------------------------------------------------------ markdown -&gt; reportlab
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer, Table, TableStyle,
+                                KeepTogether, PageBreak, Image as RLImage)
+
+SS = getSampleStyleSheet()
+BODY = ParagraphStyle(&#x27;body&#x27;, parent=SS[&#x27;BodyText&#x27;], fontName=&#x27;Helvetica&#x27;, fontSize=8.6, leading=11.4,
+                      spaceBefore=0, spaceAfter=5, alignment=TA_LEFT)
+H = [ParagraphStyle(&#x27;h%d&#x27; % i, parent=BODY, fontName=&#x27;Helvetica-Bold&#x27;,
+                    fontSize=(15, 12.5, 10.6, 9.4, 8.8, 8.6)[i - 1],
+                    leading=(18.5, 15.5, 13.2, 11.8, 11.2, 11),
+                    spaceBefore=(13, 11, 9, 7, 6, 5)[i - 1], spaceAfter=(6, 5, 4, 3, 3, 3)[i - 1])
+     for i in range(1, 7)]
+for i, s in enumerate(H):
+    s.leading = (18.5, 15.5, 13.2, 11.8, 11.2, 11)[i]
+MONO = ParagraphStyle(&#x27;mono&#x27;, parent=BODY, fontName=&#x27;Courier&#x27;, fontSize=7.4, leading=9.2,
+                      backColor=colors.HexColor(&#x27;#F4F4F1&#x27;), borderPadding=3, spaceBefore=4, spaceAfter=6)
+QUOTE = ParagraphStyle(&#x27;quote&#x27;, parent=BODY, leftIndent=12, textColor=colors.HexColor(&#x27;#333333&#x27;),
+                       borderPadding=0, spaceBefore=4, spaceAfter=6, fontName=&#x27;Helvetica-Oblique&#x27;)
+CELL = ParagraphStyle(&#x27;cell&#x27;, parent=BODY, fontSize=7.2, leading=8.8, spaceAfter=0, spaceBefore=0)
+CELLH = ParagraphStyle(&#x27;cellh&#x27;, parent=CELL, fontName=&#x27;Helvetica-Bold&#x27;)
+LI = ParagraphStyle(&#x27;li&#x27;, parent=BODY, leftIndent=13, bulletIndent=3, spaceAfter=2.5)
+TITLE_S = ParagraphStyle(&#x27;t&#x27;, parent=BODY, fontName=&#x27;Helvetica-Bold&#x27;, fontSize=19, leading=23, spaceAfter=8)
+SUB_S = ParagraphStyle(&#x27;s&#x27;, parent=BODY, fontSize=9.6, leading=13, textColor=colors.HexColor(&#x27;#444444&#x27;),
+                       spaceAfter=16)
+
+INLINE = [
+    (re.compile(r&#x27;`([^`]+)`&#x27;), r&#x27;&lt;font face=&quot;Courier&quot; size=&quot;7.6&quot;&gt;\1&lt;/font&gt;&#x27;),
+    (re.compile(r&#x27;\*\*\*(.+?)\*\*\*&#x27;), r&#x27;&lt;b&gt;&lt;i&gt;\1&lt;/i&gt;&lt;/b&gt;&#x27;),
+    (re.compile(r&#x27;\*\*(.+?)\*\*&#x27;), r&#x27;&lt;b&gt;\1&lt;/b&gt;&#x27;),
+    (re.compile(r&#x27;(?&lt;![\w*])\*([^*\n]+)\*(?![\w*])&#x27;), r&#x27;&lt;i&gt;\1&lt;/i&gt;&#x27;),
+    (re.compile(r&#x27;\[([^\]]+)\]\((https?://[^)\s]+)\)&#x27;), r&#x27;&lt;link href=&quot;\2&quot; color=&quot;#1A5276&quot;&gt;\1&lt;/link&gt;&#x27;),
+    (re.compile(r&#x27;(?&lt;![\w/&quot;&gt;])(https?://[^\s&lt;&gt;()\]]+)&#x27;), r&#x27;&lt;link href=&quot;\1&quot; color=&quot;#1A5276&quot;&gt;\1&lt;/link&gt;&#x27;),
+]
+
+
+def inline(t):
+    t = html.escape(t, quote=False)
+    for rx, rep in INLINE:
+        t = rx.sub(rep, t)
+    return t
+
+
+def para(t, st=BODY):
+    return Paragraph(inline(t), st)
+
+
+def md_to_flowables(md, width):
+    &quot;&quot;&quot;Render the markdown subset these documents use.&quot;&quot;&quot;
+    out = []
+    lines = md.split(&#x27;\n&#x27;)
+    i, n = 0, len(lines)
+    # strip a YAML front-matter block into a small header table
+    if lines and lines[0].strip() == &#x27;---&#x27;:
+        j = 1
+        while j &lt; n and lines[j].strip() != &#x27;---&#x27;:
+            j += 1
+        fm = [l for l in lines[1:j] if l.strip()]
+        if fm:
+            rows = []
+            for l in fm:
+                if &#x27;:&#x27; in l:
+                    k, v = l.split(&#x27;:&#x27;, 1)
+                    rows.append([Paragraph(inline(k.strip()), CELLH), Paragraph(inline(v.strip().strip(&#x27;&quot;&#x27;)), CELL)])
+            if rows:
+                t = Table(rows, colWidths=[width * 0.17, width * 0.83])
+                t.setStyle(TableStyle([(&#x27;VALIGN&#x27;, (0, 0), (-1, -1), &#x27;TOP&#x27;),
+                                       (&#x27;BOTTOMPADDING&#x27;, (0, 0), (-1, -1), 2),
+                                       (&#x27;TOPPADDING&#x27;, (0, 0), (-1, -1), 2),
+                                       (&#x27;LINEBELOW&#x27;, (0, 0), (-1, -1), 0.25, colors.HexColor(&#x27;#DDDDDD&#x27;))]))
+                out += [t, Spacer(1, 8)]
+        i = j + 1
+    buf = []
+
+    def flush():
+        if buf:
+            out.append(para(&#x27; &#x27;.join(buf)))
+            del buf[:]
+
+    while i &lt; n:
+        ln = lines[i]
+        s = ln.strip()
+        if not s:
+            flush(); i += 1; continue
+        if s.startswith(&#x27;```&#x27;):
+            flush(); i += 1; code = []
+            while i &lt; n and not lines[i].strip().startswith(&#x27;```&#x27;):
+                code.append(lines[i]); i += 1
+            i += 1
+            txt = html.escape(&#x27;\n&#x27;.join(code)).replace(&#x27; &#x27;, &#x27;&amp;nbsp;&#x27;).replace(&#x27;\n&#x27;, &#x27;&lt;br/&gt;&#x27;)
+            out.append(Paragraph(txt, MONO)); continue
+        if re.match(r&#x27;^(-{3,}|\*{3,}|_{3,})$&#x27;, s):
+            flush()
+            out.append(Spacer(1, 3))
+            t = Table([[&#x27;&#x27;]], colWidths=[width], rowHeights=[0.6])
+            t.setStyle(TableStyle([(&#x27;LINEABOVE&#x27;, (0, 0), (-1, 0), 0.5, colors.HexColor(&#x27;#CCCCCC&#x27;))]))
+            out += [t, Spacer(1, 5)]; i += 1; continue
+        m = re.match(r&#x27;^(#{1,6})\s+(.*)$&#x27;, s)
+        if m:
+            flush()
+            out.append(Paragraph(inline(m.group(2)), H[len(m.group(1)) - 1])); i += 1; continue
+        if s.startswith(&#x27;|&#x27;) and i + 1 &lt; n and re.match(r&#x27;^\|[\s:|-]+\|?$&#x27;, lines[i + 1].strip()):
+            flush()
+            rows, i = _table(lines, i)
+            out.append(_mk_table(rows, width)); out.append(Spacer(1, 5)); continue
+        if s.startswith(&#x27;&gt;&#x27;):
+            flush(); q = []
+            while i &lt; n and lines[i].strip().startswith(&#x27;&gt;&#x27;):
+                q.append(lines[i].strip().lstrip(&#x27;&gt;&#x27;).strip()); i += 1
+            out.append(para(&#x27; &#x27;.join(q), QUOTE)); continue
+        m = re.match(r&#x27;^([-*+])\s+(.*)$&#x27;, s)
+        if m:
+            flush()
+            out.append(Paragraph(inline(m.group(2)), LI, bulletText=&#x27;•&#x27;)); i += 1; continue
+        m = re.match(r&#x27;^(\d+)[.)]\s+(.*)$&#x27;, s)
+        if m:
+            flush()
+            out.append(Paragraph(inline(m.group(2)), LI, bulletText=m.group(1) + &#x27;.&#x27;)); i += 1; continue
+        if s.startswith(&#x27;&lt;!--&#x27;):
+            i += 1; continue
+        buf.append(s); i += 1
+    flush()
+    return out
+
+
+def _table(lines, i):
+    def cells(l):
+        l = l.strip()
+        if l.startswith(&#x27;|&#x27;):
+            l = l[1:]
+        if l.endswith(&#x27;|&#x27;):
+            l = l[:-1]
+        return [c.strip() for c in re.split(r&#x27;(?&lt;!\\)\|&#x27;, l)]
+    rows = [cells(lines[i])]
+    i += 2
+    while i &lt; len(lines) and lines[i].strip().startswith(&#x27;|&#x27;):
+        rows.append(cells(lines[i])); i += 1
+    w = max(len(r) for r in rows)
+    rows = [r + [&#x27;&#x27;] * (w - len(r)) for r in rows]
+    return rows, i
+
+
+def _mk_table(rows, width):
+    ncol = len(rows[0])
+    weights = []
+    for c in range(ncol):
+        weights.append(max(6, max(len(r[c]) for r in rows) ** 0.72))
+    tot = sum(weights)
+    cw = [max(0.5 * inch, width * w / tot) for w in weights]
+    if sum(cw) &gt; width:
+        k = width / sum(cw)
+        cw = [c * k for c in cw]
+    data = [[Paragraph(inline(c), CELLH if ri == 0 else CELL) for c in r] for ri, r in enumerate(rows)]
+    t = Table(data, colWidths=cw, repeatRows=1)
+    t.setStyle(TableStyle([
+        (&#x27;VALIGN&#x27;, (0, 0), (-1, -1), &#x27;TOP&#x27;),
+        (&#x27;BACKGROUND&#x27;, (0, 0), (-1, 0), colors.HexColor(&#x27;#EFEDE7&#x27;)),
+        (&#x27;GRID&#x27;, (0, 0), (-1, -1), 0.25, colors.HexColor(&#x27;#CFCFCF&#x27;)),
+        (&#x27;LEFTPADDING&#x27;, (0, 0), (-1, -1), 3.5), (&#x27;RIGHTPADDING&#x27;, (0, 0), (-1, -1), 3.5),
+        (&#x27;TOPPADDING&#x27;, (0, 0), (-1, -1), 2.5), (&#x27;BOTTOMPADDING&#x27;, (0, 0), (-1, -1), 2.5),
+    ]))
+    return t
+
+
+class DocTpl(BaseDocTemplate):
+    def __init__(self, path, header, **kw):
+        BaseDocTemplate.__init__(self, path, pagesize=letter, leftMargin=0.72 * inch, rightMargin=0.72 * inch,
+                                 topMargin=0.78 * inch, bottomMargin=0.72 * inch, title=header, **kw)
+        fr = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id=&#x27;f&#x27;)
+        self.header = header
+        self.addPageTemplates([PageTemplate(id=&#x27;p&#x27;, frames=[fr], onPage=self._deco)])
+
+    def _deco(self, c, d):
+        c.saveState()
+        c.setFont(&#x27;Helvetica&#x27;, 6.8)
+        c.setFillColor(colors.HexColor(&#x27;#777777&#x27;))
+        c.drawString(self.leftMargin, letter[1] - 0.52 * inch,
+                     &#x27;THE COTTAGES AT ARCADO SPRINGS — &#x27; + self.header.upper())
+        c.drawRightString(letter[0] - self.rightMargin, letter[1] - 0.52 * inch,
+                          &#x27;DRAFT — NOT SEALED — &#x27; + DATE)
+        c.setStrokeColor(colors.HexColor(&#x27;#DDDDDD&#x27;)); c.setLineWidth(0.4)
+        c.line(self.leftMargin, letter[1] - 0.60 * inch, letter[0] - self.rightMargin, letter[1] - 0.60 * inch)
+        c.line(self.leftMargin, 0.60 * inch, letter[0] - self.rightMargin, 0.60 * inch)
+        c.drawString(self.leftMargin, 0.44 * inch,
+                     &#x27;Rezoning application R-1 to R-2 — City of Lilburn, Georgia — owner-prepared draft&#x27;)
+        c.drawRightString(letter[0] - self.rightMargin, 0.44 * inch, &#x27;Page %d&#x27; % d.page)
+        c.restoreState()
+
+
+def doc_pdf(md_path, pdf_path, header):
+    md = open(md_path, encoding=&#x27;utf-8&#x27;).read()
+    d = DocTpl(pdf_path, header)
+    d.build(md_to_flowables(md, d.width))
+    return pdf_path
+
+
+def sheet_pdf(svg_path, pdf_path):
+    import cairosvg
+    cairosvg.svg2pdf(url=svg_path, write_to=pdf_path)
+    return pdf_path
+
+
+def cover_pdf(pdf_path, index_rows):
+    d = DocTpl(pdf_path, &#x27;Cover and contents&#x27;)
+    f = [Spacer(1, 42), Paragraph(TITLE, TITLE_S), Paragraph(SUBTITLE, SUB_S),
+         para(&#x27;**Applicant and owner of record (PINs R6123 033 and 015):** Mohammed Awad, 4541 Arcado Road SW, &#x27;
+              &#x27;Lilburn, Georgia 30047.&#x27;),
+         para(&#x27;**Filed under:** City of Lilburn Zoning Ordinance No. 2023-603, Article 10, section 1003, and the &#x27;
+              &#x27;City of Lilburn 2026 Application Instructions — Rezoning / Special Use Permit / Change in Condition, &#x27;
+              &#x27;items (1) through (11).&#x27;),
+         para(&#x27;**Request:** rezone 9.44 acres from R-1 (Single-Family Residential) to R-2 (Medium-Density &#x27;
+              &#x27;Residential) for 43 one-story detached cottage homes on fee-simple lots, restricted to housing for &#x27;
+              &#x27;older persons under 42 U.S.C. section 3607(b)(2)(C) by voluntary condition.&#x27;),
+         Spacer(1, 14),
+         Paragraph(&#x27;Contents&#x27;, H[1])]
+    rows = [[&#x27;Tab&#x27;, &#x27;Document or sheet&#x27;, &#x27;Instruction item&#x27;]]
+    for key, label, _p, _k in index_rows:
+        item = &#x27;&#x27;
+        m = re.search(r&#x27;Item (\d+)&#x27;, label)
+        if m:
+            item = m.group(1)
+        elif label.startswith(&#x27;Supporting&#x27;):
+            item = &#x27;supporting&#x27;
+        elif label.startswith(&#x27;Transmittal&#x27;):
+            item = &#x27;—&#x27;
+        rows.append([key, re.sub(r&#x27;^Item \d+ — |^Supporting — &#x27;, &#x27;&#x27;, label), item])
+    f.append(_mk_table(rows, d.width))
+    f.append(Spacer(1, 14))
+    f.append(para(&#x27;&gt; **Disclaimer:** This is an AI-generated analysis for preliminary planning purposes. All &#x27;
+                  &#x27;findings must be verified by a licensed professional before use in design, permitting, or &#x27;
+                  &#x27;regulatory submissions.&#x27;, QUOTE))
+    d.build(f)
+    return pdf_path
+
+
+def renderings_pdf(pdf_path, folder):
+    &quot;&quot;&quot;One landscape-ish contact set of the illustrative perspectives, each captioned.&quot;&quot;&quot;
+    imgs = sorted(f for f in os.listdir(folder)
+                  if f.lower().endswith((&#x27;.jpg&#x27;, &#x27;.png&#x27;)) and f.startswith(&#x27;R-&#x27;))
+    if not imgs:
+        return None
+    d = DocTpl(pdf_path, &#x27;Illustrative renderings&#x27;)
+    f = [Paragraph(&#x27;Illustrative Renderings — Application Instructions item (11)&#x27;, H[0]),
+         para(&#x27;These are illustrative perspectives prepared by the owner-applicant. They are generated from the &#x27;
+              &#x27;scaled elevations in sheets A-2.1, A-2.2, A-2.3 and A-3.0 and from the master concept plan, and the &#x27;
+              &#x27;scaled drawings govern wherever an image and a drawing differ. Item (11) permits imagery: &#x27;
+              &#x27;&quot;The drawings shall be to scale or in proper perspective… Visual imagery may be used.&quot;&#x27;),
+         Spacer(1, 6)]
+    from PIL import Image as PILImage
+    small_dir = os.path.join(OUT_D, &#x27;_rend&#x27;)
+    os.makedirs(small_dir, exist_ok=True)
+    for name in imgs:
+        src = os.path.join(folder, name)
+        p = os.path.join(small_dir, os.path.splitext(name)[0] + &#x27;.jpg&#x27;)
+        with PILImage.open(src) as im:          # embed a print-resolution copy, not the 2K original
+            im = im.convert(&#x27;RGB&#x27;)
+            im.thumbnail((1700, 1700))
+            im.save(p, quality=82, optimize=True)
+        with PILImage.open(p) as im:
+            w, h = im.size
+        iw = d.width
+        ih = iw * h / float(w)
+        if ih &gt; 6.2 * inch:
+            ih = 6.2 * inch; iw = ih * w / float(h)
+        cap = os.path.splitext(name)[0].replace(&#x27;_&#x27;, &#x27; — &#x27;).replace(&#x27;-&#x27;, &#x27; &#x27;)
+        f.append(KeepTogether([RLImage(p, iw, ih), Spacer(1, 3),
+                               Paragraph(inline(&#x27;**%s**&#x27; % cap), CELL), Spacer(1, 12)]))
+    d.build(f)
+    return pdf_path
+
+
+def merge(parts, out_path):
+    from pypdf import PdfWriter, PdfReader
+    w = PdfWriter()
+    for label, path in parts:
+        r = PdfReader(path)
+        start = len(w.pages)
+        for pg in r.pages:
+            w.add_page(pg)
+        w.add_outline_item(label, start)
+    with open(out_path, &#x27;wb&#x27;) as fh:
+        w.write(fh)
+    return out_path
+
+
+def build(what=&#x27;all&#x27;):
+    made, missing = [], []
+    parts = []
+    index_rows = [r for r in ORDER if r[3] != &#x27;renderings&#x27; and os.path.exists(os.path.join(ROOT, r[2]))]
+    cov = os.path.join(OUT_D, &#x27;_cover.pdf&#x27;)
+    cover_pdf(cov, [r for r in ORDER if os.path.exists(os.path.join(ROOT, r[2]))])
+    parts.append((&#x27;Cover and contents&#x27;, cov))
+    for key, label, rel, kind in ORDER:
+        src = os.path.join(ROOT, rel)
+        if not os.path.exists(src):
+            missing.append(&#x27;%s  (%s)&#x27; % (rel, label)); continue
+        try:
+            if kind == &#x27;doc&#x27; and what in (&#x27;all&#x27;, &#x27;docs&#x27;):
+                p = os.path.join(OUT_D, os.path.splitext(os.path.basename(rel))[0] + &#x27;.pdf&#x27;)
+                doc_pdf(src, p, label); made.append(p); parts.append((label, p))
+            elif kind == &#x27;sheet&#x27; and what in (&#x27;all&#x27;, &#x27;sheets&#x27;):
+                p = os.path.join(OUT_S, key.replace(&#x27;.&#x27;, &#x27;-&#x27;) + &#x27;_&#x27; + os.path.basename(rel)[:-4] + &#x27;.pdf&#x27;)
+                sheet_pdf(src, p); made.append(p); parts.append((label, p))
+            elif kind == &#x27;renderings&#x27; and what == &#x27;all&#x27;:
+                p = os.path.join(OUT_D, &#x27;renderings.pdf&#x27;)
+                if renderings_pdf(p, src):
+                    made.append(p); parts.append((label, p))
+        except Exception as e:                                    # keep going; report at the end
+            missing.append(&#x27;%s  (FAILED: %s)&#x27; % (rel, e))
+    if what == &#x27;all&#x27; and len(parts) &gt; 1:
+        b = merge(parts, os.path.join(OUT, &#x27;RZ-2026_cottages-at-arcado-springs.pdf&#x27;))
+        made.append(b)
+        mcp = os.path.join(OUT_S, &#x27;C-2-0_mcp-sheet.pdf&#x27;)
+        if os.path.exists(mcp):
+            import shutil
+            t = os.path.join(OUT, &#x27;C-2-0_master-concept-plan_36x24.pdf&#x27;)
+            shutil.copyfile(mcp, t); made.append(t)
+    print(&#x27;BUILT %d file(s):&#x27; % len(made))
+    for m in made:
+        print(&#x27;   &#x27;, os.path.relpath(m, ROOT), &#x27;(%.0f KB)&#x27; % (os.path.getsize(m) / 1024.0))
+    if missing:
+        print(&#x27;NOT YET AVAILABLE (%d):&#x27; % len(missing))
+        for m in missing:
+            print(&#x27;   &#x27;, m)
+    return made, missing
+
+
+if __name__ == &#x27;__main__&#x27;:
+    build(sys.argv[1] if len(sys.argv) &gt; 1 else &#x27;all&#x27;)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/binder.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

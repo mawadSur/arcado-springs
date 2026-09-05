@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>HOA budget — computed output (generator `tools/hoa_budget.py`) — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">qa audit</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> 3,036 words</div>
+    <nav class="doc-toc" aria-label="Contents"><p class="doc-toc-h">Contents</p><div class="toc">
+<ul>
+<li><a href="#quantities">Quantities</a></li>
+<li><a href="#budget-full-build-out-41-lots">Budget — full build-out (41 lots)</a><ul>
+<li><a href="#reserve-component-schedule-full-build-out">Reserve component schedule — full build-out</a></li>
+</ul>
+</li>
+<li><a href="#budget-phase-1-only-24-lots-the-condition-16-downside-case">Budget — Phase 1 only (24 lots), the condition-16 downside case</a><ul>
+<li><a href="#reserve-component-schedule-phase-1-only">Reserve component schedule — Phase 1 only</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+    <h1 id="hoa-budget-computed-output-generator-toolshoa_budgetpy"><a class="toclink" href="#hoa-budget-computed-output-generator-toolshoa_budgetpy">HOA budget — computed output (generator <code>tools/hoa_budget.py</code>)</a></h1>
+<p>Reproduced verbatim in <code>docs/13-hoa-hopa-and-covenant-outline.md</code> §8. Re-run the generator after any change to <code>data/layout.json</code> or <code>data/plans.json</code>.</p>
+<h2 id="quantities"><a class="toclink" href="#quantities">Quantities</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th style="text-align: right;">Value</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lots</td>
+<td style="text-align: right;">41</td>
+<td><code>layout.json</code> metrics.lots</td>
+</tr>
+<tr>
+<td>Plan mix</td>
+<td style="text-align: right;">21 A / 20 B</td>
+<td><code>layout.json</code> lots</td>
+</tr>
+<tr>
+<td>Lane length (entrance to terminus)</td>
+<td style="text-align: right;">1,754 ft</td>
+<td>metrics.lane_length_ft</td>
+</tr>
+<tr>
+<td>Lane + entry pavement</td>
+<td style="text-align: right;">48,430 SF</td>
+<td>metrics.pavement_sf (polygons compute 48,430 SF)</td>
+</tr>
+<tr>
+<td>Sidewalk</td>
+<td style="text-align: right;">14,619 SF</td>
+<td>metrics.sidewalk_sf (polygons compute 14,619 SF)</td>
+</tr>
+<tr>
+<td>Lane tract, less pavement and walk (verge)</td>
+<td style="text-align: right;">8,036 SF</td>
+<td>tract − pavement − sidewalk</td>
+</tr>
+<tr>
+<td>Front amenity tract</td>
+<td style="text-align: right;">46,777 SF, of which 8,262 SF built/paved</td>
+<td>metrics + amenity polygons</td>
+</tr>
+<tr>
+<td>Greens (3 tracts)</td>
+<td style="text-align: right;">29,312 SF</td>
+<td><code>layout.json</code> greens</td>
+</tr>
+<tr>
+<td>Pond tracts</td>
+<td style="text-align: right;">40,000 SF (2 ponds, 20,970 SF of basin)</td>
+<td>open_space_tracts, ponds</td>
+</tr>
+<tr>
+<td>Creek woods (preserved)</td>
+<td style="text-align: right;">20,000 SF</td>
+<td>open_space_tracts</td>
+</tr>
+<tr>
+<td>Buffer easement inside lots</td>
+<td style="text-align: right;">41,000 SF</td>
+<td>metrics.buffer_easement_on_lots_sf</td>
+</tr>
+<tr>
+<td>Maintained common landscape</td>
+<td style="text-align: right;">115,863 SF = 2.66 ac</td>
+<td>verge + amenity soft + greens + pond tracts</td>
+</tr>
+<tr>
+<td>Undisturbed natural area</td>
+<td style="text-align: right;">61,000 SF = 1.40 ac</td>
+<td>creek woods + buffer easement</td>
+</tr>
+<tr>
+<td>Maintained yard per lot</td>
+<td style="text-align: right;">Plan A 1,365 SF / Plan B 1,220 SF (avg 1,294 SF)</td>
+<td>5,000 SF − plans.json lot_siting impervious − 1,000 SF buffer</td>
+</tr>
+<tr>
+<td>Street trees / total trees</td>
+<td style="text-align: right;">73 / 85</td>
+<td>40 ft o.c. + frontage strip + parking bay</td>
+</tr>
+<tr>
+<td>Light fixtures</td>
+<td style="text-align: right;">16</td>
+<td>150 ft o.c. + 4 at the amenity block (assumption)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="budget-full-build-out-41-lots"><a class="toclink" href="#budget-full-build-out-41-lots">Budget — full build-out (41 lots)</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Quantity (from <code>data/layout.json</code> / <code>data/plans.json</code>)</th>
+<th>Unit cost</th>
+<th style="text-align: right;">Annual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1 Grounds</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>Lot yard care — mow, edge, trim, blow</td>
+<td>41 lots × 34 visits</td>
+<td>$22/lot/visit</td>
+<td style="text-align: right;">$30,668</td>
+</tr>
+<tr>
+<td>Lot beds — pruning, pre-emergent, mulch, leaf removal</td>
+<td>41 lots × 2 visits</td>
+<td>$120/lot/yr</td>
+<td style="text-align: right;">$4,920</td>
+</tr>
+<tr>
+<td>Common-area turf and beds (lane verge, greens, amenity, pond tracts)</td>
+<td>2.66 ac</td>
+<td>$4,500/ac/yr</td>
+<td style="text-align: right;">$11,970</td>
+</tr>
+<tr>
+<td>Buffer easement and creek-woods stewardship (undisturbed areas)</td>
+<td>1.40 ac</td>
+<td>$900/ac/yr</td>
+<td style="text-align: right;">$1,260</td>
+</tr>
+<tr>
+<td>Street- and strip-tree pruning (3-year cycle, annualised)</td>
+<td>85 trees ÷ 3</td>
+<td>$65/tree</td>
+<td style="text-align: right;">$1,842</td>
+</tr>
+<tr>
+<td>Tree, shrub and turf replacement (3 % of stock per year)</td>
+<td>85 trees × 3 %</td>
+<td>$450/tree</td>
+<td style="text-align: right;">$1,148</td>
+</tr>
+<tr>
+<td>Irrigation operation, backflow testing and repair (amenity block)</td>
+<td>1 system</td>
+<td>$1,400/yr</td>
+<td style="text-align: right;">$1,400</td>
+</tr>
+<tr>
+<td><strong>2 Lane and stormwater</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>Lane sweeping and gutter cleaning</td>
+<td>2 events/yr</td>
+<td>$650/event</td>
+<td style="text-align: right;">$1,300</td>
+</tr>
+<tr>
+<td>Pavement crack fill and pothole patching (operating)</td>
+<td>48,430 SF</td>
+<td>$0.05/SF/yr</td>
+<td style="text-align: right;">$2,422</td>
+</tr>
+<tr>
+<td>Fire-lane and traffic signs, pavement markings</td>
+<td>lane inventory</td>
+<td>$900/yr</td>
+<td style="text-align: right;">$900</td>
+</tr>
+<tr>
+<td>Storm inlet, pipe and outlet-structure cleaning</td>
+<td>1 vacuum-truck day</td>
+<td>$1,400/yr</td>
+<td style="text-align: right;">$1,400</td>
+</tr>
+<tr>
+<td>Pond annual inspection and report to the City</td>
+<td>2 ponds</td>
+<td>$900/pond/yr</td>
+<td style="text-align: right;">$1,800</td>
+</tr>
+<tr>
+<td>Pond routine maintenance (racks, forebay, rip-rap, erosion)</td>
+<td>2 ponds</td>
+<td>$1,300/pond/yr</td>
+<td style="text-align: right;">$2,600</td>
+</tr>
+<tr>
+<td>Lane and common lighting — energy and fixture maintenance</td>
+<td>16 fixtures × 12 mo</td>
+<td>$23/fixture/mo</td>
+<td style="text-align: right;">$4,416</td>
+</tr>
+<tr>
+<td>Snow and ice event allowance</td>
+<td>0.5 event/yr</td>
+<td>$600/yr</td>
+<td style="text-align: right;">$600</td>
+</tr>
+<tr>
+<td><strong>3 Amenity</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>Clubhouse electricity</td>
+<td>2,400 SF</td>
+<td>$1.85/SF/yr</td>
+<td style="text-align: right;">$4,440</td>
+</tr>
+<tr>
+<td>Clubhouse water and sewer, amenity irrigation water</td>
+<td>1 meter</td>
+<td>$2,600/yr</td>
+<td style="text-align: right;">$2,600</td>
+</tr>
+<tr>
+<td>Clubhouse gas</td>
+<td>1 service</td>
+<td>$700/yr</td>
+<td style="text-align: right;">$700</td>
+</tr>
+<tr>
+<td>Clubhouse janitorial and supplies</td>
+<td>104 visits/yr</td>
+<td>$65/visit</td>
+<td style="text-align: right;">$6,760</td>
+</tr>
+<tr>
+<td>Clubhouse repairs, HVAC contract, pest, alarm and NFPA 13 sprinkler ITM</td>
+<td>1 building</td>
+<td>$3,900/yr</td>
+<td style="text-align: right;">$3,900</td>
+</tr>
+<tr>
+<td>Internet, cameras, access control, Knox box</td>
+<td>1 building</td>
+<td>$1,700/yr</td>
+<td style="text-align: right;">$1,700</td>
+</tr>
+<tr>
+<td>Pickleball court cleaning, nets and screens</td>
+<td>2 courts</td>
+<td>$900/yr</td>
+<td style="text-align: right;">$900</td>
+</tr>
+<tr>
+<td>Mail kiosk cleaning, lighting and locks</td>
+<td>1 kiosk</td>
+<td>$500/yr</td>
+<td style="text-align: right;">$500</td>
+</tr>
+<tr>
+<td><strong>4 Administration</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>Professional community management</td>
+<td>41 doors × 12 mo</td>
+<td>$22/door/mo</td>
+<td style="text-align: right;">$10,824</td>
+</tr>
+<tr>
+<td>HOPA age-verification program (biennial survey, transfer certificates, records)</td>
+<td>41 units ÷ 2 yr + 3 transfers</td>
+<td>$18/unit + $150/transfer</td>
+<td style="text-align: right;">$1,719</td>
+</tr>
+<tr>
+<td>Insurance — property, GL, D&amp;O, crime, umbrella</td>
+<td>41 units + clubhouse</td>
+<td>$13,500/yr</td>
+<td style="text-align: right;">$13,500</td>
+</tr>
+<tr>
+<td>Financial review and Form 1120-H</td>
+<td>1/yr</td>
+<td>$1,600/yr</td>
+<td style="text-align: right;">$1,600</td>
+</tr>
+<tr>
+<td>Legal — counsel and covenant enforcement</td>
+<td>allowance</td>
+<td>$2,500/yr</td>
+<td style="text-align: right;">$2,500</td>
+</tr>
+<tr>
+<td>Reserve study (update every 3 years, annualised)</td>
+<td>1 ÷ 3 yr</td>
+<td>$3,500/study</td>
+<td style="text-align: right;">$1,167</td>
+</tr>
+<tr>
+<td>Banking, software, portal, postage, meetings, state registration</td>
+<td>1/yr</td>
+<td>$1,900/yr</td>
+<td style="text-align: right;">$1,900</td>
+</tr>
+<tr>
+<td><strong>Operating subtotal</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"><strong>$123,356</strong></td>
+</tr>
+<tr>
+<td>Operating contingency, 5 %</td>
+<td></td>
+<td></td>
+<td style="text-align: right;">$6,168</td>
+</tr>
+<tr>
+<td><strong>Reserve contribution</strong> (schedule below)</td>
+<td></td>
+<td></td>
+<td style="text-align: right;"><strong>$40,451</strong></td>
+</tr>
+<tr>
+<td>Delinquency allowance, 2 % of assessments</td>
+<td></td>
+<td></td>
+<td style="text-align: right;">$3,399</td>
+</tr>
+<tr>
+<td><strong>TOTAL ANNUAL BUDGET</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"><strong>$173,374</strong></td>
+</tr>
+<tr>
+<td><strong>Per lot per year</strong> (41 lots)</td>
+<td></td>
+<td></td>
+<td style="text-align: right;"><strong>$4,229</strong></td>
+</tr>
+<tr>
+<td><strong>Per lot per month</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"><strong>$352</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="reserve-component-schedule-full-build-out"><a class="toclink" href="#reserve-component-schedule-full-build-out">Reserve component schedule — full build-out</a></h3>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th style="text-align: right;">Qty</th>
+<th>Unit</th>
+<th style="text-align: right;">Unit cost</th>
+<th style="text-align: right;">Replacement cost</th>
+<th style="text-align: right;">Life (yr)</th>
+<th style="text-align: right;">Annual</th>
+<th>Basis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lane and entry-drive asphalt — mill and overlay</td>
+<td style="text-align: right;">48,430</td>
+<td>SF</td>
+<td style="text-align: right;">$4</td>
+<td style="text-align: right;">$193,720</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$9,686</td>
+<td>overlay $3.50–5.50/SF and mill-and-overlay $4.50–8.00/SF in 2026 (Buildcalchub; Wright Construction; Paving Estimator); $4.00 assumes a single mobilisation for the whole lane</td>
+</tr>
+<tr>
+<td>Lane crack sealing and surface treatment</td>
+<td style="text-align: right;">48,430</td>
+<td>SF</td>
+<td style="text-align: right;">$0.30</td>
+<td style="text-align: right;">$14,529</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">$2,076</td>
+<td>crack seal + fog/seal coat between overlays</td>
+</tr>
+<tr>
+<td>Concrete sidewalk — 25 % panel replacement per cycle</td>
+<td style="text-align: right;">3,655</td>
+<td>SF</td>
+<td style="text-align: right;">$9</td>
+<td style="text-align: right;">$32,895</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$1,645</td>
+<td>4-in walk removal and replacement; 25 % of panels per 20-year cycle (root heave, settlement, ADA cross-slope corrections)</td>
+</tr>
+<tr>
+<td>Curb, gutter and valley-gutter repair allowance</td>
+<td style="text-align: right;">1,754</td>
+<td>LF</td>
+<td style="text-align: right;">$4</td>
+<td style="text-align: right;">$7,016</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">$281</td>
+<td>10 % of the curb line replaced per 25-year cycle at ~$40/LF</td>
+</tr>
+<tr>
+<td>Detention pond sediment removal</td>
+<td style="text-align: right;">2</td>
+<td>pond</td>
+<td style="text-align: right;">$18,000</td>
+<td style="text-align: right;">$36,000</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">$3,600</td>
+<td>dry basins of 0.24 ac each holding 77,863 cf between them (2026-09-03 re-sizing); Southeast stormwater dredging $25–75/CY and $25,000–75,000 for a half-acre HOA pond (Angi 2026; AUE Land; Landshore 2026) — the allowance predates the enlargement and is to be re-priced before the first reserve study</td>
+</tr>
+<tr>
+<td>Pond outlet structures, trash racks, rip-rap, emergency spillway</td>
+<td style="text-align: right;">2</td>
+<td>pond</td>
+<td style="text-align: right;">$12,000</td>
+<td style="text-align: right;">$24,000</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">$800</td>
+<td>outlet control structure and headwall rehabilitation</td>
+</tr>
+<tr>
+<td>Storm sewer pipe and structure rehabilitation</td>
+<td style="text-align: right;">1,754</td>
+<td>LF of lane</td>
+<td style="text-align: right;">$68.50</td>
+<td style="text-align: right;">$120,149</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">$2,403</td>
+<td>lane storm drainage — pipe, inlets and junction boxes at end of service life, priced per foot of lane so the Phase-1 case scales</td>
+</tr>
+<tr>
+<td>Clubhouse roof — architectural asphalt shingles</td>
+<td style="text-align: right;">3,000</td>
+<td>SF</td>
+<td style="text-align: right;">$6.50</td>
+<td style="text-align: right;">$19,500</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">$780</td>
+<td>clubhouse footprint × 1.25 slope factor; tear-off and replacement</td>
+</tr>
+<tr>
+<td>Clubhouse HVAC (2 split systems)</td>
+<td style="text-align: right;">2</td>
+<td>each</td>
+<td style="text-align: right;">$11,000</td>
+<td style="text-align: right;">$22,000</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">$1,467</td>
+<td>3-ton systems, replacement including duct repairs</td>
+</tr>
+<tr>
+<td>Clubhouse exterior repaint</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$9,000</td>
+<td style="text-align: right;">$9,000</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">$1,125</td>
+<td>docs/12 §09 91 13 2.03 sets the HOA repaint cycle at 8–10 years</td>
+</tr>
+<tr>
+<td>Clubhouse interior — flooring, paint, kitchen, restrooms, furnishings</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$60,000</td>
+<td style="text-align: right;">$60,000</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">$4,000</td>
+<td>$25/SF of clubhouse for finishes and FF&amp;E</td>
+</tr>
+<tr>
+<td>Clubhouse water heater, appliances, fitness equipment</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$14,000</td>
+<td style="text-align: right;">$14,000</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">$1,167</td>
+<td>allowance</td>
+</tr>
+<tr>
+<td>Pickleball court resurfacing</td>
+<td style="text-align: right;">2</td>
+<td>court</td>
+<td style="text-align: right;">$8,000</td>
+<td style="text-align: right;">$16,000</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">$2,667</td>
+<td>acrylic resurface of a 30' × 60' pad; 5–8-year cycle</td>
+</tr>
+<tr>
+<td>Pickleball fencing</td>
+<td style="text-align: right;">360</td>
+<td>LF</td>
+<td style="text-align: right;">$28</td>
+<td style="text-align: right;">$10,080</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$504</td>
+<td>4-ft black vinyl-coated chain link on the pad perimeter</td>
+</tr>
+<tr>
+<td>Lane and amenity light poles and fixtures</td>
+<td style="text-align: right;">16</td>
+<td>each</td>
+<td style="text-align: right;">$3,800</td>
+<td style="text-align: right;">$60,800</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">$2,432</td>
+<td>14-ft full-cutoff post-top ≤3000 K (voluntary condition 11); assumes association-owned fixtures — if they are on the Georgia Power tariff this component drops out</td>
+</tr>
+<tr>
+<td>Mail kiosk — cluster box units and shelter</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$28,000</td>
+<td style="text-align: right;">$28,000</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">$1,120</td>
+<td>4 USPS-approved CBUs at ~$2,600 plus a 16' × 10' shelter (checklist §4.r, 'protection from the elements')</td>
+</tr>
+<tr>
+<td>Monument entry sign, wall and landscape lighting</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$28,000</td>
+<td style="text-align: right;">$28,000</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$1,400</td>
+<td>≤32-SF monument sign (voluntary condition 14), masonry base, external lighting</td>
+</tr>
+<tr>
+<td>Site furnishings — benches, tables, trash receptacles, kiosk board</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$16,000</td>
+<td style="text-align: right;">$16,000</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">$1,067</td>
+<td>village green and pocket greens</td>
+</tr>
+<tr>
+<td>Irrigation system replacement (amenity block)</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$18,000</td>
+<td style="text-align: right;">$18,000</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$900</td>
+<td>controller, valves, heads and mainline</td>
+</tr>
+<tr>
+<td>Landscape renovation and buffer re-planting fund</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$20,000</td>
+<td style="text-align: right;">$20,000</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">$1,333</td>
+<td>periodic renovation of common beds and the supplemental evergreen buffer planting; also the fund behind the re-planting remedy in Article 6 of the declaration</td>
+</tr>
+<tr>
+<td><strong>Total annual reserve contribution</strong></td>
+<td style="text-align: right;"></td>
+<td></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><strong>$40,451</strong></td>
+<td>straight-line component method, no interest or inflation offset</td>
+</tr>
+</tbody>
+</table></div>
+<p>Optional bundled solid-waste contract: $22/home/month = $10,824/yr, which would raise dues to $374/month.</p>
+<h2 id="budget-phase-1-only-24-lots-the-condition-16-downside-case"><a class="toclink" href="#budget-phase-1-only-24-lots-the-condition-16-downside-case">Budget — Phase 1 only (24 lots), the condition-16 downside case</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Quantity (from <code>data/layout.json</code> / <code>data/plans.json</code>)</th>
+<th>Unit cost</th>
+<th style="text-align: right;">Annual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1 Grounds</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>Lot yard care — mow, edge, trim, blow</td>
+<td>24 lots × 34 visits</td>
+<td>$22/lot/visit</td>
+<td style="text-align: right;">$17,952</td>
+</tr>
+<tr>
+<td>Lot beds — pruning, pre-emergent, mulch, leaf removal</td>
+<td>24 lots × 2 visits</td>
+<td>$120/lot/yr</td>
+<td style="text-align: right;">$2,880</td>
+</tr>
+<tr>
+<td>Common-area turf and beds (lane verge, greens, amenity, pond tracts)</td>
+<td>1.68 ac</td>
+<td>$4,500/ac/yr</td>
+<td style="text-align: right;">$7,560</td>
+</tr>
+<tr>
+<td>Buffer easement and creek-woods stewardship (undisturbed areas)</td>
+<td>0.55 ac</td>
+<td>$900/ac/yr</td>
+<td style="text-align: right;">$495</td>
+</tr>
+<tr>
+<td>Street- and strip-tree pruning (3-year cycle, annualised)</td>
+<td>37 trees ÷ 3</td>
+<td>$65/tree</td>
+<td style="text-align: right;">$802</td>
+</tr>
+<tr>
+<td>Tree, shrub and turf replacement (3 % of stock per year)</td>
+<td>37 trees × 3 %</td>
+<td>$450/tree</td>
+<td style="text-align: right;">$499</td>
+</tr>
+<tr>
+<td>Irrigation operation, backflow testing and repair (amenity block)</td>
+<td>1 system</td>
+<td>$1,400/yr</td>
+<td style="text-align: right;">$1,400</td>
+</tr>
+<tr>
+<td><strong>2 Lane and stormwater</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>Lane sweeping and gutter cleaning</td>
+<td>2 events/yr</td>
+<td>$650/event</td>
+<td style="text-align: right;">$1,300</td>
+</tr>
+<tr>
+<td>Pavement crack fill and pothole patching (operating)</td>
+<td>25,536 SF</td>
+<td>$0.05/SF/yr</td>
+<td style="text-align: right;">$1,277</td>
+</tr>
+<tr>
+<td>Fire-lane and traffic signs, pavement markings</td>
+<td>lane inventory</td>
+<td>$900/yr</td>
+<td style="text-align: right;">$900</td>
+</tr>
+<tr>
+<td>Storm inlet, pipe and outlet-structure cleaning</td>
+<td>1 vacuum-truck day</td>
+<td>$1,400/yr</td>
+<td style="text-align: right;">$1,400</td>
+</tr>
+<tr>
+<td>Pond annual inspection and report to the City</td>
+<td>1 pond</td>
+<td>$900/pond/yr</td>
+<td style="text-align: right;">$900</td>
+</tr>
+<tr>
+<td>Pond routine maintenance (racks, forebay, rip-rap, erosion)</td>
+<td>1 pond</td>
+<td>$1,300/pond/yr</td>
+<td style="text-align: right;">$1,300</td>
+</tr>
+<tr>
+<td>Lane and common lighting — energy and fixture maintenance</td>
+<td>11 fixtures × 12 mo</td>
+<td>$23/fixture/mo</td>
+<td style="text-align: right;">$3,036</td>
+</tr>
+<tr>
+<td>Snow and ice event allowance</td>
+<td>0.5 event/yr</td>
+<td>$600/yr</td>
+<td style="text-align: right;">$600</td>
+</tr>
+<tr>
+<td><strong>3 Amenity</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>Clubhouse electricity</td>
+<td>2,400 SF</td>
+<td>$1.85/SF/yr</td>
+<td style="text-align: right;">$4,440</td>
+</tr>
+<tr>
+<td>Clubhouse water and sewer, amenity irrigation water</td>
+<td>1 meter</td>
+<td>$2,600/yr</td>
+<td style="text-align: right;">$2,600</td>
+</tr>
+<tr>
+<td>Clubhouse gas</td>
+<td>1 service</td>
+<td>$700/yr</td>
+<td style="text-align: right;">$700</td>
+</tr>
+<tr>
+<td>Clubhouse janitorial and supplies</td>
+<td>104 visits/yr</td>
+<td>$65/visit</td>
+<td style="text-align: right;">$6,760</td>
+</tr>
+<tr>
+<td>Clubhouse repairs, HVAC contract, pest, alarm and NFPA 13 sprinkler ITM</td>
+<td>1 building</td>
+<td>$3,900/yr</td>
+<td style="text-align: right;">$3,900</td>
+</tr>
+<tr>
+<td>Internet, cameras, access control, Knox box</td>
+<td>1 building</td>
+<td>$1,700/yr</td>
+<td style="text-align: right;">$1,700</td>
+</tr>
+<tr>
+<td>Pickleball court cleaning, nets and screens</td>
+<td>2 courts</td>
+<td>$900/yr</td>
+<td style="text-align: right;">$900</td>
+</tr>
+<tr>
+<td>Mail kiosk cleaning, lighting and locks</td>
+<td>1 kiosk</td>
+<td>$500/yr</td>
+<td style="text-align: right;">$500</td>
+</tr>
+<tr>
+<td><strong>4 Administration</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>Professional community management</td>
+<td>24 doors × 12 mo</td>
+<td>$22/door/mo</td>
+<td style="text-align: right;">$6,336</td>
+</tr>
+<tr>
+<td>HOPA age-verification program (biennial survey, transfer certificates, records)</td>
+<td>24 units ÷ 2 yr + 3 transfers</td>
+<td>$18/unit + $150/transfer</td>
+<td style="text-align: right;">$1,566</td>
+</tr>
+<tr>
+<td>Insurance — property, GL, D&amp;O, crime, umbrella</td>
+<td>24 units + clubhouse</td>
+<td>$13,500/yr</td>
+<td style="text-align: right;">$13,500</td>
+</tr>
+<tr>
+<td>Financial review and Form 1120-H</td>
+<td>1/yr</td>
+<td>$1,600/yr</td>
+<td style="text-align: right;">$1,600</td>
+</tr>
+<tr>
+<td>Legal — counsel and covenant enforcement</td>
+<td>allowance</td>
+<td>$2,500/yr</td>
+<td style="text-align: right;">$2,500</td>
+</tr>
+<tr>
+<td>Reserve study (update every 3 years, annualised)</td>
+<td>1 ÷ 3 yr</td>
+<td>$3,500/study</td>
+<td style="text-align: right;">$1,167</td>
+</tr>
+<tr>
+<td>Banking, software, portal, postage, meetings, state registration</td>
+<td>1/yr</td>
+<td>$1,900/yr</td>
+<td style="text-align: right;">$1,900</td>
+</tr>
+<tr>
+<td><strong>Operating subtotal</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"><strong>$92,370</strong></td>
+</tr>
+<tr>
+<td>Operating contingency, 5 %</td>
+<td></td>
+<td></td>
+<td style="text-align: right;">$4,618</td>
+</tr>
+<tr>
+<td><strong>Reserve contribution</strong> (schedule below)</td>
+<td></td>
+<td></td>
+<td style="text-align: right;"><strong>$29,767</strong></td>
+</tr>
+<tr>
+<td>Delinquency allowance, 2 % of assessments</td>
+<td></td>
+<td></td>
+<td style="text-align: right;">$2,535</td>
+</tr>
+<tr>
+<td><strong>TOTAL ANNUAL BUDGET</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"><strong>$129,291</strong></td>
+</tr>
+<tr>
+<td><strong>Per lot per year</strong> (24 lots)</td>
+<td></td>
+<td></td>
+<td style="text-align: right;"><strong>$5,387</strong></td>
+</tr>
+<tr>
+<td><strong>Per lot per month</strong></td>
+<td></td>
+<td></td>
+<td style="text-align: right;"><strong>$449</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="reserve-component-schedule-phase-1-only"><a class="toclink" href="#reserve-component-schedule-phase-1-only">Reserve component schedule — Phase 1 only</a></h3>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th style="text-align: right;">Qty</th>
+<th>Unit</th>
+<th style="text-align: right;">Unit cost</th>
+<th style="text-align: right;">Replacement cost</th>
+<th style="text-align: right;">Life (yr)</th>
+<th style="text-align: right;">Annual</th>
+<th>Basis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lane and entry-drive asphalt — mill and overlay</td>
+<td style="text-align: right;">25,536</td>
+<td>SF</td>
+<td style="text-align: right;">$4</td>
+<td style="text-align: right;">$102,144</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$5,107</td>
+<td>overlay $3.50–5.50/SF and mill-and-overlay $4.50–8.00/SF in 2026 (Buildcalchub; Wright Construction; Paving Estimator); $4.00 assumes a single mobilisation for the whole lane</td>
+</tr>
+<tr>
+<td>Lane crack sealing and surface treatment</td>
+<td style="text-align: right;">25,536</td>
+<td>SF</td>
+<td style="text-align: right;">$0.30</td>
+<td style="text-align: right;">$7,661</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">$1,094</td>
+<td>crack seal + fog/seal coat between overlays</td>
+</tr>
+<tr>
+<td>Concrete sidewalk — 25 % panel replacement per cycle</td>
+<td style="text-align: right;">1,293</td>
+<td>SF</td>
+<td style="text-align: right;">$9</td>
+<td style="text-align: right;">$11,637</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$582</td>
+<td>4-in walk removal and replacement; 25 % of panels per 20-year cycle (root heave, settlement, ADA cross-slope corrections)</td>
+</tr>
+<tr>
+<td>Curb, gutter and valley-gutter repair allowance</td>
+<td style="text-align: right;">1,034</td>
+<td>LF</td>
+<td style="text-align: right;">$4</td>
+<td style="text-align: right;">$4,138</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">$166</td>
+<td>10 % of the curb line replaced per 25-year cycle at ~$40/LF</td>
+</tr>
+<tr>
+<td>Detention pond sediment removal</td>
+<td style="text-align: right;">1</td>
+<td>pond</td>
+<td style="text-align: right;">$18,000</td>
+<td style="text-align: right;">$18,000</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">$1,800</td>
+<td>dry basins of 0.24 ac each holding 77,863 cf between them (2026-09-03 re-sizing); Southeast stormwater dredging $25–75/CY and $25,000–75,000 for a half-acre HOA pond (Angi 2026; AUE Land; Landshore 2026) — the allowance predates the enlargement and is to be re-priced before the first reserve study</td>
+</tr>
+<tr>
+<td>Pond outlet structures, trash racks, rip-rap, emergency spillway</td>
+<td style="text-align: right;">1</td>
+<td>pond</td>
+<td style="text-align: right;">$12,000</td>
+<td style="text-align: right;">$12,000</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">$400</td>
+<td>outlet control structure and headwall rehabilitation</td>
+</tr>
+<tr>
+<td>Storm sewer pipe and structure rehabilitation</td>
+<td style="text-align: right;">1,034</td>
+<td>LF of lane</td>
+<td style="text-align: right;">$68.50</td>
+<td style="text-align: right;">$70,863</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">$1,417</td>
+<td>lane storm drainage — pipe, inlets and junction boxes at end of service life, priced per foot of lane so the Phase-1 case scales</td>
+</tr>
+<tr>
+<td>Clubhouse roof — architectural asphalt shingles</td>
+<td style="text-align: right;">3,000</td>
+<td>SF</td>
+<td style="text-align: right;">$6.50</td>
+<td style="text-align: right;">$19,500</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">$780</td>
+<td>clubhouse footprint × 1.25 slope factor; tear-off and replacement</td>
+</tr>
+<tr>
+<td>Clubhouse HVAC (2 split systems)</td>
+<td style="text-align: right;">2</td>
+<td>each</td>
+<td style="text-align: right;">$11,000</td>
+<td style="text-align: right;">$22,000</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">$1,467</td>
+<td>3-ton systems, replacement including duct repairs</td>
+</tr>
+<tr>
+<td>Clubhouse exterior repaint</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$9,000</td>
+<td style="text-align: right;">$9,000</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">$1,125</td>
+<td>docs/12 §09 91 13 2.03 sets the HOA repaint cycle at 8–10 years</td>
+</tr>
+<tr>
+<td>Clubhouse interior — flooring, paint, kitchen, restrooms, furnishings</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$60,000</td>
+<td style="text-align: right;">$60,000</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">$4,000</td>
+<td>$25/SF of clubhouse for finishes and FF&amp;E</td>
+</tr>
+<tr>
+<td>Clubhouse water heater, appliances, fitness equipment</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$14,000</td>
+<td style="text-align: right;">$14,000</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">$1,167</td>
+<td>allowance</td>
+</tr>
+<tr>
+<td>Pickleball court resurfacing</td>
+<td style="text-align: right;">2</td>
+<td>court</td>
+<td style="text-align: right;">$8,000</td>
+<td style="text-align: right;">$16,000</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">$2,667</td>
+<td>acrylic resurface of a 30' × 60' pad; 5–8-year cycle</td>
+</tr>
+<tr>
+<td>Pickleball fencing</td>
+<td style="text-align: right;">360</td>
+<td>LF</td>
+<td style="text-align: right;">$28</td>
+<td style="text-align: right;">$10,080</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$504</td>
+<td>4-ft black vinyl-coated chain link on the pad perimeter</td>
+</tr>
+<tr>
+<td>Lane and amenity light poles and fixtures</td>
+<td style="text-align: right;">11</td>
+<td>each</td>
+<td style="text-align: right;">$3,800</td>
+<td style="text-align: right;">$41,800</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">$1,672</td>
+<td>14-ft full-cutoff post-top ≤3000 K (voluntary condition 11); assumes association-owned fixtures — if they are on the Georgia Power tariff this component drops out</td>
+</tr>
+<tr>
+<td>Mail kiosk — cluster box units and shelter</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$28,000</td>
+<td style="text-align: right;">$28,000</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">$1,120</td>
+<td>4 USPS-approved CBUs at ~$2,600 plus a 16' × 10' shelter (checklist §4.r, 'protection from the elements')</td>
+</tr>
+<tr>
+<td>Monument entry sign, wall and landscape lighting</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$28,000</td>
+<td style="text-align: right;">$28,000</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$1,400</td>
+<td>≤32-SF monument sign (voluntary condition 14), masonry base, external lighting</td>
+</tr>
+<tr>
+<td>Site furnishings — benches, tables, trash receptacles, kiosk board</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$16,000</td>
+<td style="text-align: right;">$16,000</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">$1,067</td>
+<td>village green and pocket greens</td>
+</tr>
+<tr>
+<td>Irrigation system replacement (amenity block)</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$18,000</td>
+<td style="text-align: right;">$18,000</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$900</td>
+<td>controller, valves, heads and mainline</td>
+</tr>
+<tr>
+<td>Landscape renovation and buffer re-planting fund</td>
+<td style="text-align: right;">1</td>
+<td>LS</td>
+<td style="text-align: right;">$20,000</td>
+<td style="text-align: right;">$20,000</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">$1,333</td>
+<td>periodic renovation of common beds and the supplemental evergreen buffer planting; also the fund behind the re-planting remedy in Article 6 of the declaration</td>
+</tr>
+<tr>
+<td><strong>Total annual reserve contribution</strong></td>
+<td style="text-align: right;"></td>
+<td></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><strong>$29,767</strong></td>
+<td>straight-line component method, no interest or inflation offset</td>
+</tr>
+</tbody>
+</table></div>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/verify/hoa-budget-output.md</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Technical Memoranda — Computed Inputs — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">qa audit</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> JSON</div>
+    
+    <h1>Technical Memoranda — Computed Inputs</h1><p class="src-note">JSON · 105 lines · <a href="/data-room/src/submission/verify/memo-calcs.json">download the raw file</a></p><pre><code>{
+ &quot;units&quot;: 41,
+ &quot;lots phase 1 / phase 2&quot;: &quot;24 / 17&quot;,
+ &quot;density du/ac (9.44 deeded)&quot;: 4.34,
+ &quot;open space sf / pct&quot;: &quot;141,089 / 33.8%&quot;,
+ &quot;impervious sf / pct&quot;: &quot;184,148 / 44.1%&quot;,
+ &quot;0.80 x units&quot;: 32.8,
+ &quot;units needing a 55+ resident&quot;: 33,
+ &quot;units with no age requirement&quot;: 8,
+ &quot;251 daily lo&quot;: 152,
+ &quot;251 daily mid&quot;: 177,
+ &quot;251 AM lo&quot;: 8.2,
+ &quot;251 AM mid&quot;: 9.8,
+ &quot;251 AM hi&quot;: 13.9,
+ &quot;251 PM lo/mid&quot;: 12.3,
+ &quot;251 PM hi&quot;: 16.0,
+ &quot;251 daily @cap&quot;: 203,
+ &quot;251 AM @cap hi&quot;: 16.0,
+ &quot;251 PM @cap hi&quot;: 18.3,
+ &quot;R-1 lots @4 du/ac&quot;: 37,
+ &quot;210 daily&quot;: 348.9,
+ &quot;210 AM&quot;: 25.9,
+ &quot;210 PM&quot;: 34.8,
+ &quot;vs R-1 daily&quot;: &quot;-49%&quot;,
+ &quot;vs R-1 PM&quot;: &quot;-65%&quot;,
+ &quot;2025 MU PM raw&quot;: 213.8,
+ &quot;2025 MU daily raw&quot;: 2030,
+ &quot;vs 2025 MU PM&quot;: &quot;-94%&quot;,
+ &quot;AADT share (daily/14,800)&quot;: &quot;1.19%&quot;,
+ &quot;entrance to Arcadia Pl cl&quot;: &quot;251 ft&quot;,
+ &quot;frontage on Arcado Rd&quot;: &quot;237.44 ft chord&quot;,
+ &quot;front reach length ft&quot;: 814,
+ &quot;cross leg to the EX MH ft&quot;: 106.4,
+ &quot;invert at the phase line&quot;: 935.4,
+ &quot;front-reach lane sag&quot;: &quot;u 779 / 936.3&quot;,
+ &quot;invert at the sag (5-ft cover)&quot;: 931.3,
+ &quot;slope phase line -&gt; sag&quot;: &quot;2.05 %&quot;,
+ &quot;length sag -&gt; MH ft&quot;: 613,
+ &quot;available slope sag-&gt;MH&quot;: &quot;0.68 %&quot;,
+ &quot;lane hump between sag and MH&quot;: &quot;u 279 / 946.4&quot;,
+ &quot;pipe depth under the hump @0.40%&quot;: 17.1,
+ &quot;SW-edge alternative ground&quot;: &quot;939.3 at (250,-215)&quot;,
+ &quot;8-in full-flow Q @0.40%&quot;: &quot;344 gpm&quot;,
+ &quot;rear low point&quot;: &quot;u 1479 / 931.5&quot;,
+ &quot;ridge on the lane&quot;: &quot;u 1179 / 953.5&quot;,
+ &quot;rear invert (5-ft cover)&quot;: 926.5,
+ &quot;rear-&gt;MH length ft&quot;: 1313,
+ &quot;invert reached at the MH @0.40%&quot;: 921.25,
+ &quot;cut under the ridge if forced&quot;: 28.2,
+ &quot;extension total length ft&quot;: 478,
+ &quot;extension off-site ft&quot;: 178.0,
+ &quot;extension slope&quot;: &quot;1.45 %&quot;,
+ &quot;depth where it crosses the lane&quot;: 20.8,
+ &quot;depth at the SW property line&quot;: 10.5,
+ &quot;SW low-pocket ground&quot;: &quot;923.4 at (1400,-210)&quot;,
+ &quot;AADF (DWR table)&quot;: &quot;10670 gpd&quot;,
+ &quot;AADF gpm&quot;: &quot;7.41 gpm&quot;,
+ &quot;peak (x4.0) DWR&quot;: &quot;42680 gpd = 29.6 gpm&quot;,
+ &quot;Phase 1 AADF DWR&quot;: &quot;6420 gpd&quot;,
+ &quot;Phase 1 peak&quot;: &quot;25680 gpd = 17.8 gpm&quot;,
+ &quot;Phase 2 AADF DWR&quot;: &quot;4250 gpd&quot;,
+ &quot;Phase 2 peak&quot;: &quot;17000 gpd = 11.8 gpm&quot;,
+ &quot;AADF (population cross-check)&quot;: &quot;6314 gpd&quot;,
+ &quot;peak (x4.0) population&quot;: &quot;25256 gpd = 17.5 gpm&quot;,
+ &quot;extension pipe cost&quot;: &quot;$71,719-$107,578&quot;,
+ &quot;extension order-of-magnitude&quot;: &quot;$167,719-$272,578&quot;,
+ &quot;per Phase-2 lot&quot;: &quot;$9,866-$16,034&quot;,
+ &quot;avg day&quot;: &quot;10250 gpd&quot;,
+ &quot;max day (x2.0)&quot;: &quot;20500 gpd&quot;,
+ &quot;peak hour (x4.0)&quot;: &quot;28.5 gpm&quot;,
+ &quot;fire flow unsprinklered&quot;: &quot;1,000 gpm / 1 h&quot;,
+ &quot;fire flow w/ NFPA 13D&quot;: &quot;500 gpm / 1 h&quot;,
+ &quot;main length ft&quot;: 1754,
+ &quot;hydrants @~400 ft&quot;: 6,
+ &quot;main volume 8-in&quot;: &quot;4580 gal&quot;,
+ &quot;site area&quot;: &quot;417,174 sf = 9.58 ac&quot;,
+ &quot;impervious&quot;: &quot;184,148 sf = 4.23 ac = 44.14%&quot;,
+ &quot;Rv&quot;: 0.4473,
+ &quot;WQr (in)&quot;: 0.5367,
+ &quot;WQv&quot;: &quot;18,659 cf&quot;,
+ &quot;RRv (1.0-in basis)&quot;: &quot;15,549 cf&quot;,
+ &quot;disturbed area&quot;: &quot;328,484 sf = 7.541 ac&quot;,
+ &quot;detention required&quot;: &quot;75,410 cf&quot;,
+ &quot;detention provided&quot;: &quot;77,863 cf&quot;,
+ &quot;provided / required&quot;: &quot;103.3 %&quot;,
+ &quot;detention net of a 1.0-in RRv&quot;: &quot;59,861 cf&quot;,
+ &quot;Pond 1 (dry detention / WQ)&quot;: &quot;33,129 cf&quot;,
+ &quot;Pond 2 (dry detention / WQ)&quot;: &quot;44,734 cf&quot;,
+ &quot;prismoidal check 52 x 180 x 6&quot;: &quot;33,696 cf&quot;,
+ &quot;prismoidal check 64 x 180 x 6&quot;: &quot;45,360 cf&quot;,
+ &quot;impervious vs 2025 MU&quot;: &quot;44.1% vs 50-57%&quot;,
+ &quot;dead-end length&quot;: &quot;1754 ft&quot;,
+ &quot;units on a single access&quot;: 41,
+ &quot;hammerhead spacing&quot;: [
+  594.5,
+  570.0,
+  580.0
+ ],
+ &quot;lane pavement width&quot;: &quot;22.0 ft&quot;,
+ &quot;lane tract width&quot;: &quot;35.9-46.1 ft&quot;,
+ &quot;farthest driveway, travelled way&quot;: &quot;1701 ft&quot;,
+ &quot;steepest existing lane grade&quot;: &quot;10.9 %&quot;,
+ &quot;sprinkler offer&quot;: &quot;$123,000&quot;,
+ &quot;parking&quot;: &quot;164 on lot + 12 guest/kiosk&quot;
+}</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/verify/memo-calcs.json</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

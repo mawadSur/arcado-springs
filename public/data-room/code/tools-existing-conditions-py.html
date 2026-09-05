@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Sheet C-1.0 existing conditions generator — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Sheet C-1.0 existing conditions generator</h1><p class="src-note">Python · 417 lines · <a href="/data-room/src/submission/tools/existing_conditions.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Sheet C-0 &quot;EXISTING CONDITIONS&quot; — The Cottages at Arcado Springs (R-1 -&gt; R-2, Lilburn GA).
+
+    python3 tools/existing_conditions.py        -&gt;  drawings/existing-conditions.svg + .png
+
+ARCH D 36 x 24 in at 1&quot; = 60&#x27;, with one enlargement at 1&quot; = 30&#x27;. Everything is drawn by
+tools/sitebase.py from data/layout.json, data/site-context-local.json, data/topo-samples.json,
+data/adjoining-parcels.json and data/owners-found.json; nothing here is a hand-drawn coordinate.
+
+WHY THIS SHEET EXISTS
+Lilburn Zoning Ordinance 2023-603 section 1003-4.6 requires the site plan to show &quot;existing
+roads and streams, flood plains, existing and proposed buildings and structures, parking and
+loading areas ... [and] areas of existing vegetation&quot;. The 2026-09-03 completeness audit
+(audit-2026-09-03/completeness.md, item M8) records that two of those named elements are
+absent from Sheet C-1: the existing buildings are noted in text but not drawn in place, and
+areas of existing vegetation are not delineated at all. C-0 carries both, plus the existing
+boundary, parcel lines, topography, stream and buffers, sanitary sewer and easement, water,
+right-of-way, adjoining ownership and zoning, and the FEMA determination.
+
+DRAFT — NOT SEALED. To be superseded by a sealed Georgia RLS boundary and topographic survey.
+&quot;&quot;&quot;
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import sitebase as sb                                      # noqa: E402
+
+# --------------------------------------------------------------------------- derived numbers
+BND = sb.BOUNDARY
+GIS_AC = sb.BOUNDARY_SF / 43560.0
+HI = max(sb.TOPO[&#x27;samples&#x27;], key=lambda s: s[&#x27;z_ft&#x27;])
+LO = min(sb.TOPO[&#x27;samples&#x27;], key=lambda s: s[&#x27;z_ft&#x27;])
+ROW_W = sb.row_width_ft()
+HYDRANT = min(sb.CTX[&#x27;hydrants&#x27;], key=lambda h: h[&#x27;dist_ft&#x27;])
+STRUCTS = sb.existing_polys()
+DRIVE_PATH, DRIVE_BAND = sb.existing_drive_poly()
+DRIVE_LEN = sum(sb.dist(DRIVE_PATH[i], DRIVE_PATH[i + 1]) for i in range(len(DRIVE_PATH) - 1))
+# The Gwinnett GIS soils layer publishes the map-unit symbol but not the name (name = null in
+# data/site-context-local.json); the names below are the NRCS SSURGO GA135 series recorded in
+# FACTS.md section 2b, which are what the package cites elsewhere.
+SOIL_NAMES = {&#x27;ApB&#x27;: &#x27;Appling&#x27;, &#x27;AmC2&#x27;: &#x27;Appling/Madison&#x27;, &#x27;PfC2&#x27;: &#x27;Pacolet&#x27;, &#x27;GeB2&#x27;: &#x27;Cecil&#x27;,
+              &#x27;GgE2&#x27;: &#x27;Cecil, steep&#x27;, &#x27;ARE&#x27;: &#x27;Ashlar — gneiss at 22–40 in&#x27;, &#x27;HYB&#x27;: &#x27;Helena — HSG D&#x27;}
+SOILS = &#x27;, &#x27;.join(&#x27;%s (%s)&#x27; % (m, SOIL_NAMES.get(m, &#x27;name not published — VERIFY&#x27;))
+                  for m in [s[&#x27;musym&#x27;] for s in sb.CTX[&#x27;soils&#x27;]])
+FEMA = &#x27;Zone X (area of minimal flood hazard) — FIRM panel 13135C0114F, effective 2006-09-29&#x27;
+
+# Boundary lengths as reported by the DRAFT metes-and-bounds description (docs/05 section 5),
+# which is generated from the same GIS ring this sheet draws.
+FRONTAGE_FT, SW_FT, NE_FT, REAR_FT, PERIM_FT = 237.63, 1757.01, 1721.68, 246.41, 3962.73
+
+ENL = (-80.0, 300.0, -255.0, -35.0, &#x27;A&#x27;)                   # u0, u1, v0, v1, tag — the frontage
+# PIN callouts, each inside its own parcel and clear of the existing buildings and utility notes
+PIN_AT = {&#x27;6123 033&#x27;: (95.0, -160.0), &#x27;6123 015&#x27;: (560.0, -128.0),
+          &#x27;6123 014&#x27;: (880.0, -128.0), &#x27;6123 162&#x27;: (1500.0, -14.0)}
+sb.ENLARGEMENTS.append(ENL)
+
+# Short-course tags (L1, L2, ...) for the line table: boundary() assigns them as it labels the
+# courses, so run it once on a scratch canvas that is never drawn.
+TAGS = sb.boundary(sb.Drawing(sb.SCALE60, 0.0, 0.0), bearings=True, label=False)
+
+NOTES = [
+    &#x27;BOUNDARY AND PARCEL LINES: the assemblage boundary, the four interior parcel lines, the bearings, the distances &#x27;
+    &#x27;and the acreages shown are computed from the Gwinnett County GIS parcel fabric (SR 2240 GA West, US survey feet) &#x27;
+    &#x27;and are DRAFT. A boundary survey plat and metes-and-bounds legal description sealed by a Georgia registered land &#x27;
+    &#x27;surveyor are required by Lilburn Zoning Ordinance 2023-603 §1003-4.3 and §1003-4.4 and govern over this sheet. &#x27;
+    &#x27;The four parcels are to be combined; the interior lines are shown so the City can read the assemblage.&#x27;,
+
+    &#x27;TOPOGRAPHY: existing 2-ft contours are interpolated from the USGS 3DEP 1-metre digital elevation model sampled on &#x27;
+    &#x27;a 100 × 50-ft grid (NAVD88) and are APPROXIMATE. Elevations on site range %.1f to %.1f ft; the high point is on &#x27;
+    &#x27;the ridge at local (u %.0f, v %+.0f) and the low point is in the rear pocket at (u %.0f, v %+.0f). A topographic &#x27;
+    &#x27;survey is required before any engineering design. Contour interval 2 ft; index contours at 10 ft.&#x27;
+    % (LO[&#x27;z_ft&#x27;], HI[&#x27;z_ft&#x27;], HI[&#x27;u&#x27;], HI[&#x27;v&#x27;], LO[&#x27;u&#x27;], LO[&#x27;v&#x27;]),
+
+    &#x27;EXISTING BUILDINGS AND DRIVES (§1003-4.6 &quot;existing buildings and structures&quot;): the two dwellings and the drive &#x27;
+    &#x27;shown are APPROXIMATE — FROM AERIAL IMAGERY / TAX RECORDS, TO BE LOCATED BY SURVEY. Footprint outlines are public &#x27;
+    &#x27;aerial-imagery building footprints published by OpenStreetMap (© OpenStreetMap contributors, ODbL; Microsoft/Bing &#x27;
+    &#x27;ML BuildingFootprints lineage — ways 999395123, 999395265 and 913015145), transformed into the site-local system &#x27;
+    &#x27;and checked against public aerial imagery on 2026-09-03. Footprint areas scale at %s SF (4541) and %s SF (4535) &#x27;
+    &#x27;against 2026 digest heated areas of 2,053 SF (split-level, built 1972) and 4,267 SF (built 1987, full finished &#x27;
+    &#x27;basement). BOTH DWELLINGS, ALL ACCESSORY STRUCTURES AND ALL EXISTING DRIVES ARE TO BE REMOVED. Accessory &#x27;
+    &#x27;structures are reported near the frontage (FACTS §2; docs/02 §2) but none is resolved in the footprint source: &#x27;
+    &#x27;inventory them by survey before demolition permits. The septic-versus-sewer status of 4535 is unconfirmed — VERIFY. &#x27;
+    &#x27;NOTE THE POSITION OF 4535: its dwelling stands about %.0f ft back from the Arcado Rd right-of-way, on the ridge at &#x27;
+    &#x27;mid-strip — NOT at the frontage. FACTS §2 and docs/02 §2, which place both houses &quot;near the front&quot;, should be &#x27;
+    &#x27;corrected to match this sheet.&#x27;
+    % (format(round(STRUCTS[0][2], -1), &#x27;,.0f&#x27;), format(round(STRUCTS[1][2], -1), &#x27;,.0f&#x27;),
+       sb.poly_centroid(STRUCTS[1][1])[0]),
+
+    &#x27;EXISTING VEGETATION (§1003-4.6 &quot;areas of existing vegetation&quot;): EXISTING WOODED AREA — LIMITS APPROXIMATE, TO BE &#x27;
+    &#x27;FIELD-VERIFIED. The wooded limit is the site boundary less the two mown yards at the existing dwellings, digitised &#x27;
+    &#x27;from public aerial imagery on 2026-09-03 and consistent with docs/11 (&quot;the rear two-thirds is Piedmont hardwood&quot;) &#x27;
+    &#x27;and FACTS §2 (&quot;wooded rear&quot;). NO TREE SURVEY HAS BEEN PERFORMED: species, calliper, specimen trees and the actual &#x27;
+    &#x27;tree line are unknown. A tree survey and tree protection / replacement plan will be submitted with the Land &#x27;
+    &#x27;Disturbance Permit; tree density units at 16 TDU/ac are not required of a single-family-residential subdivision &#x27;
+    &#x27;(City of Lilburn Site Development Plan Review Checklist §6.i).&#x27;,
+
+    &#x27;STREAM AND BUFFERS: an unnamed order-0 headwater of Jackson Creek (GAR030701030315; Georgia 2024 §303(d) list for &#x27;
+    &#x27;bacteria and biota, urban runoff) reaches about 30 ft inside the SW line and terminates at local (u 1,392, &#x27;
+    &#x27;v −210). TOP OF BANK IS APPROXIMATE — a field delineation by a qualified professional is required and governs. &#x27;
+    &#x27;Buffers shown: 25 ft state (GA EPD, O.C.G.A. §12-7-6(b)(15)); 50 ft undisturbed and 25 ft additional impervious &#x27;
+    &#x27;setback = 75 ft total (City of Lilburn Code Ch. 109 Art. VII). The 50/75-ft buffers of a second branch that runs &#x27;
+    &#x27;38–58 ft outside the SW line clip the SW edge of the site.&#x27;,
+
+    &#x27;FLOODPLAIN: FEMA %s (Gwinnett GIS floodplain layer; docs/11 §2 Flood, FEMA NFHL accessed 2026-08-28). No special &#x27;
+    &#x27;flood hazard area, floodway or base flood elevation is mapped on the site; the headwater stream is not a &#x27;
+    &#x27;FEMA-mapped watercourse, so the local stream buffer, not a BFE, governs the rear pocket.&#x27; % FEMA,
+
+    &#x27;SANITARY SEWER: an existing 8-in gravity main (&quot;Arcado Road Townhomes sewer outfall&quot;, Gwinnett DWR) enters the &#x27;
+    &#x27;site at Arcado Rd and runs 7–13 ft inside the SW line to a manhole at local (u 272, v −224). Both invert &#x27;
+    &#x27;elevations shown — 927.13 at that manhole and 919.58 at the Legends at Parkview manhole at (u 1,349, v −407) — &#x27;
+    &#x27;are GIS ATTRIBUTES, UNSURVEYED: an invert survey is the first field task. The 20-ft sanitary sewer easement shown &#x27;
+    &#x27;is the &quot;EX. 20\&#x27; SSE&quot; of the 2025 hydrology sheet and is NOT a surveyed plat dimension — VERIFY the recorded &#x27;
+    &#x27;width and holder. A Gwinnett DWR sewer capacity certification is required for any connection.&#x27;,
+
+    &#x27;WATER: DIP and ACP mains are in the Arcado Rd right-of-way 47–107 ft from the front line; the public layer does &#x27;
+    &#x27;not publish diameters — VERIFY with Gwinnett DWR. The nearest fire hydrant is at local (u %.0f, v %+.1f), %.1f ft &#x27;
+    &#x27;from the front corner. Other hydrants shown are in the adjoining subdivisions.&#x27;
+    % (HYDRANT[&#x27;local&#x27;][0], HYDRANT[&#x27;local&#x27;][1], HYDRANT[&#x27;dist_ft&#x27;]),
+
+    &#x27;ARCADO ROAD RIGHT-OF-WAY: R/W WIDTH VARIES. Measured perpendicular between the two Gwinnett GIS right-of-way &#x27;
+    &#x27;lines it scales %s — a GIS-scaled dimension, not a surveyed one; the R/W line, its width and any required &#x27;
+    &#x27;dedication must be established by the RLS survey. Arcado Rd is a Gwinnett County-maintained minor collector, &#x27;
+    &#x27;35 mph, 14,800 AADT (GDOT station 135-6689, 2017). The centreline of Arcadia Place meets the Arcado Rd centreline &#x27;
+    &#x27;at local (u −12, v +61), 61 ft NE of the site\&#x27;s NE front corner.&#x27;
+    % (&#x27;, &#x27;.join(&#x27;%.1f ft at v %+.0f&#x27; % (w, v) for v, w in ROW_W)),
+
+    &#x27;ADJOINING PROPERTY: %d privately owned tax parcels adjoin the assemblage — 14 on the NE line (King David Manor, &#x27;
+    &#x27;plat S/159), 14 on the SW line (Legends at Parkview, plat 118/187) and 3 at the NW end (Nantucket) — every one of &#x27;
+    &#x27;them zoned R-1, City of Lilburn, in single-family use. With the Gwinnett County Arcado Rd right-of-way they are &#x27;
+    &#x27;the 32 notice recipients listed in docs/06. PINs, addresses and owners are from the Gwinnett County Tax Assessor &#x27;
+    &#x27;2026 property-ownership file; re-run them on the filing date. The nearest Lilburn R-2 polygon (the &quot;Arcado Road &#x27;
+    &#x27;Townhomes&quot; site) lies about 106 ft NE of the front corner and is the nearest R-2 precedent.&#x27;
+    % (len(sb.CTX[&#x27;adjoining_parcels&#x27;]) - 1),
+
+    &#x27;SOILS (NRCS SSURGO GA135, via Gwinnett GIS): %s. HYB (Helena) is hydrologic soil group D with a seasonal high &#x27;
+    &#x27;water table near 24 in; ARE (Ashlar) carries gneiss bedrock at 22–40 in under both proposed pond sites and the &#x27;
+    &#x27;mid-swale. Rock probes and an undercut allowance are required before any hydrology basis is trusted.&#x27; % SOILS,
+
+    &#x27;UTILITIES NOT SHOWN: electric, gas, telecommunication and storm-drainage structures are not published in the &#x27;
+    &#x27;layers used for this sheet and are NOT shown. Utility locates through Georgia 811 (Georgia Utility Facility &#x27;
+    &#x27;Protection Act, O.C.G.A. §25-9) are required before any field work, and a full existing-utility survey is &#x27;
+    &#x27;required with the Land Disturbance Permit.&#x27;,
+
+    &#x27;STATUS: this sheet is a DRAFT record of existing conditions compiled from public data for pre-application review. &#x27;
+    &#x27;It is NOT a survey and is NOT SEALED. All dimensions are in US survey feet in the site-local system (u along the &#x27;
+    &#x27;strip, v across). Every statement of conformity in this submittal reads &quot;appears consistent with&quot; and none is a &#x27;
+    &#x27;compliance certification. THE SEALED SURVEY GOVERNS.&#x27;,
+]
+
+LEGEND = [
+    (&#x27;line&#x27;, sb.C[&#x27;bnd&#x27;], 1.8, &#x27;&#x27;, &#x27;Assemblage boundary (Gwinnett GIS — DRAFT)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;parcel&#x27;], 0.6, &#x27;10 4 2 4&#x27;, &#x27;Interior parcel line (to be combined)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;adj_fill&#x27;], 0, &#x27;&#x27;, &#x27;Adjoining tax parcel (all zoned R-1, Lilburn)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;rw&#x27;], 0.9, &#x27;&#x27;, &#x27;Arcado Rd right-of-way line (R/W width varies)&#x27;),
+    (&#x27;line&#x27;, &#x27;#333&#x27;, 0.6, &#x27;14 3 3 3&#x27;, &#x27;Existing road centreline&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;contour&#x27;], 0.6, &#x27;4 2&#x27;, &#x27;Existing index contour, 10 ft (3DEP approx.)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;contour&#x27;], 0.3, &#x27;2 2&#x27;, &#x27;Existing contour, 2 ft (3DEP approx.)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;stream&#x27;], 1.6, &#x27;&#x27;, &#x27;Stream — state waters (top of bank approx.)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.5, &#x27;3 2&#x27;, &quot;25&#x27; state (GA EPD) buffer&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.8, &#x27;6 2&#x27;, &quot;50&#x27; undisturbed stream buffer (Lilburn)&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.8, &#x27;8 2 2 2&#x27;, &quot;75&#x27; impervious setback&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;sewer&#x27;], 0.9, &#x27;&#x27;, &#x27;Existing 8-in sanitary sewer + manhole&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#ssehatch)&#x27;, 0, &#x27;&#x27;, &quot;Existing 20&#x27; sanitary sewer easement (VERIFY)&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;water&#x27;], 0.9, &#x27;9 3 2 3&#x27;, &#x27;Existing water main (Gwinnett DWR)&#x27;),
+    (&#x27;dot&#x27;, sb.C[&#x27;hydrant&#x27;], 0, &#x27;&#x27;, &#x27;Existing fire hydrant&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#exhatch)&#x27;, 0, &#x27;&#x27;, &#x27;Existing building — approximate, to be removed&#x27;),
+    (&#x27;rect&#x27;, &#x27;#efe6dc&#x27;, 0, &#x27;&#x27;, &#x27;Existing drive — approximate, to be removed&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#woods)&#x27;, 0, &#x27;&#x27;, &#x27;Existing wooded area (limits approximate)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;wood_line&#x27;], 0.9, &#x27;7 3 2 3&#x27;, &#x27;Tree line at mown yard (approximate)&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#r2hatch)&#x27;, 0, &#x27;&#x27;, &#x27;Existing R-2 zoning (City of Lilburn)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;match&#x27;], 1.1, &#x27;16 5 3 5&#x27;, &#x27;Match line — enlargement at 1&quot; = 30\&#x27;&#x27;),
+]
+
+
+# The sanitary runs the package relies on: the Arcado Road Townhomes outfall chain that crosses
+# the property, plus the two Legends at Parkview runs that carry the 919.58 invert. Everything in
+# this schedule is a Gwinnett DWR GIS attribute — none of it is surveyed.
+SEWER_RUNS = ([r for r in sb.CTX[&#x27;sewer&#x27;] if &#x27;ARCADO ROAD TOWNHOMES&#x27; in r[&#x27;project&#x27;] and r[&#x27;min_dist_ft&#x27;] &lt;= 15]
+              + [r for r in sb.CTX[&#x27;sewer&#x27;] if &#x27;LEGENDS&#x27; in r[&#x27;project&#x27;] and r[&#x27;inv_out&#x27;] in (919.58, 917.83)])
+
+
+def sewer_rows():
+    rows = []
+    for r in sorted(SEWER_RUNS, key=lambda r: -r[&#x27;inv_in&#x27;]):
+        a = r[&#x27;paths_local&#x27;][0][0]
+        b = r[&#x27;paths_local&#x27;][0][-1]
+        rows.append([str(r[&#x27;facility&#x27;]),
+                     &#x27;(%.0f, %+.0f) → (%.0f, %+.0f)&#x27; % (a[0], a[1], b[0], b[1]),
+                     &#x27;%s-in %s&#x27; % (r[&#x27;dia&#x27;], r[&#x27;mat&#x27;]),
+                     &#x27;%.1f&#x27; % r[&#x27;len&#x27;],
+                     &#x27;%.2f&#x27; % (100.0 * (r[&#x27;inv_in&#x27;] - r[&#x27;inv_out&#x27;]) / r[&#x27;len&#x27;]),
+                     &#x27;%.2f → %.2f&#x27; % (r[&#x27;inv_in&#x27;], r[&#x27;inv_out&#x27;]),
+                     r[&#x27;project&#x27;].title().replace(&#x27;Sewer Outfall&#x27;, &#x27;sewer outfall&#x27;)])
+    return rows
+
+
+SOURCES = [
+    &#x27;Gwinnett County GIS — parcels, zoning, streets, right-of-way, sanitary sewer, water mains, hydrants, &#x27;
+    &#x27;subdivisions, city limits (accela/agis_gwinnett MapServer layers 3–7, 21, 23, 25); streams, floodplain, &#x27;
+    &#x27;soils (GISDataBrowser/GC_Main layers 1, 3, 9). Queried 2026-08-28.&#x27;,
+    &#x27;Gwinnett County Tax Assessor — 2026 Property Ownership quarterly file (owners, mailing addresses, deeded &#x27;
+    &#x27;acreage, year built, heated area). Accessed 2026-08-28.&#x27;,
+    &#x27;USGS 3DEP elevation ImageServer — 1-metre DEM sampled on a 100 × 50-ft grid, NAVD88 (data/topo-samples.json). &#x27;
+    &#x27;Accessed 2026-08-28.&#x27;,
+    &#x27;FEMA National Flood Hazard Layer — flood zone and FIRM panel (docs/11 §2). Accessed 2026-08-28.&#x27;,
+    &#x27;OpenStreetMap (© OpenStreetMap contributors, ODbL) — aerial-imagery building footprints and the 4541 drive, &#x27;
+    &#x27;ways 999395123, 999395265, 913015145; Microsoft/Bing ML BuildingFootprints lineage. Accessed 2026-09-03.&#x27;,
+    &#x27;Public aerial imagery — visual check of the footprints and of the mown-yard (tree-line) limits, 2026-09-03. &#x27;
+    &#x27;Imagery is not reproduced on this sheet.&#x27;,
+    &#x27;City of Lilburn Zoning Ordinance 2023-603 §1003-4.6 (site-plan content) and the City of Lilburn Site &#x27;
+    &#x27;Development Plan Review Checklist. FACTS.md §1, §2, §2b; docs/05 §5; docs/06; docs/11 §2.&#x27;,
+]
+
+
+def site_data_rows():
+    return [
+        [&#x27;Address / PINs&#x27;, &#x27;4535, 4537, 4539, 4541 Arcado Rd SW, Lilburn GA 30047 — R6123 162, 014, 015, 033&#x27;,
+         &#x27;Gwinnett 2026 digest&#x27;],
+        [&#x27;Land lot / district&#x27;, &#x27;Land Lot 123, 6th District, Gwinnett County; City of Lilburn tax district&#x27;,
+         &#x27;Gwinnett GIS&#x27;],
+        [&#x27;Area&#x27;, &#x27;9.44 ac deeded (411,206 SF) = 0.99 + 2.00 + 2.00 + 4.45; %.3f ac (%s SF) GIS-calculated; &#x27;
+                 &#x27;RLS survey governs&#x27; % (GIS_AC, format(round(sb.BOUNDARY_SF), &#x27;,&#x27;)), &#x27;2026 digest / GIS ring&#x27;],
+        [&#x27;Boundary lengths&#x27;, &quot;Arcado Rd frontage %.2f&#x27;; SW line %.2f&#x27;; NE line %.2f&#x27;; rear line %.2f&#x27;; &quot;
+                             &quot;perimeter %.2f&#x27;&quot; % (FRONTAGE_FT, SW_FT, NE_FT, REAR_FT, PERIM_FT),
+         &#x27;docs/05 §5 (DRAFT)&#x27;],
+        [&#x27;Width across the strip&#x27;, &quot;%.1f ft at Arcado Rd; %.1f ft at the NW end (measured NE line to SW line)&quot;
+         % (sb.width(0), sb.width(sb.U_REAR - 1)), &#x27;GIS ring&#x27;],
+        [&#x27;Existing zoning&#x27;, &#x27;R-1, City of Lilburn (all four parcels). Adjoining: R-1 Lilburn on every line; &#x27;
+                            &#x27;nearest R-2 ≈ 106 ft NE; unincorporated Gwinnett R-100 ≈ 314 ft&#x27;, &#x27;Gwinnett GIS zoning&#x27;],
+        [&#x27;Existing use&#x27;, &#x27;Two single-family dwellings with drives near the frontage and at mid-strip; the balance &#x27;
+                         &#x27;wooded. No commercial or agricultural use.&#x27;, &#x27;Aerial imagery / 2026 digest&#x27;],
+        [&#x27;Existing structures&#x27;, &#x27;4541: %s ± SF footprint at (u %.0f, v %+.0f), built 1972, 2,053 SF heated. &#x27;
+                                &#x27;4535: %s ± SF footprint at (u %.0f, v %+.0f), built 1987, 4,267 SF heated. &#x27;
+                                &quot;Drive ≈ %.0f ft long × 12 ft. All to be removed.&quot;
+         % (format(round(STRUCTS[0][2], -1), &#x27;,.0f&#x27;), sb.poly_centroid(STRUCTS[0][1])[0], sb.poly_centroid(STRUCTS[0][1])[1],
+            format(round(STRUCTS[1][2], -1), &#x27;,.0f&#x27;), sb.poly_centroid(STRUCTS[1][1])[0], sb.poly_centroid(STRUCTS[1][1])[1],
+            DRIVE_LEN), &#x27;OSM/ML footprints — APPROX.&#x27;],
+        [&#x27;Topography&#x27;, &#x27;Range %.1f – %.1f ft NAVD88; ridge %.1f at (u %.0f, v %+.0f); low %.1f at (u %.0f, v %+.0f); &#x27;
+                       &#x27;cross-slope falls NE → SW; contour interval 2 ft&#x27;
+         % (LO[&#x27;z_ft&#x27;], HI[&#x27;z_ft&#x27;], HI[&#x27;z_ft&#x27;], HI[&#x27;u&#x27;], HI[&#x27;v&#x27;], LO[&#x27;z_ft&#x27;], LO[&#x27;u&#x27;], LO[&#x27;v&#x27;]),
+         &#x27;USGS 3DEP 1-m DEM (approx.)&#x27;],
+        [&#x27;Floodplain&#x27;, FEMA + &#x27; — no SFHA, floodway or BFE on site&#x27;, &#x27;FEMA NFHL / Gwinnett GIS&#x27;],
+        [&#x27;Stream / buffers&#x27;, &#x27;One unnamed order-0 headwater (state waters) reaching ≈ 30 ft inside the SW line; &#x27;
+                             &quot;25&#x27; GA EPD / 50&#x27; undisturbed / 75&#x27; impervious setback shown from approximate top of bank&quot;,
+         &#x27;Gwinnett hydrology layer&#x27;],
+        [&#x27;Sanitary sewer&#x27;, &#x27;Existing 8-in gravity main in a 20-ft easement inside the SW line, u ≈ −42 to 272; &#x27;
+                           &#x27;MH invert 927.13 on site and 919.58 off site (Legends at Parkview) — GIS attributes, &#x27;
+                           &#x27;unsurveyed&#x27;, &#x27;Gwinnett DWR GIS&#x27;],
+        [&#x27;Water&#x27;, &#x27;DIP / ACP mains in Arcado Rd 47–107 ft from the front line; nearest hydrant %.1f ft from the &#x27;
+                  &#x27;front corner at (u %.0f, v %+.1f)&#x27; % (HYDRANT[&#x27;dist_ft&#x27;], HYDRANT[&#x27;local&#x27;][0], HYDRANT[&#x27;local&#x27;][1]),
+         &#x27;Gwinnett DWR GIS&#x27;],
+        [&#x27;Right-of-way&#x27;, &#x27;Arcado Rd, Gwinnett County minor collector, 35 mph, 14,800 AADT. R/W WIDTH VARIES: &#x27;
+                         &#x27;%s — scaled perpendicular between the two GIS R/W lines, not surveyed&#x27;
+                         % &#x27;; &#x27;.join(&#x27;%.1f ft at v %+.0f&#x27; % (w, v) for v, w in ROW_W),
+         &#x27;Gwinnett GIS R/W parcel&#x27;],
+        [&#x27;Soils&#x27;, SOILS, &#x27;NRCS SSURGO GA135&#x27;],
+        [&#x27;Vegetation&#x27;, &#x27;Existing wooded area over the balance of the site; limits approximate, no tree survey &#x27;
+                       &#x27;performed&#x27;, &#x27;Aerial imagery, 2026-09-03&#x27;],
+        [&#x27;Adjoining owners&#x27;, &#x27;%d private tax parcels (14 NE, 14 SW, 3 NW) + the Gwinnett County right-of-way = 32 &#x27;
+                             &#x27;notice recipients; PIN, owner and R-1 zoning labelled on the plan&#x27;
+         % (len(sb.CTX[&#x27;adjoining_parcels&#x27;]) - 1), &#x27;docs/06; 2026 digest&#x27;],
+    ]
+
+
+def build():
+    scale_note = &#x27;Scale 1&quot; = 60\&#x27; (ARCH D 36 × 24 in); enlargement 1&quot; = 30\&#x27;&#x27;
+    D, F = sb.sheet(&#x27;EXISTING CONDITIONS&#x27;, &#x27;C-0&#x27;,
+                    &#x27;Existing conditions of record — Lilburn Zoning Ordinance 2023-603 §1003-4.6 &#x27;
+                    &#x27;(existing roads, streams, floodplain, buildings and structures, areas of existing vegetation)&#x27;,
+                    scale_note, generator=&#x27;tools/sitebase.py + tools/existing_conditions.py&#x27;)
+
+    # ---------------------------------------------------------------- plan (full length, 1&quot; = 60&#x27;)
+    D.clip_open(fill=&#x27;#fff&#x27;)
+    sb.adjoiners(D, labels=True)
+    sb.arcado_row(D)
+    sb.wooded_area(D)
+    sb.contours(D, existing=True)
+    sb.streams_and_buffers(D)
+    sb.sewer_existing(D)
+    sb.water_existing(D)
+    sb.existing_structures(D)
+    sb.boundary(D, bearings=True)
+    sb.parcel_lines(D, at=PIN_AT)
+    sb.spot_elevations(D)
+    sb.match_lines(D)
+
+    D.text(1500, 226, &#x27;FEMA %s — NO SPECIAL FLOOD HAZARD AREA ON SITE&#x27; % FEMA.upper(), size=6.5, bold=True, fill=&#x27;#333&#x27;)
+    D.text(400, 226, &#x27;EXISTING 2-ft CONTOURS: USGS 3DEP 1-m DEM, NAVD88, APPROXIMATE — TOPOGRAPHIC SURVEY REQUIRED&#x27;,
+           size=6.5, bold=True, fill=sb.C[&#x27;contour_txt&#x27;])
+    D.text(900, 226, &#x27;KING DAVID MANOR (plat S/159) — ZONED R-1 (CITY OF LILBURN)&#x27;, size=8, bold=True, fill=&#x27;#555&#x27;)
+    D.text(760, -388, &#x27;LEGENDS AT PARKVIEW (plat 118/187) — ZONED R-1 (CITY OF LILBURN)&#x27;, size=8, bold=True, fill=&#x27;#555&#x27;)
+    D.text(1836, -110, &#x27;NANTUCKET (plat 1/268) — ZONED R-1 (LILBURN)&#x27;, size=8, rot=-90, bold=True, fill=&#x27;#555&#x27;)
+    D.text(6, 86, &quot;C/L ARCADIA PL MEETS C/L ARCADO RD AT (u −12, v +61) — 61 FT NE OF THE SITE&#x27;S NE FRONT CORNER&quot;,
+           size=6, anchor=&#x27;start&#x27;, halo=True)
+    D.clip_close()
+    px, py, pw, ph = F[&#x27;plan&#x27;]
+    D.stext(px + pw, py - 8, &#x27;NO PROPOSED IMPROVEMENT IS SHOWN ON THIS SHEET — SEE SHEET C-1, &#x27;
+                             &#x27;MASTER CONCEPT PLAN&#x27;, size=11, bold=True, fill=&#x27;#7b1fa2&#x27;, anchor=&#x27;end&#x27;)
+
+    # ---------------------------------------------------------------- band: site data
+    x = F[&#x27;inner_l&#x27;] + 20
+    y = sb.BAND_Y0
+    yend = sb.table(D, x, y, [&#x27;EXISTING SITE DATA&#x27;, &#x27;RECORD VALUE (DRAFT — SURVEY GOVERNS)&#x27;, &#x27;SOURCE&#x27;],
+                    site_data_rows(), size=6.5, widths=[110, 400, 130],
+                    title=&#x27;EXISTING SITE DATA — compiled from public records on %s&#x27; % sb.DATE)
+    D.stext(x, yend + 12, &#x27;Existing building footprints and the 4541 drive: © OpenStreetMap contributors (ODbL), &#x27;
+                          &#x27;ways 999395123 / 999395265 / 913015145 — aerial-imagery footprints, approximate.&#x27;, size=6.2,
+            fill=&#x27;#444&#x27;)
+    D.stext(x, yend + 21, &#x27;Owner names and mailing addresses: Gwinnett County Tax Assessor 2026 property-ownership &#x27;
+                          &#x27;file. Zoning: Gwinnett GIS zoning layer (City of Lilburn districts).&#x27;, size=6.2, fill=&#x27;#444&#x27;)
+
+    # ---------------------------------------------------------------- band: sanitary sewer schedule
+    y2 = sb.table(D, x, yend + 42, [&#x27;FACILITY ID&#x27;, &#x27;FROM (u, v) → TO (u, v)&#x27;, &#x27;SIZE / MAT.&#x27;, &#x27;LENGTH (ft)&#x27;,
+                                    &#x27;SLOPE (%)&#x27;, &#x27;INVERT IN → OUT (ft)&#x27;, &#x27;PROJECT&#x27;],
+                  sewer_rows(), size=6.5, widths=[52, 132, 60, 48, 44, 90, 214],
+                  title=&#x27;EXISTING SANITARY SEWER SCHEDULE — every value is a Gwinnett DWR GIS attribute, &#x27;
+                        &#x27;UNSURVEYED (an invert survey is required)&#x27;)
+    D.stext(x, y2 + 11, &#x27;Slope is computed from the published invert pair and pipe length: (INV IN − INV OUT) ÷ LENGTH. &#x27;
+                        &#x27;The 927.13 manhole is the Phase 1 point of connection; the 919.58 manhole is the &#x27;
+                        &#x27;Legends at Parkview tie-in studied in docs/08 Memo B.&#x27;, size=6.2, fill=&#x27;#444&#x27;)
+
+    # ---------------------------------------------------------------- band: sources
+    D.stext(x, y2 + 34, &#x27;SOURCES AND ACCESS DATES&#x27;, size=9, bold=True)
+    yy2 = y2 + 47
+    for i, srcline in enumerate(SOURCES, 1):
+        yy2 = D.stextblock(x, yy2, &#x27;%d. %s&#x27; % (i, srcline), size=6.3, chars=152, lead=7.9, indent=9)
+        yy2 += 2.0
+
+    # ---------------------------------------------------------------- band: legend
+    lx = x + 665
+    D.stext(lx, sb.BAND_Y0, &#x27;LEGEND&#x27;, size=9, bold=True)
+    for i, (kind, col, wdt, dash, txt) in enumerate(LEGEND):
+        yy = sb.BAND_Y0 + 14 + i * 12.5
+        if kind == &#x27;line&#x27;:
+            D.sline(lx, yy - 3, lx + 34, yy - 3, stroke=col, stroke_width=wdt, stroke_dasharray=dash)
+        elif kind == &#x27;dot&#x27;:
+            D.scircle(lx + 17, yy - 3, 2.6, fill=col, stroke=&#x27;#fff&#x27;, stroke_width=0.5)
+        else:
+            D.srect(lx, yy - 9.5, 34, 12, fill=col, stroke=&#x27;#555&#x27;, stroke_width=0.4)
+        D.stext(lx + 40, yy, txt, size=6.5)
+
+    # ---------------------------------------------------------------- band: line table
+    ty = sb.BAND_Y0 + 14 + len(LEGEND) * 12.5 + 16
+    tags = [(t, b) for t, b in TAGS]
+    sb.table(D, lx, ty, [&#x27;LINE&#x27;, &#x27;BEARING (SR 2240 GA WEST)&#x27;, &#x27;DISTANCE&#x27;],
+             [[t, b[&#x27;bearing&#x27;], &quot;%.2f&#x27;&quot; % b[&#x27;distance_ft&#x27;]] for t, b in tags], size=6.5,
+             widths=[34, 116, 50], title=&#x27;LINE TABLE — courses under 60 ft (GIS-derived, DRAFT)&#x27;)
+
+    # ---------------------------------------------------------------- band: enlargement A
+    ex = lx + 320
+    sub = sb.enlargement(ENL[0], ENL[1], ENL[2], ENL[3], ex, sb.BAND_Y0 + 34, scale=sb.SCALE30, tag=&#x27;A&#x27;)
+    sub.clip_open(fill=&#x27;#fff&#x27;)
+    sb.adjoiners(sub, labels=False)
+    sb.arcado_row(sub, labels=False)
+    sb.wooded_area(sub, labels=False)
+    sb.contours(sub, existing=True, labels=False)
+    sb.sewer_existing(sub, labels=False)
+    sb.water_existing(sub, labels=False)
+    sb.existing_structures(sub, labels=False)
+    sb.boundary(sub, bearings=True, label=False)
+    sb.parcel_lines(sub, labels=False)
+    # enlargement-only annotation
+    sub.text(-52, -228, &#x27;EX. MH&#x27;, size=6, fill=sb.C[&#x27;sewer_txt&#x27;], halo=True, anchor=&#x27;end&#x27;)
+    sub.text(-52, -238, &#x27;INV 932.69 / 930.84&#x27;, size=6, fill=sb.C[&#x27;sewer_txt&#x27;], halo=True, anchor=&#x27;end&#x27;)
+    sub.text(268, -244, &#x27;EX. MH INV 927.13  (GIS ATTRIBUTE — UNSURVEYED)&#x27;, size=6.5, bold=True,
+             fill=sb.C[&#x27;sewer_txt&#x27;], halo=True, anchor=&#x27;end&#x27;)
+    sub.line((238.0, -241.0), (268.0, -227.0), stroke=sb.C[&#x27;sewer_txt&#x27;], stroke_width=0.5)
+    sub.circle((271.7, -224.0), 3.4, fill=&#x27;none&#x27;, stroke=sb.C[&#x27;sewer_txt&#x27;], stroke_width=0.9)
+    sub.text(24, -206, &quot;EX. 8-in SANITARY SEWER IN A 20&#x27; SANITARY SEWER EASEMENT (VERIFY)&quot;, size=6.5,
+             bold=True, fill=sb.C[&#x27;sewer_txt&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    sub.textlines(203, -100, [&#x27;EXISTING HOUSE — 4541 ARCADO RD SW&#x27;,
+                              &#x27;%s ± SF FOOTPRINT — APPROXIMATE, TO BE LOCATED BY SURVEY&#x27;
+                              % format(round(STRUCTS[0][2], -1), &#x27;,.0f&#x27;),
+                              &#x27;PIN R6123 033 · built 1972 · 2,053 SF heated (2026 digest)&#x27;,
+                              &#x27;TO BE REMOVED&#x27;],
+                  size=6.5, gap=1.25, bold_first=True, fill=sb.C[&#x27;exist&#x27;], halo=True)
+    sub.text(40, -216, &#x27;EXISTING DRIVE — TO BE REMOVED&#x27;, size=6.5, fill=sb.C[&#x27;exist&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    sub.line((92.0, -218.0), (92.0, -228.0), stroke=sb.C[&#x27;exist&#x27;], stroke_width=0.5)
+    sub.text(-30, -100, &#x27;ARCADO RD R/W LINE = FRONT PROPERTY LINE&#x27;, size=6, rot=-81, bold=True, halo=True)
+    sub.text(-64, -100, &#x27;C/L ARCADO RD — R/W WIDTH VARIES (%.1f–%.1f ft SCALED)&#x27;
+             % (min(w for v, w in ROW_W), max(w for v, w in ROW_W)), size=6, rot=-81, halo=True)
+    sub.text(150, -52, &#x27;ARCADO RD FRONTAGE COURSES %s — SEE LINE TABLE&#x27; % sb.tag_ranges(TAGS),
+             size=6.5, bold=True, halo=True)
+    sub.text(255, -70, &#x27;TREE LINE (APPROX.)&#x27;, size=6, fill=sb.C[&#x27;wood_line&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    sub.clip_close()
+    ybot = sb.place(D, sub, title=&#x27;ENLARGEMENT A — ARCADO ROAD FRONTAGE, EXISTING HOUSE AT 4541 AND THE EXISTING &#x27;
+                                  &#x27;SANITARY SEWER    (SCALE 1&quot; = 30\&#x27;)&#x27;,
+                    note=&#x27;Same data, same coordinates as the plan above; u %.0f to %.0f, v %.0f to %.0f. &#x27;
+                         &#x27;Frontage courses are tabulated in the line table at the left.&#x27; % ENL[:4])
+    sb.scalebar(D, ex + 8, ybot + 24, scale=sb.SCALE30, step_ft=30, steps=4)
+    D.stext(ex + 330, ybot + 20, &#x27;Courses %s lie on the Arcado Rd frontage; courses %s are on the side and &#x27;
+                                 &#x27;rear lines.&#x27; % (sb.tag_ranges(TAGS), sb.tag_ranges(TAGS, frontage=False)),
+            size=6.5, fill=&#x27;#444&#x27;)
+    D.stext(ex + 330, ybot + 32, &#x27;Every dimension on this sheet is a GIS-derived DRAFT value in US survey feet; &#x27;
+                                 &#x27;the sealed RLS survey governs.&#x27;, size=6.5, fill=&#x27;#444&#x27;)
+
+    # ---------------------------------------------------------------- band: general notes
+    nx = ex + 940
+    D.stext(nx, sb.BAND_Y0, &#x27;GENERAL NOTES — EXISTING CONDITIONS&#x27;, size=9, bold=True)
+    yy = sb.BAND_Y0 + 13
+    for i, n in enumerate(NOTES, 1):
+        yy = D.stextblock(nx, yy, &#x27;%d. %s&#x27; % (i, n), size=6.4, chars=133, lead=8.0, indent=9)
+        yy += 2.5
+
+    return D
+
+
+if __name__ == &#x27;__main__&#x27;:
+    D = build()
+    svg, png = sb.save(D, &#x27;existing-conditions&#x27;, dpi=150)
+    print(&#x27;wrote %s\n      %s&#x27; % (svg, png))
+    print(&#x27;  courses: %d (%d under 60 ft, %d of them on the Arcado Rd frontage)&#x27;
+          % (len(sb.BEARINGS), len(TAGS), sum(1 for t, b in TAGS if b[&#x27;frontage&#x27;])))
+    print(&#x27;  existing structures: &#x27; + &#x27;; &#x27;.join(&#x27;%s %.0f SF at (u %.0f, v %.0f)&#x27;
+          % (s[&#x27;key&#x27;], a, sb.poly_centroid(p)[0], sb.poly_centroid(p)[1]) for s, p, a in STRUCTS))
+    print(&#x27;  R/W width scaled: &#x27; + &#x27;, &#x27;.join(&#x27;%.1f ft at v %+.0f&#x27; % (w, v) for v, w in ROW_W))
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/existing_conditions.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

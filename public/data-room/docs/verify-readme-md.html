@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>`verify/` — what this folder is — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">project control</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> 1,040 words</div>
+    
+    <h1 id="verify-what-this-folder-is"><a class="toclink" href="#verify-what-this-folder-is"><code>verify/</code> — what this folder is</a></h1>
+<p><code>verify/</code> is where the <strong>Cottages at Arcado Springs</strong> R-1 → R-2 rezoning package keeps its evidence: the raw,
+unedited output of the generator scripts in <code>tools/</code> (so that any number printed in <code>docs/</code> can be traced back
+to the calculation and the primary source it came from), the scripts that test the documents against
+<code>data/layout.json</code> and against the house rules of <code>FACTS.md</code> §6, and the two working records that get filled in
+as the application moves — the pre-application conference answers and the legal-notice evidence that RZ-2025-01
+did not have when it was tabled on 2025-08-28 for a defective advertisement and sign. None of it is submitted to
+the City of Lilburn; the filed package is <code>docs/</code> and <code>drawings/</code>. Read a file here when you want to know
+<strong>where a number came from</strong> or <strong>whether a document still agrees with the data</strong>, and file into it whenever a
+date, an answer or a piece of paper arrives that the package will later need to prove.</p>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>adjoiners-output.md</code></td>
+<td>Raw output of <code>tools/adjoiners.py</code> — every parcel sharing a boundary with the assemblage, grouped by side (northeasterly / King David Manor, northwesterly / Nantucket, southwesterly / Legends at Parkview), with PIN, property address, owner(s) of record and mailing address exactly as the <strong>Gwinnett County Tax Assessor 2026 Property Ownership file</strong> carries them, the run of common boundary in site-local u/v feet, and the digest acreage. <strong>31 privately owned parcels, all zoned R-1 (City of Lilburn), plus the Gwinnett County Arcado Road right-of-way = 32 notice recipients.</strong> <code>docs/06-adjoining-property-owners.md</code> (Application Instructions item 10) is written from this; <code>verify/notice/</code> checks the City's mailing list against it. Re-run on the filing date — ownership changes.</td>
+</tr>
+<tr>
+<td><code>legal-output.md</code></td>
+<td>Raw output of <code>tools/legal.py</code> — the boundary of the assemblage course by course from the Gwinnett GIS parcel fabric: segment number, side, grid bearing in quadrant notation, distance in feet, the SR 2240 (Georgia West, US survey feet) easting and northing of each corner, the same point in site-local u/v, the GIS parcel the course runs with, and the adjoiner it runs along. Point of beginning: the R6123 162 / Arcado Road right-of-way corner, E 2,310,954.00 / N 1,411,431.50 (local u 0.00, v 0.00). <code>docs/05-legal-description-DRAFT.md</code> (Application Instructions item 7) is written from this. <strong>DRAFT — NOT SEALED:</strong> a Georgia Registered Land Surveyor's sealed description supersedes it, and the sealed survey governs the acreage (9.44 ac deeded / 9.577 ac by GIS) and the 236–246-ft width on which the lot layout depends.</td>
+</tr>
+<tr>
+<td><code>memo-calcs.json</code></td>
+<td>The computed inputs behind the technical memoranda in <code>docs/08</code> — ITE Trip Generation 11th ed. LUC 251 and LUC 210 trip rates, the sewer profile (reach lengths, invert elevations, available slopes, cut depths, average and peak daily flow), water (main volume, hydrant count, fire flow with and without NFPA 13D), stormwater (Rv, WQv, RRv, detention scenarios, pond volumes) and fire-access lengths. Produced by <code>tools/memo_calcs.py</code>. <strong>Stale as of 2026-09-03:</strong> it carries layout-v1 values — 1,722-ft dead end, hammerhead spacing 727 / 550 / 435 ft, impervious 160,167 SF — which <code>audit-2026-09-03/docs-consistency.md</code> §4 supersedes with <strong>1,754 ft</strong>, <strong>746.4 / 563.0 / 435.0 ft</strong> and an impervious figure to be recomputed from <code>data/plans.json</code> rather than from the hard-coded 2,200 SF/lot in <code>tools/siteplan.py</code>. Re-run <code>tools/memo_calcs.py</code> before any of these numbers is quoted again.</td>
+</tr>
+<tr>
+<td><code>check_dev_summary.py</code></td>
+<td>The checker for <code>docs/02-development-summary.md</code> only. It tests the house rules of <code>FACTS.md</code> §6 (the disclaimer block and the <code>&lt;!-- architecture-studio:requires-disclaimer --&gt;</code> marker as the last line; the package's standing prohibition on the certainty verb — every finding must read "appears consistent with"; no pre-2024 IFC edition), the presence of all ten sections and of every required row of the zoning matrix, and about thirty numbers against <code>data/layout.json</code> and <code>data/dev-summary-derived.json</code>. Run it with <code>cd status/cottage-submission-2026-08-28 &amp;&amp; python3 verify/check_dev_summary.py</code>. <strong>It currently reports FAIL</strong> on six values (open space 32.2 %, impervious 38.4 % and 160,167 SF, open space 134,382 SF, lane 1,722 ft, hammerhead spacing 727 / 550 / 435) because <code>docs/02</code> still carries layout-v1 prose while <code>data/layout.json</code> carries v2 — the failure is real and is the same finding as <code>audit-2026-09-03/docs-consistency.md</code> §2.2. The broader checker for all eleven documents is <code>tools/check_docs.py</code>.</td>
+</tr>
+<tr>
+<td><code>preapp-notes.md</code></td>
+<td><strong>Blank form, to be completed at the pre-application conference with Planning Director Reid Turner.</strong> Pre-loaded with questions Q1–Q10 from <code>docs/10-submittal-checklist-and-roadmap.md</code> §3 — each with its "why it matters" and "if the answer is unfavorable" text and blank ANSWER / WHO ANSWERED / DATE / ACTION fields — plus the four supplementary asks from that section, three questions added by the 2026-09-03 audits (the entrance curb return inside the buffer band, notice mechanics, the scope of Instruction item 11), a header block for the meeting date, attendees and materials taken, a table of the twelve numeric and condition-number corrections applied to the questions, and a closing table mapping every question to the files that must be regenerated or rewritten if the answer goes against the design basis.</td>
+</tr>
+<tr>
+<td><code>notice/</code></td>
+<td><strong>Empty evidence folder with an index (<code>notice/README.md</code>).</strong> How the owner will prove that the 2026 public notice was correct, after RZ-2025-01 was tabled on 2025-08-28 for a clerical error in the Gwinnett Daily Post advertisement and the on-site sign. Lists every artefact to be filed — the draft advertisement text obtained from the Director before publication, two tear sheets and the publisher's affidavit, the publication and posting day counts, dated sign photographs on the day of posting and weekly after, the mailed adjoining-owner letter with the mailing list checked against <code>docs/06</code>, and screenshots of both agendas — with its required date, the rule it satisfies (Ord. 2023-603 §1003-6.1 / .2 / .3 and the 2026 Application Instructions p. 2), the file-naming convention, and the Cycle A and Cycle B calendars and day-count worksheets.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Related, but not in this folder:</strong> <code>tools/check_docs.py</code> (the package-wide document checker),
+<code>tools/verify_memo08.py</code> (memo cross-checks), <code>audit-2026-09-03/</code> (the 2026-09-03 completeness, consistency,
+drawing-standards, geometry and external-fact audits), and <code>FACTS.md</code> §5 (the primary sources everything here
+is traced to).</p>
+<blockquote>
+<p><strong>Disclaimer:</strong> This is an AI-generated analysis for preliminary planning purposes. All findings must be verified by a licensed professional before use in design, permitting, or regulatory submissions.</p>
+</blockquote>
+<!-- architecture-studio:requires-disclaimer -->
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/verify/README.md</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

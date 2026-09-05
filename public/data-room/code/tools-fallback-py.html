@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Sheet C-2.4 fallback lot-depth layout exhibit — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Sheet C-2.4 fallback lot-depth layout exhibit</h1><p class="src-note">Python · 1,100 lines · <a href="/data-room/src/submission/tools/fallback.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Sheet C-2.4 &quot;FALLBACK LOT-DEPTH LAYOUT EXHIBIT&quot; — The Cottages at Arcado Springs.
+
+    python3 tools/fallback.py     -&gt;  drawings/fallback-layout.svg + .png   (ARCH D 36 x 24, 1&quot; = 60&#x27;)
+
+WHY THIS SHEET EXISTS
+Sheet C-2.0 (master concept plan) fits two facing rows of 50&#x27;-0&quot; x 100&#x27;-0&quot; cottage lots on a
+234.70-246.38-ft-wide strip only because the 20-ft buffer required against the abutting R-1
+property is held INSIDE the rear 20 ft of each perimeter lot, in a recorded buffer easement,
+on the strength of Lilburn Zoning Ordinance 2023-603 section 313(1) (&quot;Buffer requirements ...
+supersede these minimum required yards&quot;).
+
+The 2026-09-03 external-fact review (audit-2026-09-03/external-facts.md, item P1) found that
+reading weaker than the package had assumed: section 313(1) speaks of &quot;buffer requirements
+established by this article&quot; - Article 3 - and Article 3 sets no buffer widths at all; the
+20-ft R-1 buffer comes from Table 4.1 in Article 4. Nothing in the ordinance expressly
+authorises holding a required buffer inside a private lot. Independently, the City of Lilburn
+Site Development Plan Review Checklist section 6.c reads &quot;If a portion of required buffer is
+within an easement, provide 25&#x27; additional buffer outside easement.&quot;
+
+So the application must be able to answer the unfavourable reading with a drawing, not a
+sentence. This sheet is that drawing: the same boundary, the same entrance, the same lane, the
+same amenity block, ponds, greens and phasing, with the 20-ft buffer moved into separate
+HOA-owned tracts, the lots shortened to 50&#x27;-0&quot; x 82&#x27;-0&quot; (4,100 SF), a concurrent variance
+under section 1005 from the 100-ft minimum lot depth of Table 4.1, and a third, shallower house
+plan - because the body depth left on an 82-ft lot is 82 - 15 - 20 = 47&#x27;-0&quot; less the 6&#x27;-0&quot;
+porch = 41&#x27;-0&quot;, and neither Plan A (51&#x27;-10&quot;) nor Plan B (57&#x27;-6&quot;) fits it.
+
+WHAT IS COMPUTED HERE (nothing is transcribed from an older document)
+  * every fallback lot polygon, from data/layout.json&#x27;s boundary and lot stationing;
+  * the 20-ft perimeter buffer tract, as a true mitred inward offset of the side and rear
+    property lines;
+  * the fallback lane tract and its asymmetric section, and the station at which the second
+    (SW) sidewalk can begin;
+  * lot count, density, lot and open-space areas, impervious area and WQv;
+  * the Plan C schematic footprint and its areas.
+Sheet furniture, palette, title block, north arrow, graphic scale and disclaimer come from
+tools/sitebase.py, exactly as on Sheet C-0.
+
+DRAFT - NOT SEALED. This sheet is an ALTERNATIVE, not the proposed plan. It is to be
+superseded by a sealed Georgia RLS boundary survey and PE civil design, and Plan C is a
+schematic block plan that must be replaced by a Georgia-registered architect&#x27;s drawings.
+&quot;&quot;&quot;
+import math
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import sitebase as sb                                       # noqa: E402
+
+fti = sb.fp.fti
+LAYOUT = sb.LAYOUT
+M = LAYOUT[&#x27;metrics&#x27;]
+
+# ============================================================================ design constants
+BUF_W = 20.0                     # Table 4.1 buffer abutting R-1 for &quot;all other allowed dwelling types&quot;
+LOT_W, LOT_D = 50.0, 82.0        # the fallback lot module
+LOT_SF = LOT_W * LOT_D
+PAVE_W, STRIP, WALK = 22.0, 2.0, 5.0
+HALF_SECTION = PAVE_W / 2 + STRIP + WALK          # 18.0 ft of half-tract where a sidewalk is carried
+MIN_TRACT = PAVE_W + STRIP + WALK + STRIP         # 31.0 ft - the minimum private-lane tract
+FRONT_SB, SIDE_SB, REAR_SB = 15.0, 5.0, 20.0      # Table 4.1 R-2 (local street / interior lot)
+PORCH_D = 6.0
+BODY_W, BODY_D = 38.0, LOT_D - FRONT_SB - REAR_SB - PORCH_D      # 38&#x27;-0&quot; x 41&#x27;-0&quot;
+GAR_W, GAR_D, GAR_RECESS = 21.0, 21.0, 5.0
+FRONT_WING_W = BODY_W - GAR_W                                     # 17&#x27;-0&quot;
+REAR_BLOCK_D = BODY_D - (GAR_RECESS + GAR_D)                      # 15&#x27;-0&quot;
+DRIVE_W = 20.0
+U_JOIN, U_LOT0, U_PAVE_END = 149.5, 230.0, 1700.0
+BAY = (149.5, 154.5, 225.0, 230.0)               # the amenity-block tract widening of Sheet C-2.0
+BAY_HALF = 30.0
+
+TABLE41_MIN_SF, TABLE41_MIN_W, TABLE41_MIN_D, TABLE41_MIN_HEATED = 3000.0, 50.0, 100.0, 1000.0
+
+
+# ============================================================================ geometry helpers
+def _lnorm(a, b):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    L = math.hypot(dx, dy) or 1.0
+    return (-dy / L, dx / L)
+
+
+def _ll_int(p, d1, q, d2):
+    den = d1[0] * d2[1] - d1[1] * d2[0]
+    if abs(den) &lt; 1e-12:
+        return None
+    t = ((q[0] - p[0]) * d2[1] - (q[1] - p[1]) * d2[0]) / den
+    return (p[0] + d1[0] * t, p[1] + d1[1] * t)
+
+
+def offset_left(path, d):
+    &quot;&quot;&quot;Offset an open polyline by d to its left, with mitred joins (exact for straight courses).&quot;&quot;&quot;
+    n, out = len(path), []
+    for i in range(n):
+        if i == 0 or i == n - 1:
+            a, b = (path[0], path[1]) if i == 0 else (path[-2], path[-1])
+            nx, ny = _lnorm(a, b)
+            out.append((path[i][0] + nx * d, path[i][1] + ny * d))
+            continue
+        n1, n2 = _lnorm(path[i - 1], path[i]), _lnorm(path[i], path[i + 1])
+        p1 = (path[i][0] + n1[0] * d, path[i][1] + n1[1] * d)
+        p2 = (path[i][0] + n2[0] * d, path[i][1] + n2[1] * d)
+        d1 = (path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1])
+        d2 = (path[i + 1][0] - path[i][0], path[i + 1][1] - path[i][1])
+        out.append(_ll_int(p1, d1, p2, d2) or p1)
+    return out
+
+
+def seg_seg_dist(a, b, c, d):
+    return min(sb._seg_pt(a, c, d), sb._seg_pt(b, c, d), sb._seg_pt(c, a, b), sb._seg_pt(d, a, b))
+
+
+def poly_path_dist(poly, path):
+    best = 1e9
+    for i in range(len(poly)):
+        a, b = poly[i], poly[(i + 1) % len(poly)]
+        for j in range(len(path) - 1):
+            best = min(best, seg_seg_dist(a, b, path[j], path[j + 1]))
+    return best
+
+
+def frange(a, b, step):
+    us, u = [], a
+    while u &lt; b - 1e-9:
+        us.append(u)
+        u += step
+    us.append(b)
+    return us
+
+
+def band(u0, u1, f_lo, f_hi, step=10.0):
+    us = frange(u0, u1, step)
+    return [(u, f_lo(u)) for u in us] + [(u, f_hi(u)) for u in reversed(us)]
+
+
+# ============================================================================ the 20-ft buffer tract
+# The perimeter of the assemblage less the Arcado Rd frontage: courses 6 through 47 of
+# data/layout.json &quot;bearings&quot; run from the SW front corner (u -36) NW along the SW line, NE
+# across the rear line and SE down the NE line to the NE front corner (0, 0).  The interior lies
+# to the LEFT of that direction of travel, so the inward offset is offset_left(+20).
+PERIM = [tuple(sb.BEARINGS[6][&#x27;from&#x27;])] + [tuple(b[&#x27;to&#x27;]) for b in sb.BEARINGS[6:48]]
+I_REAR0, I_REAR1 = 22, 26                                  # PERIM indices of the two rear corners
+BUF_INNER = offset_left(PERIM, BUF_W)
+BUFFER_TRACT = PERIM + BUF_INNER[::-1]
+BUFFER_SF = abs(sb.poly_area(BUFFER_TRACT))
+INNER_SW = BUF_INNER[:I_REAR0 + 1]                         # ascending u
+INNER_REAR = BUF_INNER[I_REAR0:I_REAR1 + 1]
+INNER_NE = sorted(BUF_INNER[I_REAR1:], key=lambda p: p[0])  # ascending u
+LEG_SW_FT = sum(sb.dist(PERIM[i], PERIM[i + 1]) for i in range(I_REAR0))
+LEG_REAR_FT = sum(sb.dist(PERIM[i], PERIM[i + 1]) for i in range(I_REAR0, I_REAR1))
+LEG_NE_FT = sum(sb.dist(PERIM[i], PERIM[i + 1]) for i in range(I_REAR1, len(PERIM) - 1))
+
+
+def buf_sw(u):
+    return sb.interp_v(INNER_SW, u)
+
+
+def buf_ne(u):
+    return sb.interp_v(INNER_NE, u)
+
+
+# ============================================================================ lots and lane
+def lot_line_sw(u):
+    &quot;&quot;&quot;Lane-side (front) line of the SW lot row = buffer tract line + 82 ft.&quot;&quot;&quot;
+    return buf_sw(u) + LOT_D
+
+
+def lot_line_ne(u):
+    return buf_ne(u) - LOT_D
+
+
+def tract_w(u):
+    return lot_line_ne(u) - lot_line_sw(u)
+
+
+CLM = [tuple(p) for p in LAYOUT[&#x27;lane&#x27;][&#x27;centerline&#x27;]]      # the Sheet C-2.0 lane centreline
+
+
+def clm(u):
+    return sb.interp_v(CLM, u)
+
+
+def mid(u):
+    return (sb.SW(u) + sb.NE(u)) / 2.0
+
+
+def _need(u):
+    &quot;&quot;&quot;SW offset of the travelled way from the tract midline so the NE half-section still fits.&quot;&quot;&quot;
+    return max(0.0, HALF_SECTION - tract_w(u) / 2.0)
+
+
+_EXTRA0 = max(0.0, _need(U_LOT0) - (mid(U_LOT0) - clm(U_LOT0)))
+
+
+def extra(u):
+    &quot;&quot;&quot;Extra SW shift of the lane centreline over the Sheet C-2.0 alignment (tapered at the front).&quot;&quot;&quot;
+    if u &lt;= U_JOIN:
+        return 0.0
+    if u &lt; U_LOT0:
+        return _EXTRA0 * (u - U_JOIN) / (U_LOT0 - U_JOIN)
+    return max(0.0, _need(u) - (mid(u) - clm(u)))
+
+
+def cl(u):
+    return clm(u) - extra(u)
+
+
+def bayf(u):
+    a0, a1, b1, b0 = BAY
+    if u &lt;= a0 or u &gt;= b0:
+        return 0.0
+    if u &lt; a1:
+        return (u - a0) / (a1 - a0)
+    if u &gt; b1:
+        return (b0 - u) / (b0 - b1)
+    return 1.0
+
+
+def tr_sw(u):
+    e, f = lot_line_sw(u), bayf(u)
+    return e + (cl(u) - BAY_HALF - e) * f if f &gt; 0 else e
+
+
+def tr_ne(u):
+    e, f = lot_line_ne(u), bayf(u)
+    return e + (cl(u) + BAY_HALF - e) * f if f &gt; 0 else e
+
+
+def _sw_walk_start():
+    &quot;&quot;&quot;First 10-ft station from which the SW half-section keeps fitting to the terminus.&quot;&quot;&quot;
+    ok = U_PAVE_END
+    for u in range(int(U_PAVE_END), int(U_LOT0) - 1, -10):
+        if cl(u) - lot_line_sw(u) &gt;= HALF_SECTION + 0.25:
+            ok = float(u)
+        else:
+            break
+    return ok
+
+
+U_SWWALK = _sw_walk_start()
+
+# --- lot slots: the same stationing and the same side as the 41 lots of Sheet C-2.0, so that the
+#     entrance, the greens, the hammerheads, the ponds, the creek woods and the stream setback are
+#     honoured exactly as they are there.  Only the depth changes.
+SLOTS = []
+for L in LAYOUT[&#x27;lots&#x27;]:
+    p = [tuple(q) for q in L[&#x27;polygon&#x27;]]
+    SLOTS.append({&#x27;id&#x27;: L[&#x27;id&#x27;], &#x27;side&#x27;: L[&#x27;side&#x27;], &#x27;block&#x27;: L[&#x27;block&#x27;], &#x27;block_lot&#x27;: L[&#x27;block_lot&#x27;],
+                  &#x27;phase&#x27;: L[&#x27;phase&#x27;], &#x27;u0&#x27;: min(q[0] for q in p), &#x27;u1&#x27;: max(q[0] for q in p)})
+
+
+def lot_poly(s):
+    u0, u1 = s[&#x27;u0&#x27;], s[&#x27;u1&#x27;]
+    if s[&#x27;side&#x27;] == &#x27;SW&#x27;:
+        return [(u0, buf_sw(u0)), (u1, buf_sw(u1)), (u1, lot_line_sw(u1)), (u0, lot_line_sw(u0))]
+    return [(u0, lot_line_ne(u0)), (u1, lot_line_ne(u1)), (u1, buf_ne(u1)), (u0, buf_ne(u0))]
+
+
+def lot_xy(s, x, y):
+    &quot;&quot;&quot;(x along the lot frontage from its low-u corner, y into the lot from the front line) -&gt; (u, v).&quot;&quot;&quot;
+    u = s[&#x27;u0&#x27;] + (x if s[&#x27;side&#x27;] == &#x27;NE&#x27; else (LOT_W - x))
+    front = lot_line_ne(u) if s[&#x27;side&#x27;] == &#x27;NE&#x27; else lot_line_sw(u)
+    sgn = 1.0 if s[&#x27;side&#x27;] == &#x27;NE&#x27; else -1.0
+    return (u, front + sgn * y)
+
+
+def lot_rect(s, x0, y0, x1, y1):
+    return [lot_xy(s, x0, y0), lot_xy(s, x1, y0), lot_xy(s, x1, y1), lot_xy(s, x0, y1)]
+
+
+# --- Plan C, in the lot&#x27;s own coordinates (y measured from the front lot line)
+Y_PORCH, Y_BODY = FRONT_SB, FRONT_SB + PORCH_D                     # 15&#x27;-0&quot; and 21&#x27;-0&quot;
+Y_GAR = Y_BODY + GAR_RECESS                                        # 26&#x27;-0&quot;
+Y_REAR_BLOCK = Y_GAR + GAR_D                                       # 47&#x27;-0&quot;
+Y_BACK = Y_BODY + BODY_D                                           # 62&#x27;-0&quot;
+X0 = (LOT_W - BODY_W) / 2.0                                        # 6&#x27;-0&quot; side yard
+X_GAR1 = X0 + GAR_W                                                # 27&#x27;-0&quot;
+X1 = X0 + BODY_W                                                   # 44&#x27;-0&quot;
+COND_L = [(X_GAR1, Y_BODY), (X1, Y_BODY), (X1, Y_BACK), (X0, Y_BACK), (X0, Y_REAR_BLOCK), (X_GAR1, Y_REAR_BLOCK)]
+COND_SF = FRONT_WING_W * (Y_REAR_BLOCK - Y_BODY) + BODY_W * REAR_BLOCK_D
+GAR_SF = GAR_W * GAR_D
+PORCH_SF = FRONT_WING_W * PORCH_D
+ROOF_SF = COND_SF + GAR_SF + PORCH_SF
+PATIO_W, PATIO_D = 12.0, 6.0
+WALK_SF = 60.0
+DRIVE_IN_LOT_SF = DRIVE_W * Y_GAR
+
+
+# ============================================================================ areas
+U_TRACT_END = 1701.0                              # the lane tract ends 1 ft beyond the pavement, as on C-2.0
+
+
+def lane_tract_poly():
+    return band(U_JOIN, U_TRACT_END, tr_sw, tr_ne, step=5.0)
+
+
+def pav_poly():
+    return band(U_JOIN, U_PAVE_END, lambda u: cl(u) - PAVE_W / 2, lambda u: cl(u) + PAVE_W / 2, step=5.0)
+
+
+def walk_ne_poly():
+    return band(U_JOIN, U_PAVE_END, lambda u: cl(u) + PAVE_W / 2 + STRIP,
+                lambda u: cl(u) + PAVE_W / 2 + STRIP + WALK, step=5.0)
+
+
+def walk_sw_poly():
+    return band(U_SWWALK, U_PAVE_END, lambda u: cl(u) - PAVE_W / 2 - STRIP - WALK,
+                lambda u: cl(u) - PAVE_W / 2 - STRIP, step=5.0)
+
+
+def hammerhead_legs():
+    out = []
+    for h in LAYOUT[&#x27;hammerheads&#x27;]:
+        u0 = min(p[0] for p in h[&#x27;legs&#x27;][0])
+        u1 = max(p[0] for p in h[&#x27;legs&#x27;][0])
+        for sgn in (-1.0, 1.0):
+            e0 = cl(u0) + sgn * PAVE_W / 2
+            e1 = cl(u1) + sgn * PAVE_W / 2
+            out.append([(u0, e0), (u1, e1), (u1, e1 + sgn * h[&#x27;leg_ft&#x27;]), (u0, e0 + sgn * h[&#x27;leg_ft&#x27;])])
+    return out
+
+
+LANE_TRACT = lane_tract_poly()
+PAVEMENT = pav_poly()
+WALK_NE = walk_ne_poly()
+WALK_SW = walk_sw_poly()
+HH_LEGS = hammerhead_legs()
+ENTRY = LAYOUT[&#x27;lane&#x27;][&#x27;entry_drive&#x27;]
+ENTRY_TRACT_SF = abs(sb.poly_area([tuple(p) for p in ENTRY[&#x27;tract_polygon&#x27;]]))
+LANE_TRACT_SF = abs(sb.poly_area(LANE_TRACT))
+PAVE_SF = abs(sb.poly_area(PAVEMENT))
+ENTRY_PAVE_SF = abs(sb.poly_area([tuple(p) for p in ENTRY[&#x27;pavement_polygon&#x27;]]))
+ENTRY_WALK_SF = abs(sb.poly_area([tuple(p) for p in ENTRY[&#x27;sidewalk_polygon&#x27;]]))
+WALK_SF_TOTAL = abs(sb.poly_area(WALK_NE)) + abs(sb.poly_area(WALK_SW)) + ENTRY_WALK_SF
+HH_SF = sum(abs(sb.poly_area(p)) for p in HH_LEGS)
+
+N_LOTS = len(SLOTS)
+LOTS_SF = N_LOTS * LOT_SF
+GIS_SF = sb.BOUNDARY_SF
+DEEDED_SF = 411206.0
+OPEN_SF = GIS_SF - LOTS_SF - LANE_TRACT_SF - ENTRY_TRACT_SF
+DENS_DEEDED = N_LOTS / 9.44
+DENS_GIS = N_LOTS / (GIS_SF / 43560.0)
+
+# --- driveways: 20&#x27;-0&quot; from the garage door out to the edge of pavement; the reach that crosses the
+#     5-ft sidewalk is counted once (with the sidewalk), not twice.
+APRON_SF, OVERLAP_SF = 0.0, 0.0
+for s in SLOTS:
+    um = (s[&#x27;u0&#x27;] + s[&#x27;u1&#x27;]) / 2.0
+    half = (cl(um) - lot_line_sw(um)) if s[&#x27;side&#x27;] == &#x27;SW&#x27; else (lot_line_ne(um) - cl(um))
+    APRON_SF += DRIVE_W * max(0.0, half - PAVE_W / 2)
+    if s[&#x27;side&#x27;] == &#x27;NE&#x27; or um &gt;= U_SWWALK:
+        OVERLAP_SF += DRIVE_W * WALK
+
+IMP = [
+    (&#x27;Dwellings, garages and covered porches (Plan C on every lot)&#x27;, N_LOTS * ROOF_SF),
+    (&#x27;Lot driveways, aprons and entry walks&#x27;, N_LOTS * (DRIVE_IN_LOT_SF + WALK_SF) + APRON_SF),
+    (&#x27;Private lane pavement (22\&#x27;-0&quot;, unchanged)&#x27;, PAVE_SF),
+    (&#x27;Entry drive pavement and curb returns (unchanged)&#x27;, ENTRY_PAVE_SF + 184.0),   # 184 SF of returns, layout.json
+    (&#x27;Hammerhead turnaround legs (unchanged)&#x27;, HH_SF),
+    (&#x27;Guest and mail-kiosk parking bays (unchanged)&#x27;, 2070.0),
+    (&#x27;Sidewalks (5\&#x27;-0&quot;; the SW walk begins at u = %d)&#x27; % round(U_SWWALK), WALK_SF_TOTAL),
+    (&#x27;Clubhouse roof, court pads, mail kiosk and amenity walks (unchanged)&#x27;, 6760.0),
+    (&#x27;less driveway / sidewalk area counted twice&#x27;, -OVERLAP_SF),
+]
+IMP_SF = sum(v for _, v in IMP)
+IMP_PCT = 100.0 * IMP_SF / GIS_SF
+WQV_CF = 1.2 * (0.05 + 0.009 * IMP_PCT) / 12.0 * GIS_SF
+
+# --- validation of every fallback lot (re-derived, not asserted)
+STREAMS = [[tuple(p) for p in s[&#x27;stream&#x27;]] for s in LAYOUT[&#x27;stream_setbacks&#x27;]]
+CHK = {&#x27;area&#x27;: [], &#x27;width&#x27;: [], &#x27;depth&#x27;: [], &#x27;frontage&#x27;: [], &#x27;stream&#x27;: [], &#x27;inside&#x27;: 0}
+for s in SLOTS:
+    P = lot_poly(s)
+    CHK[&#x27;area&#x27;].append(abs(sb.poly_area(P)))
+    CHK[&#x27;width&#x27;].append(sb.dist(P[0], P[1]))
+    CHK[&#x27;depth&#x27;].append(min(sb.dist(P[1], P[2]), sb.dist(P[3], P[0])))
+    CHK[&#x27;frontage&#x27;].append(sb.dist(P[2], P[3]))
+    CHK[&#x27;stream&#x27;].append(min(poly_path_dist(P, st) for st in STREAMS))
+    CHK[&#x27;inside&#x27;] += all(sb.point_in_poly(q, sb.BOUNDARY) for q in P)
+LOT_MIN_SF, LOT_MAX_SF = min(CHK[&#x27;area&#x27;]), max(CHK[&#x27;area&#x27;])
+STREAM_MIN = min(CHK[&#x27;stream&#x27;])
+
+# --- how close do the unchanged amenity improvements come to the new buffer tract?
+AMEN = LAYOUT[&#x27;amenity&#x27;]
+AMEN_POLYS = ([AMEN[&#x27;clubhouse&#x27;], AMEN[&#x27;mail_kiosk&#x27;], AMEN[&#x27;parking_bay&#x27;], AMEN[&#x27;kiosk_bay&#x27;], AMEN[&#x27;entry_sign&#x27;]]
+              + AMEN[&#x27;pickleball&#x27;])
+AMEN_TO_BUF = min(min(poly_path_dist([tuple(q) for q in p], INNER_SW),
+                      poly_path_dist([tuple(q) for q in p], INNER_NE)) for p in AMEN_POLYS)
+
+TRACT_MIN = min(tract_w(u) for u in frange(U_LOT0, U_PAVE_END, 5.0))
+TRACT_MAX = max(tract_w(u) for u in frange(U_LOT0, U_PAVE_END, 5.0))
+SHIFT_MAX = max(extra(u) for u in frange(U_LOT0, U_PAVE_END, 5.0))
+NE_HALF_MIN = min(lot_line_ne(u) - cl(u) for u in frange(U_LOT0, U_PAVE_END, 5.0))
+SW_HALF_MIN = min(cl(u) - lot_line_sw(u) for u in frange(U_LOT0, U_PAVE_END, 5.0))
+W_AT_LOT0, W_AT_REAR = sb.width(U_LOT0), sb.width(sb.U_REAR - 1.0)
+BASIS_82 = (W_AT_LOT0 - 2 * BUF_W - MIN_TRACT) / 2.0
+
+
+# ============================================================================ plan layers
+def buffer_tracts(c, labels=True):
+    c.add(&#x27;&lt;g id=&quot;buffer-tracts&quot;&gt;&#x27;)
+    c.poly(BUFFER_TRACT, fill=&#x27;url(#bufhatch)&#x27;, stroke=&#x27;#4a7a2a&#x27;, stroke_width=1.0)
+    c.pline(BUF_INNER, fill=&#x27;none&#x27;, stroke=&#x27;#4a7a2a&#x27;, stroke_width=1.0)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    for u, v, t, rot in ((980.0, -224.0, &quot;TRACT B-2 — 20&#x27;-0\&quot; UNDISTURBED BUFFER (HOA) — %s LF&quot; % format(round(LEG_SW_FT), &#x27;,&#x27;), 0),
+                         (700.0, -6.0, &quot;TRACT B-1 — 20&#x27;-0\&quot; UNDISTURBED BUFFER (HOA) — %s LF&quot; % format(round(LEG_NE_FT), &#x27;,&#x27;), 0),
+                         (1712.0, -120.0, &quot;TRACT B-3 — 20&#x27;-0\&quot; BUFFER — %d LF&quot; % round(LEG_REAR_FT), 90)):
+        c.text(u, v, t, size=6.5, bold=True, fill=&#x27;#2f5d17&#x27;, halo=True, rot=rot)
+
+
+def lane_fb(c, labels=True):
+    c.add(&#x27;&lt;g id=&quot;lane-fallback&quot;&gt;&#x27;)
+    c.poly(LANE_TRACT, fill=sb.C[&#x27;tract&#x27;], stroke=&#x27;#666&#x27;, stroke_width=0.5, stroke_dasharray=&#x27;4 2&#x27;)
+    c.poly([tuple(p) for p in ENTRY[&#x27;tract_polygon&#x27;]], fill=sb.C[&#x27;tract&#x27;], stroke=&#x27;#666&#x27;,
+           stroke_width=0.5, stroke_dasharray=&#x27;4 2&#x27;)
+    c.poly([tuple(p) for p in ENTRY[&#x27;pavement_polygon&#x27;]], fill=sb.C[&#x27;pave&#x27;], stroke=&#x27;#333&#x27;, stroke_width=0.7)
+    c.poly([tuple(p) for p in ENTRY[&#x27;sidewalk_polygon&#x27;]], fill=&#x27;#f7f7f7&#x27;, stroke=&#x27;#777&#x27;, stroke_width=0.35)
+    for leg in HH_LEGS:
+        c.poly(leg, fill=sb.C[&#x27;pave&#x27;], stroke=&#x27;#333&#x27;, stroke_width=0.7)
+    c.poly(PAVEMENT, fill=sb.C[&#x27;pave&#x27;], stroke=&#x27;#333&#x27;, stroke_width=0.7)
+    c.poly(WALK_NE, fill=&#x27;#f7f7f7&#x27;, stroke=&#x27;#777&#x27;, stroke_width=0.35)
+    c.poly(WALK_SW, fill=&#x27;#f7f7f7&#x27;, stroke=&#x27;#777&#x27;, stroke_width=0.35)
+    c.pline([(u, cl(u)) for u in frange(U_JOIN, U_PAVE_END, 10.0)], fill=&#x27;none&#x27;, stroke=&#x27;#444&#x27;,
+            stroke_width=0.4, stroke_dasharray=&#x27;12 3 2 3&#x27;)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if labels:
+        c.text(880.0, cl(880.0) + 4.0, &quot;PRIVATE LANE — HOA TRACT %s–%s (SHEET C-2.0: 35&#x27;-11\&quot;–46&#x27;-1\&quot;) — &quot;
+               &quot;22&#x27;-0\&quot; PVMT + 2&#x27;-0\&quot; STRIP + 5&#x27;-0\&quot; WALK&quot; % (fti(TRACT_MIN), fti(TRACT_MAX)),
+               size=6.5, bold=True, halo=True)
+        c.text(1105.0, -55.0, &#x27;POCKET GREEN&#x27;, size=6.5, bold=True, fill=&#x27;#2e5e1e&#x27;, rot=-90, halo=True)
+        c.text(574.0, -200.0, &#x27;POCKET GREEN&#x27;, size=6.5, bold=True, fill=&#x27;#2e5e1e&#x27;, rot=-90, halo=True)
+
+
+def lots_fb(c, labels=True):
+    c.add(&#x27;&lt;g id=&quot;lots-fallback&quot;&gt;&#x27;)
+    for s in SLOTS:
+        c.poly(lot_poly(s), fill=&#x27;#fff&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.6)
+        c.poly(lot_rect(s, SIDE_SB, FRONT_SB, LOT_W - SIDE_SB, Y_BACK), fill=&#x27;none&#x27;, stroke=&#x27;#999&#x27;,
+               stroke_width=0.3, stroke_dasharray=&#x27;2 1.5&#x27;)
+        um = (s[&#x27;u0&#x27;] + s[&#x27;u1&#x27;]) / 2.0
+        apron = -max(0.0, ((cl(um) - lot_line_sw(um)) if s[&#x27;side&#x27;] == &#x27;SW&#x27; else (lot_line_ne(um) - cl(um)))
+                     - PAVE_W / 2.0)
+        c.poly(lot_rect(s, X0 + 0.5, apron, X0 + 0.5 + DRIVE_W, Y_GAR), fill=&#x27;#e2e2e2&#x27;, stroke=&#x27;#777&#x27;,
+               stroke_width=0.35)
+        c.poly([lot_xy(s, p[0], p[1]) for p in COND_L], fill=sb.C[&#x27;house&#x27;], stroke=&#x27;#222&#x27;, stroke_width=0.6)
+        c.poly(lot_rect(s, X0, Y_GAR, X_GAR1, Y_REAR_BLOCK), fill=&#x27;#efd2ad&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.45)
+        c.poly(lot_rect(s, X_GAR1, Y_PORCH, X1, Y_BODY), fill=&#x27;#fdf3e4&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.4)
+    c.add(&#x27;&lt;/g&gt;&#x27;)
+    if not labels:
+        return
+    for s in SLOTS:
+        # three lines run down the sheet, so start them at the end of the rear block that is
+        # uppermost on the sheet: the rear line for an NE lot, the front of the block for an SW lot
+        y_anchor = (Y_BACK - 3.0) if s[&#x27;side&#x27;] == &#x27;NE&#x27; else (Y_REAR_BLOCK + 3.0)
+        p = lot_xy(s, LOT_W / 2.0, y_anchor)
+        c.textlines(p[0], p[1] + 2.0, [&#x27;LOT %d&#x27; % s[&#x27;id&#x27;], &#x27;PLAN C&#x27;, &#x27;4,100 SF&#x27;],
+                    size=6.5, gap=1.15, bold_first=True)
+
+
+def dim_v(c, u, v0, v1, txt, dx=-7.0, size=6.5, tick=3.0, color=&#x27;#000&#x27;):
+    &quot;&quot;&quot;Dimension across the strip at station u, label reading bottom-up.&quot;&quot;&quot;
+    c.line((u, v0), (u, v1), stroke=color, stroke_width=0.5)
+    for v in (v0, v1):
+        c.line((u - tick, v), (u + tick, v), stroke=color, stroke_width=0.7)
+    c.text(u + dx, (v0 + v1) / 2.0, txt, size=size, rot=-90, fill=color, halo=True)
+
+
+def dim_u(c, v, u0, u1, txt, dy=-4.0, size=6.5, tick=3.0, color=&#x27;#000&#x27;):
+    c.line((u0, v), (u1, v), stroke=color, stroke_width=0.5)
+    for u in (u0, u1):
+        c.line((u, v - tick), (u, v + tick), stroke=color, stroke_width=0.7)
+    c.text((u0 + u1) / 2.0, v, txt, size=size, fill=color, halo=True, dy=dy)
+
+
+U_SEC = 565.0                                    # the cross-section station (clear of every lot)
+KEYS = [
+    (&#x27;a&#x27;, 645.0, 92.0, (U_SEC, sb.NE(U_SEC)), &quot;EXCEPTIONAL NARROWNESS — 234.70&#x27; AT ARCADO RD, 246.38&#x27; AT THE &quot;
+     &quot;REAR LINE, AGAINST 1,721.68&#x27;–1,757.01&#x27; OF DEPTH&quot;),
+    (&#x27;c&#x27;, 100.0, 92.0, (300.0, sb.NE(300.0)), &#x27;NOT SELF-CREATED — FOUR PARCELS OF RECORD, LAND LOT 123&#x27;),
+    (&#x27;d&#x27;, 1150.0, 92.0, (1210.0, sb.NE(1210.0) - 20.0), &#x27;RIGHTS COMMONLY ENJOYED — WITHOUT DEPTH RELIEF THE R-2 &#x27;
+     &#x27;COTTAGE STANDARD CANNOT BE USED HERE AT ANY DENSITY&#x27;),
+    (&#x27;e&#x27;, 100.0, 148.0, (330.0, sb.NE(330.0) - 20.0), &#x27;MINIMUM RELIEF — 82\&#x27;-0&quot; IS ARITHMETIC: &#x27;
+     &#x27;(235.88 − 40.00 − 31.00) ÷ 2 = 82.44\&#x27; AT THE FIRST LOT ROW; NOTHING ELSE IS ASKED&#x27;),
+    (&#x27;f&#x27;, 1150.0, 148.0, (1290.0, sb.NE(1290.0) - 10.0), &#x27;NO DETRIMENT — THE 20-FT BUFFER BECOMES AN HOA TRACT: &#x27;
+     &#x27;WIDER PROTECTION FOR THE R-1 NEIGHBOURS, NOT LESS&#x27;),
+    (&#x27;b&#x27;, 1120.0, -300.0, (1330.0, -238.0), &#x27;EXTRAORDINARY PHYSICAL CONDITIONS — STATE-WATERS HEADWATER 30 FT INSIDE &#x27;
+     &#x27;THE SW LINE, WITH 50\&#x27;/75\&#x27; BUFFERS&#x27;),
+    (&#x27;g&#x27;, 290.0, -300.0, (430.0, sb.SW(430.0) + 10.0), &#x27;NOT FOR GAIN — THE VARIANCE BUYS NO ADDITIONAL LOTS: &#x27;
+     &#x27;41 LOTS AND 4.34 du/ac EITHER WAY&#x27;),
+]
+
+
+def annotations(c):
+    v_sw, v_ne = sb.SW(U_SEC), sb.NE(U_SEC)
+    stations = [v_sw, buf_sw(U_SEC), lot_line_sw(U_SEC), cl(U_SEC) - PAVE_W / 2,
+                cl(U_SEC) + PAVE_W / 2, lot_line_ne(U_SEC), buf_ne(U_SEC), v_ne]
+    labels = [&quot;20&#x27;-0\&quot; BUFFER TRACT&quot;, &quot;82&#x27;-0\&quot; LOT&quot;, &quot;%s&quot; % fti(cl(U_SEC) - PAVE_W / 2 - lot_line_sw(U_SEC)),
+              &quot;22&#x27;-0\&quot;&quot;, &quot;%s&quot; % fti(lot_line_ne(U_SEC) - cl(U_SEC) - PAVE_W / 2), &quot;82&#x27;-0\&quot; LOT&quot;,
+              &quot;20&#x27;-0\&quot; BUFFER TRACT&quot;]
+    c.line((U_SEC, v_sw), (U_SEC, v_ne), stroke=&#x27;#000&#x27;, stroke_width=0.5)
+    for v in stations:
+        c.line((U_SEC - 3.0, v), (U_SEC + 3.0, v), stroke=&#x27;#000&#x27;, stroke_width=0.7)
+    for i, t in enumerate(labels):
+        # the three lane segments are short: label them on the other side of the dimension line
+        dx = 6.0 if 2 &lt;= i &lt;= 4 else -7.0
+        c.text(U_SEC + dx, (stations[i] + stations[i + 1]) / 2.0, t, size=(5.8 if 2 &lt;= i &lt;= 4 else 6.5),
+               rot=-90, halo=True, anchor=&#x27;middle&#x27;)
+    c.text(U_SEC, 26.0, &quot;TYPICAL CROSS-SECTION AT u = 565 — %s OVERALL&quot; % fti(v_ne - v_sw),
+           size=7, bold=True, halo=True)
+    dim_v(c, U_LOT0 - 6.0, sb.SW(U_LOT0), sb.NE(U_LOT0),
+          &quot;%s AT THE FIRST LOT — NARROWEST&quot; % fti(W_AT_LOT0), dx=-8.0, color=&#x27;#b00&#x27;)
+    v_r0, v_r1 = sb.SW(sb.U_REAR - 1.0), sb.NE(sb.U_REAR - 1.0)
+    for v in (v_r0, v_r1):                                     # extension lines out to the offset dimension
+        c.line((sb.U_REAR + 2.0, v), (1744.0, v), stroke=&#x27;#000&#x27;, stroke_width=0.35)
+    dim_v(c, 1746.0, v_r0, v_r1, &quot;%s AT THE REAR LINE&quot; % fti(W_AT_REAR), dx=-8.0)
+    dim_u(c, sb.NE(900.0) + 44.0, U_JOIN, U_PAVE_END, &quot;PRIVATE LANE — %s FT OF TRAVELLED WAY FROM THE ARCADO RD &quot;
+          &quot;RIGHT-OF-WAY, ENDING IN A HAMMERHEAD TURNAROUND (UNCHANGED FROM SHEET C-2.0)&quot;
+          % format(M[&#x27;longest_dead_end_ft&#x27;], &#x27;,.0f&#x27;), dy=-4.0)
+
+    c.line((U_SWWALK, cl(U_SWWALK) - 13.0), (1080.0, -296.0), stroke=&#x27;#333&#x27;, stroke_width=0.5)
+    c.text(1076.0, -300.0, &quot;SECOND (SW) SIDEWALK BEGINS AT u = %d — WHERE THE LANE TRACT REACHES 36&#x27;-0\&quot; &quot;
+           &quot;(SHEET C-2.0: u = 530)&quot; % round(U_SWWALK), size=6.5, fill=&#x27;#333&#x27;, halo=True, anchor=&#x27;end&#x27;)
+    c.text(60.0, -254.0, &quot;EXISTING 8-in SANITARY SEWER AND ITS 20&#x27; EASEMENT LIE INSIDE THE SW BUFFER TRACT FOR &quot;
+           &quot;≈ 300 FT — SEE GENERAL NOTE 8&quot;, size=6.5, fill=sb.C[&#x27;sewer_txt&#x27;], halo=True, anchor=&#x27;start&#x27;)
+    c.text(900.0, 214.0, &#x27;ADJOINING PROPERTY — 31 PARCELS, EVERY ONE ZONED R-1, CITY OF LILBURN. PINs, ADDRESSES AND &#x27;
+           &#x27;OWNERS ARE SCHEDULED ON SHEET C-0 (EXISTING CONDITIONS).&#x27;, size=8, bold=True, fill=&#x27;#555&#x27;)
+    c.text(900.0, 202.0, &#x27;THE ASSEMBLAGE BOUNDARY, THE FOUR PARCELS TO BE COMBINED AND THE EXISTING IMPROVEMENTS TO BE &#x27;
+           &#x27;REMOVED ARE SHOWN ON SHEET C-0. ONLY THE FALLBACK LAYOUT IS SHOWN HERE.&#x27;, size=6.5, fill=&#x27;#555&#x27;)
+    c.text(1500.0, -404.0, &#x27;THE ENTRANCE, THE ENTRY DRIVE, THE LANE ALIGNMENT AND LENGTH, THE HAMMERHEADS, THE AMENITY &#x27;
+           &#x27;BLOCK, BOTH PONDS, THE GREENS, THE CREEK WOODS AND THE PHASE LINE ARE UNCHANGED FROM SHEET C-2.0.&#x27;,
+           size=7, bold=True, fill=&#x27;#7b1fa2&#x27;, anchor=&#x27;end&#x27;)
+    c.text(1500.0, -416.0, &#x27;ONLY THE LOT DEPTH, THE BUFFER TENURE, THE LANE-TRACT WIDTH, THE SECOND SIDEWALK AND THE &#x27;
+           &#x27;HOUSE PLAN CHANGE. LOT COUNT AND DENSITY DO NOT CHANGE.&#x27;, size=7, fill=&#x27;#7b1fa2&#x27;, anchor=&#x27;end&#x27;)
+
+    for k, ku, kv, tgt, txt in KEYS:
+        c.line((ku, kv), tgt, stroke=&#x27;#b00&#x27;, stroke_width=0.5)
+        c.circle((ku, kv), 6.5, fill=&#x27;#fff&#x27;, stroke=&#x27;#b00&#x27;, stroke_width=0.9)
+        c.text(ku, kv, k, size=8, bold=True, fill=&#x27;#b00&#x27;, dy=3.0)
+        c.text(ku + 10.0, kv, &#x27;§1005-3.2(%s)  %s&#x27; % (k, txt), size=6.5, anchor=&#x27;start&#x27;, halo=True, fill=&#x27;#b00&#x27;, dy=2.5)
+
+
+# ============================================================================ details
+def _dimline(c, x, y0, y1, txt, size=6.2, tick=2.0, color=&#x27;#000&#x27;, bold=False, vertical=True, off=1.6):
+    &quot;&quot;&quot;A single dimension in detail coordinates: line + ticks + label reading along it.&quot;&quot;&quot;
+    if vertical:
+        c.line((x, y0), (x, y1), stroke=color, stroke_width=0.5)
+        for yv in (y0, y1):
+            c.line((x - tick, yv), (x + tick, yv), stroke=color, stroke_width=0.7)
+        c.text(x - off, (y0 + y1) / 2.0, txt, size=size, rot=-90, fill=color, bold=bold, halo=True)
+    else:
+        c.line((y0, x), (y1, x), stroke=color, stroke_width=0.5)
+        for xv in (y0, y1):
+            c.line((xv, x - tick), (xv, x + tick), stroke=color, stroke_width=0.7)
+        c.text((y0 + y1) / 2.0, x, txt, size=size, fill=color, bold=bold, halo=True, dy=-2.4)
+
+
+def detail_typical_lot(D, x, y, scale=72.0 / 20.0):
+    &quot;&quot;&quot;Typical fallback lot at 1&quot; = 20&#x27;: buffer tract, 82-ft lot, setbacks, Plan C, lane section.
+    Detail coordinates: x across the lot frontage, y into the lot from the front (lane) lot line, so
+    the lane is at the bottom of the detail and the adjoining R-1 property at the top.&quot;&quot;&quot;
+    win = (-11.0, 60.0, -21.0, 111.0)
+    sub = sb.Drawing(scale, x, y, win=win)
+    sub.srect(sub.X(win[0]), sub.Y(win[3]), (win[1] - win[0]) * scale, (win[3] - win[2]) * scale,
+              fill=&#x27;#fff&#x27;, stroke=&#x27;none&#x27;)
+    # lane section below the front lot line
+    sub.poly(sb.rect(win[0], win[1], -18.0, -7.0), fill=sb.C[&#x27;pave&#x27;], stroke=&#x27;#333&#x27;, stroke_width=0.7)
+    sub.poly(sb.rect(win[0], win[1], -5.0, 0.0), fill=&#x27;#f7f7f7&#x27;, stroke=&#x27;#777&#x27;, stroke_width=0.4)
+    sub.line((win[0], -18.0), (win[1], -18.0), stroke=&#x27;#444&#x27;, stroke_width=0.6, stroke_dasharray=&#x27;10 3 2 3&#x27;)
+    # lot, buffer tract, property line
+    sub.poly(sb.rect(0.0, LOT_W, 0.0, LOT_D), fill=&#x27;#fff&#x27;, stroke=&#x27;#222&#x27;, stroke_width=1.4)
+    sub.poly(sb.rect(win[0], win[1], LOT_D, LOT_D + BUF_W), fill=&#x27;url(#bufhatch)&#x27;, stroke=&#x27;#4a7a2a&#x27;,
+             stroke_width=1.0)
+    sub.line((win[0], LOT_D + BUF_W), (win[1], LOT_D + BUF_W), stroke=&#x27;#000&#x27;, stroke_width=2.0)
+    sub.poly(sb.rect(SIDE_SB, LOT_W - SIDE_SB, FRONT_SB, Y_BACK), fill=&#x27;none&#x27;, stroke=&#x27;#999&#x27;,
+             stroke_width=0.6, stroke_dasharray=&#x27;4 2&#x27;)
+    # Plan C on the lot
+    sub.poly(sb.rect(X0 + 0.5, X0 + 0.5 + DRIVE_W, -7.0, Y_GAR), fill=&#x27;#e2e2e2&#x27;, stroke=&#x27;#777&#x27;, stroke_width=0.5)
+    sub.poly(COND_L, fill=sb.C[&#x27;house&#x27;], stroke=&#x27;#222&#x27;, stroke_width=1.0)
+    sub.poly(sb.rect(X0, X_GAR1, Y_GAR, Y_REAR_BLOCK), fill=&#x27;#efd2ad&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.8)
+    sub.poly(sb.rect(X_GAR1, X1, Y_PORCH, Y_BODY), fill=&#x27;#fdf3e4&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.7)
+    sub.poly(sb.rect(19.0, 19.0 + PATIO_W, Y_BACK, Y_BACK + PATIO_D), fill=&#x27;none&#x27;, stroke=&#x27;#888&#x27;,
+             stroke_width=0.6, stroke_dasharray=&#x27;3 2&#x27;)
+    # labels
+    sub.text(25.0, Y_BACK + 2.5, &#x27;OPTIONAL UNCOVERED PATIO — VERIFY&#x27;, size=5.8, fill=&#x27;#666&#x27;)
+    sub.text(X_GAR1 + 8.5, Y_REAR_BLOCK + 8.0, &#x27;PLAN C&#x27;, size=8.0, bold=True)
+    sub.text(X_GAR1 + 8.5, Y_REAR_BLOCK + 2.5, &#x27;SCHEMATIC&#x27;, size=6.2, fill=&#x27;#b00&#x27;)
+    sub.text(X0 + 10.5, Y_GAR + 11.5, &#x27;GARAGE&#x27;, size=6.2)
+    sub.text(X0 + 10.5, Y_GAR + 6.5, &quot;21&#x27; × 21&#x27;&quot;, size=6.2)
+    sub.text(X_GAR1 + 8.5, Y_PORCH + 2.0, &#x27;PORCH&#x27;, size=6.0)
+    sub.text(X0 + 10.5, 7.0, &#x27;DRIVEWAY&#x27;, size=6.2)
+    sub.text(X0 + 10.5, 2.0, &quot;20&#x27; × 26&#x27;&quot;, size=6.0)
+    sub.text(LOT_W / 2.0, LOT_D + 8.5, &quot;TRACT B — 20&#x27;-0\&quot; UNDISTURBED BUFFER (HOA)&quot;, size=6.5, bold=True,
+             fill=&#x27;#2f5d17&#x27;)
+    sub.text(LOT_W / 2.0, LOT_D + BUF_W + 4.5, &#x27;ADJOINING PROPERTY — ZONED R-1&#x27;, size=6.5, bold=True, fill=&#x27;#444&#x27;)
+    sub.text(LOT_W / 2.0, -12.5, &quot;22&#x27;-0\&quot; PRIVATE LANE PAVEMENT&quot;, size=6.5, bold=True)
+    sub.text(LOT_W / 2.0, -3.0, &quot;5&#x27;-0\&quot; WALK + 2&#x27;-0\&quot; STRIP&quot;, size=6.0)
+    # dimension strings — left: the depth chain; right: the 82-ft variance dimension
+    for a, b, t in ((0.0, FRONT_SB, &quot;15&#x27;-0\&quot;&quot;), (FRONT_SB, Y_BACK, &quot;47&#x27;-0\&quot; BUILDABLE&quot;),
+                    (Y_BACK, LOT_D, &quot;20&#x27;-0\&quot;&quot;), (LOT_D, LOT_D + BUF_W, &quot;20&#x27;-0\&quot; BUFFER&quot;)):
+        _dimline(sub, -4.0, a, b, t)
+    _dimline(sub, 54.0, 0.0, LOT_D, &quot;82&#x27;-0\&quot; LOT DEPTH — §1005 VARIANCE (100&#x27;-0\&quot; REQUIRED)&quot;,
+             size=6.5, color=&#x27;#b00&#x27;, bold=True, off=-3.2)
+    _dimline(sub, 74.0, 0.0, LOT_W, &quot;50&#x27;-0\&quot; LOT WIDTH — 4,100 SF&quot;, size=6.5, bold=True, vertical=False)
+    _dimline(sub, 55.0, 0.0, X0, &quot;6&#x27;&quot;, size=5.8, vertical=False)
+    _dimline(sub, 55.0, X1, LOT_W, &quot;6&#x27;&quot;, size=5.8, vertical=False)
+    D.add(sub.render())
+    return sub
+
+
+def detail_plan_c(D, x, y, scale=72.0 * 3.0 / 32.0):
+    &quot;&quot;&quot;Plan C schematic footprint at 3/32&quot; = 1&#x27;-0&quot;.  Detail coordinates follow data/plans.json:
+    x across the front, y from the front wall of the dwelling toward the rear, so on the sheet the
+    porch and the lane are at the bottom and the rear wall at the top.&quot;&quot;&quot;
+    win = (-9.0, 47.0, -15.0, 51.0)
+    sub = sb.Drawing(scale, x, y, win=win)
+    sub.srect(sub.X(win[0]), sub.Y(win[3]), (win[1] - win[0]) * scale, (win[3] - win[2]) * scale,
+              fill=&#x27;#fff&#x27;, stroke=&#x27;none&#x27;)
+    sub.poly(sb.rect(0.0, BODY_W, 0.0, BODY_D), fill=&#x27;none&#x27;, stroke=&#x27;#bbb&#x27;, stroke_width=0.5,
+             stroke_dasharray=&#x27;4 3&#x27;)
+    sub.poly([(GAR_W, 0.0), (BODY_W, 0.0), (BODY_W, BODY_D), (0.0, BODY_D), (0.0, GAR_RECESS + GAR_D),
+              (GAR_W, GAR_RECESS + GAR_D)], fill=sb.C[&#x27;house&#x27;], stroke=&#x27;#222&#x27;, stroke_width=1.6)
+    sub.poly(sb.rect(0.0, GAR_W, GAR_RECESS, GAR_RECESS + GAR_D), fill=&#x27;#efd2ad&#x27;, stroke=&#x27;#222&#x27;, stroke_width=1.0)
+    sub.poly(sb.rect(GAR_W, BODY_W, -PORCH_D, 0.0), fill=&#x27;#fdf3e4&#x27;, stroke=&#x27;#222&#x27;, stroke_width=0.9)
+    for a, b in (((0.0, GAR_RECESS + GAR_D), (BODY_W, GAR_RECESS + GAR_D)),
+                 ((22.0, GAR_RECESS + GAR_D), (22.0, BODY_D)), ((30.0, GAR_RECESS + GAR_D), (30.0, BODY_D)),
+                 ((GAR_W, 12.0), (BODY_W, 12.0))):
+        sub.line(a, b, stroke=&#x27;#888&#x27;, stroke_width=0.5, stroke_dasharray=&#x27;4 2&#x27;)
+    for xv, yv, t, sz in ((10.5, 17.5, &#x27;2-CAR GARAGE&#x27;, 7.0), (10.5, 13.5, &quot;21&#x27;-0\&quot; × 21&#x27;-0\&quot;&quot;, 6.2),
+                          (29.5, 20.5, &#x27;KITCHEN /&#x27;, 6.5), (29.5, 17.0, &#x27;DINING&#x27;, 6.5),
+                          (29.5, 6.0, &#x27;LIVING&#x27;, 6.5), (11.0, 36.0, &#x27;BEDROOM 1&#x27;, 6.5), (11.0, 32.5, &#x27;+ BATH 1&#x27;, 6.5),
+                          (26.0, 36.0, &#x27;BATH 2 /&#x27;, 6.0), (26.0, 32.5, &#x27;LAUNDRY&#x27;, 6.0),
+                          (34.0, 36.0, &#x27;BED 2 /&#x27;, 6.0), (34.0, 32.5, &#x27;DEN&#x27;, 6.0),
+                          (29.5, -3.5, &quot;COVERED PORCH 6&#x27;-0\&quot;&quot;, 6.2)):
+        sub.text(xv, yv, t, size=sz)
+    sub.text(BODY_W / 2.0, -11.0, &#x27;FRONT (LANE SIDE) — ZERO-STEP ENTRY&#x27;, size=6.5, bold=True)
+    sub.text(BODY_W / 2.0, 47.5, &#x27;REAR — 20\&#x27;-0&quot; REAR YARD BEYOND&#x27;, size=6.2, fill=&#x27;#444&#x27;)
+    _dimline(sub, -4.0, 0.0, BODY_D, &quot;41&#x27;-0\&quot; BODY DEPTH&quot;, size=6.5, bold=True)
+    _dimline(sub, -4.0, -PORCH_D, 0.0, &quot;6&#x27;-0\&quot;&quot;, size=6.0)
+    sub.line((0.0, 0.0), (GAR_W, 0.0), stroke=&#x27;#b00&#x27;, stroke_width=0.5, stroke_dasharray=&#x27;4 2&#x27;)
+    _dimline(sub, 10.5, 0.0, GAR_RECESS, &quot;5&#x27;-0\&quot; GARAGE RECESS&quot;, size=5.8, color=&#x27;#b00&#x27;, off=-7.0)
+    _dimline(sub, 44.0, 0.0, GAR_W, &quot;21&#x27;-0\&quot;&quot;, size=6.0, vertical=False)
+    _dimline(sub, 44.0, GAR_W, BODY_W, &quot;17&#x27;-0\&quot;&quot;, size=6.0, vertical=False)
+    _dimline(sub, -8.0, 0.0, BODY_W, &quot;38&#x27;-0\&quot; BODY WIDTH&quot;, size=6.5, bold=True, vertical=False)
+    D.add(sub.render())
+    return sub
+
+
+# ============================================================================ band content
+def comparison_rows():
+    return [
+        [&#x27;Buffer against R-1&#x27;, &quot;20&#x27;-0\&quot; undisturbed buffer inside the rear 20 ft of every perimeter lot, in a &quot;
+         &quot;recorded buffer easement (§313(1) reading)&quot;, &quot;20&#x27;-0\&quot; undisturbed buffer in separate HOA-owned Tracts &quot;
+         &quot;B-1 / B-2 / B-3 — %s SF&quot; % format(round(BUFFER_SF), &#x27;,&#x27;)],
+        [&#x27;Typical lot&#x27;, &quot;50&#x27;-0\&quot; × 100&#x27;-0\&quot; = 5,000 SF&quot;, &quot;50&#x27;-0\&quot; × 82&#x27;-0\&quot; = 4,100 SF&quot;],
+        [&#x27;Table 4.1 lot area (3,000 SF min.)&#x27;, &#x27;5,000 SF — appears consistent&#x27;, &#x27;4,100 SF — appears consistent&#x27;],
+        [&#x27;Table 4.1 lot width (50 ft min.)&#x27;, &quot;50&#x27;-0\&quot; — appears consistent&quot;, &quot;50&#x27;-0\&quot; — appears consistent&quot;],
+        [&#x27;Table 4.1 lot depth (100 ft min.)&#x27;, &quot;100&#x27;-0\&quot; — appears consistent&quot;, &quot;82&#x27;-0\&quot; — VARIANCE REQUIRED (§1005)&quot;],
+        [&#x27;Lots&#x27;, &#x27;41 (14 SW + 27 NE)&#x27;, &#x27;%d (14 SW + 27 NE) — unchanged&#x27; % N_LOTS],
+        [&#x27;Density (8 du/ac max.)&#x27;, &#x27;4.34 du/ac deeded / 4.28 GIS&#x27;, &#x27;%.2f du/ac deeded / %.2f GIS — unchanged&#x27;
+         % (DENS_DEEDED, DENS_GIS)],
+        [&#x27;Buildable body depth&#x27;, &quot;100 − 15 − 20 = 65&#x27;-0\&quot; less the 6-ft porch = 59&#x27;-0\&quot;&quot;,
+         &quot;82 − 15 − 20 = 47&#x27;-0\&quot; less the 6-ft porch = %s&quot; % fti(BODY_D)],
+        [&#x27;House plans that fit&#x27;, &quot;Plan A 38&#x27;-0\&quot; × 51&#x27;-10\&quot;; Plan B 38&#x27;-0\&quot; × 57&#x27;-6\&quot;&quot;,
+         &quot;NEITHER — a third plan is required: Plan C %s × %s&quot; % (fti(BODY_W), fti(BODY_D))],
+        [&#x27;Conditioned area&#x27;, &#x27;1,406 SF (Plan A) / 1,492 SF (Plan B)&#x27;, &#x27;≈ %s SF (Plan C) — %d SF above the 1,000-SF &#x27;
+         &#x27;Table 4.1 minimum&#x27; % (format(round(COND_SF), &#x27;,&#x27;), round(COND_SF - TABLE41_MIN_HEATED))],
+        [&#x27;Total under roof&#x27;, &#x27;1,966 SF / 2,182 SF&#x27;, &#x27;%s SF&#x27; % format(round(ROOF_SF), &#x27;,&#x27;)],
+        [&#x27;Rear amenity&#x27;, &quot;Plan A 6&#x27;-0\&quot; patio; Plan B 14&#x27;×6&#x27; covered rear porch&quot;,
+         &quot;None within the 20-ft rear yard; uncovered patio shown dashed — VERIFY&quot;],
+        [&#x27;Private lane tract&#x27;, &quot;35&#x27;-11\&quot; – 46&#x27;-1\&quot;; 22-ft pavement, symmetrical&quot;,
+         &quot;%s – %s; 22-ft pavement set %s from the NE tract line&quot; % (fti(TRACT_MIN), fti(TRACT_MAX),
+                                                                    fti(HALF_SECTION))],
+        [&#x27;Second (SW) sidewalk&#x27;, &#x27;From u = 530 (≈ 1,170 ft)&#x27;, &#x27;From u = %d (≈ %d ft)&#x27;
+         % (round(U_SWWALK), round(U_PAVE_END - U_SWWALK))],
+        [&#x27;Common open space&#x27;, &#x27;141,089 SF = 33.8% of GIS area, plus 41,000 SF of buffer easement on lots reported &#x27;
+         &#x27;separately&#x27;, &#x27;%s SF = %.1f%% of GIS area, including the %s-SF buffer tracts; no buffer easement on any lot&#x27;
+         % (format(round(OPEN_SF), &#x27;,&#x27;), 100.0 * OPEN_SF / GIS_SF, format(round(BUFFER_SF), &#x27;,&#x27;))],
+        [&#x27;Impervious area&#x27;, &#x27;184,148 SF = 44.1% of GIS area&#x27;, &#x27;%s SF = %.1f%% of GIS area (Plan C is smaller)&#x27;
+         % (format(round(IMP_SF), &#x27;,&#x27;), IMP_PCT)],
+        [&#x27;Water-quality volume WQv&#x27;, &#x27;18,659 cf&#x27;, &#x27;%s cf&#x27; % format(round(WQV_CF), &#x27;,&#x27;)],
+        [&#x27;Disturbed area / detention&#x27;, &#x27;7.54 ac; 75,410 cf required, 77,863 cf provided&#x27;,
+         &#x27;Unchanged — the preserved buffer bands and creek woods are identical&#x27;],
+        [&#x27;Fire access&#x27;, &#x27;41 units — under the 120-unit trigger of IFC 2024 (GA) App. D107.1 as amended by Ga. Comp. R. &#x27;
+         &#x27;&amp; Regs. 120-3-3-.04; D103.4 special approval for the dead end&#x27;, &#x27;Unchanged&#x27;],
+        [&#x27;Sanitary sewer&#x27;, &#x27;Phase 1 to the existing on-site 8-in main; Phase 2 by the ≈ 178-ft off-site gravity tie&#x27;,
+         &#x27;Unchanged&#x27;],
+        [&#x27;Approvals needed&#x27;, &#x27;Rezoning R-1 → R-2, plus a favourable §313(1) interpretation by the Planning Director&#x27;,
+         &#x27;Rezoning R-1 → R-2, plus a concurrent §1005 variance on lot depth decided by Mayor and Council with the &#x27;
+         &#x27;companion application&#x27;],
+        [&#x27;Filing cost&#x27;, &#x27;$1,250 rezoning fee (City of Lilburn FY2026-2027 Fee Schedule, Res. 2026-08, 2026-08-31)&#x27;,
+         &#x27;$1,250 + $500 variance hearing fee (+$25 for each additional variance on the same property) — confirm the &#x27;
+         &#x27;adopted amounts at filing&#x27;],
+        [&#x27;Principal risk&#x27;, &#x27;The §313(1) reading may be rejected: Article 3 sets no buffer widths and the ordinance &#x27;
+         &#x27;nowhere authorises a required buffer inside a private lot&#x27;, &#x27;A variance is discretionary; the applicant must &#x27;
+         &#x27;carry every §1005-3.2 criterion at the hearing&#x27;],
+    ]
+
+
+def criteria_rows():
+    return [
+        [&#x27;a&#x27;, &#x27;Exceptional narrowness, shallowness, size or shape of the property&#x27;,
+         &#x27;The assemblage is a strip %s wide at the Arcado Rd right-of-way, %s at the first lot row (u = 230) and %s &#x27;
+         &#x27;at the rear line, against %s of depth on the SW line and %s on the NE line — about 7.3 : 1. Take a 20-ft &#x27;
+         &#x27;buffer tract off each side (40 ft) and the 31-ft minimum private-lane section that City of Lilburn Site &#x27;
+         &#x27;Development Plan Review Checklist §4.s (&quot;all components of private streets ... must meet minimum standards &#x27;
+         &#x27;for public street&quot;) requires, and %s of width is left for two facing rows of lots — %s each. No arrangement &#x27;
+         &#x27;of a 100-ft-deep lot fits.&#x27;
+         % (fti(sb.width(0.0)), fti(W_AT_LOT0), fti(W_AT_REAR), &quot;1,757&#x27;-0\&quot;&quot;, &quot;1,721&#x27;-8\&quot;&quot;,
+            fti(W_AT_LOT0 - 2 * BUF_W - MIN_TRACT), fti(BASIS_82))],
+        [&#x27;b&#x27;, &#x27;Extraordinary and exceptional physical conditions&#x27;,
+         &#x27;An unnamed order-0 headwater of Jackson Creek (state waters) reaches about 30 ft inside the SW line and &#x27;
+         &#x27;carries 25-ft state, 50-ft undisturbed and 75-ft impervious setbacks; a ridge at u 1,080–1,200 divides the &#x27;
+         &#x27;sanitary basins; the only public frontage is 237.63 ft of Arcado Rd, a county collector on which no lot may &#x27;
+         &#x27;be driveway-served. The developable envelope is fixed before any lot is drawn.&#x27;],
+        [&#x27;c&#x27;, &#x27;The condition is not the result of any action by the applicant&#x27;,
+         &#x27;The four parcels (PINs R6123 033, 015, 014 and 162) and the strip geometry are of record in Land Lot 123, &#x27;
+         &#x27;6th District; King David Manor (plat S/159) and Legends at Parkview (plat 118/187) were platted around them. &#x27;
+         &#x27;The applicant has subdivided, conveyed or reconfigured nothing that created the narrowness.&#x27;],
+        [&#x27;d&#x27;, &#x27;Strict application deprives the owner of rights commonly enjoyed by other property in the district&#x27;,
+         &#x27;R-2 lists &quot;Single-family (cluster-cottage, creative lot configuration)&quot; as a permitted use (§602) and sets a &#x27;
+         &#x27;3,000-SF, 50-ft cottage lot in Table 4.1. If the buffer must sit in its own tract, the 100-ft depth rule &#x27;
+         &#x27;makes that permitted use unbuildable here at any density — the district standard the property is being &#x27;
+         &#x27;rezoned to use cannot be used.&#x27;],
+        [&#x27;e&#x27;, &#x27;The variance requested is the minimum necessary&#x27;,
+         &#x27;Relief is 18 ft of depth (100 ft → 82 ft, 18%%), and 82 ft is arithmetic, not preference: &#x27;
+         &#x27;(%.2f − 2 × 20.00 − 31.00) ÷ 2 = %.2f ft. Nothing else is asked: lot area 4,100 SF (min. 3,000), lot width &#x27;
+         &#x27;50 ft (min. 50), density %.2f du/ac (max. 8), front 15 ft, side 5 ft, rear 20 ft, height one storey, buffer &#x27;
+         &#x27;20 ft — every one met as drawn.&#x27; % (W_AT_LOT0, BASIS_82, DENS_DEEDED)],
+        [&#x27;f&#x27;, &#x27;Relief may be granted without substantial detriment to the public good and without impairing the &#x27;
+         &#x27;purposes and intent of the ordinance&#x27;,
+         &#x27;The variance moves protection outward, not inward: the 20-ft buffer stops being a private easement inside a &#x27;
+         &#x27;back yard and becomes %s SF of HOA-owned undisturbed tract, shown on the plat with a no-disturbance &#x27;
+         &#x27;restriction and a maintenance obligation (Checklist §4.o, §6.b). Common open space rises from 33.8%% to &#x27;
+         &#x27;%.1f%% of the site and impervious area falls to %.1f%%. Density, use, height, setbacks and the 55+ (HOPA) &#x27;
+         &#x27;condition are unchanged.&#x27; % (format(round(BUFFER_SF), &#x27;,&#x27;), 100.0 * OPEN_SF / GIS_SF, IMP_PCT)],
+        [&#x27;g&#x27;, &#x27;The relief sought is not merely for financial advantage&#x27;,
+         &#x27;The variance yields no additional lots and no additional density: %d lots and %.2f du/ac either way. Its &#x27;
+         &#x27;only effect is to let the required buffer be held in the separate tract staff may require, at the cost of &#x27;
+         &#x27;900 SF of private lot area per home and a smaller house. The applicant would prefer the §313(1) reading and &#x27;
+         &#x27;no variance at all.&#x27; % (N_LOTS, DENS_DEEDED)],
+    ]
+
+
+def area_rows():
+    return [
+        [&#x27;Gross site area&#x27;, &#x27;%s SF = %.3f ac (GIS); 9.44 ac deeded&#x27; % (format(round(GIS_SF), &#x27;,&#x27;), GIS_SF / 43560.0),
+         &#x27;data/layout.json boundary_ring; RLS survey governs&#x27;],
+        [&#x27;Lots&#x27;, &#x27;%d × 4,100 SF = %s SF (%.1f%%)&#x27; % (N_LOTS, format(round(LOTS_SF), &#x27;,&#x27;), 100.0 * LOTS_SF / GIS_SF),
+         &quot;50&#x27;-0\&quot; × 82&#x27;-0\&quot;, computed lot by lot (%s–%s SF)&quot; % (format(round(LOT_MIN_SF), &#x27;,&#x27;),
+                                                                format(round(LOT_MAX_SF), &#x27;,&#x27;))],
+        [&#x27;Private lane tract&#x27;, &#x27;%s SF&#x27; % format(round(LANE_TRACT_SF), &#x27;,&#x27;),
+         &#x27;Residual between the two lot rows, %s–%s&#x27; % (fti(TRACT_MIN), fti(TRACT_MAX))],
+        [&#x27;Entry drive tract&#x27;, &#x27;%s SF&#x27; % format(round(ENTRY_TRACT_SF), &#x27;,&#x27;), &#x27;Unchanged from Sheet C-2.0&#x27;],
+        [&#x27;Common open space (all HOA tracts)&#x27;, &#x27;%s SF = %.2f ac = %.1f%% of GIS / %.1f%% of deeded&#x27;
+         % (format(round(OPEN_SF), &#x27;,&#x27;), OPEN_SF / 43560.0, 100.0 * OPEN_SF / GIS_SF, 100.0 * OPEN_SF / DEEDED_SF),
+         &#x27;Residual: site less lots less the lane and entry-drive tracts&#x27;],
+        [&#x27;— of which perimeter buffer tracts&#x27;, &#x27;%s SF (B-1 NE %s LF, B-2 SW %s LF, B-3 rear %d LF)&#x27;
+         % (format(round(BUFFER_SF), &#x27;,&#x27;), format(round(LEG_NE_FT), &#x27;,&#x27;), format(round(LEG_SW_FT), &#x27;,&#x27;),
+            round(LEG_REAR_FT)), &quot;20&#x27;-0\&quot; mitred inward offset of the side and rear property lines&quot;],
+        [&#x27;— of which amenity, greens, ponds, creek woods&#x27;, &#x27;%s SF&#x27; % format(round(OPEN_SF - BUFFER_SF), &#x27;,&#x27;),
+         &#x27;Unchanged tracts of Sheet C-2.0, less the area now inside the buffer tracts&#x27;],
+        [&#x27;Buffer easement on lots&#x27;, &#x27;0 SF (Sheet C-2.0: 41,000 SF)&#x27;, &#x27;The point of this sheet&#x27;],
+        [&#x27;Impervious area&#x27;, &#x27;%s SF = %.1f%% of GIS area&#x27; % (format(round(IMP_SF), &#x27;,&#x27;), IMP_PCT),
+         &#x27;Computed from the Plan C footprint and the drawn pavement — see the impervious schedule&#x27;],
+        [&#x27;Water-quality volume WQv&#x27;, &#x27;%s cf&#x27; % format(round(WQV_CF), &#x27;,&#x27;),
+         &#x27;GCSWMM: 1.2 × (0.05 + 0.009 × %.1f) ÷ 12 × %s SF&#x27; % (IMP_PCT, format(round(GIS_SF), &#x27;,&#x27;))],
+        [&#x27;Detention required / provided&#x27;, &#x27;75,410 cf / 77,863 cf&#x27;, &#x27;Unchanged — 7.54 disturbed ac at 10,000 cf/ac &#x27;
+         &#x27;(GCSWMM); both ponds unchanged&#x27;],
+        [&#x27;Parking&#x27;, &#x27;%d required, %d on lot + 12 guest&#x27; % (2 * N_LOTS, 4 * N_LOTS),
+         &#x27;Table 8.1: 2 per dwelling unit; 2 garage + 2 driveway per lot&#x27;],
+        [&#x27;Lot frontage on the lane&#x27;, &quot;50&#x27;-0\&quot; every lot (30 ft required)&quot;, &#x27;Ord. 2023-603 §319&#x27;],
+        [&#x27;Clearance, lots to the stream centreline&#x27;, &#x27;%.1f ft minimum (Sheet C-2.0: %.1f ft)&#x27;
+         % (STREAM_MIN, M[&#x27;stream_clearances_ft&#x27;][&#x27;nearest_lot_ft&#x27;]),
+         &#x27;All three digitised reaches; top of bank not yet delineated&#x27;],
+    ]
+
+
+LEGEND = [
+    (&#x27;line&#x27;, sb.C[&#x27;bnd&#x27;], 1.8, &#x27;&#x27;, &#x27;Assemblage boundary (GIS — DRAFT)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;adj_fill&#x27;], 0, &#x27;&#x27;, &#x27;Adjoining tax parcel — zoned R-1&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;rw&#x27;], 0.9, &#x27;&#x27;, &#x27;Arcado Rd right-of-way line&#x27;),
+    (&#x27;line&#x27;, &#x27;#333&#x27;, 0.6, &#x27;14 3 3 3&#x27;, &#x27;Existing road centreline&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#bufhatch)&#x27;, 0, &#x27;&#x27;, &quot;20&#x27;-0\&quot; perimeter buffer tract (HOA)&quot;),
+    (&#x27;line&#x27;, &#x27;#222&#x27;, 0.8, &#x27;&#x27;, &quot;Fallback lot line — 50&#x27; × 82&#x27; = 4,100 SF&quot;),
+    (&#x27;line&#x27;, &#x27;#999&#x27;, 0.5, &#x27;2 1.5&#x27;, &#x27;Building setback line 15 / 5 / 20&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;house&#x27;], 0, &#x27;&#x27;, &#x27;Plan C dwelling — SCHEMATIC&#x27;),
+    (&#x27;rect&#x27;, &#x27;#efd2ad&#x27;, 0, &#x27;&#x27;, &quot;2-car garage, recessed 5&#x27;-0\&quot;&quot;),
+    (&#x27;rect&#x27;, &#x27;#fdf3e4&#x27;, 0, &#x27;&#x27;, &quot;Covered front porch 6&#x27;-0\&quot;&quot;),
+    (&#x27;rect&#x27;, &#x27;#e2e2e2&#x27;, 0, &#x27;&#x27;, &quot;Driveway 20&#x27;-0\&quot; × 26&#x27;-0\&quot;&quot;),
+    (&#x27;rect&#x27;, sb.C[&#x27;tract&#x27;], 0, &#x27;&#x27;, &#x27;Private lane / entry drive tract (HOA)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;pave&#x27;], 0, &#x27;&#x27;, &#x27;Pavement and hammerhead turnaround&#x27;),
+    (&#x27;line&#x27;, &#x27;#555&#x27;, 0.4, &#x27;&#x27;, &quot;Guest / mail-kiosk parking stall 9&#x27; × 18&#x27;&quot;),
+    (&#x27;rect&#x27;, &#x27;#f7f7f7&#x27;, 0, &#x27;&#x27;, &quot;Sidewalk 5&#x27;-0\&quot;&quot;),
+    (&#x27;line&#x27;, &#x27;#444&#x27;, 0.4, &#x27;12 3 2 3&#x27;, &#x27;Lane centreline (fallback alignment)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;green&#x27;], 0, &#x27;&#x27;, &#x27;Pocket / terminus green (unchanged)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#eef4e6&#x27;, 0, &#x27;&#x27;, &#x27;Front amenity tract (unchanged)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#cfe8bd&#x27;, 0, &#x27;&#x27;, &#x27;Village green (unchanged)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#f2c58a&#x27;, 0, &#x27;&#x27;, &#x27;Clubhouse and mail kiosk (unchanged)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#e9e2d0&#x27;, 0, &#x27;&#x27;, &#x27;Pickleball pad (unchanged)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#bcd7c2&#x27;, 0, &#x27;&#x27;, &#x27;Pickleball court surface (unchanged)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#333&#x27;, 0, &#x27;&#x27;, &#x27;Monument entry sign (unchanged)&#x27;),
+    (&#x27;rect&#x27;, &#x27;#e4efdc&#x27;, 0, &#x27;&#x27;, &#x27;Stormwater pond tract (unchanged)&#x27;),
+    (&#x27;rect&#x27;, sb.C[&#x27;pond&#x27;], 0, &#x27;&#x27;, &#x27;Dry detention / WQ basin (unchanged)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;stream&#x27;], 1.6, &#x27;&#x27;, &#x27;Stream — state waters (top of bank approx.)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.5, &#x27;3 2&#x27;, &quot;25&#x27; state (GA EPD) buffer&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.8, &#x27;6 2&#x27;, &quot;50&#x27; undisturbed stream buffer&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;buf_line&#x27;], 0.8, &#x27;8 2 2 2&#x27;, &quot;75&#x27; impervious setback&quot;),
+    (&#x27;line&#x27;, sb.C[&#x27;sewer&#x27;], 0.9, &#x27;&#x27;, &#x27;Existing 8-in sanitary sewer and manhole&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#ssehatch)&#x27;, 0, &#x27;&#x27;, &quot;Existing 20&#x27; sanitary sewer easement&quot;),
+    (&#x27;key&#x27;, &#x27;#b00&#x27;, 0, &#x27;&#x27;, &#x27;§1005-3.2 criterion key (a) – (g)&#x27;),
+    (&#x27;line&#x27;, &#x27;#000&#x27;, 0.5, &#x27;&#x27;, &#x27;Dimension line and tick&#x27;),
+]
+
+NOTES = [
+    &#x27;STATUS OF THIS SHEET — IT IS NOT THE PROPOSED PLAN. The proposed layout is Sheet C-2.0, on which the 20-ft buffer &#x27;
+    &#x27;required against the abutting R-1 property is held inside the rear 20 ft of each perimeter lot in a recorded &#x27;
+    &#x27;buffer easement, under Lilburn Zoning Ordinance 2023-603 §313(1) (&quot;Buffer requirements ... supersede these &#x27;
+    &#x27;minimum required yards&quot;). This sheet is the alternative that is built if the Planning Director or the City &#x27;
+    &#x27;Attorney reads §313(1) as not authorising a required buffer inside a private lot. Only one of the two layouts &#x27;
+    &#x27;will be constructed; both are shown so the Commission and the Council can price the interpretation before it is &#x27;
+    &#x27;made.&#x27;,
+
+    &#x27;WHY THE FALLBACK IS CARRIED. Two independent readings put the §313(1) basis in doubt. (1) §313(1) speaks of &#x27;
+    &#x27;&quot;buffer requirements established by this article&quot; — Article 3 — and Article 3 fixes no buffer width; the 20-ft &#x27;
+    &#x27;buffer abutting R-1 comes from Table 4.1 in Article 4, and nothing in Ord. 2023-603 expressly authorises holding &#x27;
+    &#x27;a required buffer inside a private lot. (2) The City of Lilburn Site Development Plan Review Checklist §6.c reads &#x27;
+    &#x27;&quot;If a portion of required buffer is within an easement, provide 25\&#x27; additional buffer outside easement,&quot; which &#x27;
+    &#x27;on its face would add 25 ft outside any buffer easement held on a lot. Both are questions for the &#x27;
+    &#x27;pre-application conference (Planning Director, 340 Main St).&#x27;,
+
+    &#x27;WHAT CHANGES AND WHAT DOES NOT. Changed: lot depth 100\&#x27;-0&quot; → 82\&#x27;-0&quot;; buffer tenure (easement on lots → HOA &#x27;
+    &#x27;tracts); house plan (Plans A and B → Plan C); private-lane tract width; the station at which the second sidewalk &#x27;
+    &#x27;begins. Unchanged: the boundary, the entrance at v = −190 and its 24-ft entry drive, the lane alignment and its &#x27;
+    &#x27;1,754-ft length, the 22-ft pavement, all three hammerhead turnarounds, the amenity block, both stormwater ponds, &#x27;
+    &#x27;the pocket and terminus greens, the creek-woods tract, the stream setbacks, the phase line at u = 980, the &#x27;
+    &#x27;perimeter buffer WIDTH (20 ft), every setback, the one-storey height, the use, and the 55+ (HOPA) condition. &#x27;
+    &#x27;LOT COUNT AND DENSITY DO NOT CHANGE: %d lots at %.2f du/ac on 9.44 deeded acres, well under the 8 du/ac maximum &#x27;
+    &#x27;of Table 4.1. Yield here is set by frontage on the single lane, not by lot depth — the same %d fifty-foot lots &#x27;
+    &#x27;front the same travelled way in both layouts — so the shallower lot returns 900 SF per lot to common open space &#x27;
+    &#x27;and takes nothing off the unit count.&#x27; % (N_LOTS, DENS_DEEDED, N_LOTS),
+
+    &#x27;THE VARIANCE REQUESTED. Table 4.1 sets a minimum lot depth of 100 ft for ALL uses in R-2, with no cottage-home &#x27;
+    &#x27;exception, so 82\&#x27;-0&quot; requires a variance under Ord. 2023-603 §1005. It would be filed as a CONCURRENT variance &#x27;
+    &#x27;with the rezoning and decided by Mayor and Council with the companion application (§1005-1); no variance may be &#x27;
+    &#x27;approved before the Council\&#x27;s final action on the rezoning. NO OTHER RELIEF IS REQUESTED: lot area 4,100 SF &#x27;
+    &#x27;(3,000 SF minimum), lot width 50\&#x27;-0&quot; (50 ft minimum), density %.2f du/ac (8 maximum), front setback 15 ft, side &#x27;
+    &#x27;5 ft, rear 20 ft, buffer 20 ft, height one storey — each appears consistent with Table 4.1 as drawn. The &#x27;
+    &#x27;applicant\&#x27;s responses to the §1005-3.2 criteria are tabulated at the left and keyed (a) – (g) on the plan.&#x27;
+    % DENS_DEEDED,
+
+    &#x27;THE §1005-3.2 CRITERIA TEXT IS NOT REPRODUCED HERE — VERIFY. The excerpt set the package works from &#x27;
+    &#x27;(data/ordinance-excerpts.md) ends inside §1005-3.1, so the adopted wording of the criteria at §1005-3.2(a) &#x27;
+    &#x27;through (g) has not been transcribed from a primary source. The criterion subjects shown are the standard &#x27;
+    &#x27;Georgia hardship-variance subjects and the letters are placeholders. Before filing, transcribe §1005-3.2(a)–(g) &#x27;
+    &#x27;verbatim from Ord. 2023-603 and conform each response — and its letter — to the adopted text.&#x27;,
+
+    &#x27;THE 82\&#x27;-0&quot; DIMENSION IS ARITHMETIC. Width available at the first lot (u = 230) = %.2f ft, less two 20\&#x27;-0&quot; &#x27;
+    &#x27;buffer tracts (40.00 ft), less the 31\&#x27;-0&quot; minimum private-lane tract (22\&#x27;-0&quot; pavement + 2\&#x27;-0&quot; strip + 5\&#x27;-0&quot; &#x27;
+    &#x27;sidewalk + 2\&#x27;-0&quot; strip) = %.2f ft for two facing rows, i.e. %.2f ft each. The lot module is set at 82\&#x27;-0&quot; and &#x27;
+    &#x27;the surplus width that the strip picks up toward the rear (it widens to %s) is carried in the lane tract, &#x27;
+    &#x27;exactly as it is on Sheet C-2.0. Lot depth is measured perpendicular to the front lot line; lot area is &#x27;
+    &#x27;4,100 SF on every lot (computed lot by lot: %s – %s SF).&#x27;
+    % (W_AT_LOT0, W_AT_LOT0 - 2 * BUF_W - MIN_TRACT, BASIS_82, fti(W_AT_REAR),
+       format(round(LOT_MIN_SF), &#x27;,&#x27;), format(round(LOT_MAX_SF), &#x27;,&#x27;)),
+
+    &#x27;THE THIRD HOUSE PLAN. Body depth available on an 82-ft lot = 82 − 15 (front setback) − 20 (rear setback) = &#x27;
+    &#x27;47\&#x27;-0&quot;, less the 6\&#x27;-0&quot; covered porch = 41\&#x27;-0&quot;. Plan A &quot;The Springbrook&quot; has a 51\&#x27;-10&quot; body and Plan B &quot;The &#x27;
+    &#x27;Laurel&quot; 57\&#x27;-6&quot; (data/plans.json), so NEITHER FITS. Plan C is drawn as a SCHEMATIC one-storey 38\&#x27;-0&quot; × 41\&#x27;-0&quot; &#x27;
+    &#x27;body with the same front-facing gable, an integral 6\&#x27;-0&quot; covered porch and a 2-car garage recessed 5\&#x27;-0&quot; &#x27;
+    &#x27;behind the front wall (Table 4.2 design criterion): ≈ %s SF conditioned, %s SF garage, %s SF covered porch, &#x27;
+    &#x27;%s SF total under roof. That is %d SF above the 1,000-SF minimum heated floor area for a cottage home in Table &#x27;
+    &#x27;4.1 — about 1%%. Plan C carries no covered rear porch; an at-grade uncovered patio is shown dashed in the 20-ft &#x27;
+    &#x27;rear yard and its permissibility must be confirmed. PLAN C IS A BLOCK DIAGRAM, NOT A DESIGNED PLAN: it is drawn &#x27;
+    &#x27;to prove that a compliant cottage fits, and must be replaced by a Georgia-registered architect\&#x27;s drawings.&#x27;
+    % (format(round(COND_SF), &#x27;,&#x27;), format(round(GAR_SF), &#x27;,&#x27;), format(round(PORCH_SF), &#x27;,&#x27;),
+       format(round(ROOF_SF), &#x27;,&#x27;), round(COND_SF - TABLE41_MIN_HEATED)),
+
+    &#x27;THE PERIMETER BUFFER TRACTS. Tracts B-1 (NE line, %s LF), B-2 (SW line, %s LF) and B-3 (rear line, %d LF) total &#x27;
+    &#x27;%s SF, are 20\&#x27;-0&quot; wide measured perpendicular to the property line, are owned and maintained by the homeowners &#x27;
+    &#x27;association, and are to be shown on the final plat labelled &quot;20\&#x27; UNDISTURBED BUFFER&quot; with a no-disturbance &#x27;
+    &#x27;restriction and the HOA maintenance obligation (Checklist §4.o, §6.b). No dwelling, drive or accessory structure &#x27;
+    &#x27;is drawn in them. Two encroachments carried over from Sheet C-2.0 must be disclosed: (i) the existing 8-in &#x27;
+    &#x27;sanitary sewer and its 20-ft easement run inside Tract B-2 for about 300 ft from Arcado Rd to the manhole at &#x27;
+    &#x27;(u 272, v −224) — Checklist §6.f permits sanitary sewer conveyance facilities and easements to encroach a buffer &#x27;
+    &#x27;&quot;as near as perpendicular as possible, up to max 50\&#x27; width&quot;, which this parallel run does not satisfy, and &#x27;
+    &#x27;§6.c may require 25 ft of additional buffer outside the easement; (ii) the SW curb return at the entrance &#x27;
+    &#x27;reaches %.1f ft into the buffer band (%.1f SF). Both need the Director\&#x27;s reading, and (i) exists on Sheet C-2.0 &#x27;
+    &#x27;as well. The SW pickleball pad stands %.1f ft clear of Tract B-2 (%.1f ft from the property line); Checklist &#x27;
+    &#x27;§6.l\&#x27;s 5-ft landscape strip around accessory structures would move it about 3 ft to the NE — an amenity-block &#x27;
+    &#x27;item inherited unchanged from Sheet C-2.0.&#x27;
+    % (format(round(LEG_NE_FT), &#x27;,&#x27;), format(round(LEG_SW_FT), &#x27;,&#x27;), round(LEG_REAR_FT),
+       format(round(BUFFER_SF), &#x27;,&#x27;), M[&#x27;sw_curb_return_buffer_encroachment_ft&#x27;],
+       M[&#x27;sw_curb_return_buffer_encroachment_sf&#x27;], AMEN_TO_BUF, AMEN_TO_BUF + BUF_W),
+
+    &#x27;THE LANE SECTION IS TIGHTER, AND THE SECOND SIDEWALK RETREATS. Holding 20 ft of buffer outside the lots takes &#x27;
+    &#x27;4\&#x27;-0&quot; of width off the lane tract: %s at the first lot against 35\&#x27;-11&quot; on Sheet C-2.0, widening to %s at the &#x27;
+    &#x27;terminus. The 31\&#x27;-0&quot; section still fits, but the 22-ft pavement must sit asymmetrically in the tract — %s from &#x27;
+    &#x27;the NE tract line to carry the 2\&#x27;-0&quot; strip and the 5\&#x27;-0&quot; sidewalk, %s to the SW — which moves the travelled &#x27;
+    &#x27;way up to %s toward the SW line, tapering out by u ≈ 1,000. The second (SW) sidewalk can begin only where the &#x27;
+    &#x27;tract reaches 36\&#x27;-0&quot;, at u = %d instead of u = 530. All private-street components must still meet minimum &#x27;
+    &#x27;public-street standards (Checklist §4.s), and the section, pavement structure and profile are PE work.&#x27;
+    % (fti(TRACT_MIN), fti(TRACT_MAX), fti(NE_HALF_MIN), fti(SW_HALF_MIN), fti(SHIFT_MAX), round(U_SWWALK)),
+
+    &#x27;AREAS AND OPEN SPACE. Common open space rises to %s SF = %.2f ac = %.1f%% of the GIS area (%.1f%% of the 9.44 &#x27;
+    &#x27;deeded acres) because 900 SF per lot moves out of private ownership; on Sheet C-2.0 the equivalent figures are &#x27;
+    &#x27;141,089 SF and 33.8%% plus 41,000 SF of buffer easement held on lots. Development Regulations §5.9 (Recreation &#x27;
+    &#x27;Areas) applies to single-family detached subdivisions of 50 acres or more and therefore does not apply to this &#x27;
+    &#x27;9.44-acre site — all common open space shown is voluntary. Open space is computed as a residual: the GIS &#x27;
+    &#x27;boundary area less the lot areas less the lane and entry-drive tracts.&#x27;
+    % (format(round(OPEN_SF), &#x27;,&#x27;), OPEN_SF / 43560.0, 100.0 * OPEN_SF / GIS_SF, 100.0 * OPEN_SF / DEEDED_SF),
+
+    &#x27;IMPERVIOUS AREA AND STORMWATER. Impervious area falls to %s SF = %.1f%% of the GIS area (Sheet C-2.0: 184,148 SF &#x27;
+    &#x27;= 44.1%%) because Plan C is a smaller house on a smaller lot; WQv falls to %s cf on the Gwinnett County &#x27;
+    &#x27;Stormwater Management Manual formula. Disturbed area and detention are UNCHANGED at 7.54 ac and 75,410 cf &#x27;
+    &#x27;required against 77,863 cf provided, because the preserved 20-ft perimeter bands and the creek-woods tract &#x27;
+    &#x27;occupy exactly the same ground in both layouts. Both ponds, their tracts and their assumptions are unchanged; &#x27;
+    &#x27;final volumes, outlet structures, forebays and the runoff-reduction credit are the design PE\&#x27;s.&#x27;
+    % (format(round(IMP_SF), &#x27;,&#x27;), IMP_PCT, format(round(WQV_CF), &#x27;,&#x27;)),
+
+    &#x27;EVERYTHING ELSE IN THE APPLICATION IS UNAFFECTED. At %d units the development stays below the 120-dwelling-unit &#x27;
+    &#x27;two-access trigger of IFC 2024 (GA) Appendix D107.1 as amended by Ga. Comp. R. &amp; Regs. 120-3-3-.04, so the only &#x27;
+    &#x27;fire-access relief sought remains special approval of the 1,754-ft dead end under IFC 2024 (GA) Appendix Table &#x27;
+    &#x27;D103.4; NFPA 13D sprinklers remain a VOLUNTARY offer, not a required mitigation. Sanitary sewer is unchanged: &#x27;
+    &#x27;Phase 1 connects by gravity to the existing 8-in main on the property (no extension), and Phase 2 depends on the &#x27;
+    &#x27;≈ 178-ft off-site gravity tie to the Legends at Parkview main at invert 919.58 — a private pump station, private &#x27;
+    &#x27;force main or private gravity sewer is not available to a residential subdivision under the Gwinnett DWR &#x27;
+    &#x27;Standard Policy for Private Developments (rev. 9/2018), and WSR-24 §1.3.1(A) does not reach a 178-ft gravity &#x27;
+    &#x27;alternative. Trip generation, school impact and the HOPA condition are unchanged.&#x27; % N_LOTS,
+
+    &#x27;DRAWING STATUS — DRAFT, NOT SEALED. The boundary, bearings and acreage are computed from the Gwinnett County GIS &#x27;
+    &#x27;parcel fabric and are DRAFT; a boundary survey plat and metes-and-bounds description sealed by a Georgia &#x27;
+    &#x27;registered land surveyor are required by Ord. 2023-603 §1003-4.3 and §1003-4.4 and govern. Lot lines, tract &#x27;
+    &#x27;lines, the lane and the buffer offsets shown here are concept geometry to be replaced by PE civil design and an &#x27;
+    &#x27;RLS plat; Plan C must be replaced by architect\&#x27;s drawings. Every statement of conformity on this sheet reads &#x27;
+    &#x27;&quot;appears consistent with&quot; and none is a compliance certification. Dimensions are US survey feet in the &#x27;
+    &#x27;site-local system (u along the strip to the NW, v across toward the NE line).&#x27;,
+]
+
+
+# ============================================================================ the sheet
+def build():
+    scale_note = &#x27;Scale 1&quot; = 60\&#x27; (ARCH D 36 × 24 in); details 1&quot; = 20\&#x27; and 3/32&quot; = 1\&#x27;-0&quot;&#x27;
+    D, F = sb.sheet(&#x27;FALLBACK LOT-DEPTH LAYOUT EXHIBIT&#x27;, &#x27;C-2.4&#x27;,
+                    &#x27;ALTERNATIVE LAYOUT — 50\&#x27;-0&quot; × 82\&#x27;-0&quot; lots, the 20-ft buffer in separate HOA tracts, and a &#x27;
+                    &#x27;concurrent §1005 lot-depth variance (100 ft → 82 ft)&#x27;,
+                    scale_note, generator=&#x27;tools/sitebase.py + tools/fallback.py&#x27;,
+                    status_lines=[&#x27;ALTERNATIVE LAYOUT — NOT THE PROPOSED PLAN. The proposed plan is Sheet&#x27;,
+                                  &#x27;C-2.0 (Master Concept Plan). This exhibit applies only if staff require&#x27;,
+                                  &#x27;the 20-ft buffer in a separate tract; it then carries a concurrent §1005&#x27;,
+                                  &#x27;variance on lot depth (100 ft → 82 ft) and a third house plan, Plan C.&#x27;])
+    # the sheet() watermark names Sheet C-0&#x27;s subject; this sheet needs its own
+    px, py, pw, ph = F[&#x27;plan&#x27;]
+    if len(D.late) &gt;= 2:
+        D.late[1] = (lambda: D.add(
+            &#x27;&lt;text x=&quot;%.1f&quot; y=&quot;%.1f&quot; font-size=&quot;40&quot; fill=&quot;#c00&quot; fill-opacity=&quot;0.09&quot; font-weight=&quot;bold&quot; &#x27;
+            &#x27;text-anchor=&quot;middle&quot; transform=&quot;rotate(-8 %.1f %.1f)&quot;&gt;DRAFT — NOT SEALED — FALLBACK EXHIBIT, &#x27;
+            &#x27;NOT THE PROPOSED PLAN — SEE SHEET C-2.0&lt;/text&gt;&#x27; % (px + pw / 2, py + ph / 2, px + pw / 2, py + ph / 2)))
+
+    # ---------------------------------------------------------------- plan (1&quot; = 60&#x27;)
+    D.clip_open(fill=&#x27;#fff&#x27;)
+    sb.adjoiners(D, labels=False, zoning=False)
+    sb.arcado_row(D, labels=False)
+    sb.ponds(D)
+    sb.open_space(D, labels=False)
+    sb.amenity(D)
+    buffer_tracts(D)
+    lane_fb(D)
+    lots_fb(D)
+    sb.streams_and_buffers(D)
+    sb.sewer_existing(D, labels=False)
+    sb.boundary(D, bearings=False, label=False)
+    annotations(D)
+    D.clip_close()
+    D.stext(px + pw, py - 8, &#x27;FOR THE PROPOSED LAYOUT SEE SHEET C-2.0 — MASTER CONCEPT PLAN&#x27;, size=11,
+            bold=True, fill=&#x27;#7b1fa2&#x27;, anchor=&#x27;end&#x27;)
+
+    # ---------------------------------------------------------------- band
+    X1_, X2_, X3_, X4_, X5_ = 62.0, 632.0, 1162.0, 1806.0, 2176.0
+    y0 = sb.BAND_Y0
+
+    # column 1 — the side-by-side comparison, then the legend
+    y = sb.table(D, X1_, y0, [&#x27;ITEM&#x27;, &#x27;SHEET C-2.0 — §313(1) BUFFER INSIDE THE LOT&#x27;,
+                              &#x27;THIS SHEET C-2.4 — BUFFER IN A SEPARATE TRACT&#x27;],
+                 comparison_rows(), size=6.5, widths=[124, 198, 220],
+                 title=&#x27;SIDE-BY-SIDE COMPARISON — the two readings of Ord. 2023-603 §313(1), priced&#x27;)
+    D.stext(X1_, y + 11, &#x27;Every figure in the right-hand column is computed by tools/fallback.py from the same &#x27;
+                         &#x27;boundary, entrance and lane geometry as Sheet C-2.0.&#x27;, size=6.5, fill=&#x27;#444&#x27;)
+
+    ylg = y + 30
+    D.stext(X1_, ylg, &#x27;LEGEND — every symbol drawn on this sheet&#x27;, size=9, bold=True)
+    half = (len(LEGEND) + 1) // 2
+    for i, (kind, col, wdt, dash, txt) in enumerate(LEGEND):
+        lx = X1_ + (0 if i &lt; half else 278)
+        yy = ylg + 13 + (i % half) * 12.0
+        if kind == &#x27;line&#x27;:
+            D.sline(lx, yy - 3, lx + 30, yy - 3, stroke=col, stroke_width=wdt, stroke_dasharray=dash)
+        elif kind == &#x27;key&#x27;:
+            D.scircle(lx + 15, yy - 3.5, 5.2, fill=&#x27;#fff&#x27;, stroke=col, stroke_width=0.9)
+            D.stext(lx + 15, yy - 1, &#x27;a&#x27;, size=7, bold=True, fill=col, anchor=&#x27;middle&#x27;)
+        else:
+            D.srect(lx, yy - 9.5, 30, 12, fill=col, stroke=&#x27;#555&#x27;, stroke_width=0.4)
+        D.stext(lx + 36, yy, txt, size=6.5)
+    D.stext(X1_, ylg + 13 + half * 12.0 + 6, &#x27;Existing contours, vegetation, structures, utilities, soils and the &#x27;
+            &#x27;adjoining-owner schedule are on Sheet C-0 and are not repeated here.&#x27;, size=6.5, fill=&#x27;#444&#x27;)
+
+    # column 2 — the variance criteria keyed to the plan, then the area tabulation
+    y2 = sb.table(D, X2_, y0, [&#x27;KEY&#x27;, &#x27;CRITERION (SUBJECT — VERIFY)&#x27;, &quot;APPLICANT&#x27;S RESPONSE&quot;],
+                  criteria_rows(), size=6.5, widths=[24, 110, 372],
+                  title=&#x27;CONCURRENT VARIANCE — Ord. 2023-603 §1005, lot depth 100\&#x27;-0&quot; → 82\&#x27;-0&quot; &#x27;
+                        &#x27;(criteria §1005-3.2 (a)–(g), keyed on the plan)&#x27;)
+    D.stext(X2_, y2 + 11, &#x27;The letters (a) – (g) are keyed to the plan above in red. The adopted text of §1005-3.2 is &#x27;
+                          &#x27;NOT reproduced on this sheet — see General Note 5.&#x27;, size=6.5, fill=&#x27;#b00&#x27;)
+    sb.table(D, X2_, y2 + 28, [&#x27;ITEM&#x27;, &#x27;THIS SHEET (COMPUTED)&#x27;, &#x27;BASIS&#x27;], area_rows(), size=6.5,
+             widths=[124, 188, 194], title=&#x27;FALLBACK SITE DATA AND AREA TABULATION&#x27;)
+
+    # column 3 — the two details
+    D.stext(X3_, y0, &#x27;TYPICAL FALLBACK LOT — 50\&#x27;-0&quot; × 82\&#x27;-0&quot; (4,100 SF)&#x27;, size=9, bold=True)
+    D.stext(X3_, y0 + 10, &#x27;Scale 1&quot; = 20\&#x27;.  Buffer in a separate HOA tract.&#x27;, size=6.5, fill=&#x27;#444&#x27;)
+    sub1 = detail_typical_lot(D, X3_, y0 + 20.0)
+    bx, by, bw, bh = sub1.box()
+    D.srect(bx, by, bw, bh, fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.8)
+    sb.scalebar(D, bx + 10, by + bh + 24, scale=72.0 / 20.0, step_ft=20, steps=3)
+
+    xc = X3_ + 268.0
+    D.stext(xc, y0, &#x27;PLAN C — SCHEMATIC COTTAGE FOOTPRINT&#x27;, size=9, bold=True)
+    D.stext(xc, y0 + 10, &#x27;Scale 3/32&quot; = 1\&#x27;-0&quot;.  Block diagram only — SCHEMATIC, not a designed plan.&#x27;,
+            size=6.5, fill=&#x27;#b00&#x27;)
+    sub2 = detail_plan_c(D, xc, y0 + 20.0)
+    bx2, by2, bw2, bh2 = sub2.box()
+    D.srect(bx2, by2, bw2, bh2, fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.8)
+    yy = sb.table(D, xc, by2 + bh2 + 18,
+                  [&#x27;PLAN C — AREA TABULATION (SCHEMATIC)&#x27;, &#x27;AREA&#x27;, &#x27;BASIS&#x27;],
+                  [[&#x27;Conditioned — front wing 17\&#x27;-0&quot; × 26\&#x27;-0&quot;&#x27;, &#x27;442 SF&#x27;, &#x27;Outside face of exterior walls&#x27;],
+                   [&#x27;Conditioned — rear block 38\&#x27;-0&quot; × 15\&#x27;-0&quot;&#x27;, &#x27;570 SF&#x27;, &#x27;Outside face of exterior walls&#x27;],
+                   [&#x27;Total conditioned (heated) floor area&#x27;, &#x27;%s SF&#x27; % format(round(COND_SF), &#x27;,&#x27;),
+                    &#x27;2 BR / 2 BA, one storey&#x27;],
+                   [&#x27;Table 4.1 minimum, cottage home&#x27;, &#x27;1,000 SF&#x27;, &#x27;Margin +%d SF (≈ 1%%)&#x27;
+                    % round(COND_SF - TABLE41_MIN_HEATED)],
+                   [&#x27;2-car garage 21\&#x27;-0&quot; × 21\&#x27;-0&quot;&#x27;, &#x27;%s SF&#x27; % format(round(GAR_SF), &#x27;,&#x27;),
+                    &#x27;Recessed 5\&#x27;-0&quot; (Table 4.2)&#x27;],
+                   [&#x27;Covered front porch 17\&#x27;-0&quot; × 6\&#x27;-0&quot;&#x27;, &#x27;%s SF&#x27; % format(round(PORCH_SF), &#x27;,&#x27;), &#x27;Integral&#x27;],
+                   [&#x27;Total under roof&#x27;, &#x27;%s SF&#x27; % format(round(ROOF_SF), &#x27;,&#x27;), &#x27;Conditioned + garage + porch&#x27;],
+                   [&#x27;Building coverage on a 4,100-SF lot&#x27;, &#x27;%.1f%%&#x27; % (100.0 * ROOF_SF / LOT_SF), &#x27;Under roof ÷ lot&#x27;],
+                   [&#x27;Impervious per lot&#x27;, &#x27;%s SF&#x27; % format(round(ROOF_SF + DRIVE_IN_LOT_SF + WALK_SF), &#x27;,&#x27;),
+                    &#x27;Roof + 20\&#x27; × 26\&#x27; drive + entry walk&#x27;],
+                   [&#x27;Ridge height (as Plans A and B)&#x27;, &#x27;≤ 24\&#x27;-0&quot;&#x27;, &#x27;One storey; Table 4.1 maximum 40 ft&#x27;]],
+                  size=6.5, widths=[176, 56, 126])
+    D.stext(xc, yy + 11, &#x27;Zero-step entry, 36-in doors, 5-ft turning circles and grab-bar blocking as Plans A and B.&#x27;,
+            size=6.5, fill=&#x27;#444&#x27;)
+
+    # columns 4 and 5 — general notes, filled column by column
+    D.stext(X4_, y0, &#x27;GENERAL NOTES — FALLBACK LAYOUT&#x27;, size=9, bold=True)
+    D.stext(X5_, y0, &#x27;(GENERAL NOTES, CONTINUED)&#x27;, size=9, bold=True)
+    cols = [(X4_, 96), (X5_, 98)]
+    ci, yy = 0, y0 + 13
+    for i, n in enumerate(NOTES, 1):
+        nx, chars = cols[ci]
+        lines = len(sb.wrap(&#x27;%d. %s&#x27; % (i, n), chars))
+        if yy + lines * 8.0 &gt; sb.BAND_Y1 and ci + 1 &lt; len(cols):
+            ci, yy = ci + 1, y0 + 13
+            nx, chars = cols[ci]
+        yy = D.stextblock(nx, yy, &#x27;%d. %s&#x27; % (i, n), size=6.5, chars=chars, lead=8.0, indent=9)
+        yy += 3.0
+
+    # the impervious schedule that the area tabulation refers to, under the last notes column
+    sb.table(D, cols[ci][0], yy + 20, [&#x27;IMPERVIOUS SCHEDULE — FALLBACK LAYOUT&#x27;, &#x27;AREA (SF)&#x27;],
+             [[n, format(round(v), &#x27;,&#x27;)] for n, v in IMP]
+             + [[&#x27;TOTAL IMPERVIOUS — %.1f%% of the %s-SF GIS site area (Sheet C-2.0: 184,148 SF = 44.1%%)&#x27;
+                 % (IMP_PCT, format(round(GIS_SF), &#x27;,&#x27;)), format(round(IMP_SF), &#x27;,&#x27;)]],
+             size=6.5, widths=[286, 60])
+    return D
+
+
+if __name__ == &#x27;__main__&#x27;:
+    D = build()
+    svg, png = sb.save(D, &#x27;fallback-layout&#x27;, dpi=150)
+    print(&#x27;wrote %s\n      %s&#x27; % (svg, png))
+    print(&#x27;  lots        : %d (%d SW + %d NE), %.0f SF each (%.1f–%.1f), %.2f du/ac deeded / %.2f GIS&#x27;
+          % (N_LOTS, sum(1 for s in SLOTS if s[&#x27;side&#x27;] == &#x27;SW&#x27;), sum(1 for s in SLOTS if s[&#x27;side&#x27;] == &#x27;NE&#x27;),
+             LOT_SF, LOT_MIN_SF, LOT_MAX_SF, DENS_DEEDED, DENS_GIS))
+    print(&#x27;  lot checks  : width %.2f–%.2f, depth %.2f–%.2f, lane frontage %.2f–%.2f, inside boundary %d/%d&#x27;
+          % (min(CHK[&#x27;width&#x27;]), max(CHK[&#x27;width&#x27;]), min(CHK[&#x27;depth&#x27;]), max(CHK[&#x27;depth&#x27;]),
+             min(CHK[&#x27;frontage&#x27;]), max(CHK[&#x27;frontage&#x27;]), CHK[&#x27;inside&#x27;], N_LOTS))
+    print(&#x27;  buffer      : %s SF (NE %.0f + rear %.0f + SW %.0f LF)&#x27;
+          % (format(round(BUFFER_SF), &#x27;,&#x27;), LEG_NE_FT, LEG_REAR_FT, LEG_SW_FT))
+    print(&#x27;  lane tract  : %.2f–%.2f ft; NE half %.2f, SW half %.2f; extra CL shift %.2f ft; SW walk from u=%d&#x27;
+          % (TRACT_MIN, TRACT_MAX, NE_HALF_MIN, SW_HALF_MIN, SHIFT_MAX, U_SWWALK))
+    print(&#x27;  areas       : lots %s, lane %s, entry %s, open space %s SF = %.1f%% GIS&#x27;
+          % (format(round(LOTS_SF), &#x27;,&#x27;), format(round(LANE_TRACT_SF), &#x27;,&#x27;), format(round(ENTRY_TRACT_SF), &#x27;,&#x27;),
+             format(round(OPEN_SF), &#x27;,&#x27;), 100.0 * OPEN_SF / GIS_SF))
+    print(&#x27;  impervious  : %s SF = %.1f%%; WQv %s cf&#x27; % (format(round(IMP_SF), &#x27;,&#x27;), IMP_PCT,
+                                                         format(round(WQV_CF), &#x27;,&#x27;)))
+    print(&#x27;  Plan C      : %.0f SF conditioned, %.0f garage, %.0f porch, %.0f under roof (min heated 1,000 SF)&#x27;
+          % (COND_SF, GAR_SF, PORCH_SF, ROOF_SF))
+    print(&#x27;  clearances  : nearest lot to a stream centreline %.1f ft; amenity to a buffer tract %.1f ft&#x27;
+          % (STREAM_MIN, AMEN_TO_BUF))
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/fallback.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

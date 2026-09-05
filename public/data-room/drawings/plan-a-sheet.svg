@@ -1,0 +1,639 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24in" height="18in" viewBox="0 0 128.000 96.000" font-family="Helvetica, Arial, sans-serif"><rect width="128.000" height="96.000" fill="#fff"/>
+<rect x="2.000" y="2.000" width="124.000" height="92.000" fill="none" stroke="#111" stroke-width="0.120"/>
+<rect x="2.400" y="2.400" width="123.200" height="91.200" fill="none" stroke="#111" stroke-width="0.040"/>
+<line x1="2.400" y1="86.600" x2="125.600" y2="86.600" stroke="#111" stroke-width="0.080" stroke-linecap="round"/>
+<text x="3.200" y="87.800" font-size="0.950" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="bold" fill="#111" dominant-baseline="middle">PLAN A — THE SPRINGBROOK — ILLUSTRATIVE ARCHITECTURAL PLAN — NOT FOR CONSTRUCTION — 2026-08-28</text>
+<text x="3.200" y="89.100" font-size="0.450" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">THE COTTAGES AT ARCADO SPRINGS — R-1 → R-2 REZONING (Lilburn Zoning Ordinance 2023-603 §1003-4) — 4535/4537/4539/4541 Arcado Rd SW, Lilburn GA 30047 — Land Lot 123, 6th District, Gwinnett County</text>
+<text x="3.200" y="90.100" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Sheet A-1 · The Springbrook · Scale 3/16" = 1'-0" on ARCH C (18 × 24 in) · Prepared by the owner-applicant (Mohammed Awad) with AI drafting tools · DRAFT — to be superseded by sealed drawings (GA-registered architect)</text>
+<text x="3.200" y="91.200" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#222" dominant-baseline="middle">Disclaimer: This is an AI-generated analysis for preliminary planning purposes. All findings must be verified by a licensed professional before use in design, permitting, or regulatory submissions.</text>
+<text x="3.200" y="92.200" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#999" dominant-baseline="middle">&lt;!-- architecture-studio:requires-disclaimer --&gt;</text>
+<rect x="110.000" y="88.950" width="1.000" height="0.500" fill="#111" stroke="#111" stroke-width="0.030"/>
+<rect x="111.000" y="88.950" width="1.000" height="0.500" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="112.000" y="88.950" width="1.000" height="0.500" fill="#111" stroke="#111" stroke-width="0.030"/>
+<rect x="113.000" y="88.950" width="1.000" height="0.500" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<text x="110.000" y="89.900" font-size="0.350" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">0</text>
+<text x="111.000" y="89.900" font-size="0.350" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">1</text>
+<text x="112.000" y="89.900" font-size="0.350" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">2</text>
+<text x="113.000" y="89.900" font-size="0.350" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">3</text>
+<text x="114.000" y="89.900" font-size="0.350" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">4</text>
+<text x="112.000" y="88.450" font-size="0.380" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">GRAPHIC SCALE — 4 FT  (1 FT DIVISIONS)</text>
+<text x="124.000" y="91.800" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#333" dominant-baseline="middle">NORTH: see site plan (lots face the lane; N 28°43' W along the strip)</text>
+<g transform="translate(12.500 0)"><polygon points="21.000,75.600 38.000,75.600 38.000,69.600 21.000,69.600" fill="#f3efe6" stroke="#111" stroke-width="0.040"/>
+<polygon points="21.000,17.770 33.000,17.770 33.000,11.770 21.000,11.770" fill="#eeeeee" stroke="#111" stroke-width="0.040" stroke-dasharray="0.4,0.2"/>
+<polygon points="0.000,64.600 21.000,64.600 21.000,42.770 0.000,42.770" fill="#f6f6f6" stroke="none" stroke-width="0.035"/>
+<polygon points="21.000,69.600 25.170,69.600 25.170,42.770 21.000,42.770" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="25.170,69.600 38.000,69.600 38.000,55.600 31.000,55.600 31.000,58.100 25.170,58.100" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="25.170,58.100 31.000,58.100 31.000,55.600 25.170,55.600" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="25.170,55.600 38.000,55.600 38.000,47.430 25.170,47.430" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="25.170,47.430 28.170,47.430 28.170,42.770 25.170,42.770" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="28.170,47.430 38.000,47.430 38.000,42.770 28.170,42.770" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="14.000,42.770 21.000,42.770 21.000,32.100 14.000,32.100" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="21.000,42.770 38.000,42.770 38.000,32.100 21.000,32.100" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="0.000,42.770 14.000,42.770 14.000,37.100 0.000,37.100" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="0.000,37.100 14.000,37.100 14.000,28.600 0.000,28.600" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="0.000,28.600 14.000,28.600 14.000,17.770 0.000,17.770" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="14.000,32.100 18.170,32.100 18.170,24.600 14.000,24.600" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<polygon points="18.170,32.100 38.000,32.100 38.000,17.770 14.000,17.770 14.000,24.600 18.170,24.600" fill="#ffffff" stroke="none" stroke-width="0.035"/>
+<rect x="0.000" y="64.100" width="14.000" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="14.000" y="64.100" width="4.170" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="18.170" y="64.100" width="2.830" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="20.833" y="58.100" width="0.333" height="6.500" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="20.833" y="55.600" width="0.333" height="2.500" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="20.833" y="47.430" width="0.333" height="8.170" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="20.833" y="42.770" width="0.333" height="4.660" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="42.603" width="14.000" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="14.000" y="42.603" width="4.170" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="18.170" y="42.603" width="2.830" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="58.100" width="0.500" height="6.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="55.600" width="0.500" height="2.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="47.430" width="0.500" height="8.170" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="42.770" width="0.500" height="4.660" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="21.000" y="69.100" width="4.170" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="25.003" y="64.600" width="0.333" height="5.000" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="25.003" y="58.100" width="0.333" height="6.500" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="25.003" y="55.600" width="0.333" height="2.500" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="25.003" y="47.430" width="0.333" height="8.170" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="25.003" y="42.770" width="0.333" height="4.660" fill="#555" stroke="#111" stroke-width="0.020"/>
+<line x1="21.000" y1="42.770" x2="25.170" y2="42.770" stroke="#333" stroke-width="0.030" stroke-dasharray="0.35,0.2" stroke-linecap="round"/>
+<rect x="21.000" y="64.600" width="0.500" height="5.000" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="25.170" y="69.100" width="3.000" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="28.170" y="69.100" width="2.830" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="31.000" y="69.100" width="7.000" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="37.500" y="64.600" width="0.500" height="5.000" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="37.500" y="58.100" width="0.500" height="6.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="37.500" y="55.600" width="0.500" height="2.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="31.000" y="55.433" width="7.000" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="30.833" y="55.600" width="0.333" height="2.500" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="25.170" y="57.933" width="3.000" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="28.170" y="57.933" width="2.830" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="25.170" y="55.433" width="3.000" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="28.170" y="55.433" width="2.830" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="37.500" y="47.430" width="0.500" height="8.170" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="25.170" y="47.263" width="3.000" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="28.170" y="47.263" width="2.830" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="31.000" y="47.263" width="7.000" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="28.003" y="42.770" width="0.333" height="4.660" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="25.170" y="42.603" width="3.000" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="37.500" y="42.770" width="0.500" height="4.660" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="28.170" y="42.603" width="2.830" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="31.000" y="42.603" width="7.000" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="20.833" y="37.100" width="0.333" height="5.670" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="20.833" y="32.100" width="0.333" height="5.000" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="14.000" y="31.933" width="4.170" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="18.170" y="31.933" width="2.830" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="13.833" y="37.100" width="0.333" height="5.670" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="13.833" y="32.100" width="0.333" height="5.000" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="37.500" y="37.100" width="0.500" height="5.670" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="37.500" y="32.100" width="0.500" height="5.000" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<line x1="21.000" y1="32.100" x2="25.170" y2="32.100" stroke="#333" stroke-width="0.030" stroke-dasharray="0.35,0.2" stroke-linecap="round"/>
+<line x1="25.170" y1="32.100" x2="28.170" y2="32.100" stroke="#333" stroke-width="0.030" stroke-dasharray="0.35,0.2" stroke-linecap="round"/>
+<line x1="28.170" y1="32.100" x2="31.000" y2="32.100" stroke="#333" stroke-width="0.030" stroke-dasharray="0.35,0.2" stroke-linecap="round"/>
+<line x1="31.000" y1="32.100" x2="38.000" y2="32.100" stroke="#333" stroke-width="0.030" stroke-dasharray="0.35,0.2" stroke-linecap="round"/>
+<rect x="0.000" y="36.933" width="14.000" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="37.100" width="0.500" height="5.670" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="13.833" y="28.600" width="0.333" height="3.500" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="28.433" width="14.000" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="32.100" width="0.500" height="5.000" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="28.600" width="0.500" height="3.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="13.833" y="24.600" width="0.333" height="4.000" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="13.833" y="17.770" width="0.333" height="6.830" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="17.770" width="14.000" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="24.600" width="0.500" height="4.000" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="0.000" y="17.770" width="0.500" height="6.830" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<line x1="18.170" y1="32.100" x2="18.170" y2="28.600" stroke="#333" stroke-width="0.030" stroke-dasharray="0.35,0.2" stroke-linecap="round"/>
+<line x1="18.170" y1="28.600" x2="18.170" y2="24.600" stroke="#333" stroke-width="0.030" stroke-dasharray="0.35,0.2" stroke-linecap="round"/>
+<rect x="14.000" y="24.433" width="4.170" height="0.333" fill="#555" stroke="#111" stroke-width="0.020"/>
+<rect x="37.500" y="28.600" width="0.500" height="3.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="37.500" y="24.600" width="0.500" height="4.000" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="37.500" y="17.770" width="0.500" height="6.830" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="14.000" y="17.770" width="4.170" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="18.170" y="17.770" width="2.830" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="21.000" y="17.770" width="4.170" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="25.170" y="17.770" width="3.000" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="28.170" y="17.770" width="2.830" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="31.000" y="17.770" width="7.000" height="0.500" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="25.330" y="55.770" width="5.500" height="1.930" fill="none" stroke="#111" stroke-width="0.025"/>
+<line x1="25.330" y1="56.735" x2="30.830" y2="56.735" stroke="#111" stroke-width="0.025" stroke-dasharray="0.25,0.15" stroke-linecap="round"/>
+<rect x="26.000" y="42.930" width="2.000" height="4.340" fill="none" stroke="#111" stroke-width="0.025"/>
+<line x1="27.000" y1="47.270" x2="27.000" y2="42.930" stroke="#111" stroke-width="0.025" stroke-dasharray="0.25,0.15" stroke-linecap="round"/>
+<rect x="0.500" y="40.600" width="13.330" height="2.000" fill="none" stroke="#111" stroke-width="0.025"/>
+<line x1="0.500" y1="41.600" x2="13.830" y2="41.600" stroke="#111" stroke-width="0.025" stroke-dasharray="0.25,0.15" stroke-linecap="round"/>
+<rect x="11.830" y="37.270" width="2.000" height="3.330" fill="none" stroke="#111" stroke-width="0.025"/>
+<line x1="12.830" y1="40.600" x2="12.830" y2="37.270" stroke="#111" stroke-width="0.025" stroke-dasharray="0.25,0.15" stroke-linecap="round"/>
+<rect x="30.800" y="62.100" width="6.650" height="5.000" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="36.150" y="62.300" width="1.100" height="4.600" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<line x1="35.850" y1="67.100" x2="35.850" y2="62.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="34.125" y="65.200" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">QUEEN</text>
+<rect x="35.000" y="50.430" width="2.500" height="5.000" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="35.300" y="50.730" width="1.900" height="4.400" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<text x="36.250" y="52.930" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(90.0 36.250 52.930)">TUB/SHWR</text>
+<rect x="25.330" y="47.600" width="4.000" height="1.830" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="26.580" y="47.915" width="1.500" height="1.200" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<circle cx="27.330" cy="48.515" r="0.120" fill="none" stroke="#111" stroke-width="0.030"/>
+<rect x="30.550" y="47.600" width="2.000" height="0.700" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<ellipse cx="31.550" cy="49.250" rx="0.620" ry="0.950" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<circle cx="29.500" cy="52.900" r="2.500" fill="none" stroke="#1a6faa" stroke-width="0.025" stroke-dasharray="0.3,0.2"/>
+<text x="29.500" y="52.900" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#1a6faa" dominant-baseline="middle">5'-0" Ø</text>
+<rect x="28.330" y="45.770" width="9.170" height="1.500" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<line x1="28.330" y1="47.270" x2="37.500" y2="45.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<rect x="36.000" y="42.930" width="1.500" height="2.840" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="14.170" y="37.100" width="2.500" height="2.500" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<circle cx="15.420" cy="38.350" r="0.825" fill="none" stroke="#111" stroke-width="0.030"/>
+<text x="15.420" y="38.350" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">W</text>
+<rect x="14.170" y="34.600" width="2.500" height="2.500" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<circle cx="15.420" cy="35.850" r="0.825" fill="none" stroke="#111" stroke-width="0.030"/>
+<text x="15.420" y="35.850" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">D</text>
+<circle cx="19.850" cy="33.300" r="0.900" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<text x="19.850" y="33.300" font-size="0.320" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">WH</text>
+<rect x="15.300" y="32.270" width="3.300" height="1.430" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<text x="16.950" y="32.985" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">BENCH</text>
+<rect x="35.500" y="40.100" width="2.000" height="2.500" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="35.000" y="37.600" width="2.500" height="2.500" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<circle cx="35.469" cy="39.553" r="0.300" fill="none" stroke="#111" stroke-width="0.030"/>
+<circle cx="37.031" cy="39.553" r="0.300" fill="none" stroke="#111" stroke-width="0.030"/>
+<circle cx="35.469" cy="38.147" r="0.300" fill="none" stroke="#111" stroke-width="0.030"/>
+<circle cx="37.031" cy="38.147" r="0.300" fill="none" stroke="#111" stroke-width="0.030"/>
+<rect x="35.500" y="36.600" width="2.000" height="1.000" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="35.650" y="34.250" width="1.700" height="2.200" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<circle cx="36.500" cy="35.350" r="0.100" fill="none" stroke="#111" stroke-width="0.030"/>
+<rect x="35.500" y="32.100" width="2.000" height="2.000" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<text x="36.500" y="33.100" font-size="0.320" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">DW</text>
+<rect x="32.000" y="40.100" width="3.000" height="2.500" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<line x1="32.000" y1="42.600" x2="35.000" y2="40.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="32.000" y1="40.100" x2="35.000" y2="42.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="33.500" y="41.350" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">REF</text>
+<rect x="28.500" y="33.100" width="3.000" height="6.700" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<text x="30.000" y="36.450" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 30.000 36.450)">ISLAND 3'×6'-8"</text>
+<rect x="22.600" y="34.100" width="3.000" height="5.000" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="22.750" y="34.250" width="2.700" height="4.700" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<text x="24.100" y="36.600" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 24.100 36.600)">DINING</text>
+<rect x="4.000" y="35.100" width="7.000" height="1.830" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="5.000" y="35.415" width="1.500" height="1.200" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<circle cx="5.750" cy="36.015" r="0.120" fill="none" stroke="#111" stroke-width="0.030"/>
+<rect x="8.500" y="35.415" width="1.500" height="1.200" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<circle cx="9.250" cy="36.015" r="0.120" fill="none" stroke="#111" stroke-width="0.030"/>
+<rect x="13.130" y="32.850" width="0.700" height="2.000" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<ellipse cx="12.180" cy="33.850" rx="0.950" ry="0.620" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="0.500" y="28.770" width="5.000" height="3.830" fill="#fff" stroke="#111" stroke-width="0.030" stroke-dasharray="0.15,0.1"/>
+<line x1="0.500" y1="32.600" x2="5.500" y2="28.770" stroke="#666" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="0.500" y1="28.770" x2="5.500" y2="32.600" stroke="#666" stroke-width="0.020" stroke-linecap="round"/>
+<circle cx="1.000" cy="29.300" r="0.150" fill="none" stroke="#111" stroke-width="0.030"/>
+<text x="3.000" y="29.985" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">CURBLESS</text>
+<circle cx="8.200" cy="31.400" r="2.500" fill="none" stroke="#1a6faa" stroke-width="0.025" stroke-dasharray="0.3,0.2"/>
+<text x="8.200" y="31.400" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#1a6faa" dominant-baseline="middle">5'-0" Ø</text>
+<rect x="7.300" y="18.300" width="6.400" height="6.800" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="7.500" y="18.500" width="6.000" height="1.100" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<line x1="7.300" y1="19.900" x2="13.700" y2="19.900" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="10.500" y="22.300" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">KING</text>
+<rect x="23.500" y="25.600" width="7.500" height="3.000" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="24.000" y="25.750" width="6.500" height="2.350" fill="#fff" stroke="#111" stroke-width="0.030"/>
+<rect x="21.580" y="69.090" width="3.000" height="0.520" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="21.580" y1="69.600" x2="21.580" y2="69.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="24.580" y1="69.600" x2="24.580" y2="69.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="21.580" y1="69.100" x2="21.580" y2="66.100" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 21.580 66.100 A 3.000 3.000 0 0 1 24.580 69.100" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="23.080" y="67.500" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">3'-0"</text>
+<rect x="2.500" y="64.090" width="16.000" height="0.520" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="2.500" y1="64.600" x2="2.500" y2="64.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="18.500" y1="64.600" x2="18.500" y2="64.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="2.500" y1="64.350" x2="18.500" y2="64.350" stroke="#111" stroke-width="0.060" stroke-linecap="round"/>
+<rect x="2.500" y="64.100" width="16.000" height="0.500" fill="none" stroke="#111" stroke-width="0.030"/>
+<text x="10.500" y="63.650" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">GARAGE DOOR 16'-0" × 7'-0"</text>
+<rect x="15.000" y="42.593" width="3.000" height="0.353" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="15.000" y1="42.937" x2="15.000" y2="42.603" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="18.000" y1="42.937" x2="18.000" y2="42.603" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="15.000" y1="42.603" x2="15.000" y2="39.603" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 15.000 39.603 A 3.000 3.000 0 0 1 18.000 42.603" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="16.500" y="41.003" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">3'-0"</text>
+<rect x="20.823" y="35.600" width="0.353" height="3.000" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="20.833" y1="38.600" x2="21.167" y2="38.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="20.833" y1="35.600" x2="21.167" y2="35.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="20.833" y1="38.600" x2="17.833" y2="38.600" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 17.833 38.600 A 3.000 3.000 0 0 1 20.833 35.600" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="19.483" y="35.300" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">3'-0"</text>
+<rect x="24.993" y="60.600" width="0.353" height="3.000" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="25.003" y1="63.600" x2="25.337" y2="63.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="25.003" y1="60.600" x2="25.337" y2="60.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="25.337" y1="63.600" x2="28.337" y2="63.600" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 28.337 63.600 A 3.000 3.000 0 0 0 25.337 60.600" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="26.687" y="60.300" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">3'-0"</text>
+<rect x="24.993" y="51.100" width="0.353" height="3.000" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="25.003" y1="54.100" x2="25.337" y2="54.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="25.003" y1="51.100" x2="25.337" y2="51.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="25.337" y1="54.100" x2="28.337" y2="54.100" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 28.337 54.100 A 3.000 3.000 0 0 0 25.337 51.100" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="26.687" y="50.800" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">3'-0"</text>
+<rect x="24.993" y="43.850" width="0.353" height="2.500" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="25.003" y1="46.350" x2="25.337" y2="46.350" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="25.003" y1="43.850" x2="25.337" y2="43.850" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="25.003" y1="46.350" x2="22.503" y2="46.350" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 22.503 46.350 A 2.500 2.500 0 0 1 25.003 43.850" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="23.878" y="43.550" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">2'-6"</text>
+<rect x="28.995" y="42.593" width="2.670" height="0.353" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="28.995" y1="42.937" x2="28.995" y2="42.603" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="31.665" y1="42.937" x2="31.665" y2="42.603" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="28.995" y1="42.937" x2="28.995" y2="45.607" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 28.995 45.607 A 2.670 2.670 0 0 0 31.665 42.937" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="30.330" y="44.388" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">2'-8"</text>
+<rect x="25.500" y="57.923" width="5.000" height="0.353" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="25.500" y1="58.267" x2="25.500" y2="57.933" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="30.500" y1="58.267" x2="30.500" y2="57.933" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="25.500" y1="58.267" x2="25.500" y2="60.767" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 25.500 60.767 A 2.500 2.500 0 0 0 28.000 58.267" fill="none" stroke="#111" stroke-width="0.035"/>
+<line x1="30.500" y1="58.267" x2="30.500" y2="60.767" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 30.500 60.767 A 2.500 2.500 0 0 1 28.000 58.267" fill="none" stroke="#111" stroke-width="0.035"/>
+<rect x="1.250" y="36.923" width="2.500" height="0.353" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="1.250" y1="37.267" x2="1.250" y2="36.933" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="3.750" y1="37.267" x2="3.750" y2="36.933" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="1.250" y1="37.267" x2="1.250" y2="39.767" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 1.250 39.767 A 2.500 2.500 0 0 0 3.750 37.267" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="2.500" y="38.642" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">2'-6"</text>
+<rect x="7.000" y="28.423" width="3.000" height="0.353" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="7.000" y1="28.767" x2="7.000" y2="28.433" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="10.000" y1="28.767" x2="10.000" y2="28.433" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="7.000" y1="28.433" x2="7.000" y2="25.433" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 7.000 25.433 A 3.000 3.000 0 0 1 10.000 28.433" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="8.500" y="26.833" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">3'-0"</text>
+<rect x="13.823" y="25.100" width="0.353" height="3.000" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="13.833" y1="28.100" x2="14.167" y2="28.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="13.833" y1="25.100" x2="14.167" y2="25.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="13.833" y1="28.100" x2="10.833" y2="28.100" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 10.833 28.100 A 3.000 3.000 0 0 1 13.833 25.100" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="12.483" y="24.800" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">3'-0"</text>
+<rect x="24.000" y="17.760" width="6.000" height="0.520" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="24.000" y1="18.270" x2="24.000" y2="17.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="30.000" y1="18.270" x2="30.000" y2="17.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="24.000" y1="18.270" x2="24.000" y2="21.270" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 24.000 21.270 A 3.000 3.000 0 0 0 27.000 18.270" fill="none" stroke="#111" stroke-width="0.035"/>
+<line x1="30.000" y1="18.270" x2="30.000" y2="21.270" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 30.000 21.270 A 3.000 3.000 0 0 1 27.000 18.270" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="27.000" y="19.870" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">6'-0"</text>
+<rect x="30.000" y="69.090" width="6.000" height="0.520" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="30.000" y1="69.600" x2="36.000" y2="69.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="30.000" y1="69.350" x2="36.000" y2="69.350" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="30.000" y1="69.100" x2="36.000" y2="69.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="30.000" y1="69.600" x2="30.000" y2="69.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="36.000" y1="69.600" x2="36.000" y2="69.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="33.000" y="70.150" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">6'-0"</text>
+<rect x="37.490" y="57.600" width="0.520" height="3.000" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="37.500" y1="60.600" x2="37.500" y2="57.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.750" y1="60.600" x2="37.750" y2="57.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="38.000" y1="60.600" x2="38.000" y2="57.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.500" y1="60.600" x2="38.000" y2="60.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.500" y1="57.600" x2="38.000" y2="57.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="38.550" y="59.100" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle" transform="rotate(-90.0 38.550 59.100)">3'-0"</text>
+<rect x="37.490" y="48.100" width="0.520" height="2.000" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="37.500" y1="50.100" x2="37.500" y2="48.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.750" y1="50.100" x2="37.750" y2="48.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="38.000" y1="50.100" x2="38.000" y2="48.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.500" y1="50.100" x2="38.000" y2="50.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.500" y1="48.100" x2="38.000" y2="48.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="38.550" y="49.100" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle" transform="rotate(-90.0 38.550 49.100)">2'-0"</text>
+<rect x="37.490" y="33.600" width="0.520" height="3.500" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="37.500" y1="37.100" x2="37.500" y2="33.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.750" y1="37.100" x2="37.750" y2="33.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="38.000" y1="37.100" x2="38.000" y2="33.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.500" y1="37.100" x2="38.000" y2="37.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.500" y1="33.600" x2="38.000" y2="33.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="38.550" y="35.350" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle" transform="rotate(-90.0 38.550 35.350)">3'-6"</text>
+<rect x="37.490" y="22.600" width="0.520" height="6.000" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="37.500" y1="28.600" x2="37.500" y2="22.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.750" y1="28.600" x2="37.750" y2="22.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="38.000" y1="28.600" x2="38.000" y2="22.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.500" y1="28.600" x2="38.000" y2="28.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.500" y1="22.600" x2="38.000" y2="22.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="38.550" y="25.600" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle" transform="rotate(-90.0 38.550 25.600)">6'-0"</text>
+<rect x="32.500" y="17.760" width="5.000" height="0.520" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="32.500" y1="18.270" x2="37.500" y2="18.270" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="32.500" y1="18.020" x2="37.500" y2="18.020" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="32.500" y1="17.770" x2="37.500" y2="17.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="32.500" y1="18.270" x2="32.500" y2="17.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="37.500" y1="18.270" x2="37.500" y2="17.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="35.000" y="17.220" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">5'-0"</text>
+<rect x="2.000" y="17.760" width="5.000" height="0.520" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="2.000" y1="18.270" x2="7.000" y2="18.270" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="2.000" y1="18.020" x2="7.000" y2="18.020" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="2.000" y1="17.770" x2="7.000" y2="17.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="2.000" y1="18.270" x2="2.000" y2="17.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="7.000" y1="18.270" x2="7.000" y2="17.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="4.500" y="17.220" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle">5'-0"</text>
+<rect x="-0.010" y="20.100" width="0.520" height="6.000" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="0.000" y1="26.100" x2="0.000" y2="20.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.250" y1="26.100" x2="0.250" y2="20.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.500" y1="26.100" x2="0.500" y2="20.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="26.100" x2="0.500" y2="26.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="20.100" x2="0.500" y2="20.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="-0.550" y="23.100" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle" transform="rotate(-90.0 -0.550 23.100)">6'-0"</text>
+<rect x="-0.010" y="33.100" width="0.520" height="2.500" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="0.000" y1="35.600" x2="0.000" y2="33.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.250" y1="35.600" x2="0.250" y2="33.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.500" y1="35.600" x2="0.500" y2="33.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="35.600" x2="0.500" y2="35.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="33.100" x2="0.500" y2="33.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="-0.550" y="34.350" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle" transform="rotate(-90.0 -0.550 34.350)">2'-6"</text>
+<rect x="-0.010" y="53.100" width="0.520" height="3.000" fill="#fff" stroke="none" stroke-width="0.035"/>
+<line x1="0.000" y1="56.100" x2="0.000" y2="53.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.250" y1="56.100" x2="0.250" y2="53.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.500" y1="56.100" x2="0.500" y2="53.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="56.100" x2="0.500" y2="56.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="53.100" x2="0.500" y2="53.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="-0.550" y="54.600" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle" transform="rotate(-90.0 -0.550 54.600)">3'-0"</text>
+<rect x="21.000" y="74.940" width="0.660" height="0.660" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="29.170" y="74.940" width="0.660" height="0.660" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<rect x="37.340" y="74.940" width="0.660" height="0.660" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<text x="10.500" y="55.750" font-size="0.500" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">2-CAR GARAGE</text>
+<text x="10.500" y="56.450" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">20'-4" × 21'-2"</text>
+<text x="10.500" y="57.050" font-size="0.325" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle" font-style="italic">ZERO-STEP DOOR TO MUD ROOM</text>
+<text x="23.000" y="56.100" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 23.000 56.100)">HALL</text>
+<text x="23.650" y="56.100" font-size="0.320" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 23.650 56.100)">3'-6" × 26'-4"</text>
+<text x="30.200" y="59.850" font-size="0.450" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">BEDROOM 2</text>
+<text x="30.200" y="60.550" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">12'-2" × 10'-10"</text>
+<text x="28.000" y="56.550" font-size="0.280" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">CLO. — BIFOLD 5'-0"</text>
+<text x="28.000" y="57.250" font-size="0.224" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">5'-6" × 2'-2"</text>
+<text x="32.400" y="51.550" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">BATH 2</text>
+<text x="32.400" y="52.250" font-size="0.320" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">12'-2" × 7'-10"</text>
+<text x="26.700" y="45.100" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 26.700 45.100)">COAT</text>
+<text x="27.350" y="45.100" font-size="0.240" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 27.350 45.100)">2'-8" × 4'-4"</text>
+<text x="33.600" y="43.950" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">PANTRY</text>
+<text x="33.600" y="44.650" font-size="0.288" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">9'-2" × 4'-4"</text>
+<text x="18.800" y="36.650" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">LAUNDRY / MUD</text>
+<text x="18.800" y="37.350" font-size="0.288" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">6'-8" × 10'-4"</text>
+<text x="24.900" y="40.750" font-size="0.450" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">KITCHEN / DINING</text>
+<text x="24.900" y="41.450" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">16'-4" × 10'-6"</text>
+<text x="6.500" y="38.550" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">W.I.C.</text>
+<text x="6.500" y="39.250" font-size="0.288" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">13'-4" × 5'-4"</text>
+<text x="8.200" y="33.900" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">PRIMARY BATH</text>
+<text x="8.200" y="34.600" font-size="0.320" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">13'-4" × 8'-2"</text>
+<text x="4.000" y="22.350" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">PRIMARY BEDROOM</text>
+<text x="4.000" y="23.050" font-size="0.336" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">13'-4" × 10'-2"</text>
+<text x="15.800" y="28.400" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 15.800 28.400)">SUITE HALL</text>
+<text x="16.450" y="28.400" font-size="0.240" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 16.450 28.400)">4'-0" × 7'-2"</text>
+<text x="28.000" y="21.650" font-size="0.550" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">GREAT ROOM</text>
+<text x="28.000" y="22.350" font-size="0.440" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">19'-4" × 13'-10"</text>
+<text x="28.000" y="22.950" font-size="0.358" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle" font-style="italic">VAULTED CEILING</text>
+<text x="29.500" y="72.250" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">COVERED PORCH</text>
+<text x="29.500" y="72.950" font-size="0.336" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">17'-0" × 6'-0"</text>
+<text x="29.500" y="73.550" font-size="0.273" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#333" dominant-baseline="middle" font-style="italic">ZERO-STEP ENTRY · UNDER THE FRONT GABLE</text>
+<text x="27.000" y="14.420" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">PATIO (UNCOVERED)</text>
+<text x="27.000" y="15.120" font-size="0.320" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">12'-0" × 6'-0"</text>
+<line x1="-0.300" y1="77.600" x2="38.300" y2="77.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="75.800" x2="0.000" y2="77.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-0.220" y1="77.820" x2="0.220" y2="77.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="2.500" y1="75.800" x2="2.500" y2="77.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="2.280" y1="77.820" x2="2.720" y2="77.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="18.500" y1="75.800" x2="18.500" y2="77.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="18.280" y1="77.820" x2="18.720" y2="77.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="21.000" y1="75.800" x2="21.000" y2="77.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="20.780" y1="77.820" x2="21.220" y2="77.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="25.170" y1="75.800" x2="25.170" y2="77.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="24.950" y1="77.820" x2="25.390" y2="77.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.000" y1="75.800" x2="38.000" y2="77.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="37.780" y1="77.820" x2="38.220" y2="77.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="1.250" y="77.150" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">2'-6"</text>
+<text x="10.500" y="77.150" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">16'-0"</text>
+<text x="19.750" y="77.150" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">2'-6"</text>
+<text x="23.085" y="77.150" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">4'-2"</text>
+<text x="31.585" y="77.150" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">12'-10"</text>
+<line x1="-0.300" y1="79.600" x2="38.300" y2="79.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="75.800" x2="0.000" y2="79.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-0.220" y1="79.820" x2="0.220" y2="79.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="21.000" y1="75.800" x2="21.000" y2="79.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="20.780" y1="79.820" x2="21.220" y2="79.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.000" y1="75.800" x2="38.000" y2="79.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="37.780" y1="79.820" x2="38.220" y2="79.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="10.500" y="79.150" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">21'-0"</text>
+<text x="29.500" y="79.150" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">17'-0"</text>
+<line x1="-0.300" y1="81.600" x2="38.300" y2="81.600" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="75.800" x2="0.000" y2="81.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-0.220" y1="81.820" x2="0.220" y2="81.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.000" y1="75.800" x2="38.000" y2="81.900" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="37.780" y1="81.820" x2="38.220" y2="81.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="19.000" y="81.150" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">38'-0"</text>
+<line x1="-0.300" y1="9.770" x2="38.300" y2="9.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="11.570" x2="0.000" y2="9.470" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-0.220" y1="9.990" x2="0.220" y2="9.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="14.000" y1="11.570" x2="14.000" y2="9.470" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="13.780" y1="9.990" x2="14.220" y2="9.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="21.000" y1="11.570" x2="21.000" y2="9.470" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="20.780" y1="9.990" x2="21.220" y2="9.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="33.000" y1="11.570" x2="33.000" y2="9.470" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="32.780" y1="9.990" x2="33.220" y2="9.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.000" y1="11.570" x2="38.000" y2="9.470" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="37.780" y1="9.990" x2="38.220" y2="9.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="7.000" y="9.320" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">14'-0"</text>
+<text x="17.500" y="9.320" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">7'-0"</text>
+<text x="27.000" y="9.320" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">12'-0"</text>
+<text x="35.500" y="9.320" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">5'-0"</text>
+<line x1="-0.300" y1="7.770" x2="38.300" y2="7.770" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="0.000" y1="11.570" x2="0.000" y2="7.470" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-0.220" y1="7.990" x2="0.220" y2="7.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.000" y1="11.570" x2="38.000" y2="7.470" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="37.780" y1="7.990" x2="38.220" y2="7.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="19.000" y="7.320" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">38'-0"</text>
+<line x1="-2.000" y1="64.900" x2="-2.000" y2="17.470" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="-0.200" y1="64.600" x2="-2.300" y2="64.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-2.220" y1="64.820" x2="-1.780" y2="64.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="-0.200" y1="42.770" x2="-2.300" y2="42.770" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-2.220" y1="42.990" x2="-1.780" y2="42.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="-0.200" y1="37.100" x2="-2.300" y2="37.100" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-2.220" y1="37.320" x2="-1.780" y2="36.880" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="-0.200" y1="28.600" x2="-2.300" y2="28.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-2.220" y1="28.820" x2="-1.780" y2="28.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="-0.200" y1="17.770" x2="-2.300" y2="17.770" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-2.220" y1="17.990" x2="-1.780" y2="17.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="-2.450" y="53.685" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 -2.450 53.685)">21'-10"</text>
+<text x="-2.450" y="39.935" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 -2.450 39.935)">5'-8"</text>
+<text x="-2.450" y="32.850" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 -2.450 32.850)">8'-6"</text>
+<text x="-2.450" y="23.185" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 -2.450 23.185)">10'-10"</text>
+<line x1="-4.000" y1="69.900" x2="-4.000" y2="17.470" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="-0.200" y1="69.600" x2="-4.300" y2="69.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-4.220" y1="69.820" x2="-3.780" y2="69.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="-0.200" y1="64.600" x2="-4.300" y2="64.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-4.220" y1="64.820" x2="-3.780" y2="64.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="-0.200" y1="17.770" x2="-4.300" y2="17.770" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-4.220" y1="17.990" x2="-3.780" y2="17.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="-4.450" y="67.100" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 -4.450 67.100)">5'-0"</text>
+<text x="-4.450" y="41.185" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 -4.450 41.185)">46'-10"</text>
+<line x1="-6.000" y1="75.900" x2="-6.000" y2="11.470" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="-0.200" y1="75.600" x2="-6.300" y2="75.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-6.220" y1="75.820" x2="-5.780" y2="75.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="-0.200" y1="69.600" x2="-6.300" y2="69.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-6.220" y1="69.820" x2="-5.780" y2="69.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="-0.200" y1="17.770" x2="-6.300" y2="17.770" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-6.220" y1="17.990" x2="-5.780" y2="17.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="-0.200" y1="11.770" x2="-6.300" y2="11.770" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="-6.220" y1="11.990" x2="-5.780" y2="11.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="-6.450" y="72.600" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 -6.450 72.600)">6'-0"</text>
+<text x="-6.450" y="43.685" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 -6.450 43.685)">51'-10"</text>
+<text x="-6.450" y="14.770" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 -6.450 14.770)">6'-0"</text>
+<line x1="40.500" y1="75.900" x2="40.500" y2="17.470" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="38.200" y1="75.600" x2="40.800" y2="75.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="40.280" y1="75.820" x2="40.720" y2="75.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.200" y1="69.600" x2="40.800" y2="69.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="40.280" y1="69.820" x2="40.720" y2="69.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.200" y1="55.600" x2="40.800" y2="55.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="40.280" y1="55.820" x2="40.720" y2="55.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.200" y1="47.430" x2="40.800" y2="47.430" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="40.280" y1="47.650" x2="40.720" y2="47.210" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.200" y1="42.770" x2="40.800" y2="42.770" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="40.280" y1="42.990" x2="40.720" y2="42.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.200" y1="32.100" x2="40.800" y2="32.100" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="40.280" y1="32.320" x2="40.720" y2="31.880" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.200" y1="17.770" x2="40.800" y2="17.770" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="40.280" y1="17.990" x2="40.720" y2="17.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="40.050" y="72.600" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 40.050 72.600)">6'-0"</text>
+<text x="40.050" y="62.600" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 40.050 62.600)">14'-0"</text>
+<text x="40.050" y="51.515" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 40.050 51.515)">8'-2"</text>
+<text x="40.050" y="45.100" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 40.050 45.100)">4'-8"</text>
+<text x="40.050" y="37.435" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 40.050 37.435)">10'-8"</text>
+<text x="40.050" y="24.935" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 40.050 24.935)">14'-4"</text>
+<line x1="42.500" y1="75.900" x2="42.500" y2="17.470" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="38.200" y1="75.600" x2="42.800" y2="75.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="42.280" y1="75.820" x2="42.720" y2="75.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.200" y1="69.600" x2="42.800" y2="69.600" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="42.280" y1="69.820" x2="42.720" y2="69.380" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="38.200" y1="17.770" x2="42.800" y2="17.770" stroke="#555" stroke-width="0.020" stroke-linecap="round"/>
+<line x1="42.280" y1="17.990" x2="42.720" y2="17.550" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="42.050" y="72.600" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 42.050 72.600)">6'-0"</text>
+<text x="42.050" y="43.685" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 42.050 43.685)">51'-10"</text>
+<line x1="6.000" y1="64.900" x2="6.000" y2="42.470" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="5.820" y1="64.780" x2="6.180" y2="64.420" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="5.820" y1="42.950" x2="6.180" y2="42.590" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="5.550" y="53.685" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle" transform="rotate(-90.0 5.550 53.685)">21'-10"</text>
+<line x1="-0.300" y1="47.100" x2="21.300" y2="47.100" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="-0.180" y1="47.280" x2="0.180" y2="46.920" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<line x1="20.820" y1="47.280" x2="21.180" y2="46.920" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<text x="10.500" y="46.650" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="normal" fill="#111" dominant-baseline="middle">21'-0"</text>
+<text x="19.000" y="84.200" font-size="0.500" font-family="Helvetica, Arial, sans-serif" text-anchor="middle" font-weight="bold" fill="#111" dominant-baseline="middle">▼  FRONT — TOWARD THE LANE (ENTRY, GARAGE, PORCH FACE AT THE 15-FT SETBACK LINE)  ▼</text></g>
+<g transform="translate(60.500 4.500) scale(1.30) translate(-60.500 -4.500)"><text x="60.500" y="4.500" font-size="0.800" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="bold" fill="#111" dominant-baseline="middle">PLAN A — THE SPRINGBROOK</text>
+<text x="60.500" y="5.500" font-size="0.420" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#333" dominant-baseline="middle">2 BR / 2 BA, 1 story, 2-car front-loaded garage recessed 5'-0", covered front porch, rear patio</text>
+<text x="60.500" y="6.900" font-size="0.450" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="bold" fill="#111" dominant-baseline="middle">AREA TABULATION — computed by tools/floorplans.py from the wall-face polygons</text>
+<text x="60.500" y="7.800" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Conditioned (heated) area</text>
+<text x="82.300" y="7.800" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">1,406 SF</text>
+<text x="86.500" y="7.800" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#444" dominant-baseline="middle">outside face of ext. walls</text>
+<text x="60.500" y="8.550" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">2-car garage</text>
+<text x="82.300" y="8.550" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">458 SF</text>
+<text x="86.500" y="8.550" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#444" dominant-baseline="middle">outside face / centreline</text>
+<text x="60.500" y="9.300" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Covered front porch</text>
+<text x="82.300" y="9.300" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">102 SF</text>
+<text x="86.500" y="9.300" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#444" dominant-baseline="middle">slab</text>
+<text x="60.500" y="10.050" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="bold" fill="#111" dominant-baseline="middle">TOTAL UNDER ROOF</text>
+<text x="82.300" y="10.050" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="bold" fill="#111" dominant-baseline="middle">1,966 SF</text>
+<text x="86.500" y="10.050" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#444" dominant-baseline="middle">cond. + garage + porch</text>
+<text x="60.500" y="10.800" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Rear patio (uncovered, not under roof)</text>
+<text x="82.300" y="10.800" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">72 SF</text>
+<text x="86.500" y="10.800" font-size="0.300" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#444" dominant-baseline="middle">slab</text>
+<line x1="60.500" y1="11.200" x2="86.500" y2="11.200" stroke="#111" stroke-width="0.020" stroke-linecap="round"/>
+<text x="60.500" y="11.550" font-size="0.320" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#333" dominant-baseline="middle">Program target 1,444 conditioned (FACTS §4 nominal 38'-0" × 38'-0"); Lilburn Table 4.1 R-2 cottage min heated 1,000 SF.</text>
+<text x="60.500" y="12.450" font-size="0.450" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="bold" fill="#111" dominant-baseline="middle">ROOM SCHEDULE (clear, inside face)</text>
+<text x="60.500" y="13.250" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">2-CAR GARAGE</text>
+<text x="82.300" y="13.250" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">20'-4" × 21'-2"</text>
+<text x="86.500" y="13.250" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">430 SF</text>
+<text x="60.500" y="13.870" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">HALL</text>
+<text x="82.300" y="13.870" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">3'-6" × 26'-4"</text>
+<text x="86.500" y="13.870" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">92 SF</text>
+<text x="60.500" y="14.490" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">BEDROOM 2</text>
+<text x="82.300" y="14.490" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">12'-2" × 10'-10"</text>
+<text x="86.500" y="14.490" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">148 SF</text>
+<text x="60.500" y="15.110" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">CLOSET</text>
+<text x="82.300" y="15.110" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">5'-6" × 2'-2"</text>
+<text x="86.500" y="15.110" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">12 SF</text>
+<text x="60.500" y="15.730" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">BATH 2</text>
+<text x="82.300" y="15.730" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">12'-2" × 7'-10"</text>
+<text x="86.500" y="15.730" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">95 SF</text>
+<text x="60.500" y="16.350" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">COAT</text>
+<text x="82.300" y="16.350" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">2'-8" × 4'-4"</text>
+<text x="86.500" y="16.350" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">12 SF</text>
+<text x="60.500" y="16.970" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">PANTRY</text>
+<text x="82.300" y="16.970" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">9'-2" × 4'-4"</text>
+<text x="86.500" y="16.970" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">40 SF</text>
+<text x="60.500" y="17.590" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">LAUNDRY / MUD</text>
+<text x="82.300" y="17.590" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">6'-8" × 10'-4"</text>
+<text x="86.500" y="17.590" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">69 SF</text>
+<text x="60.500" y="18.210" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">KITCHEN / DINING</text>
+<text x="82.300" y="18.210" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">16'-4" × 10'-6"</text>
+<text x="86.500" y="18.210" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">172 SF</text>
+<text x="60.500" y="18.830" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">W.I.C.</text>
+<text x="82.300" y="18.830" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">13'-4" × 5'-4"</text>
+<text x="86.500" y="18.830" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">71 SF</text>
+<text x="60.500" y="19.450" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">PRIMARY BATH</text>
+<text x="82.300" y="19.450" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">13'-4" × 8'-2"</text>
+<text x="86.500" y="19.450" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">109 SF</text>
+<text x="60.500" y="20.070" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">PRIMARY BEDROOM</text>
+<text x="82.300" y="20.070" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">13'-4" × 10'-2"</text>
+<text x="86.500" y="20.070" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">136 SF</text>
+<text x="60.500" y="20.690" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">SUITE HALL</text>
+<text x="82.300" y="20.690" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">4'-0" × 7'-2"</text>
+<text x="86.500" y="20.690" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">29 SF</text>
+<text x="60.500" y="21.310" font-size="0.360" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">GREAT ROOM</text>
+<text x="82.300" y="21.310" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">19'-4" × 13'-10"</text>
+<text x="86.500" y="21.310" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="end" font-weight="normal" fill="#111" dominant-baseline="middle">289 SF</text>
+<text x="60.500" y="22.930" font-size="0.450" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="bold" fill="#111" dominant-baseline="middle">ROOF / HEIGHT</text>
+<text x="60.500" y="23.730" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">main gable (rear block): span 25'-0", 8:12 → ridge 17'-10" above FF (plate 9'-0" + heel + rise)</text>
+<text x="60.500" y="24.330" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">front-wing gable (extended over the porch): span 17'-0", 8:12 → ridge 15'-2" above FF (plate 9'-0" + heel + rise)</text>
+<text x="60.500" y="24.930" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">garage gable: span 21'-0", 6:12 → ridge 14'-9" above FF (plate 9'-0" + heel + rise)</text>
+<text x="60.500" y="25.530" font-size="0.340" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Max ridge 17'-10" ≤ 24 ft program cap; Ord. 2023-603 Table 4.1 R-2 max height 40 ft — appears consistent.</text>
+<text x="60.500" y="26.730" font-size="0.450" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="bold" fill="#111" dominant-baseline="middle">ACCESSIBILITY CHECKLIST (voluntary)</text>
+<text x="60.500" y="27.530" font-size="0.310" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">• Zero-step entries — front porch (slab flush with finished floor) and garage-to-mud-room door; patio door ≤ 1/2-in threshold [design intent]</text>
+<text x="60.500" y="28.080" font-size="0.310" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">• Door clear width — all passage doors 36 in (3'-0"); closets 30 in; french door 6'-0" [design intent]</text>
+<text x="60.500" y="28.630" font-size="0.310" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">• Hall width — main hall 3'-6" clear (42 in); suite hall 4'-0" clear [design intent]</text>
+<text x="60.500" y="29.180" font-size="0.310" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">• Turning circles — 5'-0" (60 in) circle drawn and checked clear in both baths [checked by script]</text>
+<text x="60.500" y="29.730" font-size="0.310" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">• Curbless shower — primary bath 5'-0" × 3'-10" curbless (recessed slab per 03 30 00 §2.05) [design intent]</text>
+<text x="60.500" y="30.280" font-size="0.310" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">• Grab-bar blocking — 2×10 solid blocking 33–36 in AFF at all toilets, tub and showers (2024 IRC (GA 2026) — voluntary; ANSI A117.1 Type C-type) [design intent — VERIFY blocking heights with architect]</text>
+<text x="60.500" y="30.830" font-size="0.310" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">• Plate height / vaulted — 9'-0" plate; great room vaulted [design intent]</text>
+<text x="60.500" y="31.380" font-size="0.310" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">• Single-level living — 1 story; no interior steps; laundry on the living level [design intent]</text>
+<text x="60.500" y="31.930" font-size="0.310" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">• Lever hardware, rocker switches, 48-in max reach — to be specified (Division 08 / 26) [later stage]</text>
+<text x="60.500" y="32.480" font-size="0.310" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">• Lilburn §734 visitability — applies to attached dwellings only; voluntarily exceeded (100% zero-step) [appears consistent with Ord. 2023-603 §734 (not applicable)]</text>
+<text x="60.500" y="33.630" font-size="0.500" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="bold" fill="#111" dominant-baseline="middle">LEGEND</text>
+<rect x="60.500" y="34.330" width="1.600" height="0.600" fill="#2b2b2b" stroke="#111" stroke-width="0.020"/>
+<text x="62.700" y="34.630" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Exterior wall — 2×6 @ 6 in (poché)</text>
+<rect x="60.500" y="35.330" width="1.600" height="0.400" fill="#555" stroke="#111" stroke-width="0.020"/>
+<text x="62.700" y="35.530" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Interior partition — 2×4 @ 4 in</text>
+<line x1="60.500" y1="36.430" x2="62.100" y2="36.430" stroke="#111" stroke-width="0.030" stroke-dasharray="0.35,0.2" stroke-linecap="round"/>
+<text x="62.700" y="36.430" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Cased opening / ceiling beam (no wall)</text>
+<line x1="60.500" y1="37.580" x2="62.100" y2="37.580" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="60.500" y1="37.330" x2="62.100" y2="37.330" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<line x1="60.500" y1="37.080" x2="62.100" y2="37.080" stroke="#111" stroke-width="0.030" stroke-linecap="round"/>
+<text x="62.700" y="37.330" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Window (triple line), width noted</text>
+<line x1="60.500" y1="38.530" x2="60.500" y2="37.730" stroke="#111" stroke-width="0.050" stroke-linecap="round"/>
+<path d="M 60.500 37.730 A 0.800 0.800 0 0 1 61.300 38.530" fill="none" stroke="#111" stroke-width="0.035"/>
+<text x="62.700" y="38.230" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Door leaf + swing, width noted (36 in typ.)</text>
+<circle cx="61.300" cy="39.230" r="0.500" fill="none" stroke="#1a6faa" stroke-width="0.025" stroke-dasharray="0.3,0.2"/>
+<text x="62.700" y="39.230" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">5'-0" turning circle (ANSI A117.1-type)</text>
+<rect x="60.500" y="39.830" width="1.600" height="0.600" fill="none" stroke="#111" stroke-width="0.025"/>
+<line x1="60.500" y1="40.130" x2="62.100" y2="40.130" stroke="#111" stroke-width="0.025" stroke-dasharray="0.25,0.15" stroke-linecap="round"/>
+<text x="62.700" y="40.130" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Closet shelf + rod</text>
+<rect x="60.500" y="40.730" width="1.600" height="0.600" fill="#f3efe6" stroke="#111" stroke-width="0.030"/>
+<text x="62.700" y="41.030" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Covered porch slab</text>
+<rect x="60.500" y="41.630" width="1.600" height="0.600" fill="#eeeeee" stroke="#111" stroke-width="0.030" stroke-dasharray="0.4,0.2"/>
+<text x="62.700" y="41.930" font-size="0.400" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">Uncovered patio slab</text>
+<text x="88.000" y="4.500" font-size="0.500" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="bold" fill="#111" dominant-baseline="middle">NOTES</text>
+<text x="88.000" y="5.400" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">1.  Illustrative architectural plan for the rezoning application (Lilburn Zoning Ordinance</text>
+<text x="88.000" y="5.895" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     2023-603 §1003-4 renderings/elevations item). NOT FOR CONSTRUCTION. DRAFT — to be</text>
+<text x="88.000" y="6.390" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     superseded by sealed drawings by a Georgia-registered architect.</text>
+<text x="88.000" y="7.085" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">2.  Dimensions are to the outside face of exterior walls (2×6, 6 in nominal) and to the</text>
+<text x="88.000" y="7.580" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     centreline of interior partitions (2×4, 4 in). Plate height 9'-0"; great room vaulted;</text>
+<text x="88.000" y="8.075" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     roof 8:12 main gables, 4:12 porch shed, architectural shingles.</text>
+<text x="88.000" y="8.770" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">3.  Accessibility (voluntary — Ord. 2023-603 §734 applies to attached dwellings only): zero-</text>
+<text x="88.000" y="9.265" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     step entries at the porch and garage/mud room; 36-in passage doors; 42-in halls; 5'-0"</text>
+<text x="88.000" y="9.760" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     turning circles in both baths; curbless primary shower; 2×10 blocking for grab bars at</text>
+<text x="88.000" y="10.255" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     all toilets, tub and showers.</text>
+<text x="88.000" y="10.950" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">4.  Garage door 16'-0" × 7'-0" recessed 5'-0" behind the front wall of the dwelling —</text>
+<text x="88.000" y="11.445" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     appears consistent with Ord. 2023-603 Table 4.2 (front-loaded garages recessed ≥ 5 ft).</text>
+<text x="88.000" y="11.940" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     Garage clear 20'-4" × 21'-2" ≥ 20 × 21 program minimum.</text>
+<text x="88.000" y="12.635" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">5.  Life safety: NFPA 13D residential sprinklers (mitigation for the single access road, IFC</text>
+<text x="88.000" y="13.130" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     2024 (GA) App. D107.1); smoke/CO alarms per 2024 IRC (GA 2026) R314/R315; bedroom egress</text>
+<text x="88.000" y="13.625" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     windows per 2024 IRC (GA 2026) R310 — VERIFY net clear opening at unit selection.</text>
+<text x="88.000" y="14.320" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">6.  Program body is nominally 38'-0" × 38'-0" (1,444 SF). With the 2-car garage as a front</text>
+<text x="88.000" y="14.815" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     wing (the only way to keep the 40-ft width cap), the conditioned envelope is an L:</text>
+<text x="88.000" y="15.310" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     17'-0" × 26'-10" front wing + 38'-0" × 25'-0" rear block = 1,406 SF conditioned (−2.6%);</text>
+<text x="88.000" y="15.805" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     overall body 38'-0" × 51'-10" plus porch and patio.</text>
+<text x="88.000" y="16.500" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">7.  Rear patio drawn 12'-0" × 7'-0": the program 12 × 8 slab would end 10 in inside the</text>
+<text x="88.000" y="16.995" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     20-ft rear buffer easement on a 100-ft lot (15 + 6 + 5 + 21'-10" + 25 + 8 = 80'-10").</text>
+<text x="88.000" y="17.490" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     VERIFY with Planning staff whether an at-grade uncovered slab is a buffer encroachment;</text>
+<text x="88.000" y="17.985" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     otherwise hold the patio at 7 ft.</text>
+<text x="88.000" y="18.680" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">8.  Areas are computed by tools/floorplans.py from the wall-face polygons (conditioned =</text>
+<text x="88.000" y="19.175" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     outside face of exterior walls; total under roof = conditioned + garage + covered porch;</text>
+<text x="88.000" y="19.670" font-size="0.330" font-family="Helvetica, Arial, sans-serif" text-anchor="start" font-weight="normal" fill="#111" dominant-baseline="middle">     the uncovered patio is excluded).</text></g>
+</svg>
+<!-- architecture-studio:requires-disclaimer -->

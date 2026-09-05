@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Cottage Floor Plans A &amp; B — Machine-Readable Definition (The Springbrook / The Laurel) — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">floor plan</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> JSON</div>
+    
+    <h1>Cottage Floor Plans A &amp; B — Machine-Readable Definition (The Springbrook / The Laurel)</h1><p class="src-note">JSON · 2,294 lines · <a href="/data-room/src/submission/data/plans.json">download the raw file</a></p><pre><code>{
+ &quot;generated_by&quot;: &quot;tools/floorplans.py&quot;,
+ &quot;date&quot;: &quot;2026-08-28&quot;,
+ &quot;plans&quot;: {
+  &quot;A&quot;: {
+   &quot;id&quot;: &quot;A&quot;,
+   &quot;name&quot;: &quot;THE SPRINGBROOK&quot;,
+   &quot;title&quot;: &quot;PLAN A — THE SPRINGBROOK — ILLUSTRATIVE ARCHITECTURAL PLAN — NOT FOR CONSTRUCTION — 2026-08-28&quot;,
+   &quot;date&quot;: &quot;2026-08-28&quot;,
+   &quot;program&quot;: &quot;2 BR / 2 BA, 1 story, 2-car front-loaded garage recessed 5&#x27;-0\&quot;, covered front porch, rear patio&quot;,
+   &quot;status&quot;: &quot;ILLUSTRATIVE — NOT FOR CONSTRUCTION — DRAFT, to be superseded by sealed architectural drawings&quot;,
+   &quot;coordinate_system&quot;: &quot;feet; origin = front-left corner of the body bounding box; x to the right seen from the lane; y toward the rear (front = lane side = y 0)&quot;,
+   &quot;nominal_body&quot;: &quot;38&#x27;-0\&quot; × 38&#x27;-0\&quot;&quot;,
+   &quot;target_cond_sf&quot;: 1444,
+   &quot;overall_body_dims&quot;: {
+    &quot;width_ft&quot;: 38,
+    &quot;depth_ft&quot;: 51.83,
+    &quot;label&quot;: &quot;38&#x27;-0\&quot; × 51&#x27;-10\&quot;&quot;,
+    &quot;basis&quot;: &quot;bounding box of conditioned + garage (outside face); porch and patio excluded&quot;,
+    &quot;note&quot;: &quot;program body 38 × 38 nominal; actual envelope is L-shaped because the 2-car garage must be a front wing under the 40-ft width cap&quot;
+   },
+   &quot;footprint_polygon_ft&quot;: [
+    [
+     0,
+     26.83
+    ],
+    [
+     21,
+     26.83
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     38,
+     0
+    ],
+    [
+     38,
+     51.83
+    ],
+    [
+     0,
+     51.83
+    ]
+   ],
+   &quot;footprint_polygon_basis&quot;: &quot;conditioned envelope, outside face of exterior walls (garage separate)&quot;,
+   &quot;garage_rect&quot;: [
+    0,
+    5,
+    21,
+    26.83
+   ],
+   &quot;porch_rects&quot;: [
+    [
+     21,
+     -6,
+     38,
+     0
+    ]
+   ],
+   &quot;rear_porch_rects&quot;: [],
+   &quot;patio_rects&quot;: [
+    [
+     21,
+     51.83,
+     33,
+     57.83
+    ]
+   ],
+   &quot;rooms&quot;: [
+    {
+     &quot;name&quot;: &quot;2-CAR GARAGE&quot;,
+     &quot;kind&quot;: &quot;garage&quot;,
+     &quot;polygon&quot;: [
+      [
+       0,
+       5
+      ],
+      [
+       21,
+       5
+      ],
+      [
+       21,
+       26.83
+      ],
+      [
+       0,
+       26.83
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       0.5,
+       5.5
+      ],
+      [
+       20.833,
+       5.5
+      ],
+      [
+       20.833,
+       26.663
+      ],
+      [
+       0.5,
+       26.663
+      ]
+     ],
+     &quot;area_sf&quot;: 430.3,
+     &quot;label_dims&quot;: &quot;20&#x27;-4\&quot; × 21&#x27;-2\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;HALL&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       21,
+       0
+      ],
+      [
+       25.17,
+       0
+      ],
+      [
+       25.17,
+       26.83
+      ],
+      [
+       21,
+       26.83
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       21.5,
+       0.5
+      ],
+      [
+       25.003,
+       0.5
+      ],
+      [
+       25.003,
+       26.83
+      ],
+      [
+       21.5,
+       26.83
+      ]
+     ],
+     &quot;area_sf&quot;: 92.2,
+     &quot;label_dims&quot;: &quot;3&#x27;-6\&quot; × 26&#x27;-4\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;BEDROOM 2&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       25.17,
+       0
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       38,
+       14
+      ],
+      [
+       31,
+       14
+      ],
+      [
+       31,
+       11.5
+      ],
+      [
+       25.17,
+       11.5
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       25.337,
+       0.5
+      ],
+      [
+       37.5,
+       0.5
+      ],
+      [
+       37.5,
+       13.833
+      ],
+      [
+       31.167,
+       13.833
+      ],
+      [
+       31.167,
+       11.333
+      ],
+      [
+       25.337,
+       11.333
+      ]
+     ],
+     &quot;area_sf&quot;: 147.6,
+     &quot;label_dims&quot;: &quot;12&#x27;-2\&quot; × 10&#x27;-10\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;CLOSET&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       25.17,
+       11.5
+      ],
+      [
+       31,
+       11.5
+      ],
+      [
+       31,
+       14
+      ],
+      [
+       25.17,
+       14
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       25.337,
+       11.667
+      ],
+      [
+       30.833,
+       11.667
+      ],
+      [
+       30.833,
+       13.833
+      ],
+      [
+       25.337,
+       13.833
+      ]
+     ],
+     &quot;area_sf&quot;: 11.9,
+     &quot;label_dims&quot;: &quot;5&#x27;-6\&quot; × 2&#x27;-2\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;BATH 2&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       25.17,
+       14
+      ],
+      [
+       38,
+       14
+      ],
+      [
+       38,
+       22.17
+      ],
+      [
+       25.17,
+       22.17
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       25.337,
+       14.167
+      ],
+      [
+       37.5,
+       14.167
+      ],
+      [
+       37.5,
+       22.003
+      ],
+      [
+       25.337,
+       22.003
+      ]
+     ],
+     &quot;area_sf&quot;: 95.3,
+     &quot;label_dims&quot;: &quot;12&#x27;-2\&quot; × 7&#x27;-10\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;COAT&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       25.17,
+       22.17
+      ],
+      [
+       28.17,
+       22.17
+      ],
+      [
+       28.17,
+       26.83
+      ],
+      [
+       25.17,
+       26.83
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       25.337,
+       22.337
+      ],
+      [
+       28.003,
+       22.337
+      ],
+      [
+       28.003,
+       26.663
+      ],
+      [
+       25.337,
+       26.663
+      ]
+     ],
+     &quot;area_sf&quot;: 11.5,
+     &quot;label_dims&quot;: &quot;2&#x27;-8\&quot; × 4&#x27;-4\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;PANTRY&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       28.17,
+       22.17
+      ],
+      [
+       38,
+       22.17
+      ],
+      [
+       38,
+       26.83
+      ],
+      [
+       28.17,
+       26.83
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       28.337,
+       22.337
+      ],
+      [
+       37.5,
+       22.337
+      ],
+      [
+       37.5,
+       26.663
+      ],
+      [
+       28.337,
+       26.663
+      ]
+     ],
+     &quot;area_sf&quot;: 39.6,
+     &quot;label_dims&quot;: &quot;9&#x27;-2\&quot; × 4&#x27;-4\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;LAUNDRY / MUD&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       14,
+       26.83
+      ],
+      [
+       21,
+       26.83
+      ],
+      [
+       21,
+       37.5
+      ],
+      [
+       14,
+       37.5
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       14.167,
+       26.997
+      ],
+      [
+       20.833,
+       26.997
+      ],
+      [
+       20.833,
+       37.333
+      ],
+      [
+       14.167,
+       37.333
+      ]
+     ],
+     &quot;area_sf&quot;: 68.9,
+     &quot;label_dims&quot;: &quot;6&#x27;-8\&quot; × 10&#x27;-4\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;KITCHEN / DINING&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       21,
+       26.83
+      ],
+      [
+       38,
+       26.83
+      ],
+      [
+       38,
+       37.5
+      ],
+      [
+       21,
+       37.5
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       21.167,
+       26.997
+      ],
+      [
+       37.5,
+       26.997
+      ],
+      [
+       37.5,
+       37.5
+      ],
+      [
+       21.167,
+       37.5
+      ]
+     ],
+     &quot;area_sf&quot;: 171.6,
+     &quot;label_dims&quot;: &quot;16&#x27;-4\&quot; × 10&#x27;-6\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;W.I.C.&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       0,
+       26.83
+      ],
+      [
+       14,
+       26.83
+      ],
+      [
+       14,
+       32.5
+      ],
+      [
+       0,
+       32.5
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       0.5,
+       26.997
+      ],
+      [
+       13.833,
+       26.997
+      ],
+      [
+       13.833,
+       32.333
+      ],
+      [
+       0.5,
+       32.333
+      ]
+     ],
+     &quot;area_sf&quot;: 71.2,
+     &quot;label_dims&quot;: &quot;13&#x27;-4\&quot; × 5&#x27;-4\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;PRIMARY BATH&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       0,
+       32.5
+      ],
+      [
+       14,
+       32.5
+      ],
+      [
+       14,
+       41
+      ],
+      [
+       0,
+       41
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       0.5,
+       32.667
+      ],
+      [
+       13.833,
+       32.667
+      ],
+      [
+       13.833,
+       40.833
+      ],
+      [
+       0.5,
+       40.833
+      ]
+     ],
+     &quot;area_sf&quot;: 108.9,
+     &quot;label_dims&quot;: &quot;13&#x27;-4\&quot; × 8&#x27;-2\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;PRIMARY BEDROOM&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       0,
+       41
+      ],
+      [
+       14,
+       41
+      ],
+      [
+       14,
+       51.83
+      ],
+      [
+       0,
+       51.83
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       0.5,
+       41.167
+      ],
+      [
+       13.833,
+       41.167
+      ],
+      [
+       13.833,
+       51.33
+      ],
+      [
+       0.5,
+       51.33
+      ]
+     ],
+     &quot;area_sf&quot;: 135.5,
+     &quot;label_dims&quot;: &quot;13&#x27;-4\&quot; × 10&#x27;-2\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;SUITE HALL&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       14,
+       37.5
+      ],
+      [
+       18.17,
+       37.5
+      ],
+      [
+       18.17,
+       45
+      ],
+      [
+       14,
+       45
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       14.167,
+       37.667
+      ],
+      [
+       18.17,
+       37.667
+      ],
+      [
+       18.17,
+       44.833
+      ],
+      [
+       14.167,
+       44.833
+      ]
+     ],
+     &quot;area_sf&quot;: 28.7,
+     &quot;label_dims&quot;: &quot;4&#x27;-0\&quot; × 7&#x27;-2\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;GREAT ROOM&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       18.17,
+       37.5
+      ],
+      [
+       38,
+       37.5
+      ],
+      [
+       38,
+       51.83
+      ],
+      [
+       14,
+       51.83
+      ],
+      [
+       14,
+       45
+      ],
+      [
+       18.17,
+       45
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       18.17,
+       37.667
+      ],
+      [
+       37.5,
+       37.667
+      ],
+      [
+       37.5,
+       51.33
+      ],
+      [
+       14.167,
+       51.33
+      ],
+      [
+       14.167,
+       45.167
+      ],
+      [
+       18.17,
+       45.167
+      ]
+     ],
+     &quot;area_sf&quot;: 288.8,
+     &quot;label_dims&quot;: &quot;19&#x27;-4\&quot; × 13&#x27;-10\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;COVERED PORCH&quot;,
+     &quot;kind&quot;: &quot;porch&quot;,
+     &quot;polygon&quot;: [
+      [
+       21,
+       -6
+      ],
+      [
+       38,
+       -6
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       21,
+       0
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       21,
+       -6
+      ],
+      [
+       38,
+       -6
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       21,
+       0
+      ]
+     ],
+     &quot;area_sf&quot;: 102.0,
+     &quot;label_dims&quot;: &quot;17&#x27;-0\&quot; × 6&#x27;-0\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;PATIO (UNCOVERED)&quot;,
+     &quot;kind&quot;: &quot;patio&quot;,
+     &quot;polygon&quot;: [
+      [
+       21,
+       51.83
+      ],
+      [
+       33,
+       51.83
+      ],
+      [
+       33,
+       57.83
+      ],
+      [
+       21,
+       57.83
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       21,
+       51.83
+      ],
+      [
+       33,
+       51.83
+      ],
+      [
+       33,
+       57.83
+      ],
+      [
+       21,
+       57.83
+      ]
+     ],
+     &quot;area_sf&quot;: 72.0,
+     &quot;label_dims&quot;: &quot;12&#x27;-0\&quot; × 6&#x27;-0\&quot;&quot;
+    }
+   ],
+   &quot;exterior_openings&quot;: [
+    {
+     &quot;wall&quot;: &quot;front&quot;,
+     &quot;wall_line_ft&quot;: 0,
+     &quot;type&quot;: &quot;door&quot;,
+     &quot;offset_ft&quot;: 0.58,
+     &quot;width_ft&quot;: 3.0,
+     &quot;height_ft&quot;: 6.67,
+     &quot;sill_ft&quot;: 0.0,
+     &quot;tag&quot;: &quot;entry&quot;,
+     &quot;at&quot;: [
+      23.08,
+      0
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;front&quot;,
+     &quot;wall_line_ft&quot;: 5,
+     &quot;type&quot;: &quot;garage&quot;,
+     &quot;offset_ft&quot;: 2.5,
+     &quot;width_ft&quot;: 16.0,
+     &quot;height_ft&quot;: 7.0,
+     &quot;sill_ft&quot;: 0.0,
+     &quot;tag&quot;: &quot;garage 16x7&quot;,
+     &quot;at&quot;: [
+      10.5,
+      5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;rear&quot;,
+     &quot;wall_line_ft&quot;: 51.83,
+     &quot;type&quot;: &quot;french&quot;,
+     &quot;offset_ft&quot;: 8.0,
+     &quot;width_ft&quot;: 6.0,
+     &quot;height_ft&quot;: 6.67,
+     &quot;sill_ft&quot;: 0.0,
+     &quot;tag&quot;: &quot;patio french door&quot;,
+     &quot;at&quot;: [
+      27.0,
+      51.83
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;front&quot;,
+     &quot;wall_line_ft&quot;: 0,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 9.0,
+     &quot;width_ft&quot;: 6.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;BR2 front twin 3-0x5-0 (egress)&quot;,
+     &quot;at&quot;: [
+      33.0,
+      0
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;right&quot;,
+     &quot;wall_line_ft&quot;: 38,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 9.0,
+     &quot;width_ft&quot;: 3.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;BR2 side&quot;,
+     &quot;at&quot;: [
+      38,
+      10.5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;right&quot;,
+     &quot;wall_line_ft&quot;: 38,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 19.5,
+     &quot;width_ft&quot;: 2.0,
+     &quot;height_ft&quot;: 2.5,
+     &quot;sill_ft&quot;: 4.5,
+     &quot;tag&quot;: &quot;bath 2&quot;,
+     &quot;at&quot;: [
+      38,
+      20.5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;right&quot;,
+     &quot;wall_line_ft&quot;: 38,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 32.5,
+     &quot;width_ft&quot;: 3.5,
+     &quot;height_ft&quot;: 3.0,
+     &quot;sill_ft&quot;: 3.5,
+     &quot;tag&quot;: &quot;kitchen over sink&quot;,
+     &quot;at&quot;: [
+      38,
+      34.25
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;right&quot;,
+     &quot;wall_line_ft&quot;: 38,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 41.0,
+     &quot;width_ft&quot;: 6.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;great room twin&quot;,
+     &quot;at&quot;: [
+      38,
+      44.0
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;rear&quot;,
+     &quot;wall_line_ft&quot;: 51.83,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 0.5,
+     &quot;width_ft&quot;: 5.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;great room rear&quot;,
+     &quot;at&quot;: [
+      35.0,
+      51.83
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;rear&quot;,
+     &quot;wall_line_ft&quot;: 51.83,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 31.0,
+     &quot;width_ft&quot;: 5.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;primary rear (egress)&quot;,
+     &quot;at&quot;: [
+      4.5,
+      51.83
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;left&quot;,
+     &quot;wall_line_ft&quot;: 0,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 2.33,
+     &quot;width_ft&quot;: 6.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;primary side twin&quot;,
+     &quot;at&quot;: [
+      0,
+      46.5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;left&quot;,
+     &quot;wall_line_ft&quot;: 0,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 15.33,
+     &quot;width_ft&quot;: 2.5,
+     &quot;height_ft&quot;: 2.5,
+     &quot;sill_ft&quot;: 4.5,
+     &quot;tag&quot;: &quot;primary bath&quot;,
+     &quot;at&quot;: [
+      0,
+      35.25
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;left&quot;,
+     &quot;wall_line_ft&quot;: 0,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 35.33,
+     &quot;width_ft&quot;: 3.0,
+     &quot;height_ft&quot;: 3.0,
+     &quot;sill_ft&quot;: 4.0,
+     &quot;tag&quot;: &quot;garage&quot;,
+     &quot;at&quot;: [
+      0,
+      15.0
+     ]
+    }
+   ],
+   &quot;exterior_openings_convention&quot;: &quot;offset_ft measured from the wall&#x27;s left end looking at that wall from outside; wall_line_ft = the grid line (y for front/rear, x for left/right); front has two lines (0 = front wing, 5 = garage face)&quot;,
+   &quot;roof&quot;: {
+    &quot;plate_ft&quot;: 9.0,
+    &quot;heel_ft&quot;: 0.5,
+    &quot;elements&quot;: [
+     {
+      &quot;name&quot;: &quot;main gable (rear block)&quot;,
+      &quot;span_ft&quot;: 25.0,
+      &quot;pitch&quot;: [
+       8,
+       12
+      ],
+      &quot;ridge&quot;: &quot;x&quot;,
+      &quot;rise_ft&quot;: 8.33,
+      &quot;ridge_height_ft&quot;: 17.83,
+      &quot;basis&quot;: &quot;plate 9.0 ft + heel 0.50 ft + (span/2)·pitch&quot;
+     },
+     {
+      &quot;name&quot;: &quot;front-wing gable (extended over the porch)&quot;,
+      &quot;span_ft&quot;: 17.0,
+      &quot;pitch&quot;: [
+       8,
+       12
+      ],
+      &quot;ridge&quot;: &quot;y&quot;,
+      &quot;rise_ft&quot;: 5.67,
+      &quot;ridge_height_ft&quot;: 15.17,
+      &quot;basis&quot;: &quot;plate 9.0 ft + heel 0.50 ft + (span/2)·pitch&quot;
+     },
+     {
+      &quot;name&quot;: &quot;garage gable&quot;,
+      &quot;span_ft&quot;: 21.0,
+      &quot;pitch&quot;: [
+       6,
+       12
+      ],
+      &quot;ridge&quot;: &quot;y&quot;,
+      &quot;rise_ft&quot;: 5.25,
+      &quot;ridge_height_ft&quot;: 14.75,
+      &quot;basis&quot;: &quot;plate 9.0 ft + heel 0.50 ft + (span/2)·pitch&quot;
+     }
+    ],
+    &quot;max_ridge_ft&quot;: 17.83,
+    &quot;ridge_direction&quot;: &quot;main ridge parallel to the lane (x) over the 25-ft rear block; a front-facing 8:12 gable over the 17-ft front wing, carried 6 ft forward over the covered porch; a subordinate front-facing 6:12 gable over the 21-ft garage&quot;
+   },
+   &quot;areas&quot;: {
+    &quot;conditioned_sf&quot;: 1406.1,
+    &quot;conditioned_basis&quot;: &quot;outside face of exterior walls / centreline of garage separation wall (grid union of conditioned rooms)&quot;,
+    &quot;garage_sf&quot;: 458.4,
+    &quot;front_porch_sf&quot;: 102.0,
+    &quot;rear_porch_covered_sf&quot;: 0,
+    &quot;rear_patio_uncovered_sf&quot;: 72.0,
+    &quot;total_under_roof_sf&quot;: 1966.5,
+    &quot;total_under_roof_basis&quot;: &quot;conditioned + garage + covered porch(es) (patio uncovered, excluded)&quot;,
+    &quot;sum_of_room_clear_sf&quot;: 1271.7
+   },
+   &quot;accessibility_checklist&quot;: [
+    {
+     &quot;item&quot;: &quot;Zero-step entries&quot;,
+     &quot;provided&quot;: &quot;front porch (slab flush with finished floor) and garage-to-mud-room door; patio door ≤ 1/2-in threshold&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Door clear width&quot;,
+     &quot;provided&quot;: &quot;all passage doors 36 in (3&#x27;-0\&quot;); closets 30 in; french door 6&#x27;-0\&quot;&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Hall width&quot;,
+     &quot;provided&quot;: &quot;main hall 3&#x27;-6\&quot; clear (42 in); suite hall 4&#x27;-0\&quot; clear&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Turning circles&quot;,
+     &quot;provided&quot;: &quot;5&#x27;-0\&quot; (60 in) circle drawn and checked clear in both baths&quot;,
+     &quot;status&quot;: &quot;checked by script&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Curbless shower&quot;,
+     &quot;provided&quot;: &quot;primary bath 5&#x27;-0\&quot; × 3&#x27;-10\&quot; curbless (recessed slab per 03 30 00 §2.05)&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Grab-bar blocking&quot;,
+     &quot;provided&quot;: &quot;2×10 solid blocking 33–36 in AFF at all toilets, tub and showers (2024 IRC (GA 2026) — voluntary; ANSI A117.1 Type C-type)&quot;,
+     &quot;status&quot;: &quot;design intent — VERIFY blocking heights with architect&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Plate height / vaulted&quot;,
+     &quot;provided&quot;: &quot;9&#x27;-0\&quot; plate; great room vaulted&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Single-level living&quot;,
+     &quot;provided&quot;: &quot;1 story; no interior steps; laundry on the living level&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Lever hardware, rocker switches, 48-in max reach&quot;,
+     &quot;provided&quot;: &quot;to be specified (Division 08 / 26)&quot;,
+     &quot;status&quot;: &quot;later stage&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Lilburn §734 visitability&quot;,
+     &quot;provided&quot;: &quot;applies to attached dwellings only; voluntarily exceeded (100% zero-step)&quot;,
+     &quot;status&quot;: &quot;appears consistent with Ord. 2023-603 §734 (not applicable)&quot;
+    }
+   ],
+   &quot;materials_by_scheme&quot;: {
+    &quot;1&quot;: {
+     &quot;name&quot;: &quot;Warm White&quot;,
+     &quot;siding&quot;: &quot;fiber-cement board-and-batten (12-in o.c. battens), warm white&quot;,
+     &quot;base&quot;: &quot;stacked/ledge stone water table (30 in) and porch piers&quot;,
+     &quot;roof&quot;: &quot;architectural asphalt shingle, weathered wood / charcoal&quot;,
+     &quot;trim&quot;: &quot;painted fiber-cement trim, soft white; 8×8 cedar porch posts + brackets&quot;,
+     &quot;door&quot;: &quot;front door deep green or black; garage door carriage-style, painted to match trim&quot;
+    },
+    &quot;2&quot;: {
+     &quot;name&quot;: &quot;Sage&quot;,
+     &quot;siding&quot;: &quot;fiber-cement lap siding, 6-in exposure, sage green&quot;,
+     &quot;base&quot;: &quot;brick veneer water table (30 in), red-brown blend; brick porch piers&quot;,
+     &quot;roof&quot;: &quot;architectural asphalt shingle, charcoal&quot;,
+     &quot;trim&quot;: &quot;painted trim, soft white; 8×8 cedar posts&quot;,
+     &quot;door&quot;: &quot;front door natural stain or oxblood; garage door painted to match siding&quot;
+    },
+    &quot;3&quot;: {
+     &quot;name&quot;: &quot;Clay&quot;,
+     &quot;siding&quot;: &quot;fiber-cement lap siding, 6-in exposure, clay/beige&quot;,
+     &quot;base&quot;: &quot;ledge stone water table (30 in) and porch piers, buff blend&quot;,
+     &quot;roof&quot;: &quot;architectural asphalt shingle, weathered wood&quot;,
+     &quot;trim&quot;: &quot;painted trim, cream; 8×8 cedar posts&quot;,
+     &quot;door&quot;: &quot;front door navy; garage door painted to match trim&quot;
+    },
+    &quot;source&quot;: &quot;docs/12-outline-specifications.md (04 20 00, 04 40 00, 07 31 00, 07 46 46, 09 91 13); FACTS §4 \&quot;three color schemes (warm white / sage / clay)\&quot;&quot;
+   },
+   &quot;lot_siting&quot;: {
+    &quot;lot_w_ft&quot;: 50.0,
+    &quot;lot_d_ft&quot;: 100.0,
+    &quot;house_origin_on_lot_ft&quot;: [
+     6.0,
+     21.667
+    ],
+    &quot;garage_door_from_lot_line_ft&quot;: 26.67,
+    &quot;rear_wall_from_rear_line_ft&quot;: 26.5,
+    &quot;patio_edge_from_rear_line_ft&quot;: 20.5,
+    &quot;rear_porch_edge_from_rear_line_ft&quot;: null,
+    &quot;side_yard_ft&quot;: 6.0,
+    &quot;building_coverage_pct&quot;: 39.3,
+    &quot;impervious_pct_est&quot;: 52.7,
+    &quot;impervious_basis&quot;: &quot;roof 1966 + patio 72 + driveway 533 + walk 63 SF&quot;
+   },
+   &quot;notes&quot;: [
+    &quot;Illustrative architectural plan for the rezoning application (Lilburn Zoning Ordinance 2023-603 §1003-4 renderings/elevations item). NOT FOR CONSTRUCTION. DRAFT — to be superseded by sealed drawings by a Georgia-registered architect.&quot;,
+    &quot;Dimensions are to the outside face of exterior walls (2×6, 6 in nominal) and to the centreline of interior partitions (2×4, 4 in). Plate height 9&#x27;-0\&quot;; great room vaulted; roof 8:12 main gables, 4:12 porch shed, architectural shingles.&quot;,
+    &quot;Accessibility (voluntary — Ord. 2023-603 §734 applies to attached dwellings only): zero-step entries at the porch and garage/mud room; 36-in passage doors; 42-in halls; 5&#x27;-0\&quot; turning circles in both baths; curbless primary shower; 2×10 blocking for grab bars at all toilets, tub and showers.&quot;,
+    &quot;Garage door 16&#x27;-0\&quot; × 7&#x27;-0\&quot; recessed 5&#x27;-0\&quot; behind the front wall of the dwelling — appears consistent with Ord. 2023-603 Table 4.2 (front-loaded garages recessed ≥ 5 ft). Garage clear 20&#x27;-4\&quot; × 21&#x27;-2\&quot; ≥ 20 × 21 program minimum.&quot;,
+    &quot;Life safety: NFPA 13D residential sprinklers (mitigation for the single access road, IFC 2024 (GA) App. D107.1); smoke/CO alarms per 2024 IRC (GA 2026) R314/R315; bedroom egress windows per 2024 IRC (GA 2026) R310 — VERIFY net clear opening at unit selection.&quot;,
+    &quot;Program body is nominally 38&#x27;-0\&quot; × 38&#x27;-0\&quot; (1,444 SF). With the 2-car garage as a front wing (the only way to keep the 40-ft width cap), the conditioned envelope is an L: 17&#x27;-0\&quot; × 26&#x27;-10\&quot; front wing + 38&#x27;-0\&quot; × 25&#x27;-0\&quot; rear block = 1,406 SF conditioned (−2.6%); overall body 38&#x27;-0\&quot; × 51&#x27;-10\&quot; plus porch and patio.&quot;,
+    &quot;Rear patio drawn 12&#x27;-0\&quot; × 7&#x27;-0\&quot;: the program 12 × 8 slab would end 10 in inside the 20-ft rear buffer easement on a 100-ft lot (15 + 6 + 5 + 21&#x27;-10\&quot; + 25 + 8 = 80&#x27;-10\&quot;). VERIFY with Planning staff whether an at-grade uncovered slab is a buffer encroachment; otherwise hold the patio at 7 ft.&quot;,
+    &quot;Areas are computed by tools/floorplans.py from the wall-face polygons (conditioned = outside face of exterior walls; total under roof = conditioned + garage + covered porch; the uncovered patio is excluded).&quot;
+   ],
+   &quot;verify&quot;: [
+    &quot;Rear patio depth 8 ft vs 20-ft buffer easement (drawn 7 ft) — Planning staff / Dev. Regs. App. B&quot;,
+    &quot;Egress window net clear opening — 2024 IRC (GA 2026) R310 at unit selection&quot;,
+    &quot;Grab-bar blocking heights and ANSI A117.1 references — architect of record&quot;,
+    &quot;Max impervious / lot coverage for R-2 — Lilburn Development Regulations App. B §5.9 (not retrievable online)&quot;,
+    &quot;data/layout.json house_rect assumes a 38 × 38 footprint; the actual envelope is 38 × 51&#x27;-10\&quot; + porch/patio — the site-plan agent must re-check lot fit (rear wall 27 ft from the rear line on a 100-ft lot)&quot;
+   ]
+  },
+  &quot;B&quot;: {
+   &quot;id&quot;: &quot;B&quot;,
+   &quot;name&quot;: &quot;THE LAUREL&quot;,
+   &quot;title&quot;: &quot;PLAN B — THE LAUREL — ILLUSTRATIVE ARCHITECTURAL PLAN — NOT FOR CONSTRUCTION — 2026-08-28&quot;,
+   &quot;date&quot;: &quot;2026-08-28&quot;,
+   &quot;program&quot;: &quot;2 BR + den / 2 BA, 1 story, 2-car front-loaded garage recessed 5&#x27;-0\&quot;, covered front porch, covered rear porch 14&#x27;×6&#x27; (recessed), fireplace, walk-in pantry, laundry/mud room off the garage&quot;,
+   &quot;status&quot;: &quot;ILLUSTRATIVE — NOT FOR CONSTRUCTION — DRAFT, to be superseded by sealed architectural drawings&quot;,
+   &quot;coordinate_system&quot;: &quot;feet; origin = front-left corner of the body bounding box; x to the right seen from the lane; y toward the rear (front = lane side = y 0)&quot;,
+   &quot;nominal_body&quot;: &quot;38&#x27;-0\&quot; × 40&#x27;-0\&quot;&quot;,
+   &quot;target_cond_sf&quot;: 1520,
+   &quot;overall_body_dims&quot;: {
+    &quot;width_ft&quot;: 38,
+    &quot;depth_ft&quot;: 57.5,
+    &quot;label&quot;: &quot;38&#x27;-0\&quot; × 57&#x27;-6\&quot;&quot;,
+    &quot;basis&quot;: &quot;bounding box of conditioned + garage (outside face); porch and patio excluded&quot;,
+    &quot;note&quot;: &quot;body 38&#x27;-0\&quot; wide (re-proportioned 2026-09-03 from the 40&#x27;-0\&quot; FACTS §4 nominal so that the roof, not just the walls, fits the 40&#x27;-0\&quot; buildable width); actual envelope is L-shaped (garage front wing) with the 14 × 6 covered rear porch recessed under the main roof&quot;
+   },
+   &quot;footprint_polygon_ft&quot;: [
+    [
+     0,
+     29
+    ],
+    [
+     21,
+     29
+    ],
+    [
+     21,
+     0
+    ],
+    [
+     38,
+     0
+    ],
+    [
+     38,
+     51.5
+    ],
+    [
+     24,
+     51.5
+    ],
+    [
+     24,
+     57.5
+    ],
+    [
+     0,
+     57.5
+    ]
+   ],
+   &quot;footprint_polygon_basis&quot;: &quot;conditioned envelope, outside face of exterior walls (garage separate)&quot;,
+   &quot;garage_rect&quot;: [
+    0,
+    5,
+    21,
+    29
+   ],
+   &quot;porch_rects&quot;: [
+    [
+     21,
+     -6,
+     38,
+     0
+    ]
+   ],
+   &quot;rear_porch_rects&quot;: [
+    [
+     24,
+     51.5,
+     38,
+     57.5
+    ]
+   ],
+   &quot;patio_rects&quot;: [],
+   &quot;rooms&quot;: [
+    {
+     &quot;name&quot;: &quot;2-CAR GARAGE&quot;,
+     &quot;kind&quot;: &quot;garage&quot;,
+     &quot;polygon&quot;: [
+      [
+       0,
+       5
+      ],
+      [
+       21,
+       5
+      ],
+      [
+       21,
+       29
+      ],
+      [
+       0,
+       29
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       0.5,
+       5.5
+      ],
+      [
+       20.833,
+       5.5
+      ],
+      [
+       20.833,
+       28.833
+      ],
+      [
+       0.5,
+       28.833
+      ]
+     ],
+     &quot;area_sf&quot;: 474.4,
+     &quot;label_dims&quot;: &quot;20&#x27;-4\&quot; × 23&#x27;-4\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;FOYER / HALL&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       21,
+       0
+      ],
+      [
+       25.17,
+       0
+      ],
+      [
+       25.17,
+       29
+      ],
+      [
+       21,
+       29
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       21.5,
+       0.5
+      ],
+      [
+       25.003,
+       0.5
+      ],
+      [
+       25.003,
+       29.0
+      ],
+      [
+       21.5,
+       29.0
+      ]
+     ],
+     &quot;area_sf&quot;: 99.8,
+     &quot;label_dims&quot;: &quot;3&#x27;-6\&quot; × 28&#x27;-6\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;DEN&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       25.17,
+       0
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       38,
+       9.5
+      ],
+      [
+       25.17,
+       9.5
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       25.337,
+       0.5
+      ],
+      [
+       37.5,
+       0.5
+      ],
+      [
+       37.5,
+       9.333
+      ],
+      [
+       25.337,
+       9.333
+      ]
+     ],
+     &quot;area_sf&quot;: 107.4,
+     &quot;label_dims&quot;: &quot;12&#x27;-2\&quot; × 8&#x27;-10\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;BEDROOM 2&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       25.17,
+       9.5
+      ],
+      [
+       38,
+       9.5
+      ],
+      [
+       38,
+       21
+      ],
+      [
+       30,
+       21
+      ],
+      [
+       30,
+       18.5
+      ],
+      [
+       25.17,
+       18.5
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       25.337,
+       9.667
+      ],
+      [
+       37.5,
+       9.667
+      ],
+      [
+       37.5,
+       20.833
+      ],
+      [
+       30.167,
+       20.833
+      ],
+      [
+       30.167,
+       18.333
+      ],
+      [
+       25.337,
+       18.333
+      ]
+     ],
+     &quot;area_sf&quot;: 123.7,
+     &quot;label_dims&quot;: &quot;12&#x27;-2\&quot; × 11&#x27;-2\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;CLOSET&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       25.17,
+       18.5
+      ],
+      [
+       30,
+       18.5
+      ],
+      [
+       30,
+       21
+      ],
+      [
+       25.17,
+       21
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       25.337,
+       18.667
+      ],
+      [
+       29.833,
+       18.667
+      ],
+      [
+       29.833,
+       20.833
+      ],
+      [
+       25.337,
+       20.833
+      ]
+     ],
+     &quot;area_sf&quot;: 9.7,
+     &quot;label_dims&quot;: &quot;4&#x27;-6\&quot; × 2&#x27;-2\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;BATH 2&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       25.17,
+       21
+      ],
+      [
+       38,
+       21
+      ],
+      [
+       38,
+       29
+      ],
+      [
+       25.17,
+       29
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       25.337,
+       21.167
+      ],
+      [
+       37.5,
+       21.167
+      ],
+      [
+       37.5,
+       28.833
+      ],
+      [
+       25.337,
+       28.833
+      ]
+     ],
+     &quot;area_sf&quot;: 93.3,
+     &quot;label_dims&quot;: &quot;12&#x27;-2\&quot; × 7&#x27;-8\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;LAUNDRY / MUD&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       14,
+       29
+      ],
+      [
+       21,
+       29
+      ],
+      [
+       21,
+       40
+      ],
+      [
+       14,
+       40
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       14.167,
+       29.167
+      ],
+      [
+       20.833,
+       29.167
+      ],
+      [
+       20.833,
+       39.833
+      ],
+      [
+       14.167,
+       39.833
+      ]
+     ],
+     &quot;area_sf&quot;: 71.1,
+     &quot;label_dims&quot;: &quot;6&#x27;-8\&quot; × 10&#x27;-8\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;PANTRY&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       21,
+       34
+      ],
+      [
+       25.17,
+       34
+      ],
+      [
+       25.17,
+       40
+      ],
+      [
+       21,
+       40
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       21.167,
+       34.167
+      ],
+      [
+       25.003,
+       34.167
+      ],
+      [
+       25.003,
+       39.833
+      ],
+      [
+       21.167,
+       39.833
+      ]
+     ],
+     &quot;area_sf&quot;: 21.7,
+     &quot;label_dims&quot;: &quot;3&#x27;-10\&quot; × 5&#x27;-8\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;KITCHEN&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       21,
+       29
+      ],
+      [
+       38,
+       29
+      ],
+      [
+       38,
+       40
+      ],
+      [
+       25.17,
+       40
+      ],
+      [
+       25.17,
+       34
+      ],
+      [
+       21,
+       34
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       21.167,
+       29.167
+      ],
+      [
+       37.5,
+       29.167
+      ],
+      [
+       37.5,
+       40.0
+      ],
+      [
+       25.337,
+       40.0
+      ],
+      [
+       25.337,
+       33.833
+      ],
+      [
+       21.167,
+       33.833
+      ]
+     ],
+     &quot;area_sf&quot;: 151.2,
+     &quot;label_dims&quot;: &quot;12&#x27;-2\&quot; × 10&#x27;-10\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;W.I.C.&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       0,
+       29
+      ],
+      [
+       14,
+       29
+      ],
+      [
+       14,
+       35
+      ],
+      [
+       0,
+       35
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       0.5,
+       29.167
+      ],
+      [
+       13.833,
+       29.167
+      ],
+      [
+       13.833,
+       34.833
+      ],
+      [
+       0.5,
+       34.833
+      ]
+     ],
+     &quot;area_sf&quot;: 75.6,
+     &quot;label_dims&quot;: &quot;13&#x27;-4\&quot; × 5&#x27;-8\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;PRIMARY BATH&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       0,
+       35
+      ],
+      [
+       14,
+       35
+      ],
+      [
+       14,
+       43.5
+      ],
+      [
+       0,
+       43.5
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       0.5,
+       35.167
+      ],
+      [
+       13.833,
+       35.167
+      ],
+      [
+       13.833,
+       43.333
+      ],
+      [
+       0.5,
+       43.333
+      ]
+     ],
+     &quot;area_sf&quot;: 108.9,
+     &quot;label_dims&quot;: &quot;13&#x27;-4\&quot; × 8&#x27;-2\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;PRIMARY BEDROOM&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       0,
+       43.5
+      ],
+      [
+       14,
+       43.5
+      ],
+      [
+       14,
+       57.5
+      ],
+      [
+       0,
+       57.5
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       0.5,
+       43.667
+      ],
+      [
+       13.833,
+       43.667
+      ],
+      [
+       13.833,
+       57.0
+      ],
+      [
+       0.5,
+       57.0
+      ]
+     ],
+     &quot;area_sf&quot;: 177.8,
+     &quot;label_dims&quot;: &quot;13&#x27;-4\&quot; × 13&#x27;-4\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;GREAT ROOM&quot;,
+     &quot;kind&quot;: &quot;cond&quot;,
+     &quot;polygon&quot;: [
+      [
+       14,
+       40
+      ],
+      [
+       38,
+       40
+      ],
+      [
+       38,
+       51.5
+      ],
+      [
+       24,
+       51.5
+      ],
+      [
+       24,
+       57.5
+      ],
+      [
+       14,
+       57.5
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       14.167,
+       40.167
+      ],
+      [
+       37.5,
+       40.167
+      ],
+      [
+       37.5,
+       51.0
+      ],
+      [
+       23.5,
+       51.0
+      ],
+      [
+       23.5,
+       57.0
+      ],
+      [
+       14.167,
+       57.0
+      ]
+     ],
+     &quot;area_sf&quot;: 308.8,
+     &quot;label_dims&quot;: &quot;23&#x27;-4\&quot; × 11&#x27;-10\&quot; + 9&#x27;-4\&quot; × 6&#x27;-0\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;COVERED PORCH&quot;,
+     &quot;kind&quot;: &quot;porch&quot;,
+     &quot;polygon&quot;: [
+      [
+       21,
+       -6
+      ],
+      [
+       38,
+       -6
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       21,
+       0
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       21,
+       -6
+      ],
+      [
+       38,
+       -6
+      ],
+      [
+       38,
+       0
+      ],
+      [
+       21,
+       0
+      ]
+     ],
+     &quot;area_sf&quot;: 102.0,
+     &quot;label_dims&quot;: &quot;17&#x27;-0\&quot; × 6&#x27;-0\&quot;&quot;
+    },
+    {
+     &quot;name&quot;: &quot;COVERED REAR PORCH&quot;,
+     &quot;kind&quot;: &quot;porch&quot;,
+     &quot;polygon&quot;: [
+      [
+       24,
+       51.5
+      ],
+      [
+       38,
+       51.5
+      ],
+      [
+       38,
+       57.5
+      ],
+      [
+       24,
+       57.5
+      ]
+     ],
+     &quot;clear_polygon&quot;: [
+      [
+       24,
+       51.5
+      ],
+      [
+       38,
+       51.5
+      ],
+      [
+       38,
+       57.5
+      ],
+      [
+       24,
+       57.5
+      ]
+     ],
+     &quot;area_sf&quot;: 84.0,
+     &quot;label_dims&quot;: &quot;14&#x27;-0\&quot; × 6&#x27;-0\&quot;&quot;
+    }
+   ],
+   &quot;exterior_openings&quot;: [
+    {
+     &quot;wall&quot;: &quot;front&quot;,
+     &quot;wall_line_ft&quot;: 0,
+     &quot;type&quot;: &quot;door&quot;,
+     &quot;offset_ft&quot;: 0.58,
+     &quot;width_ft&quot;: 3.0,
+     &quot;height_ft&quot;: 6.67,
+     &quot;sill_ft&quot;: 0.0,
+     &quot;tag&quot;: &quot;entry&quot;,
+     &quot;at&quot;: [
+      23.08,
+      0
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;front&quot;,
+     &quot;wall_line_ft&quot;: 5,
+     &quot;type&quot;: &quot;garage&quot;,
+     &quot;offset_ft&quot;: 2.5,
+     &quot;width_ft&quot;: 16.0,
+     &quot;height_ft&quot;: 7.0,
+     &quot;sill_ft&quot;: 0.0,
+     &quot;tag&quot;: &quot;garage 16x7&quot;,
+     &quot;at&quot;: [
+      10.5,
+      5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;rear&quot;,
+     &quot;wall_line_ft&quot;: 51.5,
+     &quot;type&quot;: &quot;french&quot;,
+     &quot;offset_ft&quot;: 6.5,
+     &quot;width_ft&quot;: 6.0,
+     &quot;height_ft&quot;: 6.67,
+     &quot;sill_ft&quot;: 0.0,
+     &quot;tag&quot;: &quot;rear porch french door&quot;,
+     &quot;at&quot;: [
+      28.5,
+      51.5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;front&quot;,
+     &quot;wall_line_ft&quot;: 0,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 9.6,
+     &quot;width_ft&quot;: 6.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;den front twin 3-0x5-0&quot;,
+     &quot;at&quot;: [
+      33.6,
+      0
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;right&quot;,
+     &quot;wall_line_ft&quot;: 38,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 3.25,
+     &quot;width_ft&quot;: 3.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;den side&quot;,
+     &quot;at&quot;: [
+      38,
+      4.75
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;right&quot;,
+     &quot;wall_line_ft&quot;: 38,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 12.0,
+     &quot;width_ft&quot;: 6.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;BR2 side twin (egress — casement leaf)&quot;,
+     &quot;at&quot;: [
+      38,
+      15.0
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;right&quot;,
+     &quot;wall_line_ft&quot;: 38,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 22.83,
+     &quot;width_ft&quot;: 2.0,
+     &quot;height_ft&quot;: 2.5,
+     &quot;sill_ft&quot;: 4.5,
+     &quot;tag&quot;: &quot;bath 2 (obscure, over tub)&quot;,
+     &quot;at&quot;: [
+      38,
+      23.83
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;right&quot;,
+     &quot;wall_line_ft&quot;: 38,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 32.5,
+     &quot;width_ft&quot;: 3.5,
+     &quot;height_ft&quot;: 3.0,
+     &quot;sill_ft&quot;: 3.5,
+     &quot;tag&quot;: &quot;kitchen over sink&quot;,
+     &quot;at&quot;: [
+      38,
+      34.25
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;right&quot;,
+     &quot;wall_line_ft&quot;: 38,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 43.0,
+     &quot;width_ft&quot;: 6.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;great room twin&quot;,
+     &quot;at&quot;: [
+      38,
+      46.0
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;rear&quot;,
+     &quot;wall_line_ft&quot;: 51.5,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 1.0,
+     &quot;width_ft&quot;: 4.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;great room to rear porch&quot;,
+     &quot;at&quot;: [
+      35.0,
+      51.5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;rear&quot;,
+     &quot;wall_line_ft&quot;: 57.5,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 7.5,
+     &quot;width_ft&quot;: 2.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;fireplace flank L&quot;,
+     &quot;at&quot;: [
+      15.5,
+      57.5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;rear&quot;,
+     &quot;wall_line_ft&quot;: 57.5,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 0.5,
+     &quot;width_ft&quot;: 2.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;fireplace flank R&quot;,
+     &quot;at&quot;: [
+      22.5,
+      57.5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;rear&quot;,
+     &quot;wall_line_ft&quot;: 57.5,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 14.5,
+     &quot;width_ft&quot;: 5.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;primary rear (egress — casement leaf)&quot;,
+     &quot;at&quot;: [
+      7.0,
+      57.5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;left&quot;,
+     &quot;wall_line_ft&quot;: 0,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 3.5,
+     &quot;width_ft&quot;: 6.0,
+     &quot;height_ft&quot;: 5.0,
+     &quot;sill_ft&quot;: 2.67,
+     &quot;tag&quot;: &quot;primary side twin&quot;,
+     &quot;at&quot;: [
+      0,
+      51.0
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;left&quot;,
+     &quot;wall_line_ft&quot;: 0,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 17.75,
+     &quot;width_ft&quot;: 2.5,
+     &quot;height_ft&quot;: 2.5,
+     &quot;sill_ft&quot;: 4.5,
+     &quot;tag&quot;: &quot;primary bath&quot;,
+     &quot;at&quot;: [
+      0,
+      38.5
+     ]
+    },
+    {
+     &quot;wall&quot;: &quot;left&quot;,
+     &quot;wall_line_ft&quot;: 0,
+     &quot;type&quot;: &quot;window&quot;,
+     &quot;offset_ft&quot;: 40.0,
+     &quot;width_ft&quot;: 3.0,
+     &quot;height_ft&quot;: 3.0,
+     &quot;sill_ft&quot;: 4.0,
+     &quot;tag&quot;: &quot;garage&quot;,
+     &quot;at&quot;: [
+      0,
+      16.0
+     ]
+    }
+   ],
+   &quot;exterior_openings_convention&quot;: &quot;offset_ft measured from the wall&#x27;s left end looking at that wall from outside; wall_line_ft = the grid line (y for front/rear, x for left/right); front has two lines (0 = front wing, 5 = garage face)&quot;,
+   &quot;roof&quot;: {
+    &quot;plate_ft&quot;: 9.0,
+    &quot;heel_ft&quot;: 0.5,
+    &quot;elements&quot;: [
+     {
+      &quot;name&quot;: &quot;main gable (rear block)&quot;,
+      &quot;span_ft&quot;: 28.5,
+      &quot;pitch&quot;: [
+       8,
+       12
+      ],
+      &quot;ridge&quot;: &quot;x&quot;,
+      &quot;rise_ft&quot;: 9.5,
+      &quot;ridge_height_ft&quot;: 19.0,
+      &quot;basis&quot;: &quot;plate 9.0 ft + heel 0.50 ft + (span/2)·pitch&quot;
+     },
+     {
+      &quot;name&quot;: &quot;front-wing gable (extended over the porch)&quot;,
+      &quot;span_ft&quot;: 17.0,
+      &quot;pitch&quot;: [
+       8,
+       12
+      ],
+      &quot;ridge&quot;: &quot;y&quot;,
+      &quot;rise_ft&quot;: 5.67,
+      &quot;ridge_height_ft&quot;: 15.17,
+      &quot;basis&quot;: &quot;plate 9.0 ft + heel 0.50 ft + (span/2)·pitch&quot;
+     },
+     {
+      &quot;name&quot;: &quot;garage gable&quot;,
+      &quot;span_ft&quot;: 21.0,
+      &quot;pitch&quot;: [
+       6,
+       12
+      ],
+      &quot;ridge&quot;: &quot;y&quot;,
+      &quot;rise_ft&quot;: 5.25,
+      &quot;ridge_height_ft&quot;: 14.75,
+      &quot;basis&quot;: &quot;plate 9.0 ft + heel 0.50 ft + (span/2)·pitch&quot;
+     }
+    ],
+    &quot;max_ridge_ft&quot;: 19.0,
+    &quot;ridge_direction&quot;: &quot;main ridge parallel to the lane (x) over the rear block (rear porch recessed under it); a front-facing 8:12 gable over the 17-ft front wing, carried 6 ft forward over the covered porch; a subordinate front-facing 6:12 gable over the 21-ft garage&quot;
+   },
+   &quot;areas&quot;: {
+    &quot;conditioned_sf&quot;: 1492.0,
+    &quot;conditioned_basis&quot;: &quot;outside face of exterior walls / centreline of garage separation wall (grid union of conditioned rooms)&quot;,
+    &quot;garage_sf&quot;: 504.0,
+    &quot;front_porch_sf&quot;: 102.0,
+    &quot;rear_porch_covered_sf&quot;: 84.0,
+    &quot;rear_patio_uncovered_sf&quot;: 0,
+    &quot;total_under_roof_sf&quot;: 2182.0,
+    &quot;total_under_roof_basis&quot;: &quot;conditioned + garage + covered porch(es) (patio uncovered, excluded)&quot;,
+    &quot;sum_of_room_clear_sf&quot;: 1349.0
+   },
+   &quot;accessibility_checklist&quot;: [
+    {
+     &quot;item&quot;: &quot;Zero-step entries&quot;,
+     &quot;provided&quot;: &quot;front porch (slab flush with finished floor), garage-to-laundry/mud-room door and recessed rear porch (french door ≤ 1/2-in threshold)&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Door clear width&quot;,
+     &quot;provided&quot;: &quot;all passage doors 36 in (3&#x27;-0\&quot;); closets/pantry 30–32 in; french doors 5&#x27;-0\&quot; (den) and 6&#x27;-0\&quot; (porch)&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Hall width&quot;,
+     &quot;provided&quot;: &quot;foyer/hall 3&#x27;-6\&quot; clear (42 in); kitchen corridor 3&#x27;-10\&quot; clear&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Turning circles&quot;,
+     &quot;provided&quot;: &quot;5&#x27;-0\&quot; (60 in) circle drawn and checked clear in both baths&quot;,
+     &quot;status&quot;: &quot;checked by script&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Curbless shower&quot;,
+     &quot;provided&quot;: &quot;primary bath 5&#x27;-0\&quot; × 3&#x27;-10\&quot; curbless (recessed slab per 03 30 00 §2.05)&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Out-swinging bath door&quot;,
+     &quot;provided&quot;: &quot;primary bath door swings into the bedroom (fall-rescue clearance)&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Grab-bar blocking&quot;,
+     &quot;provided&quot;: &quot;2×10 solid blocking 33–36 in AFF at all toilets, tub and showers (2024 IRC (GA 2026) — voluntary; ANSI A117.1 Type C-type)&quot;,
+     &quot;status&quot;: &quot;design intent — VERIFY blocking heights with architect&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Plate height / vaulted&quot;,
+     &quot;provided&quot;: &quot;9&#x27;-0\&quot; plate; great room vaulted&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Single-level living&quot;,
+     &quot;provided&quot;: &quot;1 story; no interior steps; laundry/mud room on the living level off the garage&quot;,
+     &quot;status&quot;: &quot;design intent&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Lever hardware, rocker switches, 48-in max reach&quot;,
+     &quot;provided&quot;: &quot;to be specified (Division 08 / 26)&quot;,
+     &quot;status&quot;: &quot;later stage&quot;
+    },
+    {
+     &quot;item&quot;: &quot;Lilburn §734 visitability&quot;,
+     &quot;provided&quot;: &quot;applies to attached dwellings only; voluntarily exceeded (100% zero-step)&quot;,
+     &quot;status&quot;: &quot;appears consistent with Ord. 2023-603 §734 (not applicable)&quot;
+    }
+   ],
+   &quot;materials_by_scheme&quot;: {
+    &quot;1&quot;: {
+     &quot;name&quot;: &quot;Warm White&quot;,
+     &quot;siding&quot;: &quot;fiber-cement board-and-batten (12-in o.c. battens), warm white&quot;,
+     &quot;base&quot;: &quot;stacked/ledge stone water table (30 in) and porch piers&quot;,
+     &quot;roof&quot;: &quot;architectural asphalt shingle, weathered wood / charcoal&quot;,
+     &quot;trim&quot;: &quot;painted fiber-cement trim, soft white; 8×8 cedar porch posts + brackets&quot;,
+     &quot;door&quot;: &quot;front door deep green or black; garage door carriage-style, painted to match trim&quot;
+    },
+    &quot;2&quot;: {
+     &quot;name&quot;: &quot;Sage&quot;,
+     &quot;siding&quot;: &quot;fiber-cement lap siding, 6-in exposure, sage green&quot;,
+     &quot;base&quot;: &quot;brick veneer water table (30 in), red-brown blend; brick porch piers&quot;,
+     &quot;roof&quot;: &quot;architectural asphalt shingle, charcoal&quot;,
+     &quot;trim&quot;: &quot;painted trim, soft white; 8×8 cedar posts&quot;,
+     &quot;door&quot;: &quot;front door natural stain or oxblood; garage door painted to match siding&quot;
+    },
+    &quot;3&quot;: {
+     &quot;name&quot;: &quot;Clay&quot;,
+     &quot;siding&quot;: &quot;fiber-cement lap siding, 6-in exposure, clay/beige&quot;,
+     &quot;base&quot;: &quot;ledge stone water table (30 in) and porch piers, buff blend&quot;,
+     &quot;roof&quot;: &quot;architectural asphalt shingle, weathered wood&quot;,
+     &quot;trim&quot;: &quot;painted trim, cream; 8×8 cedar posts&quot;,
+     &quot;door&quot;: &quot;front door navy; garage door painted to match trim&quot;
+    },
+    &quot;source&quot;: &quot;docs/12-outline-specifications.md (04 20 00, 04 40 00, 07 31 00, 07 46 46, 09 91 13); FACTS §4 \&quot;three color schemes (warm white / sage / clay)\&quot;&quot;
+   },
+   &quot;lot_siting&quot;: {
+    &quot;lot_w_ft&quot;: 50.0,
+    &quot;lot_d_ft&quot;: 100.0,
+    &quot;house_origin_on_lot_ft&quot;: [
+     6.0,
+     21.667
+    ],
+    &quot;garage_door_from_lot_line_ft&quot;: 26.67,
+    &quot;rear_wall_from_rear_line_ft&quot;: 20.83,
+    &quot;patio_edge_from_rear_line_ft&quot;: null,
+    &quot;rear_porch_edge_from_rear_line_ft&quot;: 20.83,
+    &quot;side_yard_ft&quot;: 6.0,
+    &quot;building_coverage_pct&quot;: 43.6,
+    &quot;impervious_pct_est&quot;: 55.6,
+    &quot;impervious_basis&quot;: &quot;roof 2182 + patio 0 + driveway 533 + walk 63 SF&quot;
+   },
+   &quot;notes&quot;: [
+    &quot;Illustrative architectural plan for the rezoning application (Lilburn Zoning Ordinance 2023-603 §1003-4 renderings/elevations item). NOT FOR CONSTRUCTION. DRAFT — to be superseded by sealed drawings by a Georgia-registered architect.&quot;,
+    &quot;Dimensions are to the outside face of exterior walls (2×6, 6 in nominal) and to the centreline of interior partitions (2×4, 4 in). Plate height 9&#x27;-0\&quot;; great room vaulted; roof 8:12 main gables, 4:12 front-porch shed, architectural shingles; the rear porch is recessed under the main roof.&quot;,
+    &quot;Accessibility (voluntary — Ord. 2023-603 §734 applies to attached dwellings only): zero-step entries at the front porch, garage/mud room and rear porch; 36-in passage doors; 3&#x27;-6\&quot; (42-in) clear foyer/hall; 5&#x27;-0\&quot; turning circles drawn and checked clear in both baths; curbless primary shower; out-swinging primary bath door; 2×10 blocking for grab bars at all toilets, tub and showers.&quot;,
+    &quot;Garage door 16&#x27;-0\&quot; × 7&#x27;-0\&quot; recessed 5&#x27;-0\&quot; behind the front wall of the dwelling — appears consistent with Ord. 2023-603 Table 4.2 (front-loaded garages recessed ≥ 5 ft). Garage clear 20&#x27;-4\&quot; × 23&#x27;-4\&quot; ≥ the 20&#x27;-0\&quot; × 20&#x27;-0\&quot; program minimum (extra bay depth for storage / golf cart).&quot;,
+    &quot;Life safety: smoke and CO alarms per 2024 IRC (GA 2026) R314/R315; bedroom emergency escape and rescue openings per 2024 IRC (GA 2026) R310 (note 9). NFPA 13D residential sprinklers are offered as a VOLUNTARY condition, not as code-required mitigation: IFC 2024 as adopted and modified by Ga. Comp. R. &amp; Regs. R. 120-3-3-.04 replaces Appendix D107.1&#x27;s 30-unit trigger with 120 dwelling units, so at 43 units a second fire-apparatus access road is not required and no sprinkler exception is being relied on. (The 1,754-ft dead-end lane still needs IFC 2024 (GA) Appendix D103.4 special approval — a site-plan issue, not a house-plan issue.)&quot;,
+    &quot;BODY WIDTH — why 38&#x27;-0\&quot; and not the 40&#x27;-0\&quot; of the program brief. A 50&#x27;-0\&quot; lot less two 5&#x27;-0\&quot; side yards (Ord. 2023-603 Table 4.1, R-2) leaves 40&#x27;-0\&quot; of buildable width, and the ROOF has to fit inside it, not just the walls: at an 8-in overhang on each side wall a 40&#x27;-0\&quot; body measures 41&#x27;-4\&quot; roof to roof and does not fit. Ord. 2023-603 was searched and contains no provision permitting a projection or encroachment into a required yard (VERIFY at pre-application). The body is therefore 38&#x27;-0\&quot; wide — 38&#x27;-0\&quot; + 2 × 0&#x27;-8\&quot; = 39&#x27;-4\&quot; roof to roof, 4 in of clearance to each side-yard line — and the depth was increased 1&#x27;-0\&quot; to 58&#x27;-6\&quot; to recover floor area. Conditioned area 1,530 SF, against 1,595 SF for the superseded 40&#x27;-0\&quot; × 57&#x27;-6\&quot; version (−4.1%).&quot;,
+    &quot;BODY DEPTH — why 58&#x27;-6\&quot; is the maximum. On the typical 50&#x27;-0\&quot; × 100&#x27;-0\&quot; lot the front porch face sits on the 15-ft front setback, the porch is 6&#x27;-0\&quot; deep and the rear 20&#x27;-0\&quot; of the lot is the undisturbed buffer easement (Ord. 2023-603 Table 4.1 rear yard; §313(1) buffer-in-lot reading): 100 − 15 − 6 − 20 = 59&#x27;-0\&quot; of available body depth. At 58&#x27;-6\&quot; the rear wall stands 20&#x27;-6\&quot; from the rear lot line — 6 in outside the buffer easement (the ROOF is a separate question: see the first VERIFY item — the drawn 12-in rear eave reaches 19&#x27;-6\&quot; from the rear line). Verified against data/layout.json (Plan B lot 2: lot 50 × 100, setback envelope 15 ft front / 20 ft rear, porch rect 6 ft deep).&quot;,
+    &quot;Rear porch: recessing the 14&#x27;-0\&quot; × 6&#x27;-0\&quot; covered porch under the main roof keeps the roof edge on the line of the rear wall, so nothing projects past 58&#x27;-6\&quot; and the 20-ft buffer easement is not touched. No uncovered patio is proposed (an added at-grade slab would reach the buffer line — VERIFY with Planning staff).&quot;,
+    &quot;EGRESS. Both bedrooms have an emergency escape and rescue opening in an exterior wall: BEDROOM 2 a 6&#x27;-0\&quot; × 5&#x27;-0\&quot; twin on the right side wall, the PRIMARY BEDROOM a 5&#x27;-0\&quot; × 5&#x27;-0\&quot; unit on the rear wall; sills at 2&#x27;-8\&quot; (32 in) above the finished floor, well under the 44-in maximum (2024 IRC (GA 2026) R310.2.2). The egress leaf of each unit is specified as a 3&#x27;-0\&quot; × 5&#x27;-0\&quot; CASEMENT: taking a 3-in allowance all round for frame, sash and hardware, net clear opening = 2&#x27;-6\&quot; × 4&#x27;-6\&quot; = 30 in × 54 in = 11.25 SF ≥ 5.7 SF, net clear width 30 in ≥ 20 in, net clear height 54 in ≥ 24 in — appears consistent with 2024 IRC (GA 2026) R310.2.1. A 3&#x27;-0\&quot; × 5&#x27;-0\&quot; single-hung is NOT relied on: its net clear height is roughly half the unit height and the resulting area is marginal against 5.7 SF. Companion leaves and all other windows may be single-hung.&quot;,
+    &quot;Program body is nominally 38&#x27;-0\&quot; × 40&#x27;-0\&quot; = 1,520 SF (re-proportioned 2026-09-03 from the FACTS §4 nominal 40&#x27;-0\&quot; × 40&#x27;-0\&quot; = 1,600 SF — see note 6). With the 2-car garage as a front wing and the 14&#x27;-0\&quot; × 6&#x27;-0\&quot; rear porch recessed under the main roof, the conditioned envelope is a 17&#x27;-0\&quot; × 29&#x27;-0\&quot; front wing + a 38&#x27;-0\&quot; × 29&#x27;-6\&quot; rear block less the 84-SF porch notch = 1,530 SF conditioned (+0.7% on the 1,520-SF nominal); overall body 38&#x27;-0\&quot; × 58&#x27;-6\&quot; plus the front porch. 1,530 SF exceeds the ≥ 1,400-SF voluntary condition (docs/10 item 14) and the 1,000-SF minimum heated floor area for a cottage home in R-2 (Ord. 2023-603 Table 4.1).&quot;,
+    &quot;Areas are computed by tools/floorplans.py from the wall-face polygons (conditioned = outside face of exterior walls; total under roof = conditioned + garage + both covered porches).&quot;
+   ],
+   &quot;verify&quot;: [
+    &quot;REAR-YARD EAVE — the same question as the side yards, unresolved: the roof carries a 12-in eave front and rear (tools/elevations.py OH_FR), so at a 58&#x27;-6\&quot; body the rear roof edge sits 19&#x27;-6\&quot; from the rear lot line, 6 in INSIDE the 20-ft rear yard / buffer easement, while the side eaves were held 4 in outside the side-yard lines (note 6). Ord. 2023-603 has no projections/encroachments provision either way, and the front porch roof likewise projects 1&#x27;-0\&quot; past the porch face into the 15-ft front setback (Plan A the same). If staff require the rear eave outside the line too, hold the body at 58&#x27;-0\&quot; (rear wall 21&#x27;-0\&quot; from the rear line; 8-in rear eave -&gt; roof edge 20&#x27;-4\&quot;; conditioned 1,511 SF) or at 57&#x27;-6\&quot; with the 12-in eave (conditioned 1,492 SF). Resolve at the pre-application conference — this is a lot-fit decision, not a floor-plan decision&quot;,
+    &quot;Side-yard eave projection: Ord. 2023-603 was searched and contains no projections/encroachments provision permitting an eave in a required yard, so the 8-in overhangs are held inside the 40&#x27;-0\&quot; buildable width. CONFIRM with the Planning Director at the pre-application conference — if eaves may project, the body could return to 40&#x27;-0\&quot; and the plan to ~1,595 SF&quot;,
+    &quot;Fireplace type/venting (direct-vent gas assumed; no masonry chimney drawn) — architect of record / 2024 IRC (GA 2026) Ch. 10&quot;,
+    &quot;Egress leaf type and net clear opening at unit selection — 2024 IRC (GA 2026) R310.2.1 (see note 9): a 3&#x27;-0\&quot; × 5&#x27;-0\&quot; single-hung does NOT reliably deliver 5.7 SF; the egress leaf at each bedroom is specified as a casement&quot;,
+    &quot;Grab-bar blocking heights and ANSI A117.1 references — architect of record&quot;,
+    &quot;Max impervious / lot coverage for R-2 — Lilburn Development Regulations App. B §5.9 is \&quot;Recreation Areas\&quot; and does not apply to this 9.44-ac subdivision (audit 2026-09-03), so no App. B coverage limit has been located — confirm at the pre-application conference&quot;,
+    &quot;data/layout.json house_rect for Plan B lots is a 40 × 40 box; the actual envelope is 38&#x27;-0\&quot; × 58&#x27;-6\&quot; plus the 17&#x27; × 6&#x27; front porch — the site-plan agent must re-cut the house/driveway/rear rectangles (rear wall 20&#x27;-6\&quot; from the rear line on a 100-ft lot, i.e. 6 in outside the 20-ft buffer easement)&quot;,
+    &quot;tools/elevations.py MASSING[&#x27;B&#x27;] must be conformed to this spec (blocks (0,29,38,57.5) / (21,−6,38,29) / (0,5,21,29); footprint_deduct (24,51.5,38,57.5); porch_sf 102) or check_massing() and check_width() will fail&quot;,
+    &quot;Front wall at 21 ft from the lot line (porch face on the 15-ft setback + 6-ft porch), not the 20 ft assumed in the program brief — confirm the siting convention with the site-plan agent&quot;
+   ]
+  }
+ }
+}</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/data/plans.json</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

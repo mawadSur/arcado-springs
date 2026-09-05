@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Technical memoranda calculation engine — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> Python</div>
+    
+    <h1>Technical memoranda calculation engine</h1><p class="src-note">Python · 220 lines · <a href="/data-room/src/submission/tools/memo_calcs.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Technical-memoranda calculations for docs/08-technical-memoranda.md.
+
+Reads data/layout.json (which governs) + data/topo-samples.json; prints every derived number with its
+inputs, and writes verify/memo-calcs.json for tools/verify_memo08.py.
+
+    python3 tools/memo_calcs.py        (run from anywhere; paths are absolute off this file)
+
+REBUILT 2026-09-03 against the corrected site plan: the lot count fell from 43 to 41 (one lot inside a
+stream buffer once all three digitised reaches were screened, one lost to the enlarged stormwater basins),
+the basins were enlarged, and the sewer keys in layout.json were renamed. Nothing here is a design.
+&quot;&quot;&quot;
+import json, math, os
+
+HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
+L = json.load(open(os.path.join(ROOT, &#x27;data&#x27;, &#x27;layout.json&#x27;)))
+TOPO = json.load(open(os.path.join(ROOT, &#x27;data&#x27;, &#x27;topo-samples.json&#x27;)))[&#x27;samples&#x27;]
+M = L[&#x27;metrics&#x27;]; N = M[&#x27;lots&#x27;]
+out = {}
+
+
+def p(k, v, note=&#x27;&#x27;):
+    out[k] = v
+    print(f&quot;{k:44s} {v!s:&gt;16}  {note}&quot;)
+
+
+def dist(a, b):
+    return math.hypot(a[0] - b[0], a[1] - b[1])
+
+
+def pathlen(pts):
+    return sum(dist(pts[i], pts[i + 1]) for i in range(len(pts) - 1))
+
+
+def ground(u, v, k=4):
+    &quot;&quot;&quot;inverse-distance ground elevation from the 3DEP sample grid (approximate).&quot;&quot;&quot;
+    d = sorted((math.hypot(s[&#x27;u&#x27;] - u, s[&#x27;v&#x27;] - v), s[&#x27;z_ft&#x27;]) for s in TOPO)[:k]
+    if d[0][0] &lt; 1e-6:
+        return d[0][1]
+    w = sum(1 / dd ** 2 for dd, _ in d)
+    return sum(z / dd ** 2 for dd, z in d) / w
+
+
+print(&quot;=== PROGRAM&quot;)
+p(&#x27;units&#x27;, N, &#x27;layout.json metrics.lots&#x27;)
+p(&#x27;lots phase 1 / phase 2&#x27;, f&quot;{M[&#x27;lots_phase1&#x27;]} / {M[&#x27;lots_phase2&#x27;]}&quot;, f&quot;phase line u = {M[&#x27;phase_line_u_ft&#x27;]:.0f} ft&quot;)
+p(&#x27;density du/ac (9.44 deeded)&#x27;, M[&#x27;density_du_ac_deeded&#x27;])
+p(&#x27;open space sf / pct&#x27;, f&quot;{M[&#x27;open_space_sf&#x27;]:,} / {M[&#x27;open_space_pct_gis&#x27;]}%&quot;)
+p(&#x27;impervious sf / pct&#x27;, f&quot;{M[&#x27;impervious_sf&#x27;]:,} / {M[&#x27;impervious_pct_gis&#x27;]}%&quot;)
+
+print(&quot;\n=== HOPA (24 CFR §100.305(a) with the fractional-unit rule of §100.305(g))&quot;)
+need = math.ceil(0.80 * N)
+p(&#x27;0.80 x units&#x27;, round(0.80 * N, 2), f&quot;0.80 x {N}&quot;)
+p(&#x27;units needing a 55+ resident&#x27;, need, f&quot;the fraction counts INTO the 80% -&gt; {need} of {N} = {100*need/N:.1f}%&quot;)
+p(&#x27;units with no age requirement&#x27;, N - need, f&quot;{N} - {need}&quot;)
+
+print(&quot;\n=== A. TRAFFIC (ITE Trip Generation 11th ed.)&quot;)
+# LUC 251 rate is UNRESOLVED (no primary 11th-ed. source reachable); a range is carried - see memo A.3.
+r_lo = {&#x27;daily&#x27;: 3.70, &#x27;am&#x27;: 0.20, &#x27;pm&#x27;: 0.30}      # Falls Church VA study (states ITE 9th ed.)
+r_mid = {&#x27;daily&#x27;: 4.31, &#x27;am&#x27;: 0.24, &#x27;pm&#x27;: 0.30}     # Palm Beach County sheet (matches the FACTS PM 0.30)
+r_hi = {&#x27;am&#x27;: 0.34, &#x27;pm&#x27;: 0.39}                     # Corpus Christi &quot;common rates 11th ed.&quot; sheet
+r210 = {&#x27;daily&#x27;: 9.43, &#x27;am&#x27;: 0.70, &#x27;pm&#x27;: 0.94}      # LUC 210 Single-Family Detached
+r220 = {&#x27;daily&#x27;: 6.74, &#x27;am&#x27;: 0.40, &#x27;pm&#x27;: 0.51}      # LUC 220 Multifamily Low-Rise
+r822_pm, r822_daily = 6.59, 54.45                   # LUC 822 Strip Retail Plaza (&lt;40 ksf), per 1,000 sf
+CAP = 47
+p(&#x27;251 daily lo&#x27;, round(N * r_lo[&#x27;daily&#x27;]), f&quot;{N} x 3.70&quot;)
+p(&#x27;251 daily mid&#x27;, round(N * r_mid[&#x27;daily&#x27;]), f&quot;{N} x 4.31&quot;)
+p(&#x27;251 AM lo&#x27;, round(N * r_lo[&#x27;am&#x27;], 1), f&quot;{N} x 0.20&quot;)
+p(&#x27;251 AM mid&#x27;, round(N * r_mid[&#x27;am&#x27;], 1), f&quot;{N} x 0.24&quot;)
+p(&#x27;251 AM hi&#x27;, round(N * r_hi[&#x27;am&#x27;], 1), f&quot;{N} x 0.34&quot;)
+p(&#x27;251 PM lo/mid&#x27;, round(N * r_mid[&#x27;pm&#x27;], 1), f&quot;{N} x 0.30 (the package headline figure)&quot;)
+p(&#x27;251 PM hi&#x27;, round(N * r_hi[&#x27;pm&#x27;], 1), f&quot;{N} x 0.39&quot;)
+p(&#x27;251 daily @cap&#x27;, round(CAP * r_mid[&#x27;daily&#x27;]), f&quot;{CAP} x 4.31&quot;)
+p(&#x27;251 AM @cap hi&#x27;, round(CAP * r_hi[&#x27;am&#x27;], 1), f&quot;{CAP} x 0.34&quot;)
+p(&#x27;251 PM @cap hi&#x27;, round(CAP * r_hi[&#x27;pm&#x27;], 1), f&quot;{CAP} x 0.39 — the highest figure anywhere&quot;)
+r1_lots = math.floor(9.44 * 4)
+p(&#x27;R-1 lots @4 du/ac&#x27;, r1_lots, &quot;floor(9.44 x 4), Table 4.1 R-1 max 4 du/ac&quot;)
+p(&#x27;210 daily&#x27;, round(r1_lots * r210[&#x27;daily&#x27;], 1)); p(&#x27;210 AM&#x27;, round(r1_lots * r210[&#x27;am&#x27;], 1)); p(&#x27;210 PM&#x27;, round(r1_lots * r210[&#x27;pm&#x27;], 1))
+p(&#x27;vs R-1 daily&#x27;, f&quot;-{100*(1-N*r_mid[&#x27;daily&#x27;]/(r1_lots*r210[&#x27;daily&#x27;])):.0f}%&quot;, f&quot;{N*r_mid[&#x27;daily&#x27;]:.0f} vs {r1_lots*r210[&#x27;daily&#x27;]:.0f}&quot;)
+p(&#x27;vs R-1 PM&#x27;, f&quot;-{100*(1-N*r_mid[&#x27;pm&#x27;]/(r1_lots*r210[&#x27;pm&#x27;])):.0f}%&quot;, f&quot;{N*r_mid[&#x27;pm&#x27;]:.1f} vs {r1_lots*r210[&#x27;pm&#x27;]:.1f}&quot;)
+mu_pm = 104 * r220[&#x27;pm&#x27;] + 24.4 * r822_pm
+mu_daily = 104 * r220[&#x27;daily&#x27;] + 24.4 * r822_daily
+p(&#x27;2025 MU PM raw&#x27;, round(mu_pm, 1), &quot;104 x 0.51 (LUC 220) + 24.4 ksf x 6.59 (LUC 822)&quot;)
+p(&#x27;2025 MU daily raw&#x27;, round(mu_daily), &quot;104 x 6.74 + 24.4 x 54.45&quot;)
+p(&#x27;vs 2025 MU PM&#x27;, f&quot;-{100*(1-N*r_mid[&#x27;pm&#x27;]/mu_pm):.0f}%&quot;, f&quot;{N*r_mid[&#x27;pm&#x27;]:.1f} vs {mu_pm:.0f}&quot;)
+p(&#x27;AADT share (daily/14,800)&#x27;, f&quot;{N*r_mid[&#x27;daily&#x27;]/14800*100:.2f}%&quot;, &quot;2017 count, INELIGIBLE — context only&quot;)
+p(&#x27;entrance to Arcadia Pl cl&#x27;, f&quot;{M[&#x27;entrance_to_arcadia_cl_ft&#x27;]} ft&quot;, f&quot;chord {M[&#x27;entrance_to_arcadia_cl_chord_ft&#x27;]} ft; standard 244 ft&quot;)
+p(&#x27;frontage on Arcado Rd&#x27;, f&quot;{M[&#x27;frontage_arcado_chord_ft&#x27;]} ft chord&quot;, f&quot;{M[&#x27;frontage_arcado_along_rw_ft&#x27;]} ft along the R/W; 1 driveway per 400 ft&quot;)
+
+print(&quot;\n=== B. SANITARY SEWER&quot;)
+gp = dict(L[&#x27;lane&#x27;][&#x27;ground_profile&#x27;])
+MH_INV, MH, COVER, SMIN, N_MAN = 927.13, (271.7, -224.0), 5.0, 0.004, 0.013
+PHASE_U = M[&#x27;phase_line_u_ft&#x27;]
+front = L[&#x27;sewer&#x27;][&#x27;proposed_phase1_gravity&#x27;]
+Lf = pathlen(front)
+p(&#x27;front reach length ft&#x27;, round(Lf), f&quot;lane u {PHASE_U:.0f} -&gt; lane u 272 -&gt; EX MH (271.7,-224)&quot;)
+cross = dist((272.0, -117.65), MH)
+p(&#x27;cross leg to the EX MH ft&#x27;, round(cross, 1), &quot;lane u 272 across the amenity tract&quot;)
+u_top = min(gp, key=lambda u: abs(u - PHASE_U))
+inv_top = gp[u_top] - COVER
+p(&#x27;invert at the phase line&#x27;, round(inv_top, 2), f&quot;ground {gp[u_top]} at u {u_top} less {COVER:.0f} ft of cover&quot;)
+sag_u = min((u for u in gp if 272 &lt;= u &lt;= PHASE_U), key=lambda u: gp[u]); sag_z = gp[sag_u]
+inv_sag = sag_z - COVER
+p(&#x27;front-reach lane sag&#x27;, f&quot;u {sag_u} / {sag_z}&quot;, &quot;lowest lane ground between u 272 and the phase line&quot;)
+p(&#x27;invert at the sag (5-ft cover)&#x27;, round(inv_sag, 2))
+p(&#x27;slope phase line -&gt; sag&#x27;, f&quot;{(inv_top-inv_sag)/(u_top-sag_u)*100:.2f} %&quot;, f&quot;({inv_top:.1f}-{inv_sag:.1f})/{u_top-sag_u:.0f}&quot;)
+L_sag = (sag_u - 272) + cross
+p(&#x27;length sag -&gt; MH ft&#x27;, round(L_sag))
+s_avail = (inv_sag - MH_INV) / L_sag
+p(&#x27;available slope sag-&gt;MH&#x27;, f&quot;{s_avail*100:.2f} %&quot;, f&quot;({inv_sag:.2f}-{MH_INV})/{L_sag:.0f}; min 0.40% for 8-in&quot;)
+hump_u = max((u for u in gp if 272 &lt;= u &lt;= sag_u), key=lambda u: gp[u]); hump_z = gp[hump_u]
+inv_hump = inv_sag - SMIN * (sag_u - hump_u)
+p(&#x27;lane hump between sag and MH&#x27;, f&quot;u {hump_u} / {hump_z}&quot;)
+p(&#x27;pipe depth under the hump @0.40%&#x27;, round(hump_z - inv_hump, 1), &quot;ft to invert (deep-cut item)&quot;)
+p(&#x27;SW-edge alternative ground&#x27;, f&quot;{ground(250,-215):.1f} at (250,-215)&quot;, &quot;shallower corridor for the front trunk&quot;)
+Q_full = 1.49 / N_MAN * (math.pi * (8 / 12) ** 2 / 4) * ((8 / 12) / 4) ** (2 / 3) * SMIN ** 0.5
+p(&#x27;8-in full-flow Q @0.40%&#x27;, f&quot;{Q_full*448.83:.0f} gpm&quot;, f&quot;Manning n=0.013 -&gt; {Q_full:.3f} cfs&quot;)
+low = M[&#x27;rear_lane_low_point&#x27;]
+ridge_u = max((u for u in gp if 1000 &lt;= u &lt;= 1300), key=lambda u: gp[u]); ridge_z = gp[ridge_u]
+inv_low = low[&#x27;ground_ft&#x27;] - COVER
+L_rear = (low[&#x27;u&#x27;] - 272) + cross
+p(&#x27;rear low point&#x27;, f&quot;u {low[&#x27;u&#x27;]} / {low[&#x27;ground_ft&#x27;]}&quot;)
+p(&#x27;ridge on the lane&#x27;, f&quot;u {ridge_u} / {ridge_z}&quot;)
+p(&#x27;rear invert (5-ft cover)&#x27;, round(inv_low, 2), f&quot;already BELOW the {MH_INV} MH invert&quot;)
+p(&#x27;rear-&gt;MH length ft&#x27;, round(L_rear))
+arrive = inv_low - SMIN * L_rear
+p(&#x27;invert reached at the MH @0.40%&#x27;, round(arrive, 2), f&quot;vs {MH_INV} -&gt; deficit {MH_INV-arrive:.1f} ft&quot;)
+p(&#x27;cut under the ridge if forced&#x27;, round(ridge_z - (inv_low - SMIN * (low[&#x27;u&#x27;] - ridge_u)), 1), &quot;ft (not buildable)&quot;)
+ext = L[&#x27;sewer&#x27;][&#x27;phase2_alternative_extension&#x27;]; Lext = pathlen(ext)
+p(&#x27;extension total length ft&#x27;, round(Lext), &quot;rear low -&gt; lane u 1,300 -&gt; SW line -&gt; Legends MH&quot;)
+p(&#x27;extension off-site ft&#x27;, L[&#x27;sewer&#x27;][&#x27;extension_offsite_ft&#x27;])
+s_ext = (inv_low - 919.58) / Lext
+p(&#x27;extension slope&#x27;, f&quot;{s_ext*100:.2f} %&quot;, f&quot;({inv_low:.2f}-919.58)/{Lext:.0f}&quot;)
+d1 = pathlen(ext[:2])
+p(&#x27;depth where it crosses the lane&#x27;, round(ground(*ext[1]) - (inv_low - s_ext * d1), 1),
+  f&quot;ft at u 1,300 (ground {ground(*ext[1]):.1f}) — the deep point on the drawn route&quot;)
+d2 = pathlen(ext[:3])
+p(&#x27;depth at the SW property line&#x27;, round(ground(*ext[2]) - (inv_low - s_ext * d2), 1),
+  f&quot;ft at (1300,-235) (ground {ground(*ext[2]):.1f})&quot;)
+p(&#x27;SW low-pocket ground&#x27;, f&quot;{ground(1400,-210):.1f} at (1400,-210)&quot;, &quot;the shallower alternative alignment&quot;)
+PPU, GPCD, PF, UNIT, CLUB = 2.2, 70, 4.0, 250, 2400 * 175 / 1000
+aadf_g = N * UNIT + CLUB
+p(&#x27;AADF (DWR table)&#x27;, f&quot;{aadf_g:.0f} gpd&quot;, f&quot;{N} x {UNIT} + 2,400 sf clubhouse x 175/ksf ({CLUB:.0f} gpd)&quot;)
+p(&#x27;AADF gpm&#x27;, f&quot;{aadf_g/1440:.2f} gpm&quot;)
+p(&#x27;peak (x4.0) DWR&#x27;, f&quot;{aadf_g*PF:.0f} gpd = {aadf_g*PF/1440:.1f} gpm&quot;)
+ph1, ph2 = M[&#x27;lots_phase1&#x27;], M[&#x27;lots_phase2&#x27;]
+p(&#x27;Phase 1 AADF DWR&#x27;, f&quot;{ph1*UNIT+CLUB:.0f} gpd&quot;, f&quot;{ph1} lots + clubhouse; {(ph1*UNIT+CLUB)/1440:.1f} gpm&quot;)
+p(&#x27;Phase 1 peak&#x27;, f&quot;{(ph1*UNIT+CLUB)*PF:.0f} gpd = {(ph1*UNIT+CLUB)*PF/1440:.1f} gpm&quot;)
+p(&#x27;Phase 2 AADF DWR&#x27;, f&quot;{ph2*UNIT:.0f} gpd&quot;, f&quot;{ph2} lots; {ph2*UNIT/1440:.2f} gpm&quot;)
+p(&#x27;Phase 2 peak&#x27;, f&quot;{ph2*UNIT*PF:.0f} gpd = {ph2*UNIT*PF/1440:.1f} gpm&quot;)
+aadf = N * PPU * GPCD
+p(&#x27;AADF (population cross-check)&#x27;, f&quot;{aadf:.0f} gpd&quot;, f&quot;{N} x 2.2 x 70&quot;)
+p(&#x27;peak (x4.0) population&#x27;, f&quot;{aadf*PF:.0f} gpd = {aadf*PF/1440:.1f} gpm&quot;)
+COST = [(&#x27;8-in PVC gravity sewer&#x27;, Lext, 150, 225), ]
+p(&#x27;extension pipe cost&#x27;, f&quot;${Lext*150:,.0f}-${Lext*225:,.0f}&quot;, f&quot;{Lext:.0f} LF x $150-$225/LF&quot;)
+lo = Lext * 150 + 21000 + 30000 + 10000 + 15000 + 20000
+hi = Lext * 225 + 30000 + 30000 + 20000 + 50000 + 35000
+p(&#x27;extension order-of-magnitude&#x27;, f&quot;${lo:,.0f}-${hi:,.0f}&quot;, &quot;pipe + MHs + rock + crossing + easement + design&quot;)
+p(&#x27;per Phase-2 lot&#x27;, f&quot;${lo/ph2:,.0f}-${hi/ph2:,.0f}&quot;, f&quot;over {ph2} Phase-2 lots&quot;)
+
+print(&quot;\n=== C. WATER&quot;)
+avg = N * UNIT
+p(&#x27;avg day&#x27;, f&quot;{avg:.0f} gpd&quot;, f&quot;{N} x 250 gpd&quot;)
+p(&#x27;max day (x2.0)&#x27;, f&quot;{avg*2:.0f} gpd&quot;)
+p(&#x27;peak hour (x4.0)&#x27;, f&quot;{avg*4/1440:.1f} gpm&quot;)
+p(&#x27;fire flow unsprinklered&#x27;, &quot;1,000 gpm / 1 h&quot;, &quot;IFC 2024 (GA) App. B Table B105.1(1), &lt;=3,600 sf&quot;)
+p(&#x27;fire flow w/ NFPA 13D&#x27;, &quot;500 gpm / 1 h&quot;, &quot;B105.1: 50% reduction, not below 500 gpm&quot;)
+main_len = M[&#x27;lane_length_ft&#x27;]
+p(&#x27;main length ft&#x27;, round(main_len), &quot;single dead-end run in the lane tract&quot;)
+p(&#x27;hydrants @~400 ft&#x27;, math.ceil(main_len / 400) + 1, &quot;DWR Standards (2016) 2.2.15(b): 350-450 ft; one near the end of the main&quot;)
+p(&#x27;main volume 8-in&#x27;, f&quot;{math.pi*(8/12)**2/4*main_len*7.48:.0f} gal&quot;, f&quot;over {main_len:.0f} ft — turnover on a dead end&quot;)
+
+print(&quot;\n=== D. STORMWATER  (layout.json governs)&quot;)
+A_sf = M[&#x27;boundary_sf&#x27;]
+I = 100.0 * M[&#x27;impervious_sf&#x27;] / A_sf
+Rv = 0.05 + 0.009 * I
+WQr = 1.2 * Rv
+D = M[&#x27;disturbed_area&#x27;]
+p(&#x27;site area&#x27;, f&quot;{A_sf:,} sf = {A_sf/43560:.2f} ac&quot;)
+p(&#x27;impervious&#x27;, f&quot;{M[&#x27;impervious_sf&#x27;]:,} sf = {M[&#x27;impervious_sf&#x27;]/43560:.2f} ac = {I:.2f}%&quot;)
+p(&#x27;Rv&#x27;, round(Rv, 4), f&quot;0.05 + 0.009 x {I:.2f}&quot;)
+p(&#x27;WQr (in)&#x27;, round(WQr, 4), &quot;1.2 x Rv&quot;)
+p(&#x27;WQv&#x27;, f&quot;{WQr/12*A_sf:,.0f} cf&quot;, f&quot;WQr/12 x A; layout.json carries {M[&#x27;wqv_cf&#x27;]:,} cf&quot;)
+p(&#x27;RRv (1.0-in basis)&#x27;, f&quot;{Rv*1.0/12*A_sf:,.0f} cf&quot;, &quot;Rv x 1.0 in /12 x A — NOT claimed on the plan (RRv = 0)&quot;)
+p(&#x27;disturbed area&#x27;, f&quot;{D[&#x27;disturbed_sf&#x27;]:,} sf = {D[&#x27;disturbed_ac&#x27;]:.3f} ac&quot;,
+  f&quot;raster {D[&#x27;site_raster_sf&#x27;]:,} less buffer bands {D[&#x27;buffer_bands_sf&#x27;]:,} less creek woods {D[&#x27;creek_woods_net_sf&#x27;]:,}&quot;)
+p(&#x27;detention required&#x27;, f&quot;{M[&#x27;detention_required_cf&#x27;]:,} cf&quot;, f&quot;10,000 x {D[&#x27;disturbed_ac&#x27;]:.3f} ac, RRv = 0&quot;)
+p(&#x27;detention provided&#x27;, f&quot;{M[&#x27;detention_provided_cf&#x27;]:,} cf&quot;, str(M[&#x27;ponds_cf&#x27;]))
+p(&#x27;provided / required&#x27;, f&quot;{100*M[&#x27;detention_provided_cf&#x27;]/M[&#x27;detention_required_cf&#x27;]:.1f} %&quot;,
+  f&quot;margin {M[&#x27;detention_provided_cf&#x27;]-M[&#x27;detention_required_cf&#x27;]:,} cf&quot;)
+p(&#x27;detention net of a 1.0-in RRv&#x27;, f&quot;{M[&#x27;detention_required_cf&#x27;]-Rv/12*A_sf:,.0f} cf&quot;, &quot;if the PE earns the full credit&quot;)
+for P in L[&#x27;ponds&#x27;]:
+    p(P[&#x27;name&#x27;], f&quot;{P[&#x27;est_storage_cf&#x27;]:,} cf&quot;, f&quot;top of bank {P[&#x27;top_of_bank_ft&#x27;]} ft, 6 ft deep, 3:1&quot;)
+
+
+def pris(w, l, h=6.0, s=3.0):
+    return h / 6 * (w * l + 4 * (w - s * h) * (l - s * h) + (w - 2 * s * h) * (l - 2 * s * h))
+
+
+p(&#x27;prismoidal check 52 x 180 x 6&#x27;, f&quot;{pris(52,180):,.0f} cf&quot;, &quot;h/6 (A_top + 4 A_mid + A_bot), 3:1 slopes&quot;)
+p(&#x27;prismoidal check 64 x 180 x 6&#x27;, f&quot;{pris(64,180):,.0f} cf&quot;, &quot;the drawn basins are trapezoidal, hence slightly less&quot;)
+p(&#x27;impervious vs 2025 MU&#x27;, f&quot;{I:.1f}% vs 50-57%&quot;, &quot;2025 hydro sheet: 55/57/50% per basin&quot;)
+
+print(&quot;\n=== E. FIRE&quot;)
+p(&#x27;dead-end length&#x27;, f&quot;{M[&#x27;longest_dead_end_ft&#x27;]:.0f} ft&quot;, &quot;&gt; 750 ft -&gt; IFC 2024 (GA) App. D103.4 special approval&quot;)
+p(&#x27;units on a single access&#x27;, N, &quot;GA D107.1 trigger is 120 -&gt; not engaged&quot;)
+p(&#x27;hammerhead spacing&#x27;, M[&#x27;hammerhead_spacing_ft&#x27;], f&quot;max {M[&#x27;hammerhead_spacing_max_ft&#x27;]:.1f} ft&quot;)
+p(&#x27;lane pavement width&#x27;, f&quot;{L[&#x27;lane&#x27;][&#x27;pavement_width_ft&#x27;]} ft&quot;, &quot;IFC 503.2.1 min 20 ft; Table D103.4 pairs 26 ft with long dead ends&quot;)
+p(&#x27;lane tract width&#x27;, f&quot;{M[&#x27;lane_tract_width_ft_min&#x27;]}-{M[&#x27;lane_tract_width_ft_max&#x27;]} ft&quot;,
+  f&quot;{M[&#x27;lane_tract_width_ft_at_amenity_block&#x27;]:.0f} ft through the amenity block&quot;)
+far = max(L[&#x27;lots&#x27;], key=lambda x: sum(q[0] for q in x[&#x27;driveway_rect&#x27;]) / 4)
+u_far = sum(q[0] for q in far[&#x27;driveway_rect&#x27;]) / 4
+p(&#x27;farthest driveway, travelled way&#x27;, f&quot;{M[&#x27;entry_drive_length_ft&#x27;] + (u_far - M[&#x27;entry_join_u_ft&#x27;]):.0f} ft&quot;,
+  f&quot;entry drive {M[&#x27;entry_drive_length_ft&#x27;]:.0f} ft + (u {u_far:.0f} - join u {M[&#x27;entry_join_u_ft&#x27;]:.1f})&quot;)
+p(&#x27;steepest existing lane grade&#x27;, f&quot;{M[&#x27;max_existing_lane_grade_pct&#x27;]} %&quot;, f&quot;at u = {M[&#x27;max_existing_lane_grade_at_u_ft&#x27;]:.0f} ft (existing ground)&quot;)
+p(&#x27;sprinkler offer&#x27;, f&quot;${3000*N:,}&quot;, f&quot;{N} homes x ~$3,000 (NFPA 13D)&quot;)
+p(&#x27;parking&#x27;, f&quot;{M[&#x27;parking_provided_on_lot&#x27;]} on lot + {M[&#x27;guest_spaces&#x27;]} guest/kiosk&quot;, f&quot;required {M[&#x27;parking_required&#x27;]} (2/DU x {N})&quot;)
+
+json.dump(out, open(os.path.join(ROOT, &#x27;verify&#x27;, &#x27;memo-calcs.json&#x27;), &#x27;w&#x27;), indent=1, default=str)
+print(&quot;\nwrote verify/memo-calcs.json&quot;)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/memo_calcs.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

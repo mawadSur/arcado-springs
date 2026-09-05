@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Sheet Reference Checker — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">qa audit</p>
+    <div class="doc-meta">2026-09-03 <span class="dot">·</span> Python</div>
+    
+    <h1>Sheet Reference Checker</h1><p class="src-note">Python · 88 lines · <a href="/data-room/src/submission/verify/check_sheet_refs.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Every sheet a document names must exist — The Cottages at Arcado Springs.
+
+    python3 verify/check_sheet_refs.py
+
+The completeness audit&#x27;s worst finding was a document and a drawing disagreeing with each other. The
+cheapest version of that failure is a document that cites &quot;Sheet C-2.3&quot; when no such sheet is in the set:
+staff turn to it, find nothing, and the application looks careless. This script reads every markdown
+document in docs/, pulls out every sheet reference of the form &quot;Sheet X-N.N&quot; or &quot;sheets A-2.1 and A-2.2&quot;,
+and checks each one against the sheet register in tools/transmittal.py and against the files actually in
+drawings/.
+
+Three outcomes per reference:
+    OK          the sheet is in the register and its file exists
+    NOT ISSUED  the sheet is in the register but the drawing has not been generated yet
+    UNKNOWN     the document cites a sheet number the register has never heard of  -&gt; always a failure
+
+Exit status 0 when there are no UNKNOWN references and no NOT-ISSUED reference is cited as though it
+existed; 1 otherwise.
+&quot;&quot;&quot;
+import os, re, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path.insert(0, os.path.join(ROOT, &#x27;tools&#x27;))
+import transmittal                                                     # noqa: E402
+
+REGISTER = {no: (title, f or &#x27;&#x27;) for no, title, f, size, scale in transmittal.SHEETS}
+DRAW = os.path.join(ROOT, &#x27;drawings&#x27;)
+DOCS = os.path.join(ROOT, &#x27;docs&#x27;)
+
+# &quot;Sheet C-2.3&quot;, &quot;Sheets A-2.1 and A-2.2&quot;, &quot;on C-8.0&quot;, &quot;sheet A-3.0 (with the clubhouse)&quot;
+REF = re.compile(r&#x27;\b[Ss]heets?\s+((?:[A-Z]-\d+(?:\.\d+)?)(?:\s*(?:,|and|/|through|to)\s*[A-Z]-\d+(?:\.\d+)?)*)&#x27;)
+NUM = re.compile(r&#x27;[A-Z]-\d+(?:\.\d+)?&#x27;)
+
+
+def norm(n):
+    &quot;&quot;&quot;C-1 and C-1.0 are the same sheet; normalise to the register&#x27;s form.&quot;&quot;&quot;
+    if n in REGISTER:
+        return n
+    if &#x27;.&#x27; not in n and n + &#x27;.0&#x27; in REGISTER:
+        return n + &#x27;.0&#x27;
+    if n.endswith(&#x27;.0&#x27;) and n[:-2] in REGISTER:
+        return n[:-2]
+    return n
+
+
+def main():
+    unknown, notissued, ok = [], [], 0
+    for fn in sorted(os.listdir(DOCS)):
+        if not fn.endswith(&#x27;.md&#x27;):
+            continue
+        text = open(os.path.join(DOCS, fn), encoding=&#x27;utf-8&#x27;).read()
+        for lineno, line in enumerate(text.split(&#x27;\n&#x27;), 1):
+            for m in REF.finditer(line):
+                for raw in NUM.findall(m.group(1)):
+                    n = norm(raw)
+                    if n not in REGISTER:
+                        unknown.append((fn, lineno, raw, line.strip()[:110]))
+                        continue
+                    title, f = REGISTER[n]
+                    if f and os.path.exists(os.path.join(DRAW, f)):
+                        ok += 1
+                    else:
+                        # a reference is acceptable if the sentence says the sheet is not yet drawn
+                        excused = re.search(r&#x27;NOT YET (DRAWN|ISSUED)|not yet drawn|not yet issued|&#x27;
+                                            r&#x27;must be built|to be (drawn|built|issued)|recommended&#x27;, line)
+                        notissued.append((fn, lineno, n, bool(excused), line.strip()[:110]))
+    print(&#x27;sheet references resolved: %d&#x27; % ok)
+    hard = list(unknown) + [x for x in notissued if not x[3]]
+    if notissued:
+        print(&#x27;\nreferences to sheets that are in the register but NOT YET GENERATED (%d):&#x27; % len(notissued))
+        for fn, ln, n, excused, line in notissued:
+            print(&#x27;  %-12s %s:%d  %s&#x27; % (n, fn, ln, &#x27;flagged in the text — OK&#x27; if excused
+                                         else &#x27;CITED AS IF IT EXISTS — fix the document or build the sheet&#x27;))
+            if not excused:
+                print(&#x27;        %s&#x27; % line)
+    if unknown:
+        print(&#x27;\nreferences to sheet numbers the register does not contain (%d):&#x27; % len(unknown))
+        for fn, ln, raw, line in unknown:
+            print(&#x27;  %-12s %s:%d&#x27; % (raw, fn, ln))
+            print(&#x27;        %s&#x27; % line)
+    print(&#x27;\n&#x27; + (&#x27;FAIL&#x27; if hard else &#x27;PASS&#x27;))
+    return 1 if hard else 0
+
+
+if __name__ == &#x27;__main__&#x27;:
+    sys.exit(main())
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/verify/check_sheet_refs.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

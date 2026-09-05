@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>HOA operating and reserve budget generator — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>HOA operating and reserve budget generator</h1><p class="src-note">Python · 941 lines · <a href="/data-room/src/submission/tools/hoa_budget.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Annual HOA operating and reserve budget for The Cottages at Arcado Springs.
+
+Deterministic generator for the budget tables in `docs/13-hoa-hopa-and-covenant-outline.md`.
+Every quantity is derived from `data/layout.json` and `data/plans.json`; every unit price is a
+named planning allowance carried in UNIT_COSTS below with its benchmark source.  Nothing is
+hand-copied out of the JSON.
+
+Run:  cd status/cottage-submission-2026-08-28 &amp;&amp; python3 tools/hoa_budget.py
+Outputs:
+  data/hoa-budget-derived.json   machine-readable quantities, lines and totals
+  verify/hoa-budget-output.md    the markdown tables reproduced verbatim in docs/13
+Exit code 1 if a self-check fails or (when docs/13 exists) if its headline numbers drift.
+&quot;&quot;&quot;
+
+import json
+import math
+import os
+import re
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+L = json.load(open(os.path.join(ROOT, &quot;data&quot;, &quot;layout.json&quot;)))
+P = json.load(open(os.path.join(ROOT, &quot;data&quot;, &quot;plans.json&quot;)))[&quot;plans&quot;]
+M = L[&quot;metrics&quot;]
+
+# ---------------------------------------------------------------------------
+# geometry helpers
+# ---------------------------------------------------------------------------
+
+
+def shoelace(poly):
+    a = 0.0
+    n = len(poly)
+    for i in range(n):
+        x1, y1 = poly[i]
+        x2, y2 = poly[(i + 1) % n]
+        a += x1 * y2 - x2 * y1
+    return abs(a) / 2.0
+
+
+def centerline_length(pts, u_max=None):
+    &quot;&quot;&quot;Plan length of the lane centreline, optionally truncated at u &lt;= u_max.&quot;&quot;&quot;
+    total = 0.0
+    for (u1, v1), (u2, v2) in zip(pts, pts[1:]):
+        if u_max is not None and u1 &gt;= u_max:
+            break
+        seg = math.hypot(u2 - u1, v2 - v1)
+        if u_max is not None and u2 &gt; u_max:
+            frac = (u_max - u1) / (u2 - u1) if u2 != u1 else 0.0
+            total += seg * max(0.0, min(1.0, frac))
+            break
+        total += seg
+    return total
+
+
+# ---------------------------------------------------------------------------
+# quantities
+# ---------------------------------------------------------------------------
+
+lane = L[&quot;lane&quot;]
+Q = {}
+
+Q[&quot;lots_total&quot;] = M[&quot;lots&quot;]
+Q[&quot;lots_phase1&quot;] = M[&quot;lots_phase1&quot;]
+Q[&quot;lots_phase2&quot;] = M[&quot;lots_phase2&quot;]
+Q[&quot;plan_A_lots&quot;] = sum(1 for x in L[&quot;lots&quot;] if x[&quot;plan&quot;] == &quot;A&quot;)
+Q[&quot;plan_B_lots&quot;] = sum(1 for x in L[&quot;lots&quot;] if x[&quot;plan&quot;] == &quot;B&quot;)
+
+# --- lane and walks ---------------------------------------------------------
+Q[&quot;lane_cl_ft&quot;] = round(centerline_length(lane[&quot;centerline&quot;]), 1)
+Q[&quot;entry_drive_ft&quot;] = lane[&quot;entry_drive&quot;][&quot;length_ft&quot;]
+Q[&quot;lane_length_ft&quot;] = M[&quot;lane_length_ft&quot;]          # entrance to terminus, published
+Q[&quot;pavement_width_ft&quot;] = lane[&quot;pavement_width_ft&quot;]
+
+pave_lane = shoelace(lane[&quot;pavement_polygon&quot;])
+pave_entry = shoelace(lane[&quot;entry_drive&quot;][&quot;pavement_polygon&quot;])
+pave_hh = sum(shoelace(leg) for h in L[&quot;hammerheads&quot;] for leg in h[&quot;legs&quot;])
+# metrics.pavement_sf also counts the 90-deg guest and mail-kiosk bays and the two entrance curb
+# returns; the three polygons above do not, so add them or the cross-check fails for the wrong reason.
+pave_bays = shoelace(L[&quot;amenity&quot;][&quot;parking_bay&quot;]) + shoelace(L[&quot;amenity&quot;][&quot;kiosk_bay&quot;])
+pave_returns = M[&quot;impervious_components_sf&quot;].get(&quot;Entrance curb returns&quot;, 0)
+Q[&quot;pavement_lane_sf&quot;] = round(pave_lane)
+Q[&quot;pavement_entry_sf&quot;] = round(pave_entry)
+Q[&quot;pavement_hammerhead_sf&quot;] = round(pave_hh)
+Q[&quot;pavement_bay_sf&quot;] = round(pave_bays)
+Q[&quot;pavement_curb_return_sf&quot;] = round(pave_returns)
+Q[&quot;pavement_sf_computed&quot;] = round(pave_lane + pave_entry + pave_hh + pave_bays + pave_returns)
+Q[&quot;pavement_sf_published&quot;] = M[&quot;pavement_sf&quot;]
+
+# lane[&quot;sidewalks&quot;] already carries the entry-drive walk as its own &quot;NE (entry drive)&quot; polygon,
+# so entry_drive[&quot;sidewalk_polygon&quot;] must not be added again.
+walk_lane = sum(shoelace(s[&quot;polygon&quot;]) for s in lane[&quot;sidewalks&quot;])
+Q[&quot;sidewalk_sf_computed&quot;] = round(walk_lane)
+Q[&quot;sidewalk_sf_published&quot;] = M[&quot;sidewalk_sf&quot;]
+
+Q[&quot;lane_tract_sf&quot;] = M[&quot;lane_tract_sf&quot;]
+Q[&quot;lane_verge_sf&quot;] = round(M[&quot;lane_tract_sf&quot;] - M[&quot;pavement_sf&quot;] - M[&quot;sidewalk_sf&quot;])
+
+Q[&quot;hammerheads&quot;] = len(L[&quot;hammerheads&quot;])
+
+# --- open space -------------------------------------------------------------
+tracts = {t[&quot;name&quot;]: t[&quot;area_sf&quot;] for t in L[&quot;open_space_tracts&quot;]}
+Q[&quot;open_space_tracts&quot;] = tracts
+Q[&quot;greens_sf&quot;] = sum(g[&quot;area_sf&quot;] for g in L[&quot;greens&quot;])
+Q[&quot;pond_tract_sf&quot;] = sum(v for k, v in tracts.items() if k.startswith(&quot;Pond&quot;))
+Q[&quot;creek_woods_sf&quot;] = sum(v for k, v in tracts.items() if k.startswith(&quot;Creek woods&quot;))
+Q[&quot;amenity_tract_sf&quot;] = M[&quot;amenity_tract_sf&quot;]
+Q[&quot;ponds&quot;] = len(L[&quot;ponds&quot;])
+Q[&quot;pond_water_area_sf&quot;] = sum(p[&quot;area_sf&quot;] for p in L[&quot;ponds&quot;])
+Q[&quot;pond_storage_cf&quot;] = sum(p[&quot;est_storage_cf&quot;] for p in L[&quot;ponds&quot;])
+Q[&quot;buffer_easement_on_lots_sf&quot;] = M[&quot;buffer_easement_on_lots_sf&quot;]
+Q[&quot;open_space_sf&quot;] = M[&quot;open_space_sf&quot;]
+
+# hard surfaces inside the front amenity tract (everything else is maintained landscape)
+am = L[&quot;amenity&quot;]
+amenity_hard = (
+    shoelace(am[&quot;clubhouse&quot;])
+    + sum(shoelace(p) for p in am[&quot;pickleball&quot;])
+    + shoelace(am[&quot;parking_bay&quot;])
+    + shoelace(am[&quot;kiosk_bay&quot;])
+    + shoelace(am[&quot;mail_kiosk&quot;])
+    + shoelace(am[&quot;entry_sign&quot;])
+)
+Q[&quot;amenity_hard_sf&quot;] = round(amenity_hard)
+Q[&quot;amenity_soft_sf&quot;] = round(M[&quot;amenity_tract_sf&quot;] - amenity_hard)
+Q[&quot;clubhouse_sf&quot;] = am[&quot;clubhouse_sf&quot;]
+Q[&quot;guest_spaces&quot;] = am[&quot;guest_spaces&quot;]
+Q[&quot;kiosk_spaces&quot;] = am[&quot;kiosk_spaces&quot;]
+Q[&quot;pickleball_courts&quot;] = len(am[&quot;courts&quot;])
+Q[&quot;pickleball_pad_perimeter_lf&quot;] = round(
+    sum(
+        2 * (max(p[0] for p in pad) - min(p[0] for p in pad))
+        + 2 * (max(p[1] for p in pad) - min(p[1] for p in pad))
+        for pad in am[&quot;pickleball&quot;]
+    )
+)
+
+# --- per-lot maintained yard ------------------------------------------------
+# plans.json lot_siting carries the authoritative per-lot impervious estimate; the rear 20 ft
+# of every lot is the undisturbed buffer easement (not mown).
+LOT_SF = M[&quot;lot_area_avg_sf&quot;]
+BUFFER_PER_LOT_SF = M[&quot;buffer_easement_on_lots_sf&quot;] / M[&quot;lots&quot;]
+yard = {}
+for k in (&quot;A&quot;, &quot;B&quot;):
+    ls = P[k][&quot;lot_siting&quot;]
+    imperv = LOT_SF * ls[&quot;impervious_pct_est&quot;] / 100.0
+    yard[k] = LOT_SF - imperv - BUFFER_PER_LOT_SF
+    Q[f&quot;plan_{k}_lot_impervious_sf&quot;] = round(imperv)
+    Q[f&quot;plan_{k}_yard_sf&quot;] = round(yard[k])
+Q[&quot;yard_total_sf&quot;] = round(Q[&quot;plan_A_lots&quot;] * yard[&quot;A&quot;] + Q[&quot;plan_B_lots&quot;] * yard[&quot;B&quot;])
+Q[&quot;yard_avg_sf&quot;] = round(Q[&quot;yard_total_sf&quot;] / M[&quot;lots&quot;])
+
+# --- trees and lights (design rules stated with the number) -----------------
+STREET_TREE_SPACING_FT = 40.0     # docs/12 §32 93 00; audit M9 &quot;lane street trees at 40 ft o.c.&quot;
+LIGHT_SPACING_FT = 150.0          # assumption — photometric plan at LDP (checklist §1.11)
+ARCADO_FRONTAGE_FT = 237.63       # docs/05 §5 chord
+STRIP_TREE_PER_LF = 25.0          # checklist §6.j: 1 tree + 1 shrub per 25 lf of frontage
+PARKING_TREE_PER_SPACES = 7.0     # checklist §6.k: 1 tree per 7 spaces
+
+second_side_ft = max(0.0, Q[&quot;lane_length_ft&quot;] - lane[&quot;widen_both_sidewalks_from_u&quot;])
+Q[&quot;street_trees&quot;] = int(Q[&quot;lane_length_ft&quot;] // STREET_TREE_SPACING_FT) + int(
+    second_side_ft // STREET_TREE_SPACING_FT
+)
+Q[&quot;frontage_strip_trees&quot;] = math.ceil(ARCADO_FRONTAGE_FT / STRIP_TREE_PER_LF)
+Q[&quot;frontage_strip_shrubs&quot;] = Q[&quot;frontage_strip_trees&quot;]
+Q[&quot;parking_lot_trees&quot;] = math.ceil(
+    (Q[&quot;guest_spaces&quot;] + Q[&quot;kiosk_spaces&quot;]) / PARKING_TREE_PER_SPACES
+)
+Q[&quot;trees_total&quot;] = Q[&quot;street_trees&quot;] + Q[&quot;frontage_strip_trees&quot;] + Q[&quot;parking_lot_trees&quot;]
+Q[&quot;light_poles&quot;] = int(math.ceil(Q[&quot;lane_length_ft&quot;] / LIGHT_SPACING_FT)) + 4  # +4 amenity/entry
+
+# --- maintained landscape acreage ------------------------------------------
+Q[&quot;common_landscape_sf&quot;] = (
+    Q[&quot;lane_verge_sf&quot;] + Q[&quot;amenity_soft_sf&quot;] + Q[&quot;greens_sf&quot;] + Q[&quot;pond_tract_sf&quot;]
+)
+Q[&quot;common_landscape_ac&quot;] = round(Q[&quot;common_landscape_sf&quot;] / 43560.0, 2)
+Q[&quot;natural_area_sf&quot;] = Q[&quot;creek_woods_sf&quot;] + Q[&quot;buffer_easement_on_lots_sf&quot;]
+Q[&quot;natural_area_ac&quot;] = round(Q[&quot;natural_area_sf&quot;] / 43560.0, 2)
+
+# ---------------------------------------------------------------------------
+# unit costs — every one is a planning allowance with a stated benchmark
+# ---------------------------------------------------------------------------
+
+UNIT_COSTS = {
+    &quot;mow_visit_per_lot&quot;: (
+        22.00,
+        &quot;$/lot/visit&quot;,
+        f&quot;routed price for {M[&#x27;lots&#x27;]} stops on one &quot;
+        f&quot;{M[&#x27;lane_length_ft&#x27;]:,.0f}-ft lane at ~1,340 SF of maintained turf each; &quot;
+        &quot;Atlanta open-market mowing is $35–55/visit on a 10,890-SF quarter-acre lot &quot;
+        &quot;(yourgreenpal 2026; Angi 2026)&quot;,
+    ),
+    &quot;mow_visits_per_year&quot;: (
+        34,
+        &quot;visits/yr&quot;,
+        &quot;weekly April–October (31) + 3 winter cleanups; Georgia Piedmont growing season&quot;,
+    ),
+    &quot;lot_beds_per_year&quot;: (
+        120.00,
+        &quot;$/lot/yr&quot;,
+        &quot;2 visits: shrub pruning + pre-emergent + 2 CY mulch at ~$45/CY installed; well below the &quot;
+        &quot;$100–300/unit/month full-service national range because the yards are ~1,340 SF&quot;,
+    ),
+    &quot;common_landscape_per_ac&quot;: (
+        4500.00,
+        &quot;$/ac/yr&quot;,
+        &quot;Southeast HOA common-area maintenance contracts $2,500–6,000/ac/yr &quot;
+        &quot;(United Land Services 2026 budget guide); midpoint for mown turf + beds&quot;,
+    ),
+    &quot;natural_area_per_ac&quot;: (
+        900.00,
+        &quot;$/ac/yr&quot;,
+        &quot;2 crew-visits/yr for vine and invasive removal, storm debris and buffer-marker checks, &quot;
+        &quot;plus one arborist walk; no mowing (undisturbed buffer)&quot;,
+    ),
+    &quot;tree_prune_each&quot;: (
+        65.00,
+        &quot;$/tree per 3-yr cycle&quot;,
+        &quot;structural pruning of young street trees on a 3-year cycle, annualised&quot;,
+    ),
+    &quot;plant_replacement_each&quot;: (
+        450.00,
+        &quot;$/tree&quot;,
+        &quot;2-in caliper B&amp;B canopy tree installed; 3 % annual loss after the 12-month warranty &quot;
+        &quot;(checklist §6.m)&quot;,
+    ),
+    &quot;irrigation_year&quot;: (
+        1400.00,
+        &quot;$/yr&quot;,
+        &quot;spring start-up + winterisation + 2 backflow tests at $150 + repair allowance &quot;
+        &quot;(amenity block only; no lot irrigation)&quot;,
+    ),
+    &quot;sweep_event&quot;: (
+        650.00,
+        &quot;$/event&quot;,
+        &quot;mobilisation + 1,754 ft of curb line; 2 events/yr&quot;,
+    ),
+    &quot;pavement_patch_per_sf&quot;: (
+        0.05,
+        &quot;$/SF/yr&quot;,
+        &quot;operating crack-fill and pothole allowance; the 20-year overlay is in reserves&quot;,
+    ),
+    &quot;signs_markings_year&quot;: (
+        900.00,
+        &quot;$/yr&quot;,
+        &quot;&#x27;NO PARKING — FIRE LANE&#x27; signs both sides (IFC 2024 (GA) App. D103.6), stop and speed &quot;
+        &quot;signs, hammerhead striping; ~10 % of the installed sign inventory per year&quot;,
+    ),
+    &quot;storm_structure_clean&quot;: (
+        1400.00,
+        &quot;$/yr&quot;,
+        &quot;vacuum-truck day for inlets, pipes and both outlet structures&quot;,
+    ),
+    &quot;pond_inspection_each&quot;: (
+        900.00,
+        &quot;$/pond/yr&quot;,
+        &quot;annual inspection and written report by a qualified professional, as the recorded Storm &quot;
+        &quot;Water BMP Maintenance Agreement requires (Site Development Plan Review Checklist §2.g.3)&quot;,
+    ),
+    &quot;pond_routine_each&quot;: (
+        1300.00,
+        &quot;$/pond/yr&quot;,
+        &quot;trash-rack and orifice cleaning, forebay hand-cleaning, rip-rap reset, erosion repair, &quot;
+        &quot;mosquito/vegetation control (dry ponds; the mowing is in the common-landscape line)&quot;,
+    ),
+    &quot;light_per_fixture_month&quot;: (
+        23.00,
+        &quot;$/fixture/month&quot;,
+        &quot;Georgia Power outdoor-lighting service (energy + lamp/fixture maintenance) for a &quot;
+        &quot;decorative post-top; VERIFY the tariff and whether the fixtures are company- or &quot;
+        &quot;association-owned&quot;,
+    ),
+    &quot;snow_year&quot;: (
+        600.00,
+        &quot;$/yr&quot;,
+        &quot;one plow/sand event every other year at ~$1,200 for 1,754 ft&quot;,
+    ),
+    &quot;clubhouse_electric_per_sf&quot;: (
+        1.85,
+        &quot;$/SF/yr&quot;,
+        &quot;small assembly/community building ~14 kWh/SF/yr at ~$0.13/kWh; VERIFY against the &quot;
+        &quot;Georgia Power commercial rate&quot;,
+    ),
+    &quot;clubhouse_water_year&quot;: (
+        2600.00,
+        &quot;$/yr&quot;,
+        &quot;clubhouse restrooms and kitchen plus amenity irrigation on a 1-in meter, Gwinnett DWR &quot;
+        &quot;inside-county water and sewer rates; VERIFY&quot;,
+    ),
+    &quot;clubhouse_gas_year&quot;: (
+        700.00,
+        &quot;$/yr&quot;,
+        &quot;water heating and supplemental heat&quot;,
+    ),
+    &quot;janitorial_visit&quot;: (
+        65.00,
+        &quot;$/visit&quot;,
+        &quot;2 visits/week for a 2,400-SF clubhouse with two restrooms&quot;,
+    ),
+    &quot;clubhouse_rm_year&quot;: (
+        3900.00,
+        &quot;$/yr&quot;,
+        &quot;HVAC service contract (2 systems × $220), pest control, quarterly fire-alarm monitoring &quot;
+        &quot;and the annual NFPA 13 sprinkler inspection/test of the clubhouse system, plus a repair &quot;
+        &quot;allowance&quot;,
+    ),
+    &quot;clubhouse_tel_year&quot;: (
+        1700.00,
+        &quot;$/yr&quot;,
+        &quot;internet, cameras, access-control/fob service, Knox-box and alarm line&quot;,
+    ),
+    &quot;court_year&quot;: (
+        900.00,
+        &quot;$/yr&quot;,
+        &quot;nets, wind screens, blowing and washing 2 courts; resurfacing is in reserves&quot;,
+    ),
+    &quot;kiosk_year&quot;: (
+        500.00,
+        &quot;$/yr&quot;,
+        &quot;cleaning, lighting, lock and key replacement for the cluster-box unit shelter&quot;,
+    ),
+    &quot;management_per_door_month&quot;: (
+        22.00,
+        &quot;$/door/month&quot;,
+        &quot;Georgia management fees run $15–30/unit/month and small associations pay the top of the &quot;
+        &quot;band (Access Management Group 2026; FirstService Residential Georgia; hoamanagement.com)&quot;,
+    ),
+    &quot;hopa_survey_per_unit&quot;: (
+        18.00,
+        &quot;$/unit per survey&quot;,
+        &quot;printing, mailing, follow-up and filing of the biennial occupancy survey and affidavit &quot;
+        &quot;required by 24 CFR §100.307(b)–(c); run every 2 years, annualised&quot;,
+    ),
+    &quot;hopa_certificate_each&quot;: (
+        150.00,
+        &quot;$/certificate&quot;,
+        f&quot;resale/lease occupancy certification and age verification; ~3 transfers/yr at {M[&#x27;lots&#x27;]} units &quot;
+        &quot;(often reimbursed by the seller — carried as a cost, not netted)&quot;,
+    ),
+    &quot;hopa_admin_year&quot;: (
+        600.00,
+        &quot;$/yr&quot;,
+        &quot;records retention, the annual §100.308(b)(2) written certification, the public postings &quot;
+        &quot;required by 24 CFR §100.306(a)(7) and the annual compliance letter to the City&quot;,
+    ),
+    &quot;hopa_legal_cycle&quot;: (
+        900.00,
+        &quot;$/3 yr&quot;,
+        &quot;counsel&#x27;s review of the survey form, affidavit and published policies every 3 years&quot;,
+    ),
+    &quot;insurance_year&quot;: (
+        13500.00,
+        &quot;$/yr&quot;,
+        &quot;master property on association assets + GL $1M/$2M + D&amp;O $1M + crime/fidelity + $5M &quot;
+        &quot;umbrella; a 25–75-unit PUD with a clubhouse quotes $9,000–24,300 in 2026 &quot;
+        &quot;(Professional Insurance Group 2026), $120–325/unit&quot;,
+    ),
+    &quot;audit_year&quot;: (
+        1600.00,
+        &quot;$/yr&quot;,
+        &quot;financial review (not a full audit) and Form 1120-H preparation&quot;,
+    ),
+    &quot;legal_year&quot;: (
+        2500.00,
+        &quot;$/yr&quot;,
+        &quot;general counsel, covenant enforcement demand letters, annual document review&quot;,
+    ),
+    &quot;reserve_study_cycle&quot;: (
+        3500.00,
+        &quot;$/3 yr&quot;,
+        &quot;full study then an update every 3 years; US HOA reserve studies run $2,500–5,000 &quot;
+        &quot;(CMGT 2026; CAMS 2026)&quot;,
+    ),
+    &quot;admin_year&quot;: (
+        1900.00,
+        &quot;$/yr&quot;,
+        &quot;bank and lockbox fees, accounting software, owner portal/website, postage, annual &quot;
+        &quot;meeting, registered agent, Georgia nonprofit annual registration ($50)&quot;,
+    ),
+    &quot;bad_debt_pct&quot;: (
+        0.02,
+        &quot;of assessments&quot;,
+        &quot;2 % delinquency allowance; the POA Act lien (O.C.G.A. §44-3-232) makes eventual recovery &quot;
+        &quot;likely but the budget cannot assume it&quot;,
+    ),
+    &quot;contingency_pct&quot;: (
+        0.05,
+        &quot;of operating&quot;,
+        &quot;5 % operating contingency; this is a first-year budget for a community that does not yet &quot;
+        &quot;exist&quot;,
+    ),
+    &quot;waste_per_home_month&quot;: (
+        22.00,
+        &quot;$/home/month&quot;,
+        &quot;bundled residential hauler contract, one truck per week on a private lane; shown as an &quot;
+        &quot;option — VERIFY whether the City&#x27;s residential collection serves private streets&quot;,
+    ),
+}
+
+# reserve components: (component, quantity, unit, unit cost, useful life yr, basis)
+RESERVE_COMPONENTS = [
+    (
+        &quot;Lane and entry-drive asphalt — mill and overlay&quot;,
+        &quot;pavement_sf&quot;,
+        &quot;SF&quot;,
+        4.00,
+        20,
+        &quot;overlay $3.50–5.50/SF and mill-and-overlay $4.50–8.00/SF in 2026 (Buildcalchub; Wright &quot;
+        &quot;Construction; Paving Estimator); $4.00 assumes a single mobilisation for the whole lane&quot;,
+    ),
+    (
+        &quot;Lane crack sealing and surface treatment&quot;,
+        &quot;pavement_sf&quot;,
+        &quot;SF&quot;,
+        0.30,
+        7,
+        &quot;crack seal + fog/seal coat between overlays&quot;,
+    ),
+    (
+        &quot;Concrete sidewalk — 25 % panel replacement per cycle&quot;,
+        &quot;sidewalk_quarter_sf&quot;,
+        &quot;SF&quot;,
+        9.00,
+        20,
+        &quot;4-in walk removal and replacement; 25 % of panels per 20-year cycle (root heave, &quot;
+        &quot;settlement, ADA cross-slope corrections)&quot;,
+    ),
+    (
+        &quot;Curb, gutter and valley-gutter repair allowance&quot;,
+        &quot;lane_length_ft&quot;,
+        &quot;LF&quot;,
+        4.00,
+        25,
+        &quot;10 % of the curb line replaced per 25-year cycle at ~$40/LF&quot;,
+    ),
+    (
+        &quot;Detention pond sediment removal&quot;,
+        &quot;ponds&quot;,
+        &quot;pond&quot;,
+        18000.00,
+        10,
+        f&quot;dry basins of {Q[&#x27;pond_water_area_sf&#x27;] / 43560.0 / Q[&#x27;ponds&#x27;]:.2f} ac each holding &quot;
+        f&quot;{Q[&#x27;pond_storage_cf&#x27;]:,} cf between them (2026-09-03 re-sizing); Southeast stormwater dredging &quot;
+        &quot;$25–75/CY and $25,000–75,000 for a half-acre HOA pond (Angi 2026; AUE Land; Landshore 2026) — &quot;
+        &quot;the allowance predates the enlargement and is to be re-priced before the first reserve study&quot;,
+    ),
+    (
+        &quot;Pond outlet structures, trash racks, rip-rap, emergency spillway&quot;,
+        &quot;ponds&quot;,
+        &quot;pond&quot;,
+        12000.00,
+        30,
+        &quot;outlet control structure and headwall rehabilitation&quot;,
+    ),
+    (
+        &quot;Storm sewer pipe and structure rehabilitation&quot;,
+        &quot;lane_length_ft&quot;,
+        &quot;LF of lane&quot;,
+        68.50,
+        50,
+        &quot;lane storm drainage — pipe, inlets and junction boxes at end of service life, priced per &quot;
+        &quot;foot of lane so the Phase-1 case scales&quot;,
+    ),
+    (
+        &quot;Clubhouse roof — architectural asphalt shingles&quot;,
+        &quot;clubhouse_roof_sf&quot;,
+        &quot;SF&quot;,
+        6.50,
+        25,
+        &quot;clubhouse footprint × 1.25 slope factor; tear-off and replacement&quot;,
+    ),
+    (
+        &quot;Clubhouse HVAC (2 split systems)&quot;,
+        &quot;hvac_units&quot;,
+        &quot;each&quot;,
+        11000.00,
+        15,
+        &quot;3-ton systems, replacement including duct repairs&quot;,
+    ),
+    (
+        &quot;Clubhouse exterior repaint&quot;,
+        &quot;lump_paint&quot;,
+        &quot;LS&quot;,
+        9000.00,
+        8,
+        &quot;docs/12 §09 91 13 2.03 sets the HOA repaint cycle at 8–10 years&quot;,
+    ),
+    (
+        &quot;Clubhouse interior — flooring, paint, kitchen, restrooms, furnishings&quot;,
+        &quot;lump_interior&quot;,
+        &quot;LS&quot;,
+        60000.00,
+        15,
+        &quot;$25/SF of clubhouse for finishes and FF&amp;E&quot;,
+    ),
+    (
+        &quot;Clubhouse water heater, appliances, fitness equipment&quot;,
+        &quot;lump_equip&quot;,
+        &quot;LS&quot;,
+        14000.00,
+        12,
+        &quot;allowance&quot;,
+    ),
+    (
+        &quot;Pickleball court resurfacing&quot;,
+        &quot;pickleball_courts&quot;,
+        &quot;court&quot;,
+        8000.00,
+        6,
+        &quot;acrylic resurface of a 30&#x27; × 60&#x27; pad; 5–8-year cycle&quot;,
+    ),
+    (
+        &quot;Pickleball fencing&quot;,
+        &quot;pickleball_pad_perimeter_lf&quot;,
+        &quot;LF&quot;,
+        28.00,
+        20,
+        &quot;4-ft black vinyl-coated chain link on the pad perimeter&quot;,
+    ),
+    (
+        &quot;Lane and amenity light poles and fixtures&quot;,
+        &quot;light_poles&quot;,
+        &quot;each&quot;,
+        3800.00,
+        25,
+        &quot;14-ft full-cutoff post-top ≤3000 K (voluntary condition 11); assumes association-owned &quot;
+        &quot;fixtures — if they are on the Georgia Power tariff this component drops out&quot;,
+    ),
+    (
+        &quot;Mail kiosk — cluster box units and shelter&quot;,
+        &quot;lump_kiosk&quot;,
+        &quot;LS&quot;,
+        28000.00,
+        25,
+        &quot;4 USPS-approved CBUs at ~$2,600 plus a 16&#x27; × 10&#x27; shelter (checklist §4.r, &quot;
+        &quot;&#x27;protection from the elements&#x27;)&quot;,
+    ),
+    (
+        &quot;Monument entry sign, wall and landscape lighting&quot;,
+        &quot;lump_sign&quot;,
+        &quot;LS&quot;,
+        28000.00,
+        20,
+        &quot;≤32-SF monument sign (voluntary condition 14), masonry base, external lighting&quot;,
+    ),
+    (
+        &quot;Site furnishings — benches, tables, trash receptacles, kiosk board&quot;,
+        &quot;lump_furn&quot;,
+        &quot;LS&quot;,
+        16000.00,
+        15,
+        &quot;village green and pocket greens&quot;,
+    ),
+    (
+        &quot;Irrigation system replacement (amenity block)&quot;,
+        &quot;lump_irrig&quot;,
+        &quot;LS&quot;,
+        18000.00,
+        20,
+        &quot;controller, valves, heads and mainline&quot;,
+    ),
+    (
+        &quot;Landscape renovation and buffer re-planting fund&quot;,
+        &quot;lump_landscape&quot;,
+        &quot;LS&quot;,
+        20000.00,
+        15,
+        &quot;periodic renovation of common beds and the supplemental evergreen buffer planting; also &quot;
+        &quot;the fund behind the re-planting remedy in Article 6 of the declaration&quot;,
+    ),
+]
+
+
+def money(x):
+    return f&quot;${x:,.0f}&quot;
+
+
+def unit(x):
+    &quot;&quot;&quot;Unit prices keep their cents; whole-dollar prices do not print &#x27;.00&#x27;.&quot;&quot;&quot;
+    return f&quot;${x:,.2f}&quot; if abs(x - round(x)) &gt; 1e-9 else f&quot;${x:,.0f}&quot;
+
+
+def build(scenario):
+    &quot;&quot;&quot;scenario: &#x27;full&#x27; (every lot, whole lane, 2 ponds) or &#x27;phase1&#x27; (lots at u &lt; the phase line, 1 pond).&quot;&quot;&quot;
+    q = dict(Q)
+    if scenario == &quot;phase1&quot;:
+        u_lim = M[&quot;phase_line_u_ft&quot;]
+        cl = centerline_length(lane[&quot;centerline&quot;], u_max=u_lim)
+        q[&quot;lots_total&quot;] = M[&quot;lots_phase1&quot;]
+        q[&quot;plan_A_lots&quot;] = sum(1 for x in L[&quot;lots&quot;] if x[&quot;phase&quot;] == 1 and x[&quot;plan&quot;] == &quot;A&quot;)
+        q[&quot;plan_B_lots&quot;] = sum(1 for x in L[&quot;lots&quot;] if x[&quot;phase&quot;] == 1 and x[&quot;plan&quot;] == &quot;B&quot;)
+        q[&quot;lane_length_ft&quot;] = round(cl + Q[&quot;entry_drive_ft&quot;], 1)
+        hh1 = sum(shoelace(leg) for leg in L[&quot;hammerheads&quot;][0][&quot;legs&quot;])
+        q[&quot;pavement_sf_published&quot;] = round(cl * lane[&quot;pavement_width_ft&quot;] + Q[&quot;pavement_entry_sf&quot;] + hh1)
+        q[&quot;sidewalk_sf_published&quot;] = round((cl + Q[&quot;entry_drive_ft&quot;]) * 5.0)
+        q[&quot;lane_verge_sf&quot;] = round(
+            Q[&quot;lane_verge_sf&quot;] * (cl + Q[&quot;entry_drive_ft&quot;]) / Q[&quot;lane_length_ft&quot;]
+        )
+        q[&quot;ponds&quot;] = 1
+        q[&quot;pond_tract_sf&quot;] = Q[&quot;open_space_tracts&quot;][&quot;Pond 1 (dry detention / WQ) tract&quot;]
+        q[&quot;greens_sf&quot;] = L[&quot;greens&quot;][0][&quot;area_sf&quot;]
+        q[&quot;creek_woods_sf&quot;] = 0
+        q[&quot;buffer_easement_on_lots_sf&quot;] = q[&quot;lots_total&quot;] * BUFFER_PER_LOT_SF
+        q[&quot;yard_total_sf&quot;] = round(q[&quot;plan_A_lots&quot;] * yard[&quot;A&quot;] + q[&quot;plan_B_lots&quot;] * yard[&quot;B&quot;])
+        q[&quot;common_landscape_sf&quot;] = (
+            q[&quot;lane_verge_sf&quot;] + Q[&quot;amenity_soft_sf&quot;] + q[&quot;greens_sf&quot;] + q[&quot;pond_tract_sf&quot;]
+        )
+        q[&quot;common_landscape_ac&quot;] = round(q[&quot;common_landscape_sf&quot;] / 43560.0, 2)
+        q[&quot;natural_area_sf&quot;] = q[&quot;creek_woods_sf&quot;] + q[&quot;buffer_easement_on_lots_sf&quot;]
+        q[&quot;natural_area_ac&quot;] = round(q[&quot;natural_area_sf&quot;] / 43560.0, 2)
+        q[&quot;street_trees&quot;] = int(q[&quot;lane_length_ft&quot;] // STREET_TREE_SPACING_FT)
+        q[&quot;trees_total&quot;] = q[&quot;street_trees&quot;] + Q[&quot;frontage_strip_trees&quot;] + Q[&quot;parking_lot_trees&quot;]
+        q[&quot;light_poles&quot;] = int(math.ceil(q[&quot;lane_length_ft&quot;] / LIGHT_SPACING_FT)) + 4
+
+    n = q[&quot;lots_total&quot;]
+    uc = {k: v[0] for k, v in UNIT_COSTS.items()}
+    lines = []   # (group, item, qty text, unit cost text, annual $)
+
+    def add(group, item, qty, unitcost, amount):
+        lines.append([group, item, qty, unitcost, round(amount)])
+
+    # --- 1 grounds ---------------------------------------------------------
+    mow = n * uc[&quot;mow_visits_per_year&quot;] * uc[&quot;mow_visit_per_lot&quot;]
+    add(&quot;1 Grounds&quot;, &quot;Lot yard care — mow, edge, trim, blow&quot;,
+        f&quot;{n} lots × {uc[&#x27;mow_visits_per_year&#x27;]:.0f} visits&quot;,
+        f&quot;{unit(uc[&#x27;mow_visit_per_lot&#x27;])}/lot/visit&quot;, mow)
+    add(&quot;1 Grounds&quot;, &quot;Lot beds — pruning, pre-emergent, mulch, leaf removal&quot;,
+        f&quot;{n} lots × 2 visits&quot;, f&quot;{unit(uc[&#x27;lot_beds_per_year&#x27;])}/lot/yr&quot;,
+        n * uc[&quot;lot_beds_per_year&quot;])
+    add(&quot;1 Grounds&quot;, &quot;Common-area turf and beds (lane verge, greens, amenity, pond tracts)&quot;,
+        f&quot;{q[&#x27;common_landscape_ac&#x27;]:.2f} ac&quot;, f&quot;{unit(uc[&#x27;common_landscape_per_ac&#x27;])}/ac/yr&quot;,
+        q[&quot;common_landscape_ac&quot;] * uc[&quot;common_landscape_per_ac&quot;])
+    add(&quot;1 Grounds&quot;, &quot;Buffer easement and creek-woods stewardship (undisturbed areas)&quot;,
+        f&quot;{q[&#x27;natural_area_ac&#x27;]:.2f} ac&quot;, f&quot;{unit(uc[&#x27;natural_area_per_ac&#x27;])}/ac/yr&quot;,
+        q[&quot;natural_area_ac&quot;] * uc[&quot;natural_area_per_ac&quot;])
+    add(&quot;1 Grounds&quot;, &quot;Street- and strip-tree pruning (3-year cycle, annualised)&quot;,
+        f&quot;{q[&#x27;trees_total&#x27;]} trees ÷ 3&quot;, f&quot;{unit(uc[&#x27;tree_prune_each&#x27;])}/tree&quot;,
+        q[&quot;trees_total&quot;] / 3.0 * uc[&quot;tree_prune_each&quot;])
+    add(&quot;1 Grounds&quot;, &quot;Tree, shrub and turf replacement (3 % of stock per year)&quot;,
+        f&quot;{q[&#x27;trees_total&#x27;]} trees × 3 %&quot;, f&quot;{unit(uc[&#x27;plant_replacement_each&#x27;])}/tree&quot;,
+        q[&quot;trees_total&quot;] * 0.03 * uc[&quot;plant_replacement_each&quot;])
+    add(&quot;1 Grounds&quot;, &quot;Irrigation operation, backflow testing and repair (amenity block)&quot;,
+        &quot;1 system&quot;, f&quot;{unit(uc[&#x27;irrigation_year&#x27;])}/yr&quot;, uc[&quot;irrigation_year&quot;])
+
+    # --- 2 lane, walks, stormwater ----------------------------------------
+    add(&quot;2 Lane and stormwater&quot;, &quot;Lane sweeping and gutter cleaning&quot;,
+        &quot;2 events/yr&quot;, f&quot;{unit(uc[&#x27;sweep_event&#x27;])}/event&quot;, 2 * uc[&quot;sweep_event&quot;])
+    add(&quot;2 Lane and stormwater&quot;, &quot;Pavement crack fill and pothole patching (operating)&quot;,
+        f&quot;{q[&#x27;pavement_sf_published&#x27;]:,} SF&quot;, f&quot;{unit(uc[&#x27;pavement_patch_per_sf&#x27;])}/SF/yr&quot;,
+        q[&quot;pavement_sf_published&quot;] * uc[&quot;pavement_patch_per_sf&quot;])
+    add(&quot;2 Lane and stormwater&quot;, &quot;Fire-lane and traffic signs, pavement markings&quot;,
+        &quot;lane inventory&quot;, f&quot;{unit(uc[&#x27;signs_markings_year&#x27;])}/yr&quot;, uc[&quot;signs_markings_year&quot;])
+    add(&quot;2 Lane and stormwater&quot;, &quot;Storm inlet, pipe and outlet-structure cleaning&quot;,
+        &quot;1 vacuum-truck day&quot;, f&quot;{unit(uc[&#x27;storm_structure_clean&#x27;])}/yr&quot;,
+        uc[&quot;storm_structure_clean&quot;])
+    add(&quot;2 Lane and stormwater&quot;, &quot;Pond annual inspection and report to the City&quot;,
+        f&quot;{q[&#x27;ponds&#x27;]} pond&quot; + (&quot;s&quot; if q[&quot;ponds&quot;] != 1 else &quot;&quot;), f&quot;{unit(uc[&#x27;pond_inspection_each&#x27;])}/pond/yr&quot;,
+        q[&quot;ponds&quot;] * uc[&quot;pond_inspection_each&quot;])
+    add(&quot;2 Lane and stormwater&quot;, &quot;Pond routine maintenance (racks, forebay, rip-rap, erosion)&quot;,
+        f&quot;{q[&#x27;ponds&#x27;]} pond&quot; + (&quot;s&quot; if q[&quot;ponds&quot;] != 1 else &quot;&quot;), f&quot;{unit(uc[&#x27;pond_routine_each&#x27;])}/pond/yr&quot;,
+        q[&quot;ponds&quot;] * uc[&quot;pond_routine_each&quot;])
+    add(&quot;2 Lane and stormwater&quot;, &quot;Lane and common lighting — energy and fixture maintenance&quot;,
+        f&quot;{q[&#x27;light_poles&#x27;]} fixtures × 12 mo&quot;,
+        f&quot;{unit(uc[&#x27;light_per_fixture_month&#x27;])}/fixture/mo&quot;,
+        q[&quot;light_poles&quot;] * 12 * uc[&quot;light_per_fixture_month&quot;])
+    add(&quot;2 Lane and stormwater&quot;, &quot;Snow and ice event allowance&quot;,
+        &quot;0.5 event/yr&quot;, f&quot;{unit(uc[&#x27;snow_year&#x27;])}/yr&quot;, uc[&quot;snow_year&quot;])
+
+    # --- 3 amenity ---------------------------------------------------------
+    add(&quot;3 Amenity&quot;, &quot;Clubhouse electricity&quot;,
+        f&quot;{q[&#x27;clubhouse_sf&#x27;]:,} SF&quot;, f&quot;{unit(uc[&#x27;clubhouse_electric_per_sf&#x27;])}/SF/yr&quot;,
+        q[&quot;clubhouse_sf&quot;] * uc[&quot;clubhouse_electric_per_sf&quot;])
+    add(&quot;3 Amenity&quot;, &quot;Clubhouse water and sewer, amenity irrigation water&quot;,
+        &quot;1 meter&quot;, f&quot;{unit(uc[&#x27;clubhouse_water_year&#x27;])}/yr&quot;, uc[&quot;clubhouse_water_year&quot;])
+    add(&quot;3 Amenity&quot;, &quot;Clubhouse gas&quot;, &quot;1 service&quot;, f&quot;{unit(uc[&#x27;clubhouse_gas_year&#x27;])}/yr&quot;,
+        uc[&quot;clubhouse_gas_year&quot;])
+    add(&quot;3 Amenity&quot;, &quot;Clubhouse janitorial and supplies&quot;,
+        &quot;104 visits/yr&quot;, f&quot;{unit(uc[&#x27;janitorial_visit&#x27;])}/visit&quot;, 104 * uc[&quot;janitorial_visit&quot;])
+    add(&quot;3 Amenity&quot;, &quot;Clubhouse repairs, HVAC contract, pest, alarm and NFPA 13 sprinkler ITM&quot;,
+        &quot;1 building&quot;, f&quot;{unit(uc[&#x27;clubhouse_rm_year&#x27;])}/yr&quot;, uc[&quot;clubhouse_rm_year&quot;])
+    add(&quot;3 Amenity&quot;, &quot;Internet, cameras, access control, Knox box&quot;,
+        &quot;1 building&quot;, f&quot;{unit(uc[&#x27;clubhouse_tel_year&#x27;])}/yr&quot;, uc[&quot;clubhouse_tel_year&quot;])
+    add(&quot;3 Amenity&quot;, &quot;Pickleball court cleaning, nets and screens&quot;,
+        f&quot;{q[&#x27;pickleball_courts&#x27;]} courts&quot;, f&quot;{unit(uc[&#x27;court_year&#x27;])}/yr&quot;, uc[&quot;court_year&quot;])
+    add(&quot;3 Amenity&quot;, &quot;Mail kiosk cleaning, lighting and locks&quot;,
+        &quot;1 kiosk&quot;, f&quot;{unit(uc[&#x27;kiosk_year&#x27;])}/yr&quot;, uc[&quot;kiosk_year&quot;])
+
+    # --- 4 administration --------------------------------------------------
+    add(&quot;4 Administration&quot;, &quot;Professional community management&quot;,
+        f&quot;{n} doors × 12 mo&quot;, f&quot;{unit(uc[&#x27;management_per_door_month&#x27;])}/door/mo&quot;,
+        n * 12 * uc[&quot;management_per_door_month&quot;])
+    hopa = (
+        n * uc[&quot;hopa_survey_per_unit&quot;] / 2.0
+        + 3 * uc[&quot;hopa_certificate_each&quot;]
+        + uc[&quot;hopa_admin_year&quot;]
+        + uc[&quot;hopa_legal_cycle&quot;] / 3.0
+    )
+    add(&quot;4 Administration&quot;,
+        &quot;HOPA age-verification program (biennial survey, transfer certificates, records)&quot;,
+        f&quot;{n} units ÷ 2 yr + 3 transfers&quot;,
+        f&quot;{unit(uc[&#x27;hopa_survey_per_unit&#x27;])}/unit + {unit(uc[&#x27;hopa_certificate_each&#x27;])}/transfer&quot;,
+        hopa)
+    add(&quot;4 Administration&quot;, &quot;Insurance — property, GL, D&amp;O, crime, umbrella&quot;,
+        f&quot;{n} units + clubhouse&quot;, f&quot;{unit(uc[&#x27;insurance_year&#x27;])}/yr&quot;, uc[&quot;insurance_year&quot;])
+    add(&quot;4 Administration&quot;, &quot;Financial review and Form 1120-H&quot;, &quot;1/yr&quot;,
+        f&quot;{unit(uc[&#x27;audit_year&#x27;])}/yr&quot;, uc[&quot;audit_year&quot;])
+    add(&quot;4 Administration&quot;, &quot;Legal — counsel and covenant enforcement&quot;, &quot;allowance&quot;,
+        f&quot;{unit(uc[&#x27;legal_year&#x27;])}/yr&quot;, uc[&quot;legal_year&quot;])
+    add(&quot;4 Administration&quot;, &quot;Reserve study (update every 3 years, annualised)&quot;, &quot;1 ÷ 3 yr&quot;,
+        f&quot;{unit(uc[&#x27;reserve_study_cycle&#x27;])}/study&quot;, uc[&quot;reserve_study_cycle&quot;] / 3.0)
+    add(&quot;4 Administration&quot;, &quot;Banking, software, portal, postage, meetings, state registration&quot;,
+        &quot;1/yr&quot;, f&quot;{unit(uc[&#x27;admin_year&#x27;])}/yr&quot;, uc[&quot;admin_year&quot;])
+
+    operating = sum(l[4] for l in lines)
+
+    # --- 5 reserves --------------------------------------------------------
+    qmap = {
+        &quot;pavement_sf&quot;: q[&quot;pavement_sf_published&quot;],
+        &quot;sidewalk_quarter_sf&quot;: round(q[&quot;sidewalk_sf_published&quot;] * 0.25),
+        &quot;lane_length_ft&quot;: q[&quot;lane_length_ft&quot;],
+        &quot;ponds&quot;: q[&quot;ponds&quot;],
+        &quot;clubhouse_roof_sf&quot;: round(q[&quot;clubhouse_sf&quot;] * 1.25),
+        &quot;hvac_units&quot;: 2,
+        &quot;pickleball_courts&quot;: q[&quot;pickleball_courts&quot;],
+        &quot;pickleball_pad_perimeter_lf&quot;: q[&quot;pickleball_pad_perimeter_lf&quot;],
+        &quot;light_poles&quot;: q[&quot;light_poles&quot;],
+        &quot;lump_paint&quot;: 1,
+        &quot;lump_interior&quot;: 1,
+        &quot;lump_equip&quot;: 1,
+        &quot;lump_kiosk&quot;: 1,
+        &quot;lump_sign&quot;: 1,
+        &quot;lump_furn&quot;: 1,
+        &quot;lump_irrig&quot;: 1,
+        &quot;lump_landscape&quot;: 1,
+    }
+    reserves = []
+    for name, qkey, unitname, cost, life, basis in RESERVE_COMPONENTS:
+        qty = qmap[qkey]
+        if qkey == &quot;ponds&quot; and q[&quot;ponds&quot;] == 1:
+            pass  # quantity already scenario-scaled
+        repl = qty * cost
+        reserves.append([name, qty, unitname, cost, repl, life, repl / life, basis])
+    reserve_annual = sum(r[6] for r in reserves)
+
+    contingency = operating * uc[&quot;contingency_pct&quot;]
+    bad_debt = (operating + contingency + reserve_annual) * uc[&quot;bad_debt_pct&quot;]
+    total = operating + contingency + bad_debt + reserve_annual
+
+    return {
+        &quot;scenario&quot;: scenario,
+        &quot;lots&quot;: n,
+        &quot;quantities&quot;: q,
+        &quot;lines&quot;: lines,
+        &quot;operating&quot;: round(operating),
+        &quot;reserves&quot;: [
+            [r[0], r[1], r[2], r[3], round(r[4]), r[5], round(r[6]), r[7]] for r in reserves
+        ],
+        &quot;reserve_annual&quot;: round(reserve_annual),
+        &quot;contingency&quot;: round(contingency),
+        &quot;bad_debt&quot;: round(bad_debt),
+        &quot;total&quot;: round(total),
+        &quot;per_lot_year&quot;: round(total / n),
+        &quot;per_lot_month&quot;: round(total / n / 12),
+        &quot;operating_per_lot_month&quot;: round(operating / n / 12),
+        &quot;reserve_per_lot_month&quot;: round(reserve_annual / n / 12),
+        &quot;waste_option_per_lot_month&quot;: uc[&quot;waste_per_home_month&quot;],
+    }
+
+
+FULL = build(&quot;full&quot;)
+PH1 = build(&quot;phase1&quot;)
+
+# ---------------------------------------------------------------------------
+# self-checks
+# ---------------------------------------------------------------------------
+fails = []
+
+
+def check(cond, msg):
+    if not cond:
+        fails.append(msg)
+
+
+check(
+    abs(Q[&quot;pavement_sf_computed&quot;] - Q[&quot;pavement_sf_published&quot;]) / Q[&quot;pavement_sf_published&quot;] &lt; 0.03,
+    f&quot;pavement polygons {Q[&#x27;pavement_sf_computed&#x27;]} vs metrics {Q[&#x27;pavement_sf_published&#x27;]} differ &gt;3%&quot;,
+)
+check(
+    abs(Q[&quot;sidewalk_sf_computed&quot;] - Q[&quot;sidewalk_sf_published&quot;]) / Q[&quot;sidewalk_sf_published&quot;] &lt; 0.05,
+    f&quot;sidewalk polygons {Q[&#x27;sidewalk_sf_computed&#x27;]} vs metrics {Q[&#x27;sidewalk_sf_published&#x27;]} differ &gt;5%&quot;,
+)
+check(Q[&quot;plan_A_lots&quot;] + Q[&quot;plan_B_lots&quot;] == M[&quot;lots&quot;], &quot;plan mix does not sum to the lot count&quot;)
+check(FULL[&quot;total&quot;] &gt; 0 and FULL[&quot;per_lot_month&quot;] &gt; 0, &quot;budget did not compute&quot;)
+check(PH1[&quot;lots&quot;] == M[&quot;lots_phase1&quot;], &quot;phase-1 lot count mismatch&quot;)
+
+# ---------------------------------------------------------------------------
+# output
+# ---------------------------------------------------------------------------
+
+
+def md_tables(b):
+    out = []
+    groups = []
+    for g, item, qty, uctxt, amt in b[&quot;lines&quot;]:
+        if not groups or groups[-1][0] != g:
+            groups.append((g, []))
+        groups[-1][1].append((item, qty, uctxt, amt))
+    out.append(&quot;| Line | Quantity (from `data/layout.json` / `data/plans.json`) | Unit cost | Annual |&quot;)
+    out.append(&quot;|---|---|---|---:|&quot;)
+    for g, items in groups:
+        out.append(f&quot;| **{g}** | | | |&quot;)
+        for item, qty, uctxt, amt in items:
+            out.append(f&quot;| {item} | {qty} | {uctxt} | {money(amt)} |&quot;)
+    out.append(f&quot;| **Operating subtotal** | | | **{money(b[&#x27;operating&#x27;])}** |&quot;)
+    out.append(f&quot;| Operating contingency, 5 % | | | {money(b[&#x27;contingency&#x27;])} |&quot;)
+    out.append(f&quot;| **Reserve contribution** (schedule below) | | | **{money(b[&#x27;reserve_annual&#x27;])}** |&quot;)
+    out.append(f&quot;| Delinquency allowance, 2 % of assessments | | | {money(b[&#x27;bad_debt&#x27;])} |&quot;)
+    out.append(f&quot;| **TOTAL ANNUAL BUDGET** | | | **{money(b[&#x27;total&#x27;])}** |&quot;)
+    out.append(f&quot;| **Per lot per year** ({b[&#x27;lots&#x27;]} lots) | | | **{money(b[&#x27;per_lot_year&#x27;])}** |&quot;)
+    out.append(f&quot;| **Per lot per month** | | | **{money(b[&#x27;per_lot_month&#x27;])}** |&quot;)
+    return &quot;\n&quot;.join(out)
+
+
+def md_reserves(b):
+    out = [&quot;| Component | Qty | Unit | Unit cost | Replacement cost | Life (yr) | Annual | Basis |&quot;,
+           &quot;|---|---:|---|---:|---:|---:|---:|---|&quot;]
+    for name, qty, unitname, cost, repl, life, ann, basis in b[&quot;reserves&quot;]:
+        qtxt = f&quot;{qty:,.0f}&quot; if isinstance(qty, (int, float)) else str(qty)
+        out.append(
+            f&quot;| {name} | {qtxt} | {unitname} | {unit(cost)} | {money(repl)} | {life} | {money(ann)} | {basis} |&quot;
+        )
+    out.append(
+        f&quot;| **Total annual reserve contribution** | | | | | | **{money(b[&#x27;reserve_annual&#x27;])}** | &quot;
+        f&quot;straight-line component method, no interest or inflation offset |&quot;
+    )
+    return &quot;\n&quot;.join(out)
+
+
+report = [
+    &quot;# HOA budget — computed output (generator `tools/hoa_budget.py`)&quot;,
+    &quot;&quot;,
+    &quot;Reproduced verbatim in `docs/13-hoa-hopa-and-covenant-outline.md` §8. Re-run the generator &quot;
+    &quot;after any change to `data/layout.json` or `data/plans.json`.&quot;,
+    &quot;&quot;,
+    &quot;## Quantities&quot;,
+    &quot;&quot;,
+    &quot;| Quantity | Value | Source |&quot;,
+    &quot;|---|---:|---|&quot;,
+    f&quot;| Lots | {Q[&#x27;lots_total&#x27;]} | `layout.json` metrics.lots |&quot;,
+    f&quot;| Plan mix | {Q[&#x27;plan_A_lots&#x27;]} A / {Q[&#x27;plan_B_lots&#x27;]} B | `layout.json` lots |&quot;,
+    f&quot;| Lane length (entrance to terminus) | {Q[&#x27;lane_length_ft&#x27;]:,.0f} ft | metrics.lane_length_ft |&quot;,
+    f&quot;| Lane + entry pavement | {Q[&#x27;pavement_sf_published&#x27;]:,} SF | metrics.pavement_sf (polygons compute {Q[&#x27;pavement_sf_computed&#x27;]:,} SF) |&quot;,
+    f&quot;| Sidewalk | {Q[&#x27;sidewalk_sf_published&#x27;]:,} SF | metrics.sidewalk_sf (polygons compute {Q[&#x27;sidewalk_sf_computed&#x27;]:,} SF) |&quot;,
+    f&quot;| Lane tract, less pavement and walk (verge) | {Q[&#x27;lane_verge_sf&#x27;]:,} SF | tract − pavement − sidewalk |&quot;,
+    f&quot;| Front amenity tract | {Q[&#x27;amenity_tract_sf&#x27;]:,} SF, of which {Q[&#x27;amenity_hard_sf&#x27;]:,} SF built/paved | metrics + amenity polygons |&quot;,
+    f&quot;| Greens (3 tracts) | {Q[&#x27;greens_sf&#x27;]:,} SF | `layout.json` greens |&quot;,
+    f&quot;| Pond tracts | {Q[&#x27;pond_tract_sf&#x27;]:,} SF ({Q[&#x27;ponds&#x27;]} ponds, {Q[&#x27;pond_water_area_sf&#x27;]:,} SF of basin) | open_space_tracts, ponds |&quot;,
+    f&quot;| Creek woods (preserved) | {Q[&#x27;creek_woods_sf&#x27;]:,} SF | open_space_tracts |&quot;,
+    f&quot;| Buffer easement inside lots | {Q[&#x27;buffer_easement_on_lots_sf&#x27;]:,} SF | metrics.buffer_easement_on_lots_sf |&quot;,
+    f&quot;| Maintained common landscape | {Q[&#x27;common_landscape_sf&#x27;]:,} SF = {Q[&#x27;common_landscape_ac&#x27;]:.2f} ac | verge + amenity soft + greens + pond tracts |&quot;,
+    f&quot;| Undisturbed natural area | {Q[&#x27;natural_area_sf&#x27;]:,} SF = {Q[&#x27;natural_area_ac&#x27;]:.2f} ac | creek woods + buffer easement |&quot;,
+    f&quot;| Maintained yard per lot | Plan A {Q[&#x27;plan_A_yard_sf&#x27;]:,} SF / Plan B {Q[&#x27;plan_B_yard_sf&#x27;]:,} SF (avg {Q[&#x27;yard_avg_sf&#x27;]:,} SF) | 5,000 SF − plans.json lot_siting impervious − 1,000 SF buffer |&quot;,
+    f&quot;| Street trees / total trees | {Q[&#x27;street_trees&#x27;]} / {Q[&#x27;trees_total&#x27;]} | 40 ft o.c. + frontage strip + parking bay |&quot;,
+    f&quot;| Light fixtures | {Q[&#x27;light_poles&#x27;]} | 150 ft o.c. + 4 at the amenity block (assumption) |&quot;,
+    &quot;&quot;,
+    f&quot;## Budget — full build-out ({FULL[&#x27;lots&#x27;]} lots)&quot;,
+    &quot;&quot;,
+    md_tables(FULL),
+    &quot;&quot;,
+    &quot;### Reserve component schedule — full build-out&quot;,
+    &quot;&quot;,
+    md_reserves(FULL),
+    &quot;&quot;,
+    f&quot;Optional bundled solid-waste contract: {unit(FULL[&#x27;waste_option_per_lot_month&#x27;])}/home/month &quot;
+    f&quot;= {money(FULL[&#x27;waste_option_per_lot_month&#x27;] * 12 * FULL[&#x27;lots&#x27;])}/yr, which would raise dues to &quot;
+    f&quot;{money(FULL[&#x27;per_lot_month&#x27;] + FULL[&#x27;waste_option_per_lot_month&#x27;])}/month.&quot;,
+    &quot;&quot;,
+    f&quot;## Budget — Phase 1 only ({PH1[&#x27;lots&#x27;]} lots), the condition-16 downside case&quot;,
+    &quot;&quot;,
+    md_tables(PH1),
+    &quot;&quot;,
+    &quot;### Reserve component schedule — Phase 1 only&quot;,
+    &quot;&quot;,
+    md_reserves(PH1),
+    &quot;&quot;,
+]
+
+os.makedirs(os.path.join(ROOT, &quot;verify&quot;), exist_ok=True)
+open(os.path.join(ROOT, &quot;verify&quot;, &quot;hoa-budget-output.md&quot;), &quot;w&quot;).write(&quot;\n&quot;.join(report) + &quot;\n&quot;)
+json.dump(
+    {
+        &quot;generated_by&quot;: &quot;tools/hoa_budget.py&quot;,
+        &quot;inputs&quot;: [&quot;data/layout.json&quot;, &quot;data/plans.json&quot;],
+        &quot;unit_costs&quot;: {k: {&quot;value&quot;: v[0], &quot;unit&quot;: v[1], &quot;basis&quot;: v[2]} for k, v in UNIT_COSTS.items()},
+        &quot;full_buildout&quot;: FULL,
+        &quot;phase1_only&quot;: PH1,
+    },
+    open(os.path.join(ROOT, &quot;data&quot;, &quot;hoa-budget-derived.json&quot;), &quot;w&quot;),
+    indent=1,
+)
+
+# docs/13 cross-check
+doc = os.path.join(ROOT, &quot;docs&quot;, &quot;13-hoa-hopa-and-covenant-outline.md&quot;)
+if os.path.exists(doc):
+    t = open(doc).read()
+    for label, val in [
+        (&quot;total annual budget&quot;, money(FULL[&quot;total&quot;])),
+        (&quot;dues per lot per month&quot;, money(FULL[&quot;per_lot_month&quot;])),
+        (&quot;reserve contribution&quot;, money(FULL[&quot;reserve_annual&quot;])),
+        (&quot;phase-1 dues&quot;, money(PH1[&quot;per_lot_month&quot;])),
+    ]:
+        check(val in t, f&quot;docs/13 does not contain the computed {label} {val}&quot;)
+    check(
+        t.rstrip(&quot;\n&quot;).split(&quot;\n&quot;)[-1] == &quot;&lt;!-- architecture-studio:requires-disclaimer --&gt;&quot;,
+        &quot;docs/13: last line is not the disclaimer marker&quot;,
+    )
+    check(&quot;appears consistent with&quot; in t, &quot;docs/13: missing the required &#x27;appears consistent with&#x27; phrasing&quot;)
+    check(t.count(&quot;[ATTORNEY REVIEW REQUIRED]&quot;) &gt;= 10,
+          &quot;docs/13: fewer than 10 [ATTORNEY REVIEW REQUIRED] flags&quot;)
+    check(&quot;DRAFT — NOT SEALED&quot; in t, &quot;docs/13: missing the DRAFT — NOT SEALED label&quot;)
+    for banned in (r&quot;\bcomplies\b&quot;, r&quot;\bcompliant\b&quot;, r&quot;IFC 2018&quot;, r&quot;329[- ]f&quot;):
+        m = re.search(banned, t, re.I)
+        check(m is None, f&quot;docs/13: banned phrase {banned!r} at ...{t[max(0, (m.start() if m else 0) - 40):(m.end() if m else 0) + 20]!r}&quot;)
+
+print(f&quot;quantities: {Q[&#x27;lots_total&#x27;]} lots, pavement {Q[&#x27;pavement_sf_published&#x27;]:,} SF &quot;
+      f&quot;(polygons {Q[&#x27;pavement_sf_computed&#x27;]:,}), walk {Q[&#x27;sidewalk_sf_published&#x27;]:,} SF, &quot;
+      f&quot;common landscape {Q[&#x27;common_landscape_ac&#x27;]:.2f} ac, {Q[&#x27;light_poles&#x27;]} lights, &quot;
+      f&quot;{Q[&#x27;trees_total&#x27;]} trees&quot;)
+print(f&quot;FULL   {FULL[&#x27;lots&#x27;]} lots: operating {money(FULL[&#x27;operating&#x27;])} + reserves {money(FULL[&#x27;reserve_annual&#x27;])} &quot;
+      f&quot;+ contingency {money(FULL[&#x27;contingency&#x27;])} + bad debt {money(FULL[&#x27;bad_debt&#x27;])} &quot;
+      f&quot;= {money(FULL[&#x27;total&#x27;])} -&gt; {money(FULL[&#x27;per_lot_month&#x27;])}/lot/month &quot;
+      f&quot;({money(FULL[&#x27;operating_per_lot_month&#x27;])} operating + {money(FULL[&#x27;reserve_per_lot_month&#x27;])} reserve)&quot;)
+print(f&quot;PHASE1 {PH1[&#x27;lots&#x27;]} lots: {money(PH1[&#x27;total&#x27;])} -&gt; {money(PH1[&#x27;per_lot_month&#x27;])}/lot/month&quot;)
+print(&quot;wrote data/hoa-budget-derived.json and verify/hoa-budget-output.md&quot;)
+if fails:
+    print(&quot;\nFAILED:&quot;)
+    for f in fails:
+        print(&quot;  -&quot;, f)
+    sys.exit(1)
+print(&quot;checks: PASS&quot;)
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/hoa_budget.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,312 @@
+{
+ "acreage_deeded_ac": 9.44,
+ "deeded_sf": 411206,
+ "boundary_sf_gis": 417173.6,
+ "acreage_gis_ac": 9.577,
+ "lots": 41,
+ "lots_sw": 14,
+ "lots_ne": 27,
+ "plan_A": 21,
+ "plan_B": 20,
+ "lots_phase1": 24,
+ "lots_phase2": 17,
+ "lot_area_min_sf": 5000.0,
+ "lot_area_avg_sf": 5000.0,
+ "lot_area_max_sf": 5000.0,
+ "lot_width_min_ft": 50.0,
+ "lot_depth_min_ft": 100.0,
+ "lot_area_total_sf": 205000,
+ "density_du_ac_deeded": 4.34,
+ "density_du_ac_gis": 4.28,
+ "buffer_easement_on_lots_sf": 41000,
+ "planA_name": "THE SPRINGBROOK",
+ "planA_body_label": "38'-0\" \u00d7 51'-10\"",
+ "planA_body_w_ft": 38,
+ "planA_body_d_ft": 51.83,
+ "planA_conditioned_sf": 1406.1,
+ "planA_target_conditioned_sf": 1444,
+ "planA_garage_sf": 458.4,
+ "planA_front_porch_sf": 102.0,
+ "planA_rear_porch_covered_sf": 0,
+ "planA_rear_patio_uncovered_sf": 72.0,
+ "planA_under_roof_sf": 1966.5,
+ "planA_max_ridge_ft": 17.83,
+ "planA_side_yard_ft": 6.0,
+ "planA_garage_door_from_lot_line_ft": 26.67,
+ "planA_rear_structure_to_rear_line_ft": 20.5,
+ "planA_rear_wall_from_rear_line_ft": 26.5,
+ "planA_coverage_under_roof_pct": 39.3,
+ "planB_name": "THE LAUREL",
+ "planB_body_label": "38'-0\" \u00d7 57'-6\"",
+ "planB_body_w_ft": 38,
+ "planB_body_d_ft": 57.5,
+ "planB_conditioned_sf": 1492.0,
+ "planB_target_conditioned_sf": 1520,
+ "planB_garage_sf": 504.0,
+ "planB_front_porch_sf": 102.0,
+ "planB_rear_porch_covered_sf": 84.0,
+ "planB_rear_patio_uncovered_sf": 0,
+ "planB_under_roof_sf": 2182.0,
+ "planB_max_ridge_ft": 19.33,
+ "planB_side_yard_ft": 6.0,
+ "planB_garage_door_from_lot_line_ft": 26.67,
+ "planB_rear_structure_to_rear_line_ft": 20.83,
+ "planB_rear_wall_from_rear_line_ft": 20.83,
+ "planB_coverage_under_roof_pct": 43.6,
+ "conditioned_sf_total": 59368,
+ "conditioned_sf_avg": 1448,
+ "entry_drive_length_ft": 204.0,
+ "lane_arc_ft": 1550.5,
+ "travelled_way_ft": 1754.5,
+ "pavement_width_ft": 22.0,
+ "lane_tract_sf": 71085,
+ "lane_tract_width_ft": [
+  35.9,
+  46.1
+ ],
+ "sidewalk_widen_both_from_u": 530.0,
+ "sidewalk_sf": 14619,
+ "parking_bay_sf": 2070,
+ "pavement_sf": 48461,
+ "hammerheads_u": [
+  540.0,
+  1110.0,
+  1690.0
+ ],
+ "hammerhead_stations_ft": [
+  594.5,
+  1164.5,
+  1744.5
+ ],
+ "hammerhead_spacing_ft": [
+  594.5,
+  570.0,
+  580.0
+ ],
+ "hammerhead_spacing_max_ft": 594.5,
+ "dead_end_ft": 1754.5,
+ "blocks_between_intersections_ft": [
+  594.5,
+  570.0,
+  580.0
+ ],
+ "blocks_lot_frontage_runs_ft": [
+  300,
+  500,
+  550
+ ],
+ "entrance_v_ft": -190.0,
+ "entrance_separation_along_cl_ft": 251.2,
+ "entrance_separation_chord_ft": 250.7,
+ "entrance_drive_width_ft": 24.0,
+ "entrance_join_u_ft": 149.5,
+ "sw_curb_return_buffer_encroachment_ft": 2.0,
+ "open_space_tracts": [
+  {
+   "name": "Pocket green (u 530-580)",
+   "area_sf": 10000
+  },
+  {
+   "name": "Pocket green (u 1080-1130)",
+   "area_sf": 10000
+  },
+  {
+   "name": "Terminus green + rear buffer",
+   "area_sf": 9312
+  },
+  {
+   "name": "Pond 1 (dry detention / WQ) tract",
+   "area_sf": 20000
+  },
+  {
+   "name": "Pond 2 (dry detention / WQ) tract",
+   "area_sf": 20000
+  },
+  {
+   "name": "Creek woods (stream head + 50/75-ft buffers) \u2014 preserved",
+   "area_sf": 20000
+  },
+  {
+   "name": "Stream-setback open-space tract (SW side, u 1230-1280) \u2014 unlotted, no impervious",
+   "area_sf": 5000
+  },
+  {
+   "name": "Front amenity tract (clubhouse, village green, courts, landscape strip)",
+   "area_sf": 46777
+  }
+ ],
+ "open_space_sf": 141089,
+ "open_space_ac": 3.239,
+ "open_space_pct_gis": 33.82,
+ "open_space_pct_deeded": 34.31,
+ "amenity_built_paved_sf": 6760,
+ "open_space_built_paved_sf": 13960,
+ "open_space_green_only_sf": 127129,
+ "open_space_green_only_pct_gis": 30.47,
+ "open_space_residual_sf": 141089,
+ "open_space_unallocated_slivers_sf": 0,
+ "impervious_per_lot": {
+  "A": {
+   "under_roof_sf": 1966.5,
+   "uncovered_patio_sf": 72.0,
+   "driveway_sf_min": 653.4,
+   "driveway_sf_max": 764.2,
+   "walk_sf": 60.0,
+   "avg_total_sf": 2804.0
+  },
+  "B": {
+   "under_roof_sf": 2182.0,
+   "uncovered_patio_sf": 0,
+   "driveway_sf_min": 656.0,
+   "driveway_sf_max": 756.4,
+   "walk_sf": 60.0,
+   "avg_total_sf": 2947.7
+  }
+ },
+ "impervious_components_sf": {
+  "lots (41 x roof + patio + driveway + walk)": 117838,
+  "lane pavement + entry drive + hammerheads + guest/kiosk bays + curb returns": 48461,
+  "sidewalks": 14619,
+  "amenity block (clubhouse roof, court pads, mail kiosk, walks)": 6760,
+  "less driveway/sidewalk overlap": -3500
+ },
+ "impervious_sf": 184178,
+ "impervious_ac": 4.23,
+ "impervious_pct_gis": 44.1,
+ "impervious_pct_deeded": 44.8,
+ "Rv": 0.4473,
+ "WQr_in": 0.537,
+ "WQv_cf": 18662,
+ "RRv_cf": 15552,
+ "preserved_sf": 89744,
+ "disturbed_sf": 328484,
+ "disturbed_ac": 7.541,
+ "disturbed_sf_closed_form_check": 327472,
+ "detention_rate_cf_per_disturbed_ac": 10000,
+ "detention_required_cf": 75410,
+ "detention_required_less_rrv_cf": 59858,
+ "ponds": [
+  {
+   "name": "Pond 1 (dry detention / WQ)",
+   "top_of_bank_ft": "52 x 180",
+   "area_sf": 9450,
+   "est_storage_cf": 33129,
+   "tract_sf": 20000
+  },
+  {
+   "name": "Pond 2 (dry detention / WQ)",
+   "top_of_bank_ft": "64 x 180",
+   "area_sf": 11520,
+   "est_storage_cf": 44734,
+   "tract_sf": 20000
+  }
+ ],
+ "detention_provided_cf": 77863,
+ "detention_shortfall_cf": -2453,
+ "detention_provided_pct_of_required": 103.3,
+ "ponds_enlarged_6ft": [
+  {
+   "name": "Pond 1 (dry detention / WQ)",
+   "basin_ft": "52 x 180",
+   "depth_ft": 6.0,
+   "est_storage_cf": 33696
+  },
+  {
+   "name": "Pond 2 (dry detention / WQ)",
+   "basin_ft": "64 x 180",
+   "depth_ft": 6.0,
+   "est_storage_cf": 45360
+  }
+ ],
+ "detention_provided_6ft_cf": 79056,
+ "hydro2025": {
+  "area_sf": 424548,
+  "impervious_sf": 235388,
+  "impervious_pct": 55.4,
+  "WQv_cf": 23293,
+  "detention_cf": 74167
+ },
+ "impervious_reduction_vs_2025_pct": 21.8,
+ "parking_required": 82,
+ "parking_on_lot": 164,
+ "parking_guest": 8,
+ "parking_kiosk": 4,
+ "parking_total": 176,
+ "guest_ratio_lots_per_space": 3.4,
+ "ite_251_rate_band": {
+  "am_lo": 0.2,
+  "am_hi": 0.34,
+  "pm_lo": 0.26,
+  "pm_hi": 0.39,
+  "daily_lo": 3.7,
+  "daily_hi": 4.31,
+  "am_facts": 0.3,
+  "pm_facts": 0.3
+ },
+ "trips_251_am": [
+  8.2,
+  13.9
+ ],
+ "trips_251_pm": [
+  10.7,
+  16.0
+ ],
+ "trips_251_daily": [
+  152,
+  177
+ ],
+ "trips_251_pm_facts": 12.3,
+ "trips_251_pm_at_47_hi": 18.3,
+ "trips_210_same_lots": {
+  "daily": 387,
+  "am": 28.7,
+  "pm": 38.5
+ },
+ "r1_theoretical_units": 37,
+ "trips_210_r1_max": {
+  "daily": 349,
+  "am": 25.9,
+  "pm": 34.8
+ },
+ "trips_2025_MU": {
+  "daily": 2030,
+  "pm": 213.8
+ },
+ "pm_share_of_2025_MU_pct": 5.8,
+ "sewer_unit_flow_gpd": 250,
+ "adf_total_gpd": 10670,
+ "adf_gpm": 7.41,
+ "peak_gpd": 42680,
+ "peak_gpm": 29.6,
+ "adf_phase1_gpd": 6420,
+ "adf_phase2_gpd": 4250,
+ "peak_phase2_gpm": 11.8,
+ "phase1_gravity_len_ft": 814,
+ "phase2_ext_total_len_ft": 478,
+ "phase2_ext_offsite_ft": 178.0,
+ "rear_lane_low_point": {
+  "u": 1479,
+  "ground_ft": 931.5
+ },
+ "lane_ridge_ft": 953.5,
+ "lane_ridge_u": 1179,
+ "phase2_slope_pct": 1.45,
+ "price_lo": 420000,
+ "price_hi": 460000,
+ "taxbase_lo": 17220000,
+ "taxbase_hi": 18860000,
+ "existing_fmv_2026": 1267600,
+ "city_tax_lo": 37402,
+ "county_school_tax_lo": 217661,
+ "school_portion_lo": 138793,
+ "city_tax_hi": 40964,
+ "county_school_tax_hi": 238390,
+ "school_portion_hi": 152012,
+ "city_tax_existing": 2753,
+ "city_tax_lo_all_senior_exempt": 24044,
+ "taxbase_multiple_lo": 13.6,
+ "taxbase_multiple_hi": 14.9,
+ "hopa_units_needing_55plus": 33,
+ "hopa_units_without_55plus_cap": 8,
+ "_cross_check_notes": []
+}

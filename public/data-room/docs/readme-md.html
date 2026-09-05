@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Arcado Springs — Land Development Preview — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">project control</p>
+    <div class="doc-meta">2026-06-16 <span class="dot">·</span> 314 words</div>
+    
+    <h1 id="arcado-springs-land-development-preview"><a class="toclink" href="#arcado-springs-land-development-preview">Arcado Springs — Land Development Preview</a></h1>
+<p>The public-facing concept site for the <strong>Arcado Springs</strong> master-planned mixed-use development
+on Arcado Road (shops, dining, and walkable streets, beside the Legends of Parkview subdivision).
+It's a shareable preview for residents, local businesses, and planning stakeholders.</p>
+<p>The full interactive 3D walkthrough is built in <strong>Unity 6 (HDRP)</strong>. HDRP cannot build to WebGL,
+so the playable in-browser build is a separate effort (see <strong><code>WEBGL_BUILD_GUIDE.md</code></strong>); this site
+auto-detects that build when it's dropped in and otherwise shows the plan-based preview honestly.</p>
+<h2 id="structure"><a class="toclink" href="#structure">Structure</a></h2>
+<ul>
+<li><code>public/index.html</code> — single-page site (hero, walkthrough player, gallery, master plan, two
+  conceptions, specs, "why it helps the community", feedback form)</li>
+<li><code>public/styles.css</code> — styling (Fraunces / Inter / IBM Plex Mono; warm civic palette)</li>
+<li><code>public/main.js</code> — nav, reveal animations, lightbox, site-plan pan/zoom, and the WebGL build
+  auto-loader (probes <code>public/unity-build/Build/</code>, falls back to the plan preview if absent)</li>
+<li><code>public/site-plan.jpg</code> — colored master site plan (Conception 1 &amp; 2)</li>
+<li><code>public/screenshots/</code> — dimensioned CAD plan drawings</li>
+<li><code>public/unity-build/</code> — drop the exported Unity WebGL build here (auto-detected; see its README)</li>
+<li><code>public/vercel.json</code> — static config + WASM/Brotli MIME headers for the future WebGL build</li>
+<li><code>WEBGL_BUILD_GUIDE.md</code> — honest, step-by-step path to a real browser build (HDRP → URP → WebGL)</li>
+</ul>
+<h2 id="to-add-the-real-3d-experience"><a class="toclink" href="#to-add-the-real-3d-experience">To add the real 3D experience</a></h2>
+<ol>
+<li>Capture a few in-engine frames from the Unity scene and drop them in <code>public/screenshots/</code>,
+   then point the hero / gallery <code>&lt;img src&gt;</code> at them for a stronger first impression.</li>
+<li>Produce the WebGL build per <code>WEBGL_BUILD_GUIDE.md</code> and place the output in
+   <code>public/unity-build/</code>. The player upgrades itself — no HTML edits needed.</li>
+</ol>
+<h2 id="deploy"><a class="toclink" href="#deploy">Deploy</a></h2>
+<p>Production branch is <strong><code>master</code></strong>.
+- <strong>Git:</strong> <code>git push origin master</code> (if the Vercel project is connected to the GitHub repo, this
+  auto-deploys).
+- <strong>Vercel CLI:</strong> from the repo root, <code>vercel login</code> then <code>vercel --prod</code> (the project is already
+  linked via <code>.vercel/project.json</code>).</p>
+<p>Live at <strong>https://arcado-springs.vercel.app</strong>.</p>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>README.md</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

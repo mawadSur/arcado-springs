@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Arcado Springs — WebGL Build Guide — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">2026-07-16 <span class="dot">·</span> 1,674 words</div>
+    <nav class="doc-toc" aria-label="Contents"><p class="doc-toc-h">Contents</p><div class="toc">
+<ul>
+<li><a href="#the-honest-constraint-this-project-is-hdrp-and-hdrp-cannot-build-to-webgl">The honest constraint: this project is HDRP, and HDRP cannot build to WebGL</a><ul>
+<li><a href="#route-a-convert-the-whole-project-to-urp-render-pipeline-converter">Route A — Convert the whole project to URP (Render Pipeline Converter)</a></li>
+<li><a href="#route-b-dedicated-urpwebgl-build-variant-of-the-walkthrough-scene-recommended-for-the-web-demo">Route B — Dedicated URP/WebGL build variant of the walkthrough scene (recommended for the web demo)</a></li>
+</ul>
+</li>
+<li><a href="#1-install-the-webgl-build-support-module-unity-hub">1. Install the WebGL Build Support module (Unity Hub)</a></li>
+<li><a href="#2-switch-the-active-platform-to-webgl">2. Switch the active platform to WebGL</a></li>
+<li><a href="#3-player-settings-for-the-web-build">3. Player Settings for the web build</a></li>
+<li><a href="#4-confirm-the-scene-in-build-settings">4. Confirm the scene in Build Settings</a></li>
+<li><a href="#5-build-output-directory-must-be-exactly-this">5. Build — OUTPUT DIRECTORY MUST BE EXACTLY THIS</a></li>
+<li><a href="#6-expected-output">6. Expected output</a></li>
+<li><a href="#7-how-the-landing-page-picks-it-up-no-code-change-needed">7. How the landing page picks it up (no code change needed)</a></li>
+<li><a href="#8-local-test-before-deploying">8. Local test before deploying</a></li>
+<li><a href="#9-deploy">9. Deploy</a></li>
+</ul>
+</div>
+</nav>
+    <h1 id="arcado-springs-webgl-build-guide"><a class="toclink" href="#arcado-springs-webgl-build-guide">Arcado Springs — WebGL Build Guide</a></h1>
+<p>How to produce an in-browser WebGL build of <strong>this</strong> Unity project and drop it into the
+landing page so the player section goes from the screenshot-tour fallback to a real,
+playable walkthrough.</p>
+<hr>
+<h2 id="the-honest-constraint-this-project-is-hdrp-and-hdrp-cannot-build-to-webgl"><a class="toclink" href="#the-honest-constraint-this-project-is-hdrp-and-hdrp-cannot-build-to-webgl">The honest constraint: this project is HDRP, and HDRP cannot build to WebGL</a></h2>
+<p>This project (<code>/mnt/c/Users/Mohammed Awad/Arcado Rd</code>) is:</p>
+<ul>
+<li><strong>Unity <code>6000.1.4f1</code></strong> (Unity 6)</li>
+<li><strong>High Definition Render Pipeline (HDRP) <code>17.1.0</code></strong> — see <code>Packages/manifest.json</code>:
+  <code>com.unity.render-pipelines.high-definition</code> and <code>...high-definition-config</code></li>
+<li><strong>Linear</strong> color space (<code>ProjectSettings/ProjectSettings.asset</code> → <code>m_ActiveColorSpace: 1</code>)</li>
+<li>Main / walkthrough scene: <strong><code>Assets/withmap.unity</code></strong> (the one enabled in Build Settings today)</li>
+</ul>
+<p><strong>HDRP does not support the WebGL build target.</strong> HDRP targets compute-shader-capable
+desktop/console GPU APIs (DX12, Vulkan, Metal). WebGL runs on WebGL 2.0 (GLES 3.0), which
+HDRP's lighting/compute paths do not support. If you switch the platform to WebGL with HDRP
+active, the build will either be disabled in the Build Profiles window or fail at build time.
+There is no "just flip a switch" path — <strong>you must move the scene onto URP first.</strong></p>
+<p>You have two routes. Pick one before doing anything in the WebGL section below.</p>
+<h3 id="route-a-convert-the-whole-project-to-urp-render-pipeline-converter"><a class="toclink" href="#route-a-convert-the-whole-project-to-urp-render-pipeline-converter">Route A — Convert the whole project to URP (Render Pipeline Converter)</a></h3>
+<p>Best if you are OK with the desktop/HDRP look diverging from web, or you want a single
+pipeline going forward. This rewrites materials project-wide.</p>
+<ol>
+<li><strong>Back up the project first</strong> (copy the folder, or commit). The converter edits materials
+   in place and is not cleanly reversible.</li>
+<li>Window ▸ Package Manager ▸ install <strong>Universal RP</strong>
+   (<code>com.unity.render-pipelines.universal</code>). It is <strong>not currently installed</strong> — only HDRP
+   is in <code>Packages/manifest.json</code>.</li>
+<li>Create a URP asset: Assets ▸ Create ▸ Rendering ▸ <strong>URP Asset (with Universal Renderer)</strong>.</li>
+<li>Edit ▸ Project Settings ▸ <strong>Graphics</strong> → set the Scriptable Render Pipeline Settings to
+   the new URP asset. Also set it under <strong>Quality</strong> for each level you ship.</li>
+<li>Window ▸ Rendering ▸ <strong>Render Pipeline Converter</strong>. Select <strong>"Convert Built-in/HDRP to
+   URP"</strong> workflow → enable "Material Upgrade" (and the others it offers) → <strong>Initialize and
+   Convert</strong>.</li>
+<li>Expect manual cleanup: HDRP-only materials (Lit with HDRP features), volume overrides
+   (HDRP <code>Volume</code> profiles, exponential fog, ray tracing, screen-space lighting), decals,
+   and any HDRP-specific lighting will not survive 1:1. Re-light the scene for URP and
+   replace anything pink/magenta (pink = unconverted material).</li>
+<li>Remove the HDRP packages from <code>Packages/manifest.json</code> once converted, so the project
+   stops pulling HDRP shaders.</li>
+</ol>
+<h3 id="route-b-dedicated-urpwebgl-build-variant-of-the-walkthrough-scene-recommended-for-the-web-demo"><a class="toclink" href="#route-b-dedicated-urpwebgl-build-variant-of-the-walkthrough-scene-recommended-for-the-web-demo">Route B — Dedicated URP/WebGL build variant of the walkthrough scene (recommended for the web demo)</a></h3>
+<p>Best if you want to <strong>keep the HDRP desktop project intact</strong> and only ship a trimmed,
+web-friendly version of the walkthrough. This is the recommended route because the desktop
+HDRP build (the realism work, the drivable car, NPCs) stays untouched.</p>
+<ol>
+<li><strong>Back up / branch first.</strong></li>
+<li>Make a copy of the scene: duplicate <code>Assets/withmap.unity</code> →
+   <code>Assets/withmap_WebGL.unity</code>. Do all web work in the copy.</li>
+<li>Install <strong>Universal RP</strong> (as in Route A, step 2) and create a URP asset + Universal
+   Renderer. Assign it under Graphics + Quality.</li>
+<li>Open <code>withmap_WebGL.unity</code> and strip / swap for the web target:
+   - Replace HDRP materials with URP/Lit (run the Render Pipeline Converter scoped to the
+     materials this scene uses, or swap by hand).
+   - Remove HDRP <code>Volume</code> components, HDRP-only post, ray tracing, high-cost shadows.
+   - Cut polygon/texture budget aggressively (WebGL ships everything to the browser):
+     reduce tree/Nature Renderer density, bake lightmaps, drop 4K textures to 1–2K, disable
+     realtime GI.
+   - Decide what the web walkthrough is — e.g. a first-person walk camera. Keep the PROMETEO
+     car only if it still drives cheaply on URP; otherwise ship the walk camera alone.</li>
+<li>In Build Settings / Build Profiles, the <strong>scene list for the WebGL profile</strong> should be
+   <strong><code>Assets/withmap_WebGL.unity</code></strong> only (not the HDRP <code>withmap.unity</code>).</li>
+</ol>
+<blockquote>
+<p>Either route ends at the same place: a project whose active render pipeline is <strong>URP</strong>,
+with a web-ready scene. Everything below assumes you are at that point.</p>
+</blockquote>
+<hr>
+<h2 id="1-install-the-webgl-build-support-module-unity-hub"><a class="toclink" href="#1-install-the-webgl-build-support-module-unity-hub">1. Install the WebGL Build Support module (Unity Hub)</a></h2>
+<ol>
+<li>Open <strong>Unity Hub</strong> ▸ <strong>Installs</strong>.</li>
+<li>Find <strong><code>6000.1.4f1</code></strong> ▸ gear / ⋮ ▸ <strong>Add modules</strong>.</li>
+<li>Tick <strong>WebGL Build Support</strong> ▸ <strong>Install</strong>. (This is per-editor-version; it is not
+   installed by default.)</li>
+<li>Restart the editor if it was open.</li>
+</ol>
+<hr>
+<h2 id="2-switch-the-active-platform-to-webgl"><a class="toclink" href="#2-switch-the-active-platform-to-webgl">2. Switch the active platform to WebGL</a></h2>
+<ol>
+<li>File ▸ <strong>Build Settings</strong> (or <strong>Build Profiles</strong> in Unity 6).</li>
+<li>Select <strong>Web / WebGL</strong> in the platform list ▸ <strong>Switch Platform</strong>.
+   - This re-imports assets for WebGL and can take a while on a project this size.
+   - If WebGL is greyed out / "not supported" here, your active pipeline is still HDRP — go
+     back and finish Route A or B.</li>
+</ol>
+<hr>
+<h2 id="3-player-settings-for-the-web-build"><a class="toclink" href="#3-player-settings-for-the-web-build">3. Player Settings for the web build</a></h2>
+<p>Edit ▸ Project Settings ▸ <strong>Player</strong> ▸ (WebGL tab):</p>
+<ul>
+<li><strong>Publishing Settings ▸ Compression Format:</strong></li>
+<li><strong>Brotli</strong> — smallest payload, best for the deployed Vercel site. <strong>Use this for
+    production</strong>, AND enable <strong>Decompression Fallback</strong> (see below). This is the exact
+    combination the site is wired for.</li>
+<li><strong>Disabled</strong> — use this for <strong>quick local testing</strong> (open via a simple static server
+    with no special headers). Larger files, but zero server-config friction.</li>
+<li>Avoid <strong>Gzip</strong> unless your host can't do Brotli.</li>
+<li><strong>Publishing Settings ▸ Decompression Fallback: ENABLE it.</strong> With fallback on, Unity's own
+  <code>loader.js</code> fetches the <code>.br</code> files and decompresses them in JavaScript, so the server must
+  serve them as <strong>plain static bytes with NO <code>Content-Encoding</code> header</strong>. <code>vercel.json</code> is
+  configured exactly this way (it sets only <code>Content-Type</code> + <code>Cache-Control</code> on
+  <code>/unity-build/Build/*</code>, never <code>Content-Encoding</code>).</li>
+<li><strong>Footgun — do NOT set <code>Content-Encoding: br</code>.</strong> That is only correct for Brotli builds
+    <em>without</em> decompression fallback. Combining <code>Content-Encoding: br</code> with fallback-on makes
+    the browser pre-decompress and then Unity decompress again, producing garbage and a broken
+    player. Leave the headers in <code>vercel.json</code> as they are.</li>
+<li><strong>Color Space:</strong> this project is <strong>Linear</strong> (<code>m_ActiveColorSpace: 1</code>). WebGL 2.0 supports
+  Linear, so you can keep it. If you ever target the old WebGL 1.0 path you'd be forced to
+  Gamma — not relevant here, keep <strong>Linear</strong>.</li>
+<li><strong>Other Settings ▸ Rendering:</strong> confirm <strong>WebGL 2.0</strong> is in the Graphics APIs list (drop
+  WebGL 1.0). Disable features the scene doesn't need to shrink the build.</li>
+<li>Optional: set <strong>Resolution and Presentation</strong> to a default canvas, but the landing page
+  controls sizing via CSS, so this is cosmetic.</li>
+</ul>
+<hr>
+<h2 id="4-confirm-the-scene-in-build-settings"><a class="toclink" href="#4-confirm-the-scene-in-build-settings">4. Confirm the scene in Build Settings</a></h2>
+<p>In Build Settings / the WebGL Build Profile, <strong>Scenes In Build</strong> should contain exactly the
+scene you want to ship:</p>
+<ul>
+<li><strong>Route A:</strong> <code>Assets/withmap.unity</code> (now URP).</li>
+<li><strong>Route B:</strong> <code>Assets/withmap_WebGL.unity</code> (the URP/web copy). Make sure the HDRP
+  <code>withmap.unity</code> is <strong>unchecked / removed</strong> from the WebGL profile.</li>
+</ul>
+<p>The scene at the top of the enabled list is the one that loads first.</p>
+<hr>
+<h2 id="5-build-output-directory-must-be-exactly-this"><a class="toclink" href="#5-build-output-directory-must-be-exactly-this">5. Build — OUTPUT DIRECTORY MUST BE EXACTLY THIS</a></h2>
+<p>Click <strong>Build</strong> and choose this output folder:</p>
+<pre><code>/mnt/c/Users/Mohammed Awad/Arcado Rd/web/unity-build/
+</code></pre>
+<blockquote>
+<p>The landing page auto-detects the build at <code>web/unity-build/Build/</code>. If you build anywhere
+else, the page stays on the screenshot-tour fallback. Do not rename the <code>Build/</code> subfolder.</p>
+</blockquote>
+<p>Let it finish (WebGL builds are slow). <strong>Do not</strong> use "Build And Run" for the final artifact
+— that drops it in a temp location; use plain <strong>Build</strong> pointed at the folder above.</p>
+<hr>
+<h2 id="6-expected-output"><a class="toclink" href="#6-expected-output">6. Expected output</a></h2>
+<p>After a successful build, <code>web/unity-build/</code> should look like:</p>
+<pre><code>web/unity-build/
+├── index.html              ← Unity's own test page (the landing page does NOT use this)
+└── Build/
+    ├── unity-build.loader.js      ← the loader the landing page looks for
+    ├── unity-build.framework.js   (or .framework.js.br / .framework.js.unityweb)
+    ├── unity-build.wasm           (or .wasm.br / .wasm.unityweb)
+    └── unity-build.data           (or .data.br / .data.unityweb)
+</code></pre>
+<p>Notes:</p>
+<ul>
+<li>The <strong>base filename</strong> matches the build folder name. If your folder is <code>unity-build</code>, the
+  loader is <code>unity-build.loader.js</code>. If you named it differently, the loader name changes to
+  match — <strong>the landing page's loader.js auto-discovers the <code>*.loader.js</code> regardless of its
+  exact name</strong>, so either works, but keeping it <code>unity-build</code> is simplest.</li>
+<li>With <strong>Brotli</strong> the heavy files gain a <code>.br</code> suffix (<code>*.wasm.br</code>, <code>*.data.br</code>,
+  <code>*.framework.js.br</code>). With <strong>Disabled</strong> there is no suffix. The <code>*.loader.js</code> is always
+  uncompressed plain JS — that's the file the page probes for.</li>
+<li>A <code>StreamingAssets/</code> or <code>TemplateData/</code> folder may also appear; harmless, leave them.</li>
+</ul>
+<hr>
+<h2 id="7-how-the-landing-page-picks-it-up-no-code-change-needed"><a class="toclink" href="#7-how-the-landing-page-picks-it-up-no-code-change-needed">7. How the landing page picks it up (no code change needed)</a></h2>
+<p>The player section in <code>index.html</code> runs <code>loader.js</code> on load. It:</p>
+<ol>
+<li><code>fetch(..., { method: 'HEAD' })</code> probes <code>unity-build/Build/unity-build.loader.js</code>.</li>
+<li><strong>If found</strong> → injects that loader script, calls <code>createUnityInstance(...)</code> into the 16:9
+   canvas, and shows the <strong>Launch</strong> overlay. The user clicks Launch to start the real build.</li>
+<li><strong>If absent</strong> (404 / network error) → leaves the <strong>screenshot-tour fallback</strong> visible with
+   the <em>"Interactive walkthrough — live build deploying soon"</em> badge. No fake "playable"
+   claim is shown when there is no build.</li>
+</ol>
+<p>So the deploy flow is just: build into <code>web/unity-build/</code>, commit/upload that folder, redeploy.
+Nothing in <code>index.html</code> has to change.</p>
+<hr>
+<h2 id="8-local-test-before-deploying"><a class="toclink" href="#8-local-test-before-deploying">8. Local test before deploying</a></h2>
+<p>From the <code>web/</code> directory, serve over HTTP (WebGL will not run from a <code>file://</code> URL):</p>
+<pre><code class="language-bash">cd &quot;/mnt/c/Users/Mohammed Awad/Arcado Rd/web&quot;
+python3 -m http.server 8080
+# open http://localhost:8080/  → player section should now show Launch instead of the fallback
+</code></pre>
+<p>If you built with <strong>Brotli</strong> and the browser console complains about decompression / MIME
+type on a plain <code>http.server</code>, either (a) rebuild with <strong>Compression = Disabled</strong> for local
+testing, or (b) enable <strong>Decompression Fallback</strong> in Player Settings, or (c) test on Vercel
+where the headers are set correctly.</p>
+<hr>
+<h2 id="9-deploy"><a class="toclink" href="#9-deploy">9. Deploy</a></h2>
+<p>Copy / commit the populated <code>web/unity-build/</code> folder alongside <code>index.html</code> and redeploy the
+static site (the showcase currently deploys via Vercel CLI). Once <code>unity-build/Build/</code> is live,
+the player section upgrades itself to the real walkthrough automatically.</p>
+<blockquote>
+<p><strong>Git LFS:</strong> <code>public/unity-build/Build/WebGL.data.unityweb</code> (~95 MB) is tracked by
+Git LFS (see <code>.gitattributes</code>) because it sits right under GitHub's 100 MB hard limit.
+On a fresh machine run <code>git lfs install</code> once; after that, commit rebuilt data files
+exactly like any other file. The Vercel project has Git LFS enabled, so deploys pull
+the real file, not the pointer.</p>
+</blockquote>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>WEBGL_BUILD_GUIDE.md</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>

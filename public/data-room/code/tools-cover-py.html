@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2F5D3A">
+<title>Sheet C-0.0 cover, sheet index and vicinity map — Arcado Springs data room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%232F5D3A'/%3E%3Cpath%20d='M16%206l8%2020H8z'%20fill='none'%20stroke='%23C9B896'%20stroke-width='2.4'%20stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/data-room/assets/doc.css">
+</head>
+<body>
+<a class="skip-link" href="#doc">Skip to document</a>
+<header class="dochead">
+  <div class="dochead-in">
+    <a class="dochead-back" href="/data-room.html">&larr; Data room</a>
+    <span class="dochead-brand">Arcado <span>Springs</span></span>
+    <span class="tier tier-unlisted">Shareable</span>
+  </div>
+</header>
+<main class="docwrap">
+  <article class="doc" id="doc">
+    <p class="doc-kicker">toolchain</p>
+    <div class="doc-meta">Python</div>
+    
+    <h1>Sheet C-0.0 cover, sheet index and vicinity map</h1><p class="src-note">Python · 1,170 lines · <a href="/data-room/src/submission/tools/cover.py">download the raw file</a></p><pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Sheet C-0.0 &quot;COVER SHEET, SHEET INDEX AND VICINITY MAP&quot; — The Cottages at Arcado Springs.
+
+    python3 tools/cover.py        -&gt;  drawings/cover.svg + drawings/cover.png
+
+ARCH D 36 x 24 in.  This is item M5 of audit-2026-09-03/completeness.md and the C-0.0 row of
+audit-2026-09-03/drawing-standards.md section 3.1, and it is the &quot;Cover Page&quot; the City of Lilburn
+Site Development Plan Review Checklist section 1.e.1 asks for:
+
+    &quot;Cover Page - Project name and use(s), address and District, Land Lot and Parcel Number(s) or
+     PIN in title block; add owner, 24 hr contact, designer and all professional names, addresses,
+     email and phone contacts; Sheet Index; site location map, zoning and proposed use data&quot;
+
+WHERE EVERYTHING COMES FROM — nothing on this sheet is a hand-typed coordinate or a hand-typed count
+    data/layout.json            lot count, density, open space, disturbed area, lane length, frontage
+                                (regenerated 2026-09-03 by tools/siteplan.py — read fresh at run
+                                time, never quoted from an older document)
+    data/plans.json             conditioned areas and body dimensions of Plan A and Plan B
+    data/site-context-local.json    street centrelines, adjoining tax parcels, zoning polygons and
+                                streams, already in the site-local (u, v) system, from Gwinnett GIS
+    tools/sitebase.py           the boundary ring, the palette, the sheet primitives, the disclaimer
+                                and the canonical marker (imported; NOT modified)
+    drawings/*.svg              the SHEET INDEX is built by listing the files that actually exist at
+                                run time, so the index can never claim a sheet the set does not hold
+
+THE TWO MAPS ARE DRAWN NORTH-UP, NOT IN THE SITE-LOCAL SYSTEM
+    Every other C-sheet is drawn in the site-local (u, v) frame with grid north 28 deg 43&#x27; above the
+    +u axis.  A cover-sheet vicinity map has one job — orientation — so both maps here are rotated
+    into grid east / grid north:
+
+        E = -sin(28.72 deg) * u + cos(28.72 deg) * v
+        N =  cos(28.72 deg) * u + sin(28.72 deg) * v
+
+    (checked against sitebase.lonlat_of(): 1,722 ft of u gives 1,455 ft of northing and -928 ft of
+    easting, which matches the lat/lon of the rear line to better than 5 ft.)
+
+WHY THIS FILE DOES NOT CALL sitebase.sheet()
+    sitebase.sheet() is built for a 1&quot; = 60&#x27; plan sheet: it opens a fixed 2,388 x 804-pt plan window,
+    prints a header line over it and queues a watermark reading &quot;EXISTING CONDITIONS OF RECORD, NOT A
+    SURVEY&quot;.  None of that belongs on a cover.  _frame() below reproduces sitebase&#x27;s ARCH D border,
+    title-block cell grid, type sizes and disclaimer strip exactly — the sheets must look like one
+    set — but leaves the sheet body empty.  If the title block in sitebase.py changes, change it here.
+
+LETTERING
+    General notes 10.5 pt; tables, legend and map annotation 8.5-11 pt; block and banner titles
+    13-40 pt; title block and map furniture 7-8 pt.  That is a cap height of 0.068-0.107 in at full
+    size.  The set standard is a 1/8-in cap height; the volume of content the City&#x27;s checklist puts
+    on a cover page does not fit an ARCH D sheet at that size, so this sheet carries the largest
+    type that fits, and general note 17 says so on the sheet.  tw() measures real Helvetica/Arial
+    advance widths, so every block is fitted to its column rather than to a flat per-character
+    guess; build() prints a WARNING if any column overruns the disclaimer strip.
+
+DRAFT - NOT SEALED.  The seal blocks on this sheet are blank on purpose: Checklist section 1.e.1 asks
+for every professional&#x27;s name, and where none is engaged the blank line makes the omission visible
+instead of silent.
+&quot;&quot;&quot;
+import glob
+import math
+import os
+import re
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import sitebase as sb                                      # noqa: E402
+
+DRAW = sb.DRAW
+SHEET_NO = &#x27;C-0.0&#x27;
+SHEET_TITLE = &#x27;COVER SHEET, SHEET INDEX AND VICINITY MAP&#x27;
+SELF_FILE = &#x27;cover.svg&#x27;
+
+# --------------------------------------------------------------------------- north-up transform
+_A = math.radians(sb.NORTH_DEG)
+_S, _C = math.sin(_A), math.cos(_A)
+
+
+def EN(p):
+    &quot;&quot;&quot;site-local (u, v) feet  -&gt;  (grid east, grid north) feet, origin at the Arcado Rd corner.&quot;&quot;&quot;
+    return (-_S * p[0] + _C * p[1], _C * p[0] + _S * p[1])
+
+
+def ENs(path):
+    return [EN(p) for p in path]
+
+
+# --------------------------------------------------------------------------- live package numbers
+L = sb.LAYOUT
+M = L[&#x27;metrics&#x27;]
+PLANS = sb._load(&#x27;plans.json&#x27;)[&#x27;plans&#x27;]
+SW_ = L[&#x27;stormwater&#x27;]
+
+LOTS = M[&#x27;lots&#x27;]
+DENS_DEED, DENS_GIS = M[&#x27;density_du_ac_deeded&#x27;], M[&#x27;density_du_ac_gis&#x27;]
+GIS_SF, GIS_AC, DEED_AC = M[&#x27;boundary_sf&#x27;], M[&#x27;acreage_gis_ac&#x27;], M[&#x27;acreage_deeded_ac&#x27;]
+DEED_SF = int(round(DEED_AC * 43560))
+OS_SF, OS_AC, OS_PCT = M[&#x27;open_space_sf&#x27;], M[&#x27;open_space_ac&#x27;], M[&#x27;open_space_pct_gis&#x27;]
+DISTURBED_AC = SW_[&#x27;disturbed_area&#x27;][&#x27;disturbed_ac&#x27;]
+LANE_FT = M[&#x27;lane_length_ft&#x27;]
+FRONTAGE_FT = M[&#x27;frontage_arcado_chord_ft&#x27;]
+LOT_SF = M[&#x27;lot_area_min_sf&#x27;]
+GUEST = L[&#x27;amenity&#x27;][&#x27;guest_spaces&#x27;] + L[&#x27;amenity&#x27;][&#x27;kiosk_spaces&#x27;]
+SEWER_EXT_FT = M[&#x27;sewer_ext_offsite_ft&#x27;]
+LANE_GRADE = M[&#x27;max_existing_lane_grade_pct&#x27;]
+
+PA, PB = PLANS[&#x27;A&#x27;], PLANS[&#x27;B&#x27;]
+COND_A, COND_B = PA[&#x27;areas&#x27;][&#x27;conditioned_sf&#x27;], PB[&#x27;areas&#x27;][&#x27;conditioned_sf&#x27;]
+BODY_A, BODY_B = PA[&#x27;overall_body_dims&#x27;][&#x27;label&#x27;], PB[&#x27;overall_body_dims&#x27;][&#x27;label&#x27;]
+RIDGE = max(PA[&#x27;roof&#x27;][&#x27;max_ridge_ft&#x27;], PB[&#x27;roof&#x27;][&#x27;max_ridge_ft&#x27;])
+
+FIRM = &#x27;13135C0114F, effective 2006-09-29&#x27;
+
+
+def fmt(n, d=0):
+    return format(round(n, d) if d else int(round(n)), &#x27;,.%df&#x27; % d)
+
+
+# --------------------------------------------------------------------------- text metrics
+# Liberation Sans is metric-compatible with Arial, which is metric-compatible with Helvetica, so
+# the Adobe Helvetica / Helvetica-Bold advance widths (per 1000 em, ASCII 32-126) measure this
+# sheet&#x27;s type exactly.  A flat &quot;0.56 em per character&quot; estimate is 15-20% wrong on capitalised
+# text, which is what leaves gaps after a run-in bold note head and pushes table cells out of
+# their columns.
+_ASCII_REG = (&#x27;278 278 355 556 556 889 667 191 333 333 389 584 278 333 278 278 &#x27;
+              &#x27;556 556 556 556 556 556 556 556 556 556 278 278 584 584 584 556 &#x27;
+              &#x27;1015 667 667 722 722 667 611 778 722 278 500 667 556 833 722 778 &#x27;
+              &#x27;667 778 722 667 611 722 667 944 667 667 611 278 278 278 469 556 &#x27;
+              &#x27;333 556 556 500 556 556 278 556 556 222 222 500 222 833 556 556 &#x27;
+              &#x27;556 556 333 500 278 556 500 722 500 500 500 334 260 334 584&#x27;)
+_ASCII_BLD = (&#x27;278 333 474 556 556 889 722 238 333 333 389 584 278 333 278 278 &#x27;
+              &#x27;556 556 556 556 556 556 556 556 556 556 333 333 584 584 584 611 &#x27;
+              &#x27;975 722 722 722 722 667 611 778 722 278 556 722 611 833 722 778 &#x27;
+              &#x27;667 778 722 667 611 722 667 944 667 667 611 333 278 333 584 556 &#x27;
+              &#x27;333 556 611 556 611 556 333 611 611 278 278 556 278 889 611 611 &#x27;
+              &#x27;611 611 389 556 333 611 556 778 556 556 500 389 280 389 584&#x27;)
+_EXTRA = {&#x27;\u2014&#x27;: 1000, &#x27;\u2013&#x27;: 556, &#x27;\u2019&#x27;: 191, &#x27;\u2018&#x27;: 191, &#x27;\u201c&#x27;: 355,
+          &#x27;\u201d&#x27;: 355, &#x27;\u00a7&#x27;: 556, &#x27;\u00d7&#x27;: 584, &#x27;\u2192&#x27;: 1000, &#x27;\u00b0&#x27;: 400}
+_WID = {False: {chr(32 + i): int(w) for i, w in enumerate(_ASCII_REG.split())},
+        True: {chr(32 + i): int(w) for i, w in enumerate(_ASCII_BLD.split())}}
+for _t in (_WID[False], _WID[True]):
+    _t.update(_EXTRA)
+
+
+def tw(text, size, bold=False):
+    &quot;&quot;&quot;Width of `text` at `size` points, in points.&quot;&quot;&quot;
+    t = _WID[bool(bold)]
+    return size * sum(t.get(ch, 556) for ch in str(text)) / 1000.0
+
+
+def wrap_w(text, size, width, bold=False):
+    &quot;&quot;&quot;Greedy word wrap to a measured width in points.&quot;&quot;&quot;
+    out, cur = [], &#x27;&#x27;
+    for w in str(text).split():
+        cand = (cur + &#x27; &#x27; + w).strip()
+        if cur and tw(cand, size, bold) &gt; width:
+            out.append(cur)
+            cur = w
+        else:
+            cur = cand
+    if cur:
+        out.append(cur)
+    return out or [&#x27;&#x27;]
+
+
+# ============================================================================ THE SHEET INDEX
+# Explicit file -&gt; sheet-number table.  It is deliberately the same table tools/transmittal.py uses
+# to build docs/00, so that the drawing index and the filing transmittal can never disagree,
+# extended with the four sheets that audit-2026-09-03/drawing-standards.md section 3.1 names and the
+# transmittal omits.  A row with no file, or whose file is absent from drawings/ at run time, prints
+# NOT ISSUED.
+SHEETS = [
+    (&#x27;C-0.0&#x27;, &#x27;Cover Sheet, Sheet Index and Vicinity Map&#x27;, &#x27;cover.svg&#x27;, &#x27;ARCH D 36 x 24&#x27;, &#x27;As noted&#x27;),
+    (&#x27;C-1.0&#x27;, &#x27;Existing Conditions, Boundary and Topographic Survey&#x27;, &#x27;existing-conditions.svg&#x27;,
+     &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 60\&#x27;&#x27;),
+    (&#x27;C-1.1&#x27;, &#x27;Demolition and Tree Protection Plan&#x27;, None, &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 60\&#x27;&#x27;),
+    (&#x27;C-2.0&#x27;, &#x27;Master Concept Plan - Overall&#x27;, &#x27;mcp-sheet.svg&#x27;, &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 60\&#x27;&#x27;),
+    (&#x27;C-2.1&#x27;, &#x27;Master Concept Plan - Enlargement, Block A&#x27;, &#x27;mcp-enlargement-a.svg&#x27;,
+     &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 30\&#x27;&#x27;),
+    (&#x27;C-2.2&#x27;, &#x27;Master Concept Plan - Enlargement, Block B&#x27;, &#x27;mcp-enlargement-b.svg&#x27;,
+     &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 30\&#x27;&#x27;),
+    (&#x27;C-2.3&#x27;, &#x27;Entry, Frontage and Amenity Enlargement&#x27;, &#x27;entry-enlargement.svg&#x27;,
+     &#x27;ARCH C 24 x 18&#x27;, &#x27;1&quot; = 20\&#x27;&#x27;),
+    (&#x27;C-2.4&#x27;, &#x27;Fallback Lot-Depth Exhibit - 50 x 82-ft Lots&#x27;, &#x27;fallback-layout.svg&#x27;,
+     &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 60\&#x27;&#x27;),
+    (&#x27;C-3.0&#x27;, &#x27;Grading, Drainage and Stormwater Concept&#x27;, &#x27;grading-drainage.svg&#x27;,
+     &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 60\&#x27;&#x27;),
+    (&#x27;C-3.1&#x27;, &#x27;Stormwater Details and Sections&#x27;, None, &#x27;ARCH C 24 x 18&#x27;, &#x27;As noted&#x27;),
+    (&#x27;C-4.0&#x27;, &#x27;Utility and Phasing Concept&#x27;, &#x27;utility-phasing.svg&#x27;, &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 60\&#x27;&#x27;),
+    (&#x27;C-4.1&#x27;, &#x27;Sanitary Sewer Profiles&#x27;, None, &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 50\&#x27; H / 5\&#x27; V&#x27;),
+    (&#x27;C-5.0&#x27;, &#x27;Private Lane Plan and Profile&#x27;, None, &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 50\&#x27; H / 5\&#x27; V&#x27;),
+    (&#x27;C-6.0&#x27;, &#x27;Phasing, Block and Open Space Exhibit&#x27;, &#x27;phasing-openspace.svg&#x27;,
+     &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 60\&#x27;&#x27;),
+    (&#x27;C-7.0&#x27;, &#x27;Landscape, Buffer and Tree Protection Concept&#x27;, &#x27;landscape-buffer.svg&#x27;,
+     &#x27;ARCH D 36 x 24&#x27;, &#x27;1&quot; = 60\&#x27;&#x27;),
+    (&#x27;C-8.0&#x27;, &#x27;Civil Details&#x27;, &#x27;civil-details.svg&#x27;, &#x27;ARCH D 36 x 24&#x27;, &#x27;As noted&#x27;),
+    (&#x27;A-1.1&#x27;, &#x27;Plan A &quot;The Springbrook&quot; - Floor Plan&#x27;, &#x27;plan-a-sheet.svg&#x27;, &#x27;ARCH C 24 x 18&#x27;,
+     &#x27;3/16&quot; = 1\&#x27;-0&quot;&#x27;),
+    (&#x27;A-1.2&#x27;, &#x27;Plan B &quot;The Laurel&quot; - Floor Plan&#x27;, &#x27;plan-b-sheet.svg&#x27;, &#x27;ARCH C 24 x 18&#x27;,
+     &#x27;3/16&quot; = 1\&#x27;-0&quot;&#x27;),
+    (&#x27;A-2.1&#x27;, &#x27;Plan A - Exterior Elevations (four sides)&#x27;, &#x27;plan-a-elev.svg&#x27;, &#x27;ARCH C 24 x 18&#x27;,
+     &#x27;3/16&quot; = 1\&#x27;-0&quot;&#x27;),
+    (&#x27;A-2.2&#x27;, &#x27;Plan B - Exterior Elevations (four sides)&#x27;, &#x27;plan-b-elev.svg&#x27;, &#x27;ARCH C 24 x 18&#x27;,
+     &#x27;3/16&quot; = 1\&#x27;-0&quot;&#x27;),
+    (&#x27;A-2.3&#x27;, &#x27;Exterior Colour Schemes and Materials&#x27;, &#x27;plan-colors.svg&#x27;, &#x27;ARCH C 24 x 18&#x27;,
+     &#x27;3/16&quot; = 1\&#x27;-0&quot;&#x27;),
+    (&#x27;A-3.0&#x27;, &#x27;Clubhouse, Mail Kiosk and Entry Monument Sign&#x27;, &#x27;amenity-sheet.svg&#x27;,
+     &#x27;ARCH C 24 x 18&#x27;, &#x27;As noted&#x27;),
+    (&#x27;A-4.0&#x27;, &#x27;Typical Lot - Plan A&#x27;, &#x27;plan-a-lot.svg&#x27;, &#x27;ARCH C 18 x 24 (portrait)&#x27;, &#x27;1&quot; = 10\&#x27;&#x27;),
+    (&#x27;A-4.1&#x27;, &#x27;Typical Lot - Plan B&#x27;, &#x27;plan-b-lot.svg&#x27;, &#x27;ARCH C 18 x 24 (portrait)&#x27;, &#x27;1&quot; = 10\&#x27;&#x27;),
+]
+
+# Files that live in drawings/ but are exhibits rather than sheets of the bound set.
+EXHIBITS = {
+    &#x27;plan-a.svg&#x27;: &#x27;Plan A floor plan, tight crop — working exhibit for docs/09 and the web page&#x27;,
+    &#x27;plan-b.svg&#x27;: &#x27;Plan B floor plan, tight crop — working exhibit for docs/09 and the web page&#x27;,
+    &#x27;mcp-web.svg&#x27;: &#x27;Master concept plan, screen version — public web exhibit, not a plot sheet&#x27;,
+}
+
+_NUM = r&#x27;[A-Z]{1,2}-[0-9](?:\.[0-9])?&#x27;
+_PAT = (re.compile(r&#x27;&lt;title&gt;[^&lt;]*?Sheet\s+(%s)&#x27; % _NUM, re.I),
+        re.compile(r&#x27;&lt;text\b(?=[^&gt;]*font-weight=&quot;bold&quot;)[^&gt;]*&gt;\s*(%s)\s*&lt;/text&gt;&#x27; % _NUM),
+        re.compile(r&#x27;Sheet\s+(%s)\b&#x27; % _NUM))
+
+
+def titleblock_number(path):
+    &quot;&quot;&quot;The sheet number the file&#x27;s OWN title block carries, or &#x27;&#x27; if it declares none.
+
+    Read so that the index can disclose where an issued sheet still carries a provisional number
+    from an earlier numbering (existing-conditions.svg says &quot;C-0&quot;; plan-a-sheet.svg says &quot;A-1&quot;).
+    The index number governs; the discrepancy is shown rather than silently overwritten.
+    &quot;&quot;&quot;
+    try:
+        txt = open(path, encoding=&#x27;utf-8&#x27;, errors=&#x27;replace&#x27;).read()
+    except OSError:
+        return &#x27;&#x27;
+    for p in _PAT:
+        m = p.search(txt)
+        if m:
+            return m.group(1)
+    return &#x27;&#x27;
+
+
+def index_rows():
+    &quot;&quot;&quot;(rows for the index table, issued count, list of unclaimed .svg files in drawings/).
+
+    This sheet counts as issued whatever the state of drawings/ when the script starts: it is being
+    written by this run, so a clean rebuild must not print &quot;NOT ISSUED&quot; against its own row.
+    &quot;&quot;&quot;
+    present = {os.path.basename(p) for p in glob.glob(os.path.join(DRAW, &#x27;*.svg&#x27;))}
+    present.add(SELF_FILE)
+    claimed, rows, issued = set(), [], 0
+    for no, title, fn, size, scale in SHEETS:
+        if fn:
+            claimed.add(fn)
+        if fn and fn in present:
+            issued += 1
+            png = os.path.exists(os.path.join(DRAW, fn[:-4] + &#x27;.png&#x27;)) or fn == SELF_FILE
+            status = &#x27;ISSUED&#x27; if png else &#x27;ISSUED (SVG)&#x27;
+            tb = no if fn == SELF_FILE else titleblock_number(os.path.join(DRAW, fn))
+            tb = (&#x27;=&#x27; if tb == no else (tb or &#x27;--&#x27;))
+            fname = fn[:-4]
+        else:
+            status, tb, fname = &#x27;NOT ISSUED&#x27;, &#x27;--&#x27;, &#x27;--&#x27;
+        rows.append([no, title, &#x27;%s · %s&#x27; % (size, scale), status, fname, tb])
+    return rows, issued, sorted(present - claimed)
+
+
+# ============================================================================ TEXT BLOCKS
+_BLANK = &#x27;____________________&#x27;
+_TBE = &#x27;NOT YET ENGAGED  ________________&#x27;   # the visible blank line Checklist §1.e.1 asks for
+CONTACTS = [
+    [&#x27;Owner / applicant&#x27;, &#x27;Mohammed Awad — owner of record, PINs R6123 033 and R6123 015&#x27;,
+     &#x27;4541 Arcado Rd SW, Lilburn, GA 30047-3968&#x27;, _BLANK],
+    [&#x27;Co-applicant owner&#x27;, &#x27;Santos C. Mendez and Lesvia Rosario Roblero de Leon — owners of &#x27;
+     &#x27;record, PINs R6123 014 and R6123 162&#x27;, &#x27;4535 Arcado Rd SW, Lilburn, GA 30047-3968&#x27;, _BLANK],
+    [&#x27;24-hour contact&#x27;, &#x27;Mohammed Awad — 24-hour emergency contact for the site&#x27;,
+     &#x27;4541 Arcado Rd SW, Lilburn, GA 30047-3968&#x27;, _BLANK],
+    [&#x27;Designer / preparer&#x27;, &#x27;Owner-prepared, AI-assisted drafting. NOT A DESIGN PROFESSIONAL.&#x27;,
+     &#x27;As above&#x27;, _BLANK],
+    [&#x27;Land surveyor (RLS)&#x27;, _TBE, _BLANK, _BLANK],
+    [&#x27;Civil engineer (PE)&#x27;, _TBE, _BLANK, _BLANK],
+    [&#x27;Architect (GA RA)&#x27;, _TBE, _BLANK, _BLANK],
+    [&#x27;Landscape architect&#x27;, _TBE, _BLANK, _BLANK],
+    [&#x27;Geotech. engineer&#x27;, _TBE, _BLANK, _BLANK],
+    [&#x27;Stream delineation&#x27;, _TBE, _BLANK, _BLANK],
+    [&#x27;Traffic engineer&#x27;, _TBE, _BLANK, _BLANK],
+    [&#x27;Attorney&#x27;, _TBE, _BLANK, _BLANK],
+    [&#x27;City contact&#x27;, &#x27;Reid Turner, Planning Director, City of Lilburn&#x27;,
+     &#x27;340 Main St, Lilburn, GA 30047&#x27;, &#x27;(770) 279-3715\nreturner@cityoflilburn.com&#x27;],
+]
+
+
+def zoning_rows():
+    return [
+        [&#x27;Existing zoning&#x27;, &#x27;R-1, Single-Family Residential, City of Lilburn — all four parcels &#x27;
+                            &#x27;(Ord. 2023-603 §401)&#x27;],
+        [&#x27;Proposed zoning&#x27;, &#x27;R-2, Medium-Density Residential, City of Lilburn (Ord. 2023-603 §402)&#x27;],
+        [&#x27;Proposed use&#x27;, &#x27;&quot;Single-family (cluster-cottage, creative lot configuration)&quot; — P &#x27;
+                         &#x27;(permitted by right) in R-2, §602 Use Table. No special use permit; no &#x27;
+                         &#x27;commercial, attached or multi-family use.&#x27;],
+        [&#x27;Occupancy&#x27;, &#x27;55+ Housing for Older Persons (42 U.S.C. §3607(b)(2)(C); 24 CFR Part 100 &#x27;
+                      &#x27;Subpart E) by voluntary condition and recorded covenants. 0 students &#x27;
+                      &#x27;generated.&#x27;],
+        [&#x27;Gross site area&#x27;, &#x27;%s ac deeded (%s SF) = 0.99 + 2.00 + 2.00 + 4.45 ac; %.3f ac (%s SF) &#x27;
+                            &#x27;GIS-calculated. THE SEALED RLS SURVEY GOVERNS.&#x27;
+                            % (DEED_AC, fmt(DEED_SF), GIS_AC, fmt(GIS_SF))],
+        [&#x27;Lots / dwelling units&#x27;, &#x27;%d one-story detached cottage homes on fee-simple lots; %d plan &#x27;
+                                  &#x27;types; HOA-maintained yards&#x27; % (LOTS, len(PLANS))],
+        [&#x27;Gross density&#x27;, &#x27;PROVIDED %.2f du/ac deeded (%.2f GIS) — REQUIRED max. 8.0 du/ac &#x27;
+                          &#x27;(Table 4.1, R-2)&#x27; % (DENS_DEED, DENS_GIS)],
+        [&#x27;Lot area / width /\ndepth&#x27;, &#x27;PROVIDED %s SF typical, 50\&#x27;-0&quot; x 100\&#x27;-0&quot; — REQUIRED min. &#x27;
+                                      &#x27;3,000 SF, 50 ft, 100 ft (Table 4.1, cottage home)&#x27;
+                                      % fmt(LOT_SF)],
+        [&#x27;Setbacks&#x27;, &#x27;PROVIDED / REQUIRED front 15\&#x27;-0&quot; from the lane tract and 50\&#x27;-0&quot; from the &#x27;
+                     &#x27;Arcado Rd R/W; side 5\&#x27;-0&quot;; rear 20\&#x27;-0&quot;; accessory 5\&#x27;-0&quot; (Table 4.1)&#x27;],
+        [&#x27;Buffer abutting R-1&#x27;, &#x27;PROVIDED / REQUIRED 20\&#x27;-0&quot; undisturbed on every line but the &#x27;
+                                &#x27;Arcado Rd frontage, within the lots as a recorded easement &#x27;
+                                &#x27;(§313(1)) — see note 14&#x27;],
+        [&#x27;Height / floor area&#x27;, &#x27;PROVIDED 1 story, ridge %.1f ft; %s and %s SF conditioned (%s and &#x27;
+                                &#x27;%s bodies) — REQUIRED max. 40 ft, min. 1,000 SF heated&#x27;
+                                % (RIDGE, fmt(COND_A), fmt(COND_B), BODY_A, BODY_B)],
+        [&#x27;Parking&#x27;, &#x27;PROVIDED %d on lot (2-car garage + 2-car drive) + %d guest and kiosk spaces &#x27;
+                    &#x27;incl. 1 van-accessible — REQUIRED %d (Table 8.1, 2 per DU, no maximum)&#x27;
+                    % (LOTS * 4, GUEST, LOTS * 2)],
+        [&#x27;Common open space&#x27;, &#x27;PROVIDED %s SF = %.2f ac = %.1f%% of gross, in common tracts. &#x27;
+                              &#x27;Development Regs. §5.9 does not apply below 50 ac (note 13), so &#x27;
+                              &#x27;this is voluntary.&#x27; % (fmt(OS_SF), OS_AC, OS_PCT)],
+        [&#x27;Streets&#x27;, &#x27;One private lane %s ft long in a private tract; all components to meet the &#x27;
+                    &#x27;minimum public-street standards (Checklist §4.s). None offered for dedication.&#x27;
+                    % fmt(LANE_FT)],
+        [&#x27;Acreage disturbed&#x27;, &#x27;%.2f ac on site. Off-site: the Phase-2 sewer corridor, about %s ft, &#x27;
+                              &#x27;quantified on Sheet C-4.0 (Checklist §4.e).&#x27;
+                              % (DISTURBED_AC, fmt(SEWER_EXT_FT))],
+        [&#x27;Adjoining zoning&#x27;, &#x27;R-1, City of Lilburn, single-family, on every property line. Nearest &#x27;
+                             &#x27;R-2 about 106 ft NE; unincorporated Gwinnett R-100 about 314 ft. &#x27;
+                             &#x27;Owners: docs/06 and Sheet C-1.0.&#x27;],
+        [&#x27;Water and sewer&#x27;, &#x27;Gwinnett County Dept. of Water Resources — water and sanitary sewer &#x27;
+                            &#x27;only. All other utilities by private providers (note 11).&#x27;],
+        [&#x27;Frontage / access&#x27;, &#x27;%s ft on Arcado Rd SW (chord); one entrance in the SW third of the &#x27;
+                              &#x27;frontage, about 252 ft from the Arcadia Pl centreline. No lot takes &#x27;
+                              &#x27;access from Arcado Rd.&#x27; % fmt(FRONTAGE_FT, 1)],
+    ]
+
+
+NOTES = [
+    (&#x27;STATUS AND SEALS.&#x27;, &#x27;This set is owner-prepared from public records for pre-application &#x27;
+     &#x27;review and the rezoning hearing. DRAFT — NOT SEALED: no sheet is sealed by a Georgia &#x27;
+     &#x27;registered land surveyor, professional engineer, architect or landscape architect, and the &#x27;
+     &#x27;seal blocks are blank because none is yet engaged. Every statement of conformity reads &#x27;
+     &#x27;&quot;appears consistent with&quot;; none is a certification of compliance. Final plan sets must be &#x27;
+     &#x27;sealed, signed and dated across the seal by the licensed registered party responsible for &#x27;
+     &#x27;the contents of the sheet (Georgia Board Rule 180-12-.02; Checklist §1.e).&#x27;),
+
+    (&#x27;APPROVAL NOTES — required on the cover by Checklist §4.a, verbatim:&#x27;,
+     &#x27;&quot;APPROVAL OF THESE PLANS DOES NOT RELIEVE THE OWNER, DEVELOPER, AND/OR CONTRACTOR FROM &#x27;
+     &#x27;COMPLYING WITH ALL APPLICABLE RULES, REGULATIONS, AND ORDINANCES.&quot;   &quot;DEVELOPER TO PROVIDE &#x27;
+     &#x27;TO CITY CERTIFIED DETENTION POST-CONSTRUCTION (RECORD) DRAWINGS WITH THE SUBMITTAL OF THE &#x27;
+     &#x27;FINAL PLAT OR ONE WEEK PRIOR TO REQUESTING A CERTIFICATE OF OCCUPANCY, SO THAT THE &#x27;
+     &#x27;POST-CONSTRUCTION CONDITIONS MAY BE VERIFIED AND APPROVED. CERTIFIED RECORD DRAWINGS SHALL &#x27;
+     &#x27;INCLUDE TOPOGRAPHY OF POND AND OUTLET STRUCTURE DETAIL USING POST-CONSTRUCTION SURVEY DATA. &#x27;
+     &#x27;USING RECORD DRAWINGS, PROVIDE A CERTIFIED HYDROLOGY REPORT VERIFYING POND VOLUMES AND PEAK &#x27;
+     &#x27;OUTFLOWS FROM REGULATED STORM EVENTS.&quot;&#x27;),
+
+    (&#x27;ZONING HISTORY AND CONDITIONS (Checklist §1.a, §4.b).&#x27;, &#x27;THERE ARE NO ZONING CONDITIONS ON &#x27;
+     &#x27;THIS PROPERTY. Zoning case no. RZ-2026-______ (assigned by the City); date of approval &#x27;
+     &#x27;__________; conditions __________. No special use permit, Zoning Board of Appeals variance &#x27;
+     &#x27;or administrative variance is of record on any of the four parcels, and no overlay district &#x27;
+     &#x27;applies. The only prior case is RZ-2025-01, a mixed-use request for 104 condominium units on &#x27;
+     &#x27;this assemblage, which the Planning Commission TABLED on 2025-08-28 on a defective legal &#x27;
+     &#x27;advertisement. It was never heard on its merits and never denied, so the twelve-month bar of &#x27;
+     &#x27;§1003-11 does not appear to apply — confirm the file status with the Planning Director.&#x27;),
+
+    (&#x27;FLOODPLAIN (Checklist §9 Floodplain a, b).&#x27;, &#x27;The property lies wholly in FEMA Zone X (area &#x27;
+     &#x27;of minimal flood hazard), FIRM panel %s (FEMA National Flood Hazard Layer; Gwinnett GIS). NO &#x27;
+     &#x27;SPECIAL FLOOD HAZARD AREA, FLOODWAY OR BASE FLOOD ELEVATION IS MAPPED ON THIS PROPERTY and &#x27;
+     &#x27;no development is proposed in a floodplain. The Gwinnett future-conditions floodplain &#x27;
+     &#x27;(www.gwinnettfloodplain.com) shall be checked before the Land Disturbance Permit; where one &#x27;
+     &#x27;exists, finished floors shall be at least 1 ft above the future-conditions elevation and 3 &#x27;
+     &#x27;ft above the 100-year base flood elevation (§9 Floodplain f). Lilburn Code Ch. 109 Art. III &#x27;
+     &#x27;governs.&#x27; % FIRM),
+
+    (&#x27;WETLANDS (Checklist §9 Wetlands a, b).&#x27;, &#x27;No wetland is mapped on the property by the U.S. &#x27;
+     &#x27;Fish and Wildlife Service National Wetlands Inventory. A field survey of any waters of the &#x27;
+     &#x27;United States shall be made with the boundary and topographic survey; any delineation shall &#x27;
+     &#x27;state its source and carry U.S. Army Corps of Engineers approval, and it is the owner\&#x27;s &#x27;
+     &#x27;responsibility to obtain any Corps permit required.&#x27;),
+
+    (&#x27;STREAM BUFFERS — required by Checklist §9 Buffered State Waters e and f, verbatim:&#x27;,
+     &#x27;&quot;STREAM BUFFERS ARE TO REMAIN IN A NATURAL AND UNDISTURBED CONDITION.&quot;   &quot;STREAM BUFFER &#x27;
+     &#x27;SHALL BE STAKED AND PROTECTED PRIOR TO LAND DISTURBANCE.&quot;   An unnamed order-0 headwater of &#x27;
+     &#x27;Jackson Creek (GAR030701030315; Georgia 2024 §303(d) list) reaches about 30 ft inside the SW &#x27;
+     &#x27;property line and ends on the property. The 25-ft state buffer (O.C.G.A. §12-7-6(b)(15)), &#x27;
+     &#x27;the 50-ft undisturbed buffer and the 75-ft impervious setback (Lilburn Code Ch. 109 Art. &#x27;
+     &#x27;VII) are labelled on Sheets C-1.0, C-2.0 and C-2.2 from the top of bank. TOP OF BANK IS &#x27;
+     &#x27;APPROXIMATE: the state waters shall be field-located and both banks delineated by a &#x27;
+     &#x27;qualified professional, and that delineation governs. No buffer variance is requested with &#x27;
+     &#x27;this rezoning.&#x27;),
+
+    (&#x27;SIGNS (Checklist §4.q).&#x27;, &#x27;One monument entry sign not over 32 SF is proposed at the Arcado &#x27;
+     &#x27;Rd entrance; its location, size and sight-triangle clearance are on Sheets C-2.3 and A-3.0. &#x27;
+     &#x27;NO WALL SIGNS ARE PROPOSED ON ANY DWELLING OR ON THE CLUBHOUSE. ALL SIGNS SHALL BE PERMITTED &#x27;
+     &#x27;SEPARATELY. A sign easement may be required.&#x27;),
+
+    (&#x27;MAIL DELIVERY (Checklist §4.r).&#x27;, &#x27;Mail will be delivered to a cluster box unit (CBU) kiosk &#x27;
+     &#x27;in the amenity tract inside the entrance, with protection from the elements, an accessible &#x27;
+     &#x27;route and four short-term spaces; detailed on Sheet A-3.0. THE LILBURN POST OFFICE GROWTH &#x27;
+     &#x27;MANAGER SHALL BE CONTACTED FOR MAIL DELIVERY AND MAILBOX REQUIREMENTS. A cluster mailbox &#x27;
+     &#x27;system may be required for the entire project and one street name may serve to assign all &#x27;
+     &#x27;house numbers.&#x27;),
+
+    (&#x27;GRADING — required by Checklist §10.a on the grading plan and on all soil-erosion, &#x27;
+     &#x27;sedimentation and pollution-control sheets, verbatim:&#x27;,
+     &#x27;&quot;MAXIMUM CUT OR FILL SLOPES IS 2H:1V&quot;   &quot;CITY OF LILBURN/GWINNETT COUNTY ASSUMES NO &#x27;
+     &#x27;RESPONSIBILITY FOR OVERFLOW OR EROSION OF NATURAL OR ARTIFICIAL DRAINS BEYOND THE EXTENT OF &#x27;
+     &#x27;THE STREET RIGHT-OF-WAY, OR FOR THE EXTENSION OF CULVERTS BEYOND THE POINT SHOWN ON THE &#x27;
+     &#x27;APPROVED AND RECORDED PLAN. THE CITY OF LILBURN/GWINNETT COUNTY DOES NOT ASSUME THE &#x27;
+     &#x27;RESPONSIBILITY FOR THE MAINTENANCE OF PIPES IN DRAINAGE EASEMENTS BEYOND THE CITY/COUNTY &#x27;
+     &#x27;RIGHT-OF-WAY.&quot;   &quot;STRUCTURES ARE NOT ALLOWED IN DRAINAGE EASEMENTS.&quot;&#x27;),
+
+    (&#x27;STREET GRADES.&#x27;, &#x27;Maximum street grade 12%%; grades of 12%% to 15%% require an &quot;As Graded&quot; &#x27;
+     &#x27;survey before installation of the curb (Checklist §7.k). Existing ground on the lane &#x27;
+     &#x27;alignment reaches %.1f%% — see Sheet C-5.0.&#x27; % LANE_GRADE),
+
+    (&#x27;UTILITIES (Checklist §4.d).&#x27;, &#x27;Gwinnett County Department of Water Resources provides water &#x27;
+     &#x27;and sanitary sewer only; electric, gas and telecommunication service is by the respective &#x27;
+     &#x27;private providers, and new electric distribution within the development will be underground. &#x27;
+     &#x27;PHASE 1 connects by gravity to the existing 8-in sewer already crossing this property &#x27;
+     &#x27;(manhole invert 927.13) and needs no extension. PHASE 2 needs an off-site gravity extension &#x27;
+     &#x27;of about %s ft to the Legends at Parkview 8-in main at invert 919.58. A private pump &#x27;
+     &#x27;station, force main or gravity sewer is NOT available: Gwinnett DWR\&#x27;s Standard Policy for &#x27;
+     &#x27;Private Developments (Condominiums, Townhomes and Subdivisions, rev. 9/2018) allows private &#x27;
+     &#x27;facilities &quot;only ... for commercial properties under single ownership within a development&quot;, &#x27;
+     &#x27;and a county station fails WSR-24 §1.3.1(A) because gravity is %s ft away, not &quot;more than &#x27;
+     &#x27;5,000 feet down gradient&quot;. A DWR sewer capacity certification is required. See Sheets C-4.0 &#x27;
+     &#x27;and C-4.1.&#x27; % (fmt(SEWER_EXT_FT), fmt(SEWER_EXT_FT))),
+
+    (&#x27;FIRE ACCESS.&#x27;, &#x27;One private lane about %s ft long, dead-ended at the NW terminus, 22 ft of &#x27;
+     &#x27;clear pavement, no parking, hammerhead turnarounds. SPECIAL APPROVAL OF A DEAD-END FIRE &#x27;
+     &#x27;APPARATUS ACCESS ROAD OVER 750 FT IS REQUESTED under IFC 2024 (GA) Appendix D103.4, Table &#x27;
+     &#x27;D103.4. Two access roads are NOT required: Ga. Comp. R. &amp; Regs. 120-3-3-.04 replaces &#x27;
+     &#x27;Appendix D107.1 and sets the trigger above 120 dwelling units, and %d are proposed. NFPA 13D &#x27;
+     &#x27;sprinklers in every dwelling are offered VOLUNTARILY and are not a code requirement. Codes: &#x27;
+     &#x27;the Georgia State Minimum Standard Codes effective 1 January 2026 (2024 IRC / IBC / IFC / &#x27;
+     &#x27;IPC / IMC / IFGC with the 2026 Georgia Amendments; 2023 NEC; 2015 IECC as amended).&#x27;
+     % (fmt(LANE_FT), LOTS)),
+
+    (&#x27;OPEN SPACE AND RECREATION AREAS.&#x27;, &#x27;Development Regulations §5.9.1 requires recreation land &#x27;
+     &#x27;in single-family detached subdivisions &quot;having a gross area of 50 acres or more&quot;. At %s &#x27;
+     &#x27;acres this development is below that threshold and §5.9 does not apply; the %.1f%% of common &#x27;
+     &#x27;open space shown is voluntary.&#x27; % (DEED_AC, OS_PCT)),
+
+    (&#x27;BUFFERS AND THE §313(1) READING.&#x27;, &#x27;The 20-ft undisturbed buffer required abutting R-1 &#x27;
+     &#x27;(Table 4.1, allowed dwelling types other than detached single-family) is held within the &#x27;
+     &#x27;lots as a recorded buffer easement in reliance on §313(1), &quot;Buffer requirements ... &#x27;
+     &#x27;supersede these minimum required yards&quot;. THIS READING IS TO BE CONFIRMED WITH THE PLANNING &#x27;
+     &#x27;DIRECTOR; Sheet C-2.4 carries the fallback layout, 50 x 82-ft lots with the buffer in a &#x27;
+     &#x27;separate common tract, if a separate tract is required.&#x27;),
+
+    (&#x27;DIMENSIONS, DATUM AND COORDINATES.&#x27;, &#x27;All dimensions are in US survey feet. Horizontal datum &#x27;
+     &#x27;Georgia State Plane West Zone (SR 2240), NAD83; vertical NAVD88. Sheets C-1.0 to C-8.0 are &#x27;
+     &#x27;drawn in a site-local system (+u along the strip on a bearing of N 28°43\&#x27; W from the Arcado &#x27;
+     &#x27;Rd R/W corner at 2,310,954.00 E / 1,411,431.50 N; +v across the strip toward the NE line). &#x27;
+     &#x27;THE TWO MAPS ON THIS SHEET ARE DRAWN NORTH-UP. Boundary geometry is Gwinnett GIS and is &#x27;
+     &#x27;DRAFT; topography is USGS 3DEP and is approximate. THE SEALED SURVEY GOVERNS.&#x27;),
+
+    (&#x27;SHEET INDEX INTEGRITY.&#x27;, &#x27;The sheet index is generated at plot time by listing the files &#x27;
+     &#x27;present in the package drawings/ directory and matching them against the sheet table in &#x27;
+     &#x27;tools/cover.py — the same table tools/transmittal.py uses for the filing transmittal. A row &#x27;
+     &#x27;marked NOT ISSUED is not in this set and must not be relied on. Where the &quot;T/B&quot; column shows &#x27;
+     &#x27;a number, that sheet\&#x27;s own title block still carries a provisional number from an earlier &#x27;
+     &#x27;numbering; THE NUMBER IN THIS INDEX GOVERNS and the sheet will be renumbered at the next &#x27;
+     &#x27;issue.&#x27;),
+
+    (&#x27;SCALES AND LETTERING.&#x27;, &#x27;A graphic scale and a north arrow are shown on each map here and on &#x27;
+     &#x27;every applicable sheet (Checklist §4.h); engineering scales on the C-sheets, architectural &#x27;
+     &#x27;on the A-sheets. DO NOT SCALE A REDUCED PRINT — use the graphic scale. Lettering on this &#x27;
+     &#x27;sheet is 10.5 pt in the general notes, 8.5 to 11 pt in the tables, legend and map &#x27;
+     &#x27;annotation, and 7 to 8 pt in the title block and map furniture — a cap height of 0.068 to &#x27;
+     &#x27;0.107 in at full size. The set standard is a 1/8-in cap height; the content this checklist &#x27;
+     &#x27;requires on a cover page does not fit an ARCH D sheet at that size, so this sheet carries &#x27;
+     &#x27;the largest type that fits.&#x27;),
+
+    (&#x27;BASIS AND SOURCES.&#x27;, &#x27;Gwinnett County GIS — parcels, zoning, streets, right-of-way, sewer, &#x27;
+     &#x27;water, hydrology, floodplain, soils, queried 2026-08-28; Gwinnett Tax Assessor 2026 &#x27;
+     &#x27;property-ownership file; USGS 3DEP; FEMA NFHL; Ride Gwinnett GTFS feed 2026-07-02; City of &#x27;
+     &#x27;Lilburn Zoning Ordinance 2023-603, 2026 Application Instructions, Site Development Plan &#x27;
+     &#x27;Review Checklist, 2024 Comprehensive Plan and the 2026 Comprehensive Plan Amendment &#x27;
+     &#x27;(transmitted to DCA 2026-07-13; adoption pending as of %s). Package files FACTS.md, &#x27;
+     &#x27;data/layout.json and data/plans.json, all read at plot time.&#x27; % sb.DATE),
+]
+
+# The eleven items of the City&#x27;s 2026 Application Instructions, and what answers each — the same
+# list tools/transmittal.py puts in docs/00, so the cover and the transmittal cannot disagree.
+SUBMITTAL = [
+    [&#x27;1  Application Form&#x27;, &#x27;docs/01-application-form-data.md&#x27;],
+    [&#x27;2  Application Fee&#x27;, &#x27;$1,250 — see APPLICATION DATA in the title banner above&#x27;],
+    [&#x27;3  Standards Governing the Zoning Power (§1003-7)&#x27;, &#x27;docs/04 — the six §1003-7 criteria&#x27;],
+    [&#x27;4  Conflict of Interest Form (§36-67A-3)&#x27;, &#x27;docs/07 — file with the application&#x27;],
+    [&#x27;5  Notarized owner signatures&#x27;, &#x27;docs/07 — two ownership groups&#x27;],
+    [&#x27;6  Letter of Intent&#x27;, &#x27;docs/03 — states the voluntary conditions offered&#x27;],
+    [&#x27;7  Legal Description (metes and bounds)&#x27;, &#x27;docs/05 — DRAFT; sealed RLS description governs&#x27;],
+    [&#x27;8  Site Plan&#x27;, &#x27;This drawing set; Sheet C-2.0 is the site plan proper&#x27;],
+    [&#x27;9  Boundary Survey&#x27;, &#x27;NOT INCLUDED — must be commissioned (Georgia RLS)&#x27;],
+    [&#x27;10  List of Adjoining Property Owners&#x27;, &#x27;docs/06 — re-pull on the filing date&#x27;],
+    [&#x27;11  Architectural Renderings and Elevations&#x27;, &#x27;docs/09 and Sheets A-1.1 to A-4.1&#x27;],
+]
+
+SEALS = [
+    (&#x27;GEORGIA REGISTERED LAND SURVEYOR&#x27;,
+     &#x27;Boundary survey plat, metes-and-bounds legal description and topographic survey — Ord. &#x27;
+     &#x27;2023-603 §1003-4.3 and §1003-4.4; Checklist §1.e.2. Sheet C-1.0.&#x27;),
+    (&#x27;GEORGIA REGISTERED PROFESSIONAL ENGINEER&#x27;,
+     &#x27;Grading, drainage, certified stormwater report, sewer, water, private street design and &#x27;
+     &#x27;retaining walls — Checklist §1.e.7-9, §8.a, §11.a. Sheets C-3.0 to C-5.0 and C-8.0.&#x27;),
+    (&#x27;GEORGIA REGISTERED ARCHITECT&#x27;,
+     &#x27;Dwelling and clubhouse plans and elevations — 2026 Application Instructions item (11). &#x27;
+     &#x27;Sheets A-1.1 to A-4.1.&#x27;),
+    (&#x27;GA REGISTERED LANDSCAPE ARCHITECT / FORESTER / ARBORIST&#x27;,
+     &#x27;Buffer and landscape plan, tree protection and preservation — Checklist §1.e.10 and §6.a. &#x27;
+     &#x27;Sheets C-1.1 and C-7.0.&#x27;),
+]
+
+REVISIONS = [[&#x27;0&#x27;, sb.DATE, &#x27;Issued for pre-application review — DRAFT, not sealed&#x27;, &#x27;M.A.&#x27;]] + \
+            [[&#x27;&#x27;, &#x27;&#x27;, &#x27;&#x27;, &#x27;&#x27;] for _ in range(4)]
+
+# Legend — one entry per symbol drawn on the two maps, and no entry that is not drawn.
+LEGEND = [
+    (&#x27;site&#x27;, &#x27;&#x27;, 0, &#x27;&#x27;, &#x27;Subject property — the %s-ac assemblage to be rezoned R-1 → R-2&#x27; % DEED_AC),
+    (&#x27;line&#x27;, sb.C[&#x27;adj_line&#x27;], 0.5, &#x27;&#x27;, &#x27;Adjoining tax parcel (Gwinnett GIS) — vicinity map&#x27;),
+    (&#x27;line&#x27;, &#x27;#8a8a8a&#x27;, 0.8, &#x27;&#x27;, &#x27;Street centreline (Gwinnett GIS)&#x27;),
+    (&#x27;line&#x27;, &#x27;#333333&#x27;, 2.0, &#x27;&#x27;, &#x27;Arcado Rd SW / Killian Hill Rd — county collectors&#x27;),
+    (&#x27;line&#x27;, &#x27;#333333&#x27;, 1.2, &#x27;7 4&#x27;, &#x27;Centreline produced — not mapped in the source data&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;stream&#x27;], 1.4, &#x27;&#x27;, &#x27;Stream — state waters (top of bank approximate)&#x27;),
+    (&#x27;stop&#x27;, sb.C[&#x27;red&#x27;], 0, &#x27;&#x27;, &#x27;Ride Gwinnett Route 25 bus stop (GTFS feed 2026-07-02)&#x27;),
+    (&#x27;line&#x27;, sb.C[&#x27;red&#x27;], 1.1, &#x27;5 3&#x27;, &#x27;Straight-line distance from the site&#x27;),
+    (&#x27;rect&#x27;, &#x27;url(#r2hatch)&#x27;, 0, &#x27;&#x27;, &#x27;Existing R-2 zoning, City of Lilburn — nearest R-2 precedent&#x27;),
+    (&#x27;rect&#x27;, &#x27;#eef2e6&#x27;, 0, &#x27;&#x27;, &#x27;Existing R-1 zoning, City of Lilburn — location map&#x27;),
+    (&#x27;rect&#x27;, &#x27;#e4ecf4&#x27;, 0, &#x27;&#x27;, &#x27;R-100 zoning, unincorporated Gwinnett — location map&#x27;),
+    (&#x27;ring&#x27;, &#x27;#7a5230&#x27;, 0, &#x27;&#x27;, &#x27;Distance ring from the site, 1/4 and 1/2 mile — location map&#x27;),
+    (&#x27;arrow&#x27;, &#x27;#7a5230&#x27;, 0, &#x27;&#x27;, &#x27;Direction and straight-line distance to an off-map destination&#x27;),
+]
+
+
+# ============================================================================ sheet frame
+def _frame():
+    &quot;&quot;&quot;ARCH D border, title block and disclaimer strip — sitebase.sheet()&#x27;s frame with no plan
+    window.  Returns (Drawing, margins dict).&quot;&quot;&quot;
+    W, H, m, i_ = sb.SHEET_W, sb.SHEET_H, sb.MARGIN, sb.INNER
+    D = sb.Drawing(1.0, 0.0, 0.0, fs=1.0, win=(0, 1, 0, 1))
+    D.add(&#x27;&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;36in&quot; height=&quot;24in&quot; &#x27;
+          &#x27;viewBox=&quot;0 0 %d %d&quot; font-family=&quot;%s&quot;&gt;&#x27; % (W, H, sb.FONT))
+    D.add(&#x27;&lt;title&gt;%s&lt;/title&gt;&#x27; % sb.esc(&#x27;%s — %s — Sheet %s&#x27;
+                                       % (sb.PROJECT.title(), SHEET_TITLE, SHEET_NO)))
+    D.add(sb.DEFS)
+    D.srect(0, 0, W, H, fill=&#x27;#fff&#x27;)
+    D.srect(m, m, W - 2 * m, H - 2 * m, fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=2)
+    D.srect(m + i_, m + i_, W - 2 * m - 2 * i_, H - 2 * m - 2 * i_,
+            fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.6)
+
+    tb_y, tb_h = sb.TB_Y, sb.TB_H - 6
+    D.srect(m + i_, tb_y, W - 2 * m - 2 * i_, tb_h, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1.2)
+    cells = [0, 820, 1330, 1780, 2180, W - 2 * m - 2 * i_]
+    for cx in cells[1:-1]:
+        D.sline(m + i_ + cx, tb_y, m + i_ + cx, tb_y + tb_h, stroke=&#x27;#000&#x27;, stroke_width=0.8)
+    bx = m + 8
+    D.stext(bx, tb_y + 30, sb.PROJECT, size=22, bold=True)
+    D.stext(bx, tb_y + 52, &#x27;%s — Rezoning R-1 → R-2 (City of Lilburn, Georgia)&#x27; % SHEET_TITLE,
+            size=13, bold=True)
+    D.stext(bx, tb_y + 70, &#x27;%s — %s&#x27; % (sb.ADDRESSES, sb.LEGAL), size=9)
+    D.stext(bx, tb_y + 86, &#x27;Cover page per City of Lilburn Site Development Plan Review Checklist &#x27;
+                           &#x27;§1.e.1, §4.a and §4.b; sheet index generated from drawings/ at plot &#x27;
+                           &#x27;time&#x27;, size=9)
+    bx = m + i_ + cells[1] + 8
+    D.stext(bx, tb_y + 18, &#x27;APPLICANT / OWNER&#x27;, size=8, fill=&#x27;#555&#x27;)
+    D.stext(bx, tb_y + 34, sb.APPLICANT, size=11, bold=True)
+    D.stext(bx, tb_y + 48, &#x27;4541 Arcado Rd SW, Lilburn GA 30047-3968 (parcels 033, 015); &#x27;
+                           &#x27;Mendez / Roblero de Leon&#x27;, size=7)
+    D.stext(bx, tb_y + 58, &#x27;(parcels 014, 162) — co-applicants, owner signatures required&#x27;, size=7)
+    D.stext(bx, tb_y + 74, &#x27;PREPARED FOR&#x27;, size=8, fill=&#x27;#555&#x27;)
+    D.stext(bx, tb_y + 88, &#x27;Pre-application conference, City of Lilburn Planning &amp; Zoning &#x27;
+                           &#x27;(340 Main St) —&#x27;, size=8)
+    D.stext(bx, tb_y + 98, &#x27;rezoning application per Ord. 2023-603 §1003 (2026 Application &#x27;
+                           &#x27;Instructions)&#x27;, size=8)
+    bx = m + i_ + cells[2] + 8
+    D.stext(bx, tb_y + 18, &#x27;STATUS&#x27;, size=8, fill=&#x27;#555&#x27;)
+    D.stext(bx, tb_y + 38, &#x27;DRAFT — NOT SEALED&#x27;, size=14, bold=True, fill=&#x27;#c00&#x27;)
+    for k, ln in enumerate([
+            &#x27;Owner-prepared cover page for pre-application review. No sheet in&#x27;,
+            &#x27;this set is sealed; the seal blocks are blank because no Georgia RLS,&#x27;,
+            &#x27;PE, architect or landscape architect is yet engaged. To be superseded&#x27;,
+            &#x27;by sealed survey, civil, architectural and landscape drawings.&#x27;]):
+        D.stext(bx, tb_y + 54 + k * 11, ln, size=8)
+    D.stext(bx, tb_y + 100, &#x27;Generator: tools/cover.py (on tools/sitebase.py)&#x27;, size=8)
+    bx = m + i_ + cells[3] + 8
+    for k, (a, b) in enumerate([(&#x27;DATE&#x27;, sb.DATE), (&#x27;SCALE&#x27;, &#x27;As noted — see each map&#x27;),
+                                (&#x27;DATUM&#x27;, &#x27;SR 2240 GA West US-ft; NAVD88&#x27;),
+                                (&#x27;DRAWN&#x27;, &#x27;owner-prepared (AI-assisted)&#x27;),
+                                (&#x27;CHECKED&#x27;, &#x27;RLS / PE — pending&#x27;)]):
+        D.stext(bx, tb_y + 16 + k * 18, a, size=7.5, fill=&#x27;#555&#x27;)
+        D.stext(bx + 55, tb_y + 16 + k * 18, b, size=8.5)
+    bx = m + i_ + cells[4] + 8
+    D.stext(bx, tb_y + 18, &#x27;SHEET&#x27;, size=8, fill=&#x27;#555&#x27;)
+    D.stext(bx + 150, tb_y + 72, SHEET_NO, size=54, bold=True, anchor=&#x27;middle&#x27;)
+    D.stext(bx + 150, tb_y + 92, SHEET_TITLE, size=8, anchor=&#x27;middle&#x27;)
+
+    dy = sb.TB_Y - 46
+    D.srect(m + i_, dy, W - 2 * m - 2 * i_, 40, fill=&#x27;#fff8e1&#x27;, stroke=&#x27;#b00&#x27;, stroke_width=0.8)
+    D.stext(m + i_ + 8, dy + 15, &#x27;Disclaimer: &#x27; + sb.DISCLAIMER.split(&#x27;Disclaimer: &#x27;)[-1],
+            size=9, bold=True, fill=&#x27;#7a0000&#x27;)
+    D.stext(m + i_ + 8, dy + 30,
+            &#x27;Label: DRAFT / NOT SEALED — every item that must be sealed by a Georgia RLS, PE, &#x27;
+            &#x27;architect or landscape architect is shown as a concept only. Statements of conformity &#x27;
+            &#x27;read &quot;appears consistent with&quot;.&#x27;, size=8, fill=&#x27;#7a0000&#x27;)
+    D.add(&#x27;&lt;!-- %s --&gt;&#x27; % sb.MARKER)
+    return D, {&#x27;l&#x27;: m + i_ + 10, &#x27;r&#x27;: W - m - i_ - 10, &#x27;t&#x27;: m + i_ + 10, &#x27;b&#x27;: dy - 14}
+
+
+# ============================================================================ map furniture
+def north_up(c, x, y, r=24.0):
+    c.srect(x - 52, y - r - 22, 104, 2 * r + 62, fill=&#x27;#fff&#x27;, stroke=&#x27;#999&#x27;, stroke_width=0.6)
+    c.scircle(x, y, r, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.8)
+    c.sline(x, y + r * 0.76, x, y - r * 0.84, stroke=&#x27;#000&#x27;, stroke_width=2.0)
+    c.spoly([(x, y - r * 0.84), (x - 6.0, y - r * 0.84 + 15), (x + 6.0, y - r * 0.84 + 15)],
+            fill=&#x27;#000&#x27;)
+    c.stext(x, y - r - 8, &#x27;N&#x27;, size=13, bold=True, anchor=&#x27;middle&#x27;)
+    c.stext(x, y + r + 13, &#x27;GRID NORTH&#x27;, size=8, anchor=&#x27;middle&#x27;, bold=True)
+    c.stext(x, y + r + 23, &#x27;(SR 2240 GA WEST)&#x27;, size=7.5, anchor=&#x27;middle&#x27;)
+    c.stext(x, y + r + 33, &#x27;MAP DRAWN NORTH-UP&#x27;, size=7.5, anchor=&#x27;middle&#x27;)
+
+
+def scale_bar(c, x, y, pt_per_ft, step_ft, steps, h=8.0, lsize=10.0):
+    w = step_ft * pt_per_ft * steps
+    cap = &#x27;GRAPHIC SCALE   1&quot; = %s\&#x27;&#x27; % fmt(72.0 / pt_per_ft)
+    pw = max(w + 28, tw(cap, lsize, True) + 14)
+    c.srect(x + w / 2.0 - pw / 2.0, y - 18, pw, h + 44, fill=&#x27;#fff&#x27;, stroke=&#x27;#999&#x27;,
+            stroke_width=0.6)
+    for k in range(steps):
+        c.srect(x + step_ft * pt_per_ft * k, y, step_ft * pt_per_ft, h,
+                fill=&#x27;#000&#x27; if k % 2 == 0 else &#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.6)
+        c.stext(x + step_ft * pt_per_ft * k, y - 4, fmt(step_ft * k), size=8.5, anchor=&#x27;middle&#x27;)
+    c.stext(x + w, y - 4, &#x27;%s ft&#x27; % fmt(step_ft * steps), size=8.5, anchor=&#x27;middle&#x27;)
+    c.stext(x + w / 2.0, y + h + 14, cap, size=lsize, bold=True, anchor=&#x27;middle&#x27;)
+
+
+def bus_stop(c, p, r=6.0):
+    x, y = c.X(p[0]), c.Y(p[1])
+    c.scircle(x, y, r + 2.0, fill=&#x27;#fff&#x27;, stroke=&#x27;#fff&#x27;, stroke_width=1.5)
+    c.scircle(x, y, r, fill=sb.C[&#x27;red&#x27;], stroke=&#x27;#fff&#x27;, stroke_width=1.4)
+    c.scircle(x, y, r * 0.42, fill=&#x27;#fff&#x27;)
+
+
+def inwin(c, p, pad=0.0):
+    u0, u1, v0, v1 = c.win
+    return u0 + pad &lt;= p[0] &lt;= u1 - pad and v0 + pad &lt;= p[1] &lt;= v1 - pad
+
+
+def label_along(c, paths, text, size=9.0, fill=&#x27;#666&#x27;, bold=False, pad=0.0):
+    &quot;&quot;&quot;Name a street along its longest segment that lies inside the map window.&quot;&quot;&quot;
+    best, bl = None, 0.0
+    for path in paths:
+        q = ENs(path)
+        for a, b in zip(q[:-1], q[1:]):
+            mid = ((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0)
+            d = sb.dist(a, b)
+            if d &gt; bl and inwin(c, mid, pad):
+                best, bl = (a, b, mid), d
+    if best and bl * c.s &gt; tw(text, size) * 0.85:
+        a, b, mid = best
+        c.text(mid[0], mid[1], text, size=size, rot=c.rot_of(a, b), fill=fill, halo=True,
+               bold=bold, dy=-2.5)
+        return True
+    return False
+
+
+def ray_hit(p0, d, segs):
+    &quot;&quot;&quot;First intersection of the ray p0 + t*d (t &gt; 0) with a list of (a, b) segments.&quot;&quot;&quot;
+    best = None
+    for a, b in segs:
+        e = (b[0] - a[0], b[1] - a[1])
+        den = d[0] * e[1] - d[1] * e[0]
+        if abs(den) &lt; 1e-9:
+            continue
+        w = (a[0] - p0[0], a[1] - p0[1])
+        t = (w[0] * e[1] - w[1] * e[0]) / den
+        s = (w[0] * d[1] - w[1] * d[0]) / den
+        if t &gt; 0 and -0.05 &lt;= s &lt;= 1.05 and (best is None or t &lt; best[0]):
+            best = (t, (p0[0] + t * d[0], p0[1] + t * d[1]))
+    return best
+
+
+def street_parts(name):
+    return [p for s in sb.CTX[&#x27;streets&#x27;] if s[&#x27;name&#x27;] == name for p in s[&#x27;paths_local&#x27;]]
+
+
+def killian_at_arcado():
+    &quot;&quot;&quot;Where Arcado Rd meets Killian Hill Rd, in (E, N).
+
+    The Gwinnett GIS Arcado Rd centreline is clipped short of the intersection.  The point returned
+    is that centreline PRODUCED on the bearing of its last mapped course, cut by the mapped Killian
+    Hill Rd polyline.  Returns (point, tail of the produced line) or None.
+    &quot;&quot;&quot;
+    ends = []
+    for path in street_parts(&#x27;ARCADO RD&#x27;):
+        q = ENs(path)
+        ends += [(q[-1][1], q[-1], q[-2]), (q[0][1], q[0], q[1])]
+    if not ends:
+        return None
+    _, tip, prev = max(ends, key=lambda e: e[0])
+    d = (tip[0] - prev[0], tip[1] - prev[1])
+    n = math.hypot(*d) or 1.0
+    d = (d[0] / n, d[1] / n)
+    segs = []
+    for path in street_parts(&#x27;KILLIAN HILL RD&#x27;):
+        q = ENs(path)
+        segs += list(zip(q[:-1], q[1:]))
+    hit = ray_hit(tip, d, segs)
+    return (hit[1], tip) if hit else None
+
+
+# ============================================================================ the two maps
+VWIN = (-1875.0, 1125.0, -975.0, 2025.0)           # E0, E1, N0, N1 — 3,000 x 3,000 ft
+VSC = 72.0 / 400.0                                  # 1&quot; = 400&#x27;  -&gt; 540 x 540 pt
+LWIN = (-3464.0, 2536.0, -1273.0, 2727.0)          # 6,000 x 4,000 ft, centred on the site
+LSC = 72.0 / 1000.0                                 # 1&quot; = 1,000&#x27; -&gt; 432 x 316.8 pt
+
+SITE_EN = ENs(sb.BOUNDARY)
+SITE_MID = EN((sb.U_REAR / 2.0, -117.0))
+HEAVY = (&#x27;ARCADO RD&#x27;, &#x27;KILLIAN HILL RD&#x27;)
+
+
+def draw_streets(c, names=True, size=8.5):
+    for s in sb.CTX[&#x27;streets&#x27;]:
+        big = s[&#x27;name&#x27;] in HEAVY
+        for path in s[&#x27;paths_local&#x27;]:
+            c.pline(ENs(path), fill=&#x27;none&#x27;, stroke=&#x27;#333333&#x27; if big else &#x27;#8a8a8a&#x27;,
+                    stroke_width=2.0 if big else 0.8, stroke_linejoin=&#x27;round&#x27;)
+    if not names:
+        return
+    for nm in sorted({s[&#x27;name&#x27;] for s in sb.CTX[&#x27;streets&#x27;]}):
+        if nm in HEAVY:                       # the two collectors are hand-placed in vicinity()
+            continue
+        label_along(c, street_parts(nm), nm, size=size, fill=&#x27;#777&#x27;, pad=90.0)
+
+
+def draw_streams(c):
+    for st in sb.CTX[&#x27;streams&#x27;]:
+        for path in st[&#x27;paths_local&#x27;]:
+            c.pline(ENs(path), fill=&#x27;none&#x27;, stroke=sb.C[&#x27;stream&#x27;], stroke_width=1.4,
+                    stroke_linejoin=&#x27;round&#x27;)
+
+
+def draw_site(c, heavy=2.4, label=True):
+    c.poly(SITE_EN, fill=&#x27;#fdf3d0&#x27;, fill_opacity=&#x27;0.9&#x27;, stroke=&#x27;#000&#x27;, stroke_width=heavy)
+    if label:
+        rot = c.rot_of(EN((300.0, -117.0)), EN((1300.0, -117.0)))
+        c.text(SITE_MID[0], SITE_MID[1], &#x27;SUBJECT PROPERTY — %s AC&#x27; % DEED_AC, size=11,
+               bold=True, rot=rot, halo=True)
+
+
+def draw_r2(c, label=True):
+    for z in sb.CTX[&#x27;zoning&#x27;]:
+        if z[&#x27;type&#x27;] != &#x27;R2&#x27;:
+            continue
+        ring = ENs(z[&#x27;ring_local&#x27;])
+        c.poly(ring, fill=&#x27;url(#r2hatch)&#x27;, stroke=&#x27;#c07a30&#x27;, stroke_width=1.0)
+        if label:
+            ctr = sb.poly_centroid(ring)
+            c.line((ctr[0] + 60, ctr[1] - 70), (560.0, -40.0), stroke=&#x27;#8a4b12&#x27;, stroke_width=0.8)
+            c.textlines(1090.0, -30.0,
+                        [&#x27;EXISTING R-2 (CITY OF LILBURN) —&#x27;, &#x27;&quot;ARCADO ROAD TOWNHOMES&quot;,&#x27;,
+                         &#x27;THE NEAREST R-2, ABOUT 106 FT NE&#x27;],
+                        size=8.5, anchor=&#x27;end&#x27;, fill=&#x27;#8a4b12&#x27;, halo=True, bold_first=True)
+
+
+def vicinity(x, y):
+    c = sb.Drawing(VSC, x, y, fs=1.0, win=VWIN)
+    W = (VWIN[1] - VWIN[0]) * VSC
+    H = (VWIN[3] - VWIN[2]) * VSC
+    c.clip_open(fill=&#x27;#fbfbf8&#x27;)
+    for a in sb.CTX[&#x27;adjoining_parcels&#x27;]:
+        c.poly(ENs(a[&#x27;ring_local&#x27;]), fill=&#x27;#f4f4f0&#x27;, stroke=sb.C[&#x27;adj_line&#x27;], stroke_width=0.5)
+    draw_streets(c)
+    draw_streams(c)
+    draw_r2(c)
+    draw_site(c)
+
+    kh = killian_at_arcado()
+    if kh:
+        stop, tail = kh
+        c.pline([tail, stop], fill=&#x27;none&#x27;, stroke=&#x27;#333333&#x27;, stroke_width=1.2,
+                stroke_dasharray=&#x27;7 4&#x27;)
+        c.pline([(0.0, 0.0), stop], fill=&#x27;none&#x27;, stroke=sb.C[&#x27;red&#x27;], stroke_width=1.1,
+                stroke_dasharray=&#x27;5 3&#x27;)
+        d_ft = math.hypot(*stop)
+        c.line((900.0, 1830.0), (stop[0] + 20.0, stop[1] + 60.0), stroke=sb.C[&#x27;red&#x27;],
+               stroke_width=0.8)
+        c.textlines(1085.0, 1900.0, [&#x27;RIDE GWINNETT ROUTE 25 STOP&#x27;,
+                                     &#x27;KILLIAN HILL RD @ ARCADO RD — 0.30 MI&#x27;],
+                    size=9, anchor=&#x27;end&#x27;, fill=sb.C[&#x27;red&#x27;], halo=True, bold_first=True)
+        bus_stop(c, stop)
+        mid = (stop[0] * 0.55, stop[1] * 0.55)
+        c.text(mid[0] + 90, mid[1] + 50, &#x27;%s FT = %.2f MI STRAIGHT-LINE&#x27;
+               % (fmt(d_ft), d_ft / 5280.0), size=8.5, fill=sb.C[&#x27;red&#x27;], halo=True, bold=True,
+               rot=c.rot_of((0.0, 0.0), stop))
+
+    for uv, txt in (((620.0, 250.0), &#x27;KING DAVID MANOR  (PLAT S/159) — ZONED R-1&#x27;),
+                    ((620.0, -430.0), &#x27;LEGENDS AT PARKVIEW  (PLAT 118/187) — ZONED R-1&#x27;)):
+        p = EN(uv)
+        rot = c.rot_of(EN((uv[0] - 300, uv[1])), EN((uv[0] + 300, uv[1])))
+        c.text(p[0], p[1], txt, size=9.5, bold=True, fill=&#x27;#4a4a4a&#x27;, halo=True, rot=rot)
+    c.text(-1150.0, 1800.0, &#x27;NANTUCKET  (PLAT 1/268) — ZONED R-1&#x27;, size=9.5, bold=True,
+           fill=&#x27;#4a4a4a&#x27;, halo=True, anchor=&#x27;start&#x27;)
+
+    # the two county collectors, hand-placed so they clear the callouts and the map furniture
+    a, b = EN((-78.8, -692.1)), EN((-65.1, -235.5))
+    c.text((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0, &#x27;ARCADO RD SW&#x27;, size=10.5, bold=True,
+           fill=&#x27;#111&#x27;, halo=True, rot=c.rot_of(a, b), dy=-3)
+    kh_pts = [q for path in street_parts(&#x27;KILLIAN HILL RD&#x27;) for q in ENs(path)]
+    if len(kh_pts) &gt; 3:
+        a, b = kh_pts[3], kh_pts[5]
+        c.text((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0, &#x27;KILLIAN HILL RD&#x27;, size=10.5, bold=True,
+               fill=&#x27;#111&#x27;, halo=True, rot=c.rot_of(a, b), dy=-3)
+
+    ap = EN((-12.4, 60.6))
+    c.line(ap, (980.0, -400.0), stroke=&#x27;#111&#x27;, stroke_width=0.7)
+    c.textlines(1085.0, -440.0, [&#x27;ARCADIA PL CENTRELINE MEETS&#x27;, &#x27;ARCADO RD 61 FT NE OF THE&#x27;,
+                                 &quot;SITE&#x27;S NE FRONT CORNER&quot;],
+                size=8.5, anchor=&#x27;end&#x27;, halo=True, bold_first=True)
+    c.clip_close()
+    # Furniture sits inside this map: the column is only 20 pt wider than the map.  Bottom-left and
+    # bottom-centre are the two corners with no geometry in them.
+    c.later(lambda: north_up(c, x + 62, y + H - 70))
+    c.later(lambda: scale_bar(c, x + 300, y + H - 52, VSC, 200, 4))
+    return c
+
+
+def location(x, y):
+    c = sb.Drawing(LSC, x, y, fs=1.0, win=LWIN)
+    W = (LWIN[1] - LWIN[0]) * LSC
+    H = (LWIN[3] - LWIN[2]) * LSC
+    c.clip_open(fill=&#x27;#fbfbf8&#x27;)
+    for z in sb.CTX[&#x27;zoning&#x27;]:
+        if z[&#x27;type&#x27;] == &#x27;R1&#x27; and z[&#x27;jurisdiction&#x27;] == &#x27;LILBURN&#x27;:
+            c.poly(ENs(z[&#x27;ring_local&#x27;]), fill=&#x27;#eef2e6&#x27;, stroke=&#x27;#b9c7a6&#x27;, stroke_width=0.6)
+        elif z[&#x27;type&#x27;] == &#x27;R100&#x27;:
+            c.poly(ENs(z[&#x27;ring_local&#x27;]), fill=&#x27;#e4ecf4&#x27;, stroke=&#x27;#a8bccd&#x27;, stroke_width=0.6)
+    draw_streets(c, names=False)
+    draw_streams(c)
+    draw_r2(c, label=False)
+    draw_site(c, heavy=1.8, label=False)
+
+    for en, lines in (((-2560.0, -700.0), [&#x27;CITY OF LILBURN&#x27;, &#x27;R-1&#x27;]),
+                      ((1420.0, -650.0), [&#x27;UNINCORPORATED&#x27;, &#x27;GWINNETT — R-100&#x27;])):
+        c.textlines(en[0], en[1], lines, size=9.5, fill=&#x27;#4a5a3a&#x27;, halo=True, bold_first=True)
+    c.text(SITE_MID[0] - 820, SITE_MID[1] + 250, &#x27;SUBJECT PROPERTY&#x27;, size=9.5, bold=True,
+           halo=True, anchor=&#x27;middle&#x27;)
+    c.line((SITE_MID[0] - 560, SITE_MID[1] + 230), (SITE_MID[0] - 120, SITE_MID[1] + 60),
+           stroke=&#x27;#111&#x27;, stroke_width=0.7)
+
+    for ft, txt in ((1320.0, &#x27;1/4 MILE&#x27;), (2640.0, &#x27;1/2 MILE&#x27;)):
+        c.circle(SITE_MID, ft * LSC, fill=&#x27;none&#x27;, stroke=&#x27;#7a5230&#x27;, stroke_width=0.9,
+                 stroke_dasharray=&#x27;4 3&#x27;)
+        a = math.radians(255.0)
+        c.text(SITE_MID[0] + ft * math.sin(a), SITE_MID[1] + ft * math.cos(a), txt,
+               size=9, fill=&#x27;#7a5230&#x27;, bold=True, halo=True)
+    c.circle(SITE_MID, 2.6, fill=&#x27;#7a5230&#x27;)
+
+    for ang, txt in ((45.0, &#x27;KILLIAN HILL RD 0.30 MI&#x27;), (225.0, &#x27;ROCKBRIDGE RD 0.70 MI&#x27;),
+                     (315.0, &#x27;DOWNTOWN LILBURN 1.4 MI&#x27;), (0.0, &#x27;TRICKUM MS 0.46 MI&#x27;),
+                     (180.0, &#x27;PARKVIEW HS 1.44 MI&#x27;)):
+        a = math.radians(ang)
+        d = (math.sin(a), math.cos(a))
+        pad = 34.0 / LSC                                      # arrow tip 34 pt inside the border
+        r = 1e9
+        for k, (lo, hi) in enumerate(((LWIN[0], LWIN[1]), (LWIN[2], LWIN[3]))):
+            if abs(d[k]) &gt; 1e-6:
+                r = min(r, (((hi - pad) if d[k] &gt; 0 else (lo + pad)) - SITE_MID[k]) / d[k])
+        tip = (SITE_MID[0] + d[0] * r, SITE_MID[1] + d[1] * r)
+        tail = (tip[0] - d[0] * 420.0, tip[1] - d[1] * 420.0)
+        c.line(tail, tip, stroke=&#x27;#7a5230&#x27;, stroke_width=1.4)
+        px, py, sx, sy = c.X(tip[0]), c.Y(tip[1]), c.X(tail[0]), c.Y(tail[1])
+        vx, vy = px - sx, py - sy
+        n = math.hypot(vx, vy) or 1.0
+        vx, vy = vx / n, vy / n
+        c.spoly([(px, py), (px - 9 * vx + 4 * vy, py - 9 * vy - 4 * vx),
+                 (px - 9 * vx - 4 * vy, py - 9 * vy + 4 * vx)], fill=&#x27;#7a5230&#x27;)
+        lp = (tip[0] - d[0] * 660.0, tip[1] - d[1] * 660.0)   # label INSIDE the tip, 47 pt back
+        c.text(lp[0], lp[1], txt, size=8.5, fill=&#x27;#7a5230&#x27;, bold=True, halo=True, anchor=&#x27;middle&#x27;,
+               dy=(9 if d[1] &lt; -0.5 else (-4 if d[1] &gt; 0.5 else 0)))
+    c.clip_close()
+    # This map is 432 pt wide in a 560-pt column, so its furniture goes OUTSIDE the neatline, clear
+    # of the direction arrows.
+    c.later(lambda: north_up(c, x + W + 59, y + 56))
+    c.later(lambda: scale_bar(c, x + W + 26, y + 176, LSC, 500, 2, lsize=8.5))
+    return c
+
+
+def paste(D, sub, border=True):
+    &quot;&quot;&quot;Paste a sub-drawing onto the sheet.  The queued furniture (north arrow, scale bar) is run
+    BEFORE render(): each callback emits several elements, so sitebase.place()&#x27;s one-pop-per-
+    callback idiom would silently drop all but the last of them.&quot;&quot;&quot;
+    for fn in sub.late:
+        fn()
+    sub.late = []
+    x, y, w, h = sub.box()
+    D.add(sub.render())
+    if border:
+        D.srect(x, y, w, h, fill=&#x27;none&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1.2)
+    return y + h
+
+
+# ============================================================================ blocks
+def block_title(D, x, y, t, sub=None, w=600.0):
+    D.stext(x, y, t, size=14, bold=True)
+    if not sub:
+        return y + 14
+    n = 0
+    for n, ln in enumerate(sb.wrap(sub, int(w / (0.56 * 9.5)))):
+        D.stext(x, y + 13 + n * 11, ln, size=9.5, fill=&#x27;#444&#x27;)
+    return y + 26 + n * 11
+
+
+def note_block(D, x, y, num, head, body, size=10.0, width=680.0, lead=12.1, hang=15.0):
+    &quot;&quot;&quot;One general note: a bold run-in head, then the body, with a hanging indent.  Widths are
+    measured with tw(), so the body starts hard against the head instead of after a ragged gap.&quot;&quot;&quot;
+    hd = &#x27;%d. %s&#x27; % (num, head)
+    hw = tw(hd, size, True)
+    if hw &gt; width - 130:                       # head too long to share a line with the body
+        for ln in wrap_w(hd, size, width, True):
+            D.stext(x, y, ln, size=size, bold=True)
+            y += lead
+        first_w, first_x = width - hang, x + hang
+    else:
+        D.stext(x, y, hd, size=size, bold=True)
+        first_w, first_x = width - hw - 8.0, x + hw + 8.0
+    lines, cur, avail = [], &#x27;&#x27;, first_w
+    for w_ in body.split():
+        cand = (cur + &#x27; &#x27; + w_).strip()
+        if cur and tw(cand, size) &gt; avail:
+            lines.append(cur)
+            cur, avail = w_, width - hang
+        else:
+            cur = cand
+    if cur:
+        lines.append(cur)
+    for i, ln in enumerate(lines):
+        D.stext(first_x if i == 0 else x + hang, y, ln, size=size)
+        y += lead
+    return y
+
+
+def seal_block(D, x, y, w, h, title, scope):
+    D.srect(x, y, w, h, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1.0)
+    D.srect(x, y, w, 17, fill=&#x27;#e8e8e8&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1.0)
+    ts = min(9.5, 9.5 * (w - 14.0) / max(tw(title, 9.5, True), 1.0))
+    D.stext(x + 5, y + 12.5, title, size=ts, bold=True)
+    sq = min(86.0, h - 74.0)                      # the blank seal area, clear of the signature line
+    D.srect(x + 8, y + 22, sq, sq, fill=&#x27;none&#x27;, stroke=&#x27;#999&#x27;, stroke_width=0.8,
+            stroke_dasharray=&#x27;5 3&#x27;)
+    D.stext(x + 8 + sq / 2, y + 22 + sq / 2, &#x27;SEAL&#x27;, size=10, fill=&#x27;#aaa&#x27;, anchor=&#x27;middle&#x27;)
+    D.stext(x + 8 + sq / 2, y + 36 + sq / 2, &#x27;(BLANK)&#x27;, size=9, fill=&#x27;#aaa&#x27;, anchor=&#x27;middle&#x27;)
+    yy = y + 32
+    for ln in sb.wrap(scope, int((w - sq - 24) / (0.56 * 8.5))):
+        D.stext(x + sq + 16, yy, ln, size=8.5, fill=&#x27;#333&#x27;)
+        yy += 10.2
+    D.stext(x + 8, y + h - 42, &#x27;NOT YET ENGAGED — NO SHEET IN THIS SET IS SEALED.&#x27;, size=8.5,
+            bold=True, fill=&#x27;#b00&#x27;)
+    D.sline(x + 8, y + h - 22, x + w - 88, y + h - 22, stroke=&#x27;#000&#x27;, stroke_width=0.6)
+    D.stext(x + 8, y + h - 12, &#x27;SIGNATURE&#x27;, size=8, fill=&#x27;#666&#x27;)
+    D.sline(x + w - 82, y + h - 22, x + w - 8, y + h - 22, stroke=&#x27;#000&#x27;, stroke_width=0.6)
+    D.stext(x + w - 82, y + h - 12, &#x27;DATE&#x27;, size=8, fill=&#x27;#666&#x27;)
+
+
+def legend_block(D, x, y, w):
+    D.stext(x, y, &#x27;LEGEND — VICINITY AND LOCATION MAPS&#x27;, size=13, bold=True)
+    yy = y + 18
+    nch = int((w - 46) / (0.56 * 10))
+    for kind, col, lw, dash, txt in LEGEND:
+        if kind == &#x27;site&#x27;:
+            D.srect(x, yy - 9, 36, 12, fill=&#x27;#fdf3d0&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1.8)
+        elif kind == &#x27;line&#x27;:
+            D.sline(x, yy - 3, x + 36, yy - 3, stroke=col, stroke_width=lw, stroke_dasharray=dash)
+        elif kind == &#x27;stop&#x27;:
+            D.scircle(x + 18, yy - 3, 6.0, fill=col, stroke=&#x27;#fff&#x27;, stroke_width=1.4)
+            D.scircle(x + 18, yy - 3, 2.5, fill=&#x27;#fff&#x27;)
+        elif kind == &#x27;ring&#x27;:
+            D.scircle(x + 18, yy - 3, 6.5, fill=&#x27;none&#x27;, stroke=col, stroke_width=0.9,
+                      stroke_dasharray=&#x27;4 3&#x27;)
+        elif kind == &#x27;arrow&#x27;:
+            D.sline(x, yy - 3, x + 28, yy - 3, stroke=col, stroke_width=1.4)
+            D.spoly([(x + 36, yy - 3), (x + 27, yy - 7), (x + 27, yy + 1)], fill=col)
+        else:
+            D.srect(x, yy - 9, 36, 12, fill=col, stroke=&#x27;#777&#x27;, stroke_width=0.5)
+        lns = sb.wrap(txt, nch)
+        for j, ln in enumerate(lns):
+            D.stext(x + 44, yy + j * 11, ln, size=10)
+        yy += 13.5 + 10.5 * (len(lns) - 1)
+    return yy
+
+
+# ============================================================================ build
+def build():
+    D, F = _frame()
+    L_, R_, T_, B_ = F[&#x27;l&#x27;], F[&#x27;r&#x27;], F[&#x27;t&#x27;], F[&#x27;b&#x27;]
+
+    # ---------------------------------------------------------------- banner
+    D.srect(L_, T_, R_ - L_, 186, fill=&#x27;#fff&#x27;, stroke=&#x27;#000&#x27;, stroke_width=1.2)
+    D.stext(L_ + 14, T_ + 48, &#x27;THE COTTAGES AT ARCADO SPRINGS&#x27;, size=40, bold=True)
+    D.stext(L_ + 14, T_ + 76, &#x27;SHEET %s — %s&#x27; % (SHEET_NO, SHEET_TITLE), size=20, bold=True)
+    D.stext(L_ + 14, T_ + 100,
+            &#x27;APPLICATION TO REZONE %s ACRES FROM R-1 TO R-2 — %d ONE-STORY DETACHED 55+ (HOPA) &#x27;
+            &#x27;COTTAGE HOMES ON FEE-SIMPLE LOTS, %.2f DU/AC&#x27; % (DEED_AC, LOTS, DENS_DEED),
+            size=16, bold=True, fill=&#x27;#7b1fa2&#x27;)
+    D.stext(L_ + 14, T_ + 124,
+            &#x27;Use: &quot;Single-family (cluster-cottage, creative lot configuration)&quot; — permitted in R-2 &#x27;
+            &#x27;by Lilburn Zoning Ordinance 2023-603 §602 Use Table. No special use permit requested.&#x27;,
+            size=13)
+    D.stext(L_ + 14, T_ + 145,
+            &#x27;4535, 4537, 4539 and 4541 Arcado Road SW, Lilburn, Georgia 30047 — Land Lot 123, &#x27;
+            &#x27;6th District, Gwinnett County — PINs R6123 033, R6123 015, R6123 014 and R6123 162&#x27;,
+            size=13, bold=True)
+    D.stext(L_ + 14, T_ + 168,
+            &#x27;City of Lilburn, Gwinnett County, Georgia — Department of Planning and Zoning, &#x27;
+            &#x27;340 Main Street. Filed under Ord. 2023-603 §1003 and the 2026 Application &#x27;
+            &#x27;Instructions (11 items).&#x27;, size=11, fill=&#x27;#444&#x27;)
+    D.stext(1390, T_ + 172, &#x27;DRAFT — NOT SEALED&#x27;, size=18, bold=True, fill=&#x27;#c00&#x27;, anchor=&#x27;end&#x27;)
+
+    ax, aw = 1404.0, 470.0
+    D.srect(ax, T_ + 10, aw, 166, fill=&#x27;#f7f7f2&#x27;, stroke=&#x27;#000&#x27;, stroke_width=0.9)
+    D.stext(ax + 8, T_ + 26, &#x27;APPLICATION DATA&#x27;, size=11.5, bold=True)
+    for k, (a, b) in enumerate([
+            (&#x27;ZONING CASE NO.&#x27;, &#x27;RZ-2026-____________  (assigned by the City)&#x27;),
+            (&#x27;DATE FILED&#x27;, _BLANK),
+            (&#x27;PLANNING COMMISSION&#x27;, &#x27;____________________  (4th Thursday, 7:30 pm)&#x27;),
+            (&#x27;CITY COUNCIL&#x27;, &#x27;____________________  (2nd Monday, 7:30 pm)&#x27;),
+            (&#x27;APPLICATION FEE&#x27;, &#x27;$1,250 — 5.0 to 9.9 ac; FY2026-2027 Fee Schedule,&#x27;),
+            (&#x27;&#x27;, &#x27;Res. No. 2026-08, adopted 2026-08-31 (confirm on filing)&#x27;),
+            (&#x27;EXISTING / PROPOSED&#x27;, &#x27;R-1  →  R-2  (Ord. 2023-603 §402)&#x27;)]):
+        D.stext(ax + 8, T_ + 44 + k * 18, a, size=9.5, fill=&#x27;#555&#x27;, bold=True)
+        D.stext(ax + 152, T_ + 44 + k * 18, b, size=10.5)
+
+    rx, rw = 1900.0, R_ - 1900.0
+    D.stext(rx, T_ + 22, &#x27;REVISIONS&#x27;, size=11.5, bold=True)
+    sb.table(D, rx, T_ + 30, [&#x27;NO.&#x27;, &#x27;DATE&#x27;, &#x27;DESCRIPTION&#x27;, &#x27;BY&#x27;], REVISIONS, size=10,
+             widths=[34, 74, rw - 150, 42])
+
+    # ---------------------------------------------------------------- columns
+    y0 = T_ + 202
+    CA, CAW = L_, 580.0
+    CB, CBW = L_ + 602, 600.0
+    CC, CCW = L_ + 1224, 560.0
+    CD = L_ + 1806
+    CDW = R_ - CD
+
+    # ---- column A: contacts, zoning data
+    y = block_title(D, CA, y0, &#x27;OWNER, CONTACTS AND DESIGN PROFESSIONALS&#x27;,
+                    &#x27;Site Development Plan Review Checklist §1.e.1 — a blank line means no such &#x27;
+                    &#x27;professional is engaged&#x27;, w=CAW)
+    y = sb.table(D, CA, y + 4, [&#x27;ROLE&#x27;, &#x27;NAME&#x27;, &#x27;ADDRESS&#x27;, &#x27;PHONE / E-MAIL&#x27;], CONTACTS,
+                 size=10, widths=[108, 210, 128, 134])
+    y = block_title(D, CA, y + 24, &#x27;ZONING AND PROPOSED USE DATA&#x27;,
+                    &#x27;Checklist §1.e.1, §4.b and §4.c (&quot;required versus provided&quot;); Lilburn Zoning &#x27;
+                    &#x27;Ordinance 2023-603 Tables 4.1, 4.2 and 8.1&#x27;, w=CAW)
+    y = sb.table(D, CA, y + 4, [&#x27;ITEM&#x27;, &#x27;REQUIRED / PROVIDED&#x27;], zoning_rows(), size=10,
+                 widths=[126, 454])
+    D.stextblock(CA, y + 13, &#x27;Quantities are read at plot time from data/layout.json &#x27;
+                             &#x27;(regenerated %s) and data/plans.json — the quantities actually drawn &#x27;
+                             &#x27;on Sheet C-2.0. The full required-versus-provided table for Articles &#x27;
+                             &#x27;4, 5 and 8 is on Sheet C-2.0.&#x27; % sb.DATE, size=9.5, chars=int(CAW / (0.56 * 9.5)),
+                 lead=11.6, fill=&#x27;#444&#x27;)
+    y = block_title(D, CA, y + 62, &#x27;REZONING SUBMITTAL INDEX — 2026 APPLICATION INSTRUCTIONS&#x27;)
+    ya = sb.table(D, CA, y + 4, [&#x27;ITEM&#x27;, &#x27;PROVIDED&#x27;], SUBMITTAL, size=10,
+                  widths=[252, 328])
+
+    # ---- column B: sheet index, exhibits, seal blocks
+    rows, issued, unclaimed = index_rows()
+    y = block_title(D, CB, y0, &#x27;SHEET INDEX&#x27;,
+                    &#x27;%d of %d sheets issued as of %s. Built by listing drawings/*.svg at plot &#x27;
+                    &#x27;time — see general note 16.&#x27; % (issued, len(SHEETS), sb.DATE), w=CBW)
+    y = sb.table(D, CB, y + 4,
+                 [&#x27;SHEET&#x27;, &#x27;TITLE&#x27;, &#x27;SIZE / SCALE&#x27;, &#x27;STATUS&#x27;, &#x27;FILE (drawings/…)&#x27;, &#x27;T/B&#x27;],
+                 rows, size=10, widths=[40, 178, 108, 84, 132, 58])
+    D.stextblock(CB, y + 12, &#x27;T/B is the sheet number printed in that sheet\&#x27;s own title block: &#x27;
+                             &#x27;&quot;=&quot; matches this index, &quot;--&quot; means the sheet declares none, and any &#x27;
+                             &#x27;other value is a provisional number to be corrected at the next &#x27;
+                             &#x27;issue (general note 16).&#x27;, size=9, chars=int(CBW / (0.56 * 9)),
+                 lead=11.0, fill=&#x27;#444&#x27;)
+    y = block_title(D, CB, y + 40, &#x27;ALSO IN drawings/ — EXHIBITS, NOT SHEETS OF THIS SET&#x27;, w=CBW)
+    ex_rows = [[f, EXHIBITS.get(f, &#x27;Unrecognised file — identify it before filing&#x27;)]
+               for f in unclaimed]
+    if ex_rows:
+        y = sb.table(D, CB, y + 4, [&#x27;FILE&#x27;, &#x27;WHAT IT IS&#x27;], ex_rows, size=10, widths=[140, 460])
+    else:
+        D.stext(CB, y + 12, &#x27;None — every SVG in drawings/ is a numbered sheet of this set.&#x27;,
+                size=10)
+        y += 18
+
+    y = block_title(D, CB, y + 14, &#x27;SEAL BLOCKS&#x27;,
+                    &#x27;Blank on purpose: no Georgia RLS, PE, architect or landscape architect is yet &#x27;
+                    &#x27;engaged, and no sheet in this set is sealed&#x27;, w=CBW)
+    for k, (t, sc) in enumerate(SEALS):
+        seal_block(D, CB + (k % 2) * 310, y + 6 + (k // 2) * 160, 290, 150, t, sc)
+    sy = D.stextblock(CB, y + 6 + 160 + 150 + 14,
+                      &#x27;Final plan sets must be sealed, signed and dated across the seal by the &#x27;
+                      &#x27;licensed registered party responsible for the contents of each sheet &#x27;
+                      &#x27;(Georgia Board Rule 180-12-.02; Checklist §1.e).&#x27;,
+                      size=9.5, chars=int(CBW / (0.56 * 9.5)), lead=11.6, fill=&#x27;#444&#x27;)
+
+    # ---- column C: the two maps and the legend
+    y = block_title(D, CC, y0, &#x27;VICINITY MAP     SCALE 1&quot; = 400\&#x27;&#x27;,
+                    &#x27;Arcado Rd, Killian Hill Rd, Arcadia Pl, the three adjoining subdivisions and &#x27;
+                    &#x27;the Ride Gwinnett Route 25 stop&#x27;, w=CCW)
+    ybot = paste(D, vicinity(CC + 10, y + 6))
+    yc = D.stextblock(CC, ybot + 14,
+                      &#x27;Drawn north-up from the Gwinnett County GIS street centrelines, tax-parcel &#x27;
+                      &#x27;fabric, zoning polygons and hydrology carried in &#x27;
+                      &#x27;data/site-context-local.json and from the boundary ring in &#x27;
+                      &#x27;data/layout.json. Adjoining parcels are the 31 abutters plus the Arcado Rd &#x27;
+                      &#x27;right-of-way. Route 25 runs Gwinnett Place Transit Center to Stone &#x27;
+                      &#x27;Mountain: weekday headway about 50 minutes, Saturday hourly, no Sunday &#x27;
+                      &#x27;service. Neither centreline is mapped through the Killian Hill Rd / Arcado &#x27;
+                      &#x27;Rd intersection, so the intersection is shown where the mapped Arcado Rd &#x27;
+                      &#x27;centreline, produced on its last mapped bearing, cuts the mapped Killian &#x27;
+                      &#x27;Hill Rd centreline: it scales 1,483 ft (0.28 mi) against the 0.30-mi &#x27;
+                      &#x27;straight-line distance to stops 2528 and 2578 in the GTFS feed. &#x27;
+                      &#x27;Not a survey.&#x27;,
+                      size=9.0, chars=int(CCW / (0.56 * 9.0)), lead=11.0, fill=&#x27;#444&#x27;)
+
+    y = block_title(D, CC, yc + 10, &#x27;LOCATION MAP     SCALE 1&quot; = 1,000\&#x27;&#x27;,
+                    &#x27;The site in the City of Lilburn zoning pattern, with distance rings on the &#x27;
+                    &#x27;site centroid&#x27;, w=CCW)
+    lbot = paste(D, location(CC + 10, y + 6))
+    yc = D.stextblock(CC, lbot + 14,
+                      &#x27;Zoning polygons and jurisdiction from the Gwinnett County GIS zoning layer; &#x27;
+                      &#x27;the R-1 (Lilburn) and R-100 (unincorporated Gwinnett) fills show the city &#x27;
+                      &#x27;limit. Off-map destinations are straight-line distances from docs/11 §6.3 &#x27;
+                      &#x27;and their compass directions are approximate.&#x27;,
+                      size=9.0, chars=int(CCW / (0.56 * 9.0)), lead=11.0, fill=&#x27;#444&#x27;)
+    yl = legend_block(D, CC, yc + 10, CCW)
+
+    # ---- column D: general notes
+    y = block_title(D, CD, y0, &#x27;GENERAL NOTES&#x27;,
+                    &#x27;Notes the City of Lilburn Site Development Plan Review Checklist requires on &#x27;
+                    &#x27;the cover page are reproduced verbatim and identified as such&#x27;, w=CDW)
+    yy = y + 6
+    for i, (head, body) in enumerate(NOTES, 1):
+        yy = note_block(D, CD, yy, i, head, body, size=10.5, width=CDW - 8.0, lead=12.8)
+        yy += 3.0
+    for name, bot in ((&#x27;column A (contacts, zoning data, submittal index)&#x27;, ya),
+                      (&#x27;column B (sheet index, exhibits, seal blocks)&#x27;, sy),
+                      (&#x27;column C (maps and legend)&#x27;, yl),
+                      (&#x27;column D (general notes)&#x27;, yy)):
+        if bot &gt; B_:
+            print(&#x27;  ** WARNING: %s overflows the sheet by %.0f pt&#x27; % (name, bot - B_))
+    return D
+
+
+if __name__ == &#x27;__main__&#x27;:
+    d = build()
+    svg, png = sb.save(d, &#x27;cover&#x27;, dpi=150)
+    rows, issued, unclaimed = index_rows()
+    print(&#x27;wrote %s\n      %s&#x27; % (svg, png))
+    print(&#x27;  sheet index: %d of %d issued; exhibits (unclaimed SVGs): %s&#x27;
+          % (issued, len(SHEETS), &#x27;, &#x27;.join(unclaimed) or &#x27;none&#x27;))
+    kh = killian_at_arcado()
+    if kh:
+        print(&#x27;  Killian Hill @ Arcado (Arcado centreline produced): E %.0f N %.0f — %.0f ft &#x27;
+              &#x27;(%.2f mi) from the front corner&#x27;
+              % (kh[0][0], kh[0][1], math.hypot(*kh[0]), math.hypot(*kh[0]) / 5280.0))
+    print(&#x27;  live numbers: %d lots, %.2f du/ac deeded, %s SF open space (%.1f%%), %.2f ac disturbed&#x27;
+          % (LOTS, DENS_DEED, fmt(OS_SF), OS_PCT, DISTURBED_AC))
+</code></pre>
+  </article>
+  <footer class="docfoot">
+    <p><strong>Source:</strong> <code>status/cottage-submission-2026-08-28/tools/cover.py</code></p>
+    <p>AI-assisted preliminary work product. Nothing here is sealed, filed, or approved. All findings must be verified by licensed Georgia professionals (RLS, PE, architect, attorney) before use in design, permitting, or a regulatory submission. Boundary geometry derives from the Gwinnett County GIS parcel fabric, not a field survey.</p>
+    <p><a href="/data-room.html">&larr; Back to the data room index</a></p>
+  </footer>
+</main>
+</body>
+</html>
