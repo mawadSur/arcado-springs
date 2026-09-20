@@ -1,0 +1,231 @@
+<title>Site Capacity</title>
+<meta name="robots" content="noindex, nofollow" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Why the Arcado Springs cottage plan holds 41 homes: the parcel's cross-section, the governing dimensional standards, and six alternative layouts tested against them." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--paper:#F7F5EF;--surface:#FFFDF8;--ink:#1E2419;--muted:#6B6E62;--line:#DFDACB;
+ --forest:#2F5D3A;--brass:#876A38;--brick:#9C3B2E;--ok:#3F6B45;--draw:#FCFAF5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --paper:#151713;--surface:#1D201A;--ink:#ECEBE3;--muted:#9DA093;--line:#333729;
+ --forest:#8FC09A;--brass:#C6A468;--brick:#E28A7B;--ok:#8FC09A}}
+:root[data-theme="dark"]{--paper:#151713;--surface:#1D201A;--ink:#ECEBE3;--muted:#9DA093;
+ --line:#333729;--forest:#8FC09A;--brass:#C6A468;--brick:#E28A7B;--ok:#8FC09A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);line-height:1.58;
+ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+.narrow{max-width:64ch}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;text-wrap:balance;margin:0}
+h1{font-size:clamp(30px,4.4vw,46px);line-height:1.06;letter-spacing:-0.012em}
+h2{font-size:clamp(21px,2.5vw,29px);line-height:1.2}
+h3{font-size:16.5px}
+p{margin:0 0 15px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
+ text-transform:uppercase;color:var(--brass);margin:0 0 10px}
+header.top{border-bottom:1px solid var(--line);padding:38px 0 28px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:"IBM Plex Mono",monospace;
+ font-size:11.5px;color:var(--muted);margin-top:16px}
+.meta b{color:var(--ink);font-weight:500}
+section{padding:46px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+.lede{font-size:19px;line-height:1.5;max-width:60ch}
+.xs-holder{background:var(--draw);border:1px solid var(--line);border-radius:4px;
+ padding:16px;margin:26px 0;overflow-x:auto}
+.xs{width:100%;min-width:740px;height:auto;display:block}
+.fig{background:var(--draw);border:1px solid var(--line);border-radius:4px;padding:12px;
+ margin-top:20px;overflow-x:auto}
+.fig img{display:block;width:100%;min-width:900px;height:auto}
+.fig.plan img{min-width:0;max-width:430px;margin:0 auto}
+.cap{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin-top:10px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:26px;margin-top:22px;align-items:start}
+table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13.5px}
+th{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.09em;
+ text-transform:uppercase;color:var(--muted);font-weight:500;padding:0 12px 9px 0;border-bottom:1px solid var(--line)}
+td{padding:12px 12px 12px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow-x:auto}
+.pill{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.05em;padding:3px 9px;
+ border-radius:99px;white-space:nowrap;display:inline-block}
+.no{color:var(--brick);border:1px solid color-mix(in srgb,var(--brick) 45%,transparent)}
+.yes{color:var(--ok);border:1px solid color-mix(in srgb,var(--ok) 45%,transparent)}
+.rule{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--forest);
+ border-radius:0 4px 4px 0;padding:18px 22px;margin:22px 0}
+.rule h3{color:var(--forest);margin-bottom:7px}
+.rule p:last-child{margin-bottom:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
+ background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:22px}
+.st{background:var(--surface);padding:14px 16px}
+.st-k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
+ text-transform:uppercase;color:var(--muted)}
+.st-v{font-family:Fraunces,Georgia,serif;font-size:26px;line-height:1.15;margin-top:3px;
+ font-variant-numeric:tabular-nums}
+.st-n{font-size:11.5px;color:var(--muted);margin-top:2px}
+footer{padding:32px 0 64px;color:var(--muted);font-size:12px}
+footer code{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink)}
+a{color:var(--forest)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">Arcado Springs &middot; R-1 &rarr; R-2 &middot; capacity analysis</p>
+    <h1>Why this site holds 41 homes</h1>
+    <div class="meta">
+      <span><b>4535&ndash;4541 Arcado Rd SW</b>, Lilburn GA</span>
+      <span>9.44 ac deeded</span>
+      <span>236&#8242;&ndash;246&#8242; wide &times; 1,754&#8242; deep</span>
+      <span>single access</span>
+      <span>2026-09-20</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="lede narrow">R-2 zoning permits up to 8 dwellings per acre &mdash; about 75 homes on
+    9.44 acres. The filed plan plans 41. This page explains why that gap is not caution: the parcel
+    itself will not hold more, and the arrangement shown is the only one the ordinance allows.</p>
+
+    <div class="xs-holder"><svg viewBox="0 0 920 300" class="xs" role="img" aria-label="Cross-section of the site: two 100-foot lot depths and a 35.9-foot lane tract total 235.9 feet against 236 feet of site width, leaving one inch of slack.">
+<rect x="64.7" y="118" width="335.0" height="64" fill="#E6E1D0" stroke="#1E2419" stroke-width="1.1"/>
+<text x="232.2" y="154" font-size="12" fill="#3a382f" text-anchor="middle" font-weight="600">Lot depth 100&#8242;</text>
+<rect x="399.7" y="118" width="120.3" height="64" fill="#4a4a48" stroke="#1E2419" stroke-width="1.1"/>
+<text x="459.8" y="154" font-size="12" fill="#fff" text-anchor="middle" font-weight="600">Lane 35.9&#8242;</text>
+<rect x="520.0" y="118" width="335.0" height="64" fill="#E6E1D0" stroke="#1E2419" stroke-width="1.1"/>
+<text x="687.5" y="154" font-size="12" fill="#3a382f" text-anchor="middle" font-weight="600">Lot depth 100&#8242;</text>
+<rect x="855.0" y="118" width="0.34" height="64" fill="#9C3B2E"/>
+<line x1="64.7" y1="88" x2="855.3" y2="88" stroke="#876A38" stroke-width="1"/>
+<line x1="64.7" y1="83" x2="64.7" y2="93" stroke="#876A38" stroke-width="1"/>
+<line x1="855.3" y1="83" x2="855.3" y2="93" stroke="#876A38" stroke-width="1"/>
+<text x="460.0" y="80" font-size="12.5" fill="#876A38" text-anchor="middle">site width at the front &#8212; 236&#8242;-0&#8243;</text>
+<text x="460.0" y="208" font-size="13" fill="#1E2419" text-anchor="middle" font-weight="600">100&#8242; + 35.9&#8242; + 100&#8242; = 235&#8242;-11&#8243;</text>
+<text x="460.0" y="228" font-size="11.5" fill="#9C3B2E" text-anchor="middle">One inch to spare. Every foot of the cross-section is spoken for.</text>
+</svg></div>
+
+    <div class="narrow">
+      <p>The parcel is a ribbon &mdash; 236 feet wide at the road, 1,754 feet deep, with a single
+      entrance and no other street frontage. The zoning ordinance sets a minimum lot depth of
+      <b>100 feet</b> for every dwelling. Two rows of homes therefore consume 200 feet, leaving
+      <b>36 feet for the road and everything in it</b>.</p>
+      <p>A single lane down the middle fits that in 35.9 feet, with one inch to spare. That one
+      measurement determines the whole plan: two rows of homes, one lane between them, and no room
+      for a third row, a wider street, or a second drive.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">The governing standards</p>
+    <h2>Three numbers set the capacity</h2>
+    <div class="rule">
+      <h3>Zoning Ordinance 2023-603, Table 4.1 &mdash; cottage home dwelling, R-2</h3>
+      <p class="narrow">Minimum lot width <b>50 feet</b> &middot; minimum lot depth <b>100 feet</b>
+      &middot; minimum rear yard <b>20 feet</b>. Section 402-3 makes the table mandatory
+      (&ldquo;dimensional requirements <em>shall</em> be as provided in Table 4.1&rdquo;), and the
+      standards attach to the dwelling rather than to a platted lot &mdash; so they apply however the
+      land is owned or subdivided.</p>
+    </div>
+    <div class="narrow">
+      <p>The 50-foot width is what caps the count. Usable frontage divided by 50 gives the number of
+      homes, and no choice about the houses changes it. The single provision in the code that reduces
+      lot width &mdash; Section 310, down to 35 feet &mdash; applies only inside an Overlay District
+      or a redevelopment Character Area. This parcel is in neither; its Comprehensive Plan character
+      area is &ldquo;Established Residential.&rdquo;</p>
+    </div>
+    <div class="stats">
+      <div class="st"><div class="st-k">Homes</div><div class="st-v">41</div><div class="st-n">27 north-east + 14 south-west</div></div>
+      <div class="st"><div class="st-k">Density</div><div class="st-v">4.34</div><div class="st-n">du/ac &middot; cap is 8.0</div></div>
+      <div class="st"><div class="st-k">Open space</div><div class="st-v">33.8%</div><div class="st-n">minimum 20%</div></div>
+      <div class="st"><div class="st-k">Lane tract</div><div class="st-v">35.9&#8202;&#8242;</div><div class="st-n">of 36&#8242; available</div></div>
+      <div class="st"><div class="st-k">Lot</div><div class="st-v">50&#215;100</div><div class="st-n">at the minimums</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">The filed plan</p>
+    <h2>Two rows, one lane</h2>
+    <div class="fig">
+      <img src="/cottages/submission/drawings/mcp-web.svg" alt="Master concept plan of the filed 41-lot cottage community: a single private lane running the length of a narrow parcel with cottage lots on both sides, three hammerhead turnarounds, two detention ponds and a preserved creek-woods tract on the south-west side, and an amenity block at the entrance." loading="lazy" />
+      <p class="cap">Filed master concept plan &mdash; 41 cottages, 4.34 du/ac. Illustrative; boundary from Gwinnett County GIS, survey required and governs.</p>
+    </div>
+    <div class="two">
+      <div>
+        <div class="fig plan"><img src="/cottages/plan-a.svg" alt="Schematic floor plan of The Springbrook: one story, 38 feet wide by 51 feet 10 inches deep, 1,406 square feet conditioned, two bedrooms and two baths with a two-car garage recessed at the front." loading="lazy" /></div>
+        <p class="cap">The Springbrook &middot; 38&#8242; &times; 51&#8242;-10&#8243; &middot; 1,406 sf &middot; 458 sf 2-car garage</p>
+      </div>
+      <div class="narrow">
+        <h3>Why the homes are this size</h3>
+        <p>A 50-foot lot with 5-foot side yards leaves 40 feet of buildable width. The filed plans use
+        38 feet of it. Making the houses smaller would not add a single home &mdash; the lot width is
+        fixed &mdash; so the plan uses the width it has.</p>
+        <p>Both plans are single storey with zero-step entries, 36-inch doors and 5-foot turning
+        circles in the baths, which is what the 55-and-over programme requires and what drives the
+        depth.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Alternatives tested</p>
+    <h2>Five other layouts, and why each fails</h2>
+    <p class="narrow">Each was modelled against the real parcel boundary and checked against the
+    ordinance. None produced a buildable plan with more homes.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Layout</th><th>Homes</th><th>Why it fails</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Cluster rows, buffer as common land</td><td class="n">37</td><td>Holding the 20&#8242; buffer as common open space makes the buffer line the rear lot line, which triggers a 20&#8242; rear setback inside it. Every unit ended up with a 2&ndash;6&#8242; rear yard where 20&#8242; is required.</td><td><span class="pill no">FAILS</span></td></tr><tr><td>Tighter module</td><td class="n">41</td><td>Same rear-yard defect, plus 3&#8242; side yards. The ordinance has no mechanism for side yards below 5&#8242; outside an overlay district.</td><td><span class="pill no">FAILS</span></td></tr><tr><td>Narrow cottages, 36&#8242; lots</td><td class="n">57</td><td>Needed a lane tract narrower than the section it had to carry, and counted the buffer as open space while also carrying it inside the lots. Real open space was 13.4% against a 20% minimum.</td><td><span class="pill no">FAILS</span></td></tr><tr><td>Cottage court, units on a common tract</td><td class="n">53</td><td>Assumed Table 4.1&#8217;s minimums attach to a platted lot, so common ownership would escape them. They attach to the <em>dwelling</em> &mdash; Sec. 402-3 makes the table mandatory and the cluster-cottage use grants no dimensional relief.</td><td><span class="pill no">FAILS</span></td></tr><tr><td>Cottage court, drives on the perimeter</td><td class="n">40</td><td>Two perimeter drives need 44&#8242; of width. After two 100&#8242; lot depths only 36&#8242; remains. 100 + 44 + 100 = 244&#8242; against 236&#8242; available.</td><td><span class="pill no">FAILS</span></td></tr>
+          <tr><td><b>Filed plan &mdash; two rows, one lane</b></td><td class="n"><b>41</b></td>
+              <td>Fits the cross-section exactly and meets every dimensional standard.</td>
+              <td><span class="pill yes">BUILDABLE</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="rule" style="margin-top:26px">
+      <h3>The conclusion</h3>
+      <p class="narrow">Two 100-foot lot depths plus a 35.9-foot lane consume 235 feet 11 inches of
+      a 236-foot width. Perimeter drives serving each row would need 44 feet where 36 feet exists.
+      The filed arrangement is not one option among several &mdash; it is the only one this parcel
+      and this ordinance permit.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">What would change it</p>
+    <h2>Three routes, all outside this application</h2>
+    <div class="narrow">
+      <p><b>A different dwelling type.</b> Attached homes carry different Table 4.1 dimensions and
+      would raise the count materially. They are also what the neighbourhood objected to, and they are
+      not what is proposed here.</p>
+      <p><b>A variance on lot width.</b> Section 1005 requires unnecessary hardship. A conforming
+      41-lot plan demonstrably fits this parcel, so a request for narrower lots would be a
+      self-created hardship &mdash; the weakest possible ground.</p>
+      <p><b>A text amendment.</b> Changing the cottage-home dimensions in Table 4.1 is a legislative
+      act, not a rezoning, and a far larger undertaking than this application.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Cross-section and capacity arithmetic derived from the parcel boundary (Gwinnett County GIS
+    parcel fabric, queried 2026-08-28; boundary area 417,173.6&nbsp;sf) and the filed site-plan data.
+    Standards: City of Lilburn Zoning Ordinance 2023-603 &sect;&sect;310, 319, 402-3, 602, Tables 4.1
+    and 4.2; Site Development Plan Review Checklist; IFC 2024 as adopted and modified by Ga. Comp. R.
+    &amp; Regs. 120-3-3-.04. Alternative layouts were modelled independently and reviewed against the
+    same sources.</p>
+    <p>Illustrative analysis prepared for owner and stakeholder review. Not a filed exhibit, and not
+    sealed by a Georgia registered land surveyor, professional engineer or architect. The boundary
+    survey governs. See also the <a href="/cottages.html">cottage concept study</a>.</p>
+  </div>
+</footer>

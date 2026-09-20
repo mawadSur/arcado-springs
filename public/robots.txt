@@ -7,5 +7,6 @@ Disallow: /data-room/
 Disallow: /cottages.html
 Disallow: /cottages/
 Disallow: /decisions.html
+Disallow: /site-capacity.html
 
 Sitemap: https://arcado-springs.vercel.app/sitemap.xml
