@@ -9,5 +9,6 @@ Disallow: /cottages/
 Disallow: /decisions.html
 Disallow: /site-capacity.html
 Disallow: /density-ceiling.html
+Disallow: /exit-2-99ac.html
 
 Sitemap: https://arcado-springs.vercel.app/sitemap.xml
